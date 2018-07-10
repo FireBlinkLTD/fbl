@@ -67,5 +67,9 @@
       "name": "Vladyslav Tkachenko",
       "email": "vlad@fireblink.com"
     }
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FireBlinkLTD/fbl.git"
+  }
 }
