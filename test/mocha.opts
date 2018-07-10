@@ -1,0 +1,6 @@
+--ui mocha-typescript
+--require source-map-support/register
+dist/test/**/**/*.js
+dist/test/**/*.js
+--reporter mochawesome
+--reporter-options output=coverage/testReport.html

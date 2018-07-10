@@ -1,0 +1,11 @@
+node_modules/
+dist/
+
+yarn-error.log
+
+.nyc_output/
+coverage/
+mochawesome-report/
+
+.idea/
+*.iml

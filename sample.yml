@@ -1,0 +1,15 @@
+version: 1.0.0
+description: |-
+  Sample file to describe all kinds of possibilities fbl can provide inside the descriptor
+pipeline:
+  # sequence of actions
+  '--':
+    # parallel actions
+    - '||':
+      - '?':
+          value: 'test'
+          is:
+            '<%- "test" %>':
+              '@': './test.yml' # load from file
+      - '@': './test2.yml' # load from file
+      - 'test':
