@@ -9,7 +9,7 @@ import {resolve} from 'path';
 
 // prepare commander
 commander
-    .version(require('../package.json').version)
+    .version(require('../../package.json').version)
     .option('-p --plugin <file>', '[optional] Plugin file.', (val, list) => {
         list.push(val);
 
@@ -34,7 +34,8 @@ const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandl
 
 // register plugins (including default ones)
 const plugins: string[] = [
-    './plugins/flow'
+    './plugins/flow',
+    './plugins/context'
 ];
 plugins.push(...commander.plugin.map((p: string) => resolve(p)));
 

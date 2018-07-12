@@ -4,12 +4,16 @@ description: |-
 pipeline:
   # sequence of actions
   '--':
+    # assign context value for "test" field
+    - 'ctx':
+        test:
+          inline: 123
     # parallel actions
     - '||':
       - '?':
-          value: 'test'
+          value: '<%- ctx["test"] %>'
           is:
-            '<%- "test" %>':
+            '123':
               '@': './test.yml' # load from file
       - '@': './test2.yml' # load from file
       - 'test':
