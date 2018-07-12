@@ -22,7 +22,8 @@ export class FlowService {
      */
     async executeAction(idOrAlias: string, options: any, context: any): Promise<void> {
         const handler = this.actionHandlersRegistry.find(idOrAlias);
-        options = await this.resolveOptions(handler, options, context);
+
+        options = this.resolveOptions(handler, options, context);
 
         await handler.validate(options, context);
 
@@ -33,14 +34,33 @@ export class FlowService {
     }
 
     /**
+     * Read and parse yaml file
+     * @param {string} file
+     * @returns {Promise<any>}
+     */
+    async readYamlFromFile(file: string): Promise<any> {
+        const source = await promisify(readFile)(file, 'utf8');
+
+        return safeLoad(source);
+    }
+
+    /**
      * Read flow from file
      * @param {string} file
      * @returns {Promise<IFlow>}
      */
     async readFlowFromFile(file: string): Promise<IFlow> {
-        const source = await promisify(readFile)(file, 'utf8');
+        return await this.readYamlFromFile(file) as IFlow;
+    }
 
-        return safeLoad(source) as IFlow;
+    resolveOptionsWithNoHandlerCheck(options: any, context: any): any {
+        if (options) {
+            const tpl = dump(options);
+            const yaml = render(tpl, {ctx: context});
+            options = safeLoad(yaml);
+        }
+
+        return options;
     }
 
     /**
@@ -50,17 +70,11 @@ export class FlowService {
      * @param context
      * @returns {Promise<any>}
      */
-    async resolveOptions(handler: ActionHandler, options: any, context: any): Promise<any> {
+    resolveOptions(handler: ActionHandler, options: any, context: any): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        if (options) {
-            const tpl = dump(options);
-            const yaml = render(tpl, context);
-            options = safeLoad(yaml);
-        }
-
-        return options;
+        return this.resolveOptionsWithNoHandlerCheck(options, context);
     }
 }

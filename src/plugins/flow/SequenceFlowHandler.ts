@@ -16,7 +16,7 @@ export class SequenceFlowHandler extends ActionHandler {
             '--',
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: false
+        skipTemplateProcessing: true
     };
 
     private static validationSchema = Joi.array()
