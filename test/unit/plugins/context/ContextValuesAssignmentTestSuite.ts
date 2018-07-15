@@ -4,10 +4,75 @@ import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
 const tmp = require('tmp-promise');
 
 @suite()
 export class ContextValuesAssignmentTestSuite {
+
+    @test()
+    async failValidation(): Promise<void> {
+        const actionHandler = new ContextValuesAssignment();
+
+        await chai.expect(
+            actionHandler.validate([], {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({}, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: {}
+            }, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: []
+            }, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: 123
+            }, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: 'tst'
+            }, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: {
+                    inline: 'test',
+                    file: '/tmp/test'
+                }
+            }, {})
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: {
+                    inline: 'test'
+                }
+            }, {})
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: {
+                    file: '/tmp/test'
+                }
+            }, {})
+        ).to.be.not.rejected;
+    }
 
     @test()
     async assignValues(): Promise<void> {
@@ -24,12 +89,11 @@ export class ContextValuesAssignmentTestSuite {
         };
 
         const tmpFile = await tmp.file();
-        console.log(tmpFile);
 
         // write to temp file
-        await promisify(writeFile)(tmpFile.file, dump(fileContent), 'utf8');
+        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
 
-        await actionHandler.execute({
+        const options = {
             test: {
                 inline: 123
             },
@@ -39,9 +103,12 @@ export class ContextValuesAssignmentTestSuite {
                 }
             },
             fromFile: {
-                file: tmpFile.file
+                file: tmpFile.path
             }
-        }, context);
+        };
+
+        await actionHandler.validate(options, context);
+        await actionHandler.execute(options, context);
 
         assert.strictEqual(context.test, 123);
         assert.strictEqual(context.existing.value, undefined);

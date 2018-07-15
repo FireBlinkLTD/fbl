@@ -21,10 +21,11 @@ export class ContextValuesAssignment extends ActionHandler {
         .pattern(
             /^/,
             Joi.object({
-                    'inline': Joi.any(),
-                    'file': Joi.string()
+                    inline: Joi.any(),
+                    file: Joi.string()
                 })
-                .or(['inline', 'file'])
+                .or('inline', 'file')
+                .without('inline', 'file')
                 .required()
         )
         .min(1)
@@ -42,7 +43,8 @@ export class ContextValuesAssignment extends ActionHandler {
     async execute(options: any, context: any): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        await Promise.all(Object.keys(options).map(async (name: string): Promise<void> => {
+        const names = Object.keys(options);
+        const promises = names.map(async (name: string): Promise<void> => {
             if (options[name].inline) {
                 context[name] = options[name].inline;
             }
@@ -50,6 +52,8 @@ export class ContextValuesAssignment extends ActionHandler {
             if (options[name].file) {
                 context[name] = await flowService.readYamlFromFile(options[name].file);
             }
-        }));
+        });
+
+        await Promise.all(promises);
     }
 }
