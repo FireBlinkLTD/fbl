@@ -86,8 +86,10 @@ export class ContextValuesAssignmentTestSuite {
         const actionHandler = new ContextValuesAssignment();
 
         const context: any = {
-            existing: {
-                value: 'value'
+            ctx: {
+                existing: {
+                    value: 'value'
+                }
             }
         };
 
@@ -117,9 +119,9 @@ export class ContextValuesAssignmentTestSuite {
         await actionHandler.validate(options, context);
         await actionHandler.execute(options, context);
 
-        assert.strictEqual(context.test, 123);
-        assert.strictEqual(context.existing.value, undefined);
-        assert.strictEqual(context.existing.other, 'other');
-        assert.strictEqual(context.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.ctx.test, 123);
+        assert.strictEqual(context.ctx.existing.value, undefined);
+        assert.strictEqual(context.ctx.existing.other, 'other');
+        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
     }
 }

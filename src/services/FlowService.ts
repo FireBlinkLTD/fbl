@@ -56,7 +56,7 @@ export class FlowService {
     resolveOptionsWithNoHandlerCheck(options: any, context: any): any {
         if (options) {
             const tpl = dump(options);
-            const yaml = render(tpl, {ctx: context});
+            const yaml = render(tpl, context);
             options = safeLoad(yaml);
         }
 

@@ -46,11 +46,11 @@ export class ContextValuesAssignment extends ActionHandler {
         const names = Object.keys(options);
         const promises = names.map(async (name: string): Promise<void> => {
             if (options[name].inline) {
-                context[name] = options[name].inline;
+                context.ctx[name] = options[name].inline;
             }
 
             if (options[name].file) {
-                context[name] = await flowService.readYamlFromFile(options[name].file);
+                context.ctx[name] = await flowService.readYamlFromFile(options[name].file);
             }
         });
 

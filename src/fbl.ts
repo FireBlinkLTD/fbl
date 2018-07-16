@@ -38,7 +38,9 @@ export class FireBlinkLogistics {
         }
 
         if (!context) {
-            context = {};
+            context = {
+                ctx: {}
+            };
         }
 
         const keys = Object.keys(flow.pipeline);

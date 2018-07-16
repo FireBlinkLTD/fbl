@@ -44,61 +44,61 @@ export class SwitchFlowHandlerTestSuite {
         const actionHandler = new SwitchFlowHandler();
 
         await chai.expect(
-            actionHandler.validate([], {})
+            actionHandler.validate([], {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {})
+            actionHandler.validate({ctx: {}}, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst'
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 is: 'tst'
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: 'tst'
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: {}
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
@@ -107,7 +107,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: []
                 }
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
@@ -116,7 +116,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: 123
                 }
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
@@ -128,7 +128,7 @@ export class SwitchFlowHandlerTestSuite {
                         f2: false
                     }
                 }
-            }, {})
+            }, {ctx: {}})
         ).to.be.rejected;
     }
 
@@ -144,7 +144,7 @@ export class SwitchFlowHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, {})
+            }, {ctx: {}})
         ).to.be.not.rejected;
     }
 
@@ -152,9 +152,9 @@ export class SwitchFlowHandlerTestSuite {
     async triggerActionHandlerDueToMatch(): Promise<void> {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        let actionHandlerInvoked = false;
+        let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
-            actionHandlerInvoked = opts;
+            actionHandlerOptions = opts;
         });
         actionHandlersRegistry.register(dummyActionHandler);
 
@@ -170,7 +170,9 @@ export class SwitchFlowHandlerTestSuite {
         };
 
         const context = {
-            value: 'tst'
+            ctx: {
+                value: 'tst'
+            }
         };
 
         // validate first to process template inside options
@@ -182,16 +184,16 @@ export class SwitchFlowHandlerTestSuite {
             actionHandler.execute(options, context)
         ).to.be.not.rejected;
 
-        assert.strictEqual(actionHandlerInvoked, true);
+        assert.strictEqual(actionHandlerOptions, true);
     }
 
     @test()
     async doNotTriggerActionHandlerDueToMismatch(): Promise<void> {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        let actionHandlerInvoked = false;
+        let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
-            actionHandlerInvoked = opts;
+            actionHandlerOptions = opts;
         });
         actionHandlersRegistry.register(dummyActionHandler);
 
@@ -207,7 +209,9 @@ export class SwitchFlowHandlerTestSuite {
         };
 
         const context = {
-            value: 'tst2'
+            ctx: {
+                value: 'tst2'
+            }
         };
 
         // validate first to process template inside options
@@ -219,6 +223,6 @@ export class SwitchFlowHandlerTestSuite {
             actionHandler.execute(options, context)
         ).to.be.not.rejected;
 
-        assert.strictEqual(actionHandlerInvoked, false);
+        assert.strictEqual(actionHandlerOptions, false);
     }
 }

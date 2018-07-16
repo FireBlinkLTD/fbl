@@ -39,35 +39,44 @@ class DummyActionHandler extends ActionHandler {
 
 @suite()
 export class ParallelFlowHandlerTestSuite {
+
+    after() {
+        Container
+            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
+            .unregister(DummyActionHandler.ID + '.0')
+            .unregister(DummyActionHandler.ID + '.1')
+            .unregister(DummyActionHandler.ID + '.2');
+    }
+
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
 
         await chai.expect(
-            actionHandler.validate(123, {})
+            actionHandler.validate(123, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', {})
+            actionHandler.validate('test', {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {})
+            actionHandler.validate({}, {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], {})
+            actionHandler.validate([], {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{}], {})
+            actionHandler.validate([{}], {ctx: {}})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 test1: 123,
                 test2: 321
-            }], {})
+            }], {ctx: {}})
         ).to.be.rejected;
     }
 
@@ -78,7 +87,7 @@ export class ParallelFlowHandlerTestSuite {
         await chai.expect(
             actionHandler.validate([
                 {test: 123}
-            ], {})
+            ], {ctx: {}})
         ).to.be.not.rejected;
     }
 
@@ -104,7 +113,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = {};
+        const context = {ctx: {}};
 
         await chai.expect(
             actionHandler.validate(options, context)
@@ -146,7 +155,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = {};
+        const context = {ctx: {}};
 
         await chai.expect(
             actionHandler.validate(options, context)
