@@ -20,7 +20,12 @@ export class SequenceFlowHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.array()
-        .items(Joi.object().min(1).max(1))
+        .items(
+            Joi.object()
+                .min(1)
+                .max(1)
+                .required()
+        )
         .min(1)
         .required()
         .options({ abortEarly: true });
