@@ -4,9 +4,11 @@ import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
+
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
 const tmp = require('tmp-promise');
 
 @suite()
@@ -56,6 +58,11 @@ export class ContextValuesAssignmentTestSuite {
                 }
             }, {})
         ).to.be.rejected;
+    }
+
+    @test()
+    async passValidation(): Promise<void> {
+        const actionHandler = new ContextValuesAssignment();
 
         await chai.expect(
             actionHandler.validate({

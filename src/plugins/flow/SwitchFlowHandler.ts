@@ -29,6 +29,7 @@ export class SwitchFlowHandler extends ActionHandler {
                     .max(1)
                     .required()
             )
+            .min(1)
             .required()
     })
         .required()

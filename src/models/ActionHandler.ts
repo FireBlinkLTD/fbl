@@ -59,5 +59,5 @@ export interface IHandlerMetadata {
     examples?: string[];
     aliases?: string[];
     version: string;
-    skipTemplateProcessing: boolean;
+    skipTemplateProcessing?: boolean;
 }
