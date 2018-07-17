@@ -44,9 +44,6 @@ export class FireBlinkLogistics {
         }
 
         const keys = Object.keys(flow.pipeline);
-        if (keys.length !== 1) {
-            throw new Error('Invalid pipeline format. Only 1 key is allowed.');
-        }
 
         const idOrAlias = keys[0];
         const options = flow.pipeline[idOrAlias];

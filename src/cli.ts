@@ -35,7 +35,8 @@ const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandl
 // register plugins (including default ones)
 const plugins: string[] = [
     './plugins/flow',
-    './plugins/context'
+    './plugins/context',
+    './plugins/files'
 ];
 plugins.push(...commander.plugin.map((p: string) => resolve(p)));
 

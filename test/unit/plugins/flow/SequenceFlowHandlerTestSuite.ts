@@ -43,6 +43,7 @@ export class SequenceFlowHandlerTestSuite {
     after() {
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
+            .unregister(new SequenceFlowHandler().getMetadata().id)
             .unregister(DummyActionHandler.ID + '.0')
             .unregister(DummyActionHandler.ID + '.1')
             .unregister(DummyActionHandler.ID + '.2');
@@ -128,7 +129,7 @@ export class SequenceFlowHandlerTestSuite {
     }
 
     @test()
-    async shouldFaileAfterFirstError(): Promise<void> {
+    async shouldFailAfterFirstError(): Promise<void> {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
@@ -160,5 +161,45 @@ export class SequenceFlowHandlerTestSuite {
         ).to.be.rejected;
 
         assert.strictEqual(results.length, 0);
+    }
+
+    @test()
+    async tree(): Promise<void> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new SequenceFlowHandler();
+        actionHandlersRegistry.register(actionHandler);
+
+        const results: number[] = [];
+        const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
+            results.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler1);
+
+        const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
+            results.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler2);
+
+        const options = [
+            {
+              '--': [
+                  {[DummyActionHandler.ID + '.1']: 1},
+              ]
+            },
+            {[DummyActionHandler.ID + '.2']: 2},
+        ];
+
+        const context = {ctx: {}};
+
+        await chai.expect(
+            actionHandler.validate(options, context)
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.execute(options, context)
+        ).to.be.not.rejected;
+
+        assert.strictEqual(results[0], 1);
+        assert.strictEqual(results[1], 2);
     }
 }

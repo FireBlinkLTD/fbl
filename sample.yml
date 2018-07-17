@@ -10,6 +10,18 @@ pipeline:
           inline: 123
     # parallel actions
     - '||':
+      - '->':
+          path: '/tmp/test.json'
+          content: |-
+            {
+              "version": "1.0.0"
+            }
+      - 'tmp.->':
+          context: 'contextFieldNameToStorePath'
+          content: |-
+            {
+              "version": "1.0.0"
+            }
       - '?':
           value: '<%- ctx["test"] %>'
           is:
