@@ -30,4 +30,4 @@ jobs:
       - run: yarn coverage
 
       # send test coverage
-      - run: bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
+      - run: bash <(curl -s https://codecov.io/bash) -f ~/repo/coverage/coverage.lcov
