@@ -23,5 +23,11 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
+      # build project
       - run: yarn build
-      - run: yarn test
+
+      # run tests and generate coverage report
+      - run: yarn coverage
+
+      # send test coverage
+      - run: bash <(curl -s https://codecov.io/bash) -f coverage/coverage.lcov
