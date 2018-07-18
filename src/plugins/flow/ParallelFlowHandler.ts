@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class ParallelFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -15,7 +16,7 @@ export class ParallelFlowHandler extends ActionHandler {
             '||'
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: false
+        skipTemplateProcessing: true
     };
 
     private static validationSchema = Joi.array()
@@ -32,7 +33,7 @@ export class ParallelFlowHandler extends ActionHandler {
         return ParallelFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
         const errors: Error[] = [];
         const promises = options.map(async (action: any): Promise<void> => {

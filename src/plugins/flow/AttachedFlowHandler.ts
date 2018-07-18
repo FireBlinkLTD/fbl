@@ -4,6 +4,8 @@ import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
 import {FireBlinkLogistics} from '../../fbl';
+import {IContext} from '../../interfaces';
+import {dirname} from 'path';
 
 export class AttachedFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -29,11 +31,16 @@ export class AttachedFlowHandler extends ActionHandler {
         return AttachedFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
         const fbl = Container.get(FireBlinkLogistics);
 
-        const flow = await flowService.readFlowFromFile(options);
-        await fbl.execute(flow, context);
+        const file = flowService.getAbsolutePath(options, context);
+
+        const flow = await flowService.readFlowFromFile(file);
+        await fbl.execute(flow, <IContext> {
+            ctx: context.ctx,
+            wd: dirname(file)
+        });
     }
 }

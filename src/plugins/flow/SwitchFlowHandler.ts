@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class SwitchFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -13,7 +14,10 @@ export class SwitchFlowHandler extends ActionHandler {
             'fbl.switch',
             'switch',
             '?'
-        ]
+        ],
+        // we don't want to process templates inside options in a default way as it may cause processing of templates
+        // inside nested actions, but we will need to process "value" as it supposed to use template.
+        skipTemplateProcessing: true
     };
 
     private static validationSchema = Joi.object({
@@ -26,6 +30,7 @@ export class SwitchFlowHandler extends ActionHandler {
                     .max(1)
                     .required()
             )
+            .min(1)
             .required()
     })
         .required()
@@ -35,11 +40,20 @@ export class SwitchFlowHandler extends ActionHandler {
         return SwitchFlowHandler.metadata;
     }
 
+    async validate(options: any, context: any): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        // resolve value, as it is mostly likely a template and we're not processing options as a template
+        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context);
+
+        await super.validate(options, context);
+    }
+
     getValidationSchema(): SchemaLike | null {
         return SwitchFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const action = options.is[options.value];

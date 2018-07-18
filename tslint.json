@@ -51,7 +51,7 @@
     "prefer-const": true,
     "no-string-literal": false,
     "no-switch-case-fall-through": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": false,
     "no-unused-expression": true,
     "no-var-keyword": true,
     "no-var-requires": false,
