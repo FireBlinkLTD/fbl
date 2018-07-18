@@ -1,5 +1,5 @@
 import {FlowService} from './services';
-import {IFlow} from './interfaces';
+import {IContext, IFlow} from './interfaces';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import * as Joi from 'joi';
@@ -27,20 +27,14 @@ export class FireBlinkLogistics {
 
     /**
      * Execute flow
-     * @param flow,
-     * @param context
+     * @param {IFlow} flow,
+     * @param {IContext} context
      * @returns {Promise<FireBlinkLogistics>}
      */
-    async execute(flow: IFlow, context?: any): Promise<FireBlinkLogistics> {
+    async execute(flow: IFlow, context: IContext): Promise<FireBlinkLogistics> {
         const result = Joi.validate(flow, FireBlinkLogistics.validationSchema);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
-        }
-
-        if (!context) {
-            context = {
-                ctx: {}
-            };
         }
 
         const keys = Object.keys(flow.pipeline);

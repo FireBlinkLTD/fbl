@@ -3,6 +3,7 @@ import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
 import {WriteToTempFile} from '../../../../src/plugins/files/WriteToTempFile';
+import {IContext} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -17,39 +18,44 @@ export class WriteToTempFileTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
-            actionHandler.validate([], {})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, {})
+            actionHandler.validate(123, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', {})
+            actionHandler.validate('test', context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 context: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 context: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 context: '',
                 content: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
     }
 
@@ -58,11 +64,16 @@ export class WriteToTempFileTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
             actionHandler.validate({
                 context: '/tmp',
                 content: 'test'
-            }, {})
+            }, context)
         ).to.be.not.rejected;
     }
 

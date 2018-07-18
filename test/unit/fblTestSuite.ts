@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {Container} from 'typedi';
 import {FireBlinkLogistics} from '../../src/fbl';
-import {IFlow} from '../../src/interfaces';
+import {IContext, IFlow} from '../../src/interfaces';
 import {ActionHandler, IHandlerMetadata} from '../../src/models';
 import * as assert from 'assert';
 import {ActionHandlersRegistry} from '../../src/services';
@@ -58,6 +58,9 @@ export class FblTestSuite {
             pipeline: {
                 [DummyActionHandler.ID]: 'tst'
             }
+        }, <IContext> {
+            ctx: {},
+            wd: '.'
         });
 
         assert.strictEqual(result, 'tst');
@@ -65,6 +68,9 @@ export class FblTestSuite {
         await chai.expect(fbl.execute(<IFlow> {
             version: '1.0.0',
             pipeline: {}
+        }, <IContext> {
+            ctx: {},
+            wd: '.'
         })).to.be.rejected;
     }
 
@@ -82,6 +88,9 @@ export class FblTestSuite {
             pipeline: {
                 [DummyActionHandler.ID]: 'tst'
             }
+        }, <IContext> {
+            ctx: {},
+            wd: '.'
         });
 
         assert.strictEqual(result, null);

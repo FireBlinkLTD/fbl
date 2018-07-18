@@ -1,4 +1,5 @@
 import * as Joi from 'joi';
+import {IContext} from '../interfaces';
 
 /**
  * Context variables resolver
@@ -14,10 +15,10 @@ export abstract class ActionHandler {
      * Validate options before processing.
      * Should throw exception on error.
      * @param options
-     * @param context
+     * @param {IContext} context
      * @returns {Promise<void>}
      */
-    async validate(options: any, context: any): Promise<void> {
+    async validate(options: any, context: IContext): Promise<void> {
         const schema = this.getValidationSchema();
         if (schema) {
             const result = Joi.validate(options, schema);
@@ -37,20 +38,20 @@ export abstract class ActionHandler {
     /**
      * Check if handler should be actually executed
      * @param options
-     * @param context
+     * @param {IContext} context
      * @returns {Promise<boolean>}
      */
-    async isShouldExecute(options: any, context: any): Promise<boolean> {
+    async isShouldExecute(options: any, context: IContext): Promise<boolean> {
         return true;
     }
 
     /**
      * Execute handler
      * @param options
-     * @param context
+     * @param {IContext} context
      * @returns {Promise<void>}
      */
-    abstract async execute(options: any, context: any): Promise<void>;
+    abstract async execute(options: any, context: IContext): Promise<void>;
 }
 
 export interface IHandlerMetadata {

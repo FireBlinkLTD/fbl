@@ -7,6 +7,7 @@ import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
+import {IContext} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -48,20 +49,25 @@ export class AttachedFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+        
         await chai.expect(
-            actionHandler.validate(123, {ctx: {}})
+            actionHandler.validate(123, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], {ctx: {}})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', {ctx: {}})
+            actionHandler.validate('', context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {ctx: {}})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
     }
 
@@ -69,8 +75,13 @@ export class AttachedFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
-            actionHandler.validate('/tmp/test.tst', {ctx: {}})
+            actionHandler.validate('/tmp/test.tst', context)
         ).to.be.not.rejected;
     }
 
@@ -99,7 +110,8 @@ export class AttachedFlowHandlerTestSuite {
         await promisify(writeFile)(tmpFile.path, dump(subFlow), 'utf8');
 
         const actionHandler = new AttachedFlowHandler();
-        const context = {
+        const context = <IContext> {
+            wd: '.',
             ctx: {
                 tst: 123
             }

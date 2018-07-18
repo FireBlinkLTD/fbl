@@ -4,6 +4,8 @@ import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
+import {IContext} from '../../../../src/interfaces';
+import {basename, dirname} from 'path';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -18,36 +20,41 @@ export class ContextValuesAssignmentTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
-            actionHandler.validate([], {})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
@@ -56,7 +63,7 @@ export class ContextValuesAssignmentTestSuite {
                     inline: 'test',
                     file: '/tmp/test'
                 }
-            }, {})
+            }, context)
         ).to.be.rejected;
     }
 
@@ -64,12 +71,17 @@ export class ContextValuesAssignmentTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
             actionHandler.validate({
                 test: {
                     inline: 'test'
                 }
-            }, {})
+            }, context)
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -77,7 +89,7 @@ export class ContextValuesAssignmentTestSuite {
                 test: {
                     file: '/tmp/test'
                 }
-            }, {})
+            }, context)
         ).to.be.not.rejected;
     }
 
@@ -85,7 +97,8 @@ export class ContextValuesAssignmentTestSuite {
     async assignValues(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
 
-        const context: any = {
+        const context: IContext = {
+            wd: '.',
             ctx: {
                 existing: {
                     value: 'value'
@@ -115,6 +128,20 @@ export class ContextValuesAssignmentTestSuite {
                 file: tmpFile.path
             }
         };
+
+        await actionHandler.validate(options, context);
+        await actionHandler.execute(options, context);
+
+        assert.strictEqual(context.ctx.test, 123);
+        assert.strictEqual(context.ctx.existing.value, undefined);
+        assert.strictEqual(context.ctx.existing.other, 'other');
+        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+
+        console.log('->', tmpFile.path);
+
+        // do the same with relative path
+        options.fromFile.file = basename(tmpFile.path);
+        context.wd = dirname(tmpFile.path);
 
         await actionHandler.validate(options, context);
         await actionHandler.execute(options, context);

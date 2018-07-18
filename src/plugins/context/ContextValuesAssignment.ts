@@ -3,6 +3,7 @@ import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
 import {SchemaLike} from 'joi';
+import {IContext} from '../../interfaces';
 
 export class ContextValuesAssignment extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -40,7 +41,7 @@ export class ContextValuesAssignment extends ActionHandler {
         return ContextValuesAssignment.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const names = Object.keys(options);
@@ -50,7 +51,10 @@ export class ContextValuesAssignment extends ActionHandler {
             }
 
             if (options[name].file) {
-                context.ctx[name] = await flowService.readYamlFromFile(options[name].file);
+                console.log('-> options[name].file:', options[name].file);
+                const file = flowService.getAbsolutePath(options[name].file, context);
+                console.log('-> file:', file);
+                context.ctx[name] = await flowService.readYamlFromFile(file);
             }
         });
 

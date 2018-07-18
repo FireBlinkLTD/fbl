@@ -3,6 +3,9 @@ import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
+import {Container} from 'typedi';
+import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class WriteToFile extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -44,7 +47,9 @@ export class WriteToFile extends ActionHandler {
         return WriteToFile.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
-        await promisify(writeFile)(options.path, options.content, 'utf8');
+    async execute(options: any, context: IContext): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const file = flowService.getAbsolutePath(options.path, context);
+        await promisify(writeFile)(file, options.content, 'utf8');
     }
 }

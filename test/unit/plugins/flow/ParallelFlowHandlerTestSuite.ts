@@ -4,6 +4,7 @@ import * as assert from 'assert';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
 import {ParallelFlowHandler} from '../../../../src/plugins/flow/ParallelFlowHandler';
+import {IContext} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -53,31 +54,36 @@ export class ParallelFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+        
         await chai.expect(
-            actionHandler.validate(123, {ctx: {}})
+            actionHandler.validate(123, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', {ctx: {}})
+            actionHandler.validate('test', context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {ctx: {}})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], {ctx: {}})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{}], {ctx: {}})
+            actionHandler.validate([{}], context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 test1: 123,
                 test2: 321
-            }], {ctx: {}})
+            }], context)
         ).to.be.rejected;
     }
 
@@ -85,10 +91,15 @@ export class ParallelFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
             actionHandler.validate([
                 {test: 123}
-            ], {ctx: {}})
+            ], context)
         ).to.be.not.rejected;
     }
 
@@ -114,7 +125,10 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = {ctx: {}};
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
 
         await chai.expect(
             actionHandler.validate(options, context)
@@ -156,7 +170,10 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = {ctx: {}};
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
 
         await chai.expect(
             actionHandler.validate(options, context)
@@ -197,7 +214,10 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = {ctx: {}};
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
 
         await chai.expect(
             actionHandler.validate(options, context)

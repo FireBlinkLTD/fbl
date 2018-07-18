@@ -1,12 +1,13 @@
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
 import {readFile} from 'fs';
-import {IFlow} from '../interfaces';
+import {IContext, IFlow} from '../interfaces';
 import {safeLoad, dump} from 'js-yaml';
 import {render} from 'ejs';
 import {ActionHandler} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {promisify} from 'util';
+import {isAbsolute, resolve} from 'path';
 
 @Service()
 export class FlowService {
@@ -17,10 +18,10 @@ export class FlowService {
      * Execute action
      * @param {string} idOrAlias
      * @param options
-     * @param context
+     * @param {IContext} context
      * @returns {Promise<void>}
      */
-    async executeAction(idOrAlias: string, options: any, context: any): Promise<void> {
+    async executeAction(idOrAlias: string, options: any, context: IContext): Promise<void> {
         const handler = this.actionHandlersRegistry.find(idOrAlias);
 
         options = this.resolveOptions(handler, options, context);
@@ -31,6 +32,20 @@ export class FlowService {
         if (shouldExecute) {
             await handler.execute(options, context);
         }
+    }
+
+    /**
+     * Get absolute based on current working directory
+     * @param {string} path
+     * @param {IContext} context
+     * @return {string}
+     */
+    getAbsolutePath(path: string, context: IContext): string {
+        if (isAbsolute(path)) {
+            return path;
+        }
+
+        return resolve(context.wd, path);
     }
 
     /**
@@ -53,7 +68,13 @@ export class FlowService {
         return await this.readYamlFromFile(file) as IFlow;
     }
 
-    resolveOptionsWithNoHandlerCheck(options: any, context: any): any {
+    /**
+     * Resolve options with no handler check
+     * @param options
+     * @param {IContext} context
+     * @return {any}
+     */
+    resolveOptionsWithNoHandlerCheck(options: any, context: IContext): any {
         if (options) {
             const tpl = dump(options);
             const yaml = render(tpl, context);
@@ -67,10 +88,10 @@ export class FlowService {
      * Resolve options for handler
      * @param {ActionHandler} handler
      * @param options
-     * @param context
+     * @param {IContext} context
      * @returns {Promise<any>}
      */
-    resolveOptions(handler: ActionHandler, options: any, context: any): any {
+    resolveOptions(handler: ActionHandler, options: any, context: IContext): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }

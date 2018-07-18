@@ -4,6 +4,7 @@ import {ActionHandler, IHandlerMetadata} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
 import * as assert from 'assert';
+import {IContext} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -43,62 +44,67 @@ export class SwitchFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
-            actionHandler.validate([], {ctx: {}})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({ctx: {}}, {ctx: {}})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst'
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 is: 'tst'
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: 'tst'
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: {}
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
@@ -107,7 +113,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: []
                 }
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
@@ -116,7 +122,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: 123
                 }
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
@@ -128,13 +134,18 @@ export class SwitchFlowHandlerTestSuite {
                         f2: false
                     }
                 }
-            }, {ctx: {}})
+            }, context)
         ).to.be.rejected;
     }
 
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
+
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
 
         await chai.expect(
             actionHandler.validate({
@@ -144,7 +155,7 @@ export class SwitchFlowHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, {ctx: {}})
+            }, context)
         ).to.be.not.rejected;
     }
 
@@ -169,10 +180,11 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
-        const context = {
+        const context = <IContext> {
             ctx: {
                 value: 'tst'
-            }
+            },
+            wd: '.'
         };
 
         // validate first to process template inside options
@@ -208,10 +220,11 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
-        const context = {
+        const context = <IContext> {
             ctx: {
                 value: 'tst2'
-            }
+            },
+            wd: '.'
         };
 
         // validate first to process template inside options

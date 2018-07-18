@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class SequenceFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -38,7 +39,7 @@ export class SequenceFlowHandler extends ActionHandler {
         return SequenceFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
 
         for (const action of options) {

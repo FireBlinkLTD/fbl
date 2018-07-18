@@ -3,6 +3,7 @@ import {WriteToFile} from '../../../../src/plugins/files/WriteToFile';
 import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
+import {IContext} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -17,39 +18,44 @@ export class WriteToFileTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFile();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
-            actionHandler.validate([], {})
+            actionHandler.validate([], context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, {})
+            actionHandler.validate({}, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, {})
+            actionHandler.validate(123, context)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', {})
+            actionHandler.validate('test', context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 content: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '',
                 content: 'test'
-            }, {})
+            }, context)
         ).to.be.rejected;
     }
 
@@ -58,11 +64,16 @@ export class WriteToFileTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToFile();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp',
                 content: 'test'
-            }, {})
+            }, context)
         ).to.be.not.rejected;
     }
 
@@ -72,12 +83,17 @@ export class WriteToFileTestSuite {
 
         const tmpFile = await tmp.file();
 
+        const context = <IContext> {
+            ctx: {},
+            wd: '.'
+        };
+
         const content = 'test';
         await chai.expect(
             actionHandler.execute({
                 path: tmpFile.path,
                 content: content
-            }, {})
+            }, context)
         ).to.be.not.rejected;
 
         const result = await promisify(readFile)(tmpFile.path, 'utf8');

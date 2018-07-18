@@ -3,6 +3,7 @@ import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
+import {IContext} from '../../interfaces';
 
 const tmp = require('tmp-promise');
 
@@ -46,7 +47,7 @@ export class WriteToTempFile extends ActionHandler {
         return WriteToTempFile.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const tmpFile = await tmp.file();
         context.ctx[options.context] = tmpFile.path;
         await promisify(writeFile)(tmpFile.path, options.content, 'utf8');

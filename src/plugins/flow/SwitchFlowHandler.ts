@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class SwitchFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -52,7 +53,7 @@ export class SwitchFlowHandler extends ActionHandler {
         return SwitchFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const action = options.is[options.value];
