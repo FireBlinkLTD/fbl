@@ -1,5 +1,7 @@
 # FBL or FireBlink Logistics
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/FireBlinkLTD/fbl.svg)](https://greenkeeper.io/)
+
 This project is early in development and not recommended to even look at before version 0.1.0.
 
 This is a second reincarnation on internal tool that FireBlink LTD used to deploy its own projects.
