@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: node:8.11.3
 
-    working_directory: ~/repo
+    working_directory: /tmp
 
     steps:
       - checkout
@@ -16,6 +16,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
+      # install app dependencies and build app
       - run: yarn install
 
       - save_cache:
@@ -23,11 +24,8 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # build project
-      - run: yarn build
-
       # run tests and generate coverage report
       - run: yarn coverage
 
       # send test coverage
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/coverage/coverage.lcov
