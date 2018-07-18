@@ -14,8 +14,9 @@ export class ActionHandlersRegistry {
     /**
      * Register new entity
      * @param {ActionHandler} handler
+     * @return self instance
      */
-    public register(handler: ActionHandler) {
+    public register(handler: ActionHandler): ActionHandlersRegistry {
         const metadata = handler.getMetadata();
 
         this.registry[metadata.id] = handler;
@@ -24,19 +25,24 @@ export class ActionHandlersRegistry {
                 this.aliases[alias] = metadata.id;
             });
         }
+
+        return this;
     }
 
     /**
      * Unregister handler by name
      * @param {string} id
+     * @return self instance
      */
-    public unregister(id: string) {
+    public unregister(id: string): ActionHandlersRegistry {
         delete this.registry[id];
         Object.keys(this.aliases).forEach(key => {
             if (this.aliases[key] === id) {
                 delete this.aliases[key];
             }
         });
+
+        return this;
     }
 
     /**

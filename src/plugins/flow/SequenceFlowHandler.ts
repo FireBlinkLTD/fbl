@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
+import {IContext} from '../../interfaces';
 
 export class SequenceFlowHandler extends ActionHandler {
     private static metadata = <IHandlerMetadata> {
@@ -16,11 +17,16 @@ export class SequenceFlowHandler extends ActionHandler {
             '--',
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: false
+        skipTemplateProcessing: true
     };
 
     private static validationSchema = Joi.array()
-        .items(Joi.object().min(1).max(1))
+        .items(
+            Joi.object()
+                .min(1)
+                .max(1)
+                .required()
+        )
         .min(1)
         .required()
         .options({ abortEarly: true });
@@ -33,7 +39,7 @@ export class SequenceFlowHandler extends ActionHandler {
         return SequenceFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: IContext): Promise<void> {
         const flowService = Container.get(FlowService);
 
         for (const action of options) {

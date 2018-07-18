@@ -4,12 +4,28 @@ description: |-
 pipeline:
   # sequence of actions
   '--':
+    # assign context value for "test" field
+    - 'ctx':
+        test:
+          inline: 123
     # parallel actions
     - '||':
+      - '->':
+          path: '/tmp/test.json'
+          content: |-
+            {
+              "version": "1.0.0"
+            }
+      - 'tmp.->':
+          context: 'contextFieldNameToStorePath'
+          content: |-
+            {
+              "version": "1.0.0"
+            }
       - '?':
-          value: 'test'
+          value: '<%- ctx["test"] %>'
           is:
-            '<%- "test" %>':
+            '123':
               '@': './test.yml' # load from file
       - '@': './test2.yml' # load from file
       - 'test':

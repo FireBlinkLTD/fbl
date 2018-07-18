@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "dist/cli.js",
   "scripts": {
@@ -8,15 +8,15 @@
     "tsc": "tsc",
     "depcheck": "depcheck",
     "rimraf": "rimraf",
-    "start": "node dist/cli.js",
+    "start": "node dist/src/cli.js",
     "test": "nyc --reporter=html --reporter=text mocha",
     "build": "rimraf ./dist/ && tsc",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "prepublish": "npm run build && npm run lint",
     "precommit": "npm run lint"
   },
   "bin": {
-    "fbl": "dist/cli.js"
+    "fbl": "dist/src/cli.js"
   },
   "author": "FireBlink LTD",
   "license": "MIT",
@@ -25,21 +25,23 @@
     "@types/deepmerge": "2.1.0",
     "@types/ejs": "2.6.0",
     "@types/flat": "0.0.28",
-    "@types/joi": "13.4.0",
+    "@types/joi": "13.4.0",    
     "@types/js-yaml": "3.11.2",
     "@types/node": "10.5.2",
-    "commander": "2.16.0",
+    "commander": "2.16.0",    
+    "chai-as-promised": "7.1.1",
     "deepmerge": "2.1.1",
     "ejs": "2.6.1",
     "joi": "13.4.0",
     "js-yaml": "3.12.0",
     "reflect-metadata": "0.1.12",
-    "typedi": "0.8.0"
+    "typedi": "0.8.0",
+    "uuid": "3.3.2"
   },
   "devDependencies": {
     "@types/chai": "4.1.4",
     "chai": "4.1.2",
-    "git-pre-commit": "^2.1.4",
+    "git-pre-commit": "2.1.4",
     "mocha": "5.2.0",
     "mocha-typescript": "1.1.17",
     "mochawesome": "3.0.2",
@@ -51,14 +53,14 @@
     "typescript": "2.9.2"
   },
   "nyc": {
-    "check-coverage": false,
+    "check-coverage": true,
     "per-file": true,
     "lines": 100,
     "statements": 100,
     "functions": 100,
     "branches": 100,
     "exclude": [
-      "dist/lib/**/index.js",
+      "dist/src/lib/**/index.js",
       "dist/test/**/*.js"
     ]
   },
