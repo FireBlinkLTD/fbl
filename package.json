@@ -10,6 +10,7 @@
     "rimraf": "rimraf",
     "start": "node dist/src/cli.js",
     "test": "nyc --reporter=html --reporter=text mocha",
+    "coverage": "mkdir coverage || nyc --reporter=text-lcov mocha > coverage/coverage.lcov",
     "build": "rimraf ./dist/ && tsc",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "prepublish": "npm run build && npm run lint",
