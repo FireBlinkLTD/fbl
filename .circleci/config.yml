@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: node:8.11.3
 
-    working_directory: /tmp
+    working_directory: /tmp/fbl
 
     steps:
       - checkout
@@ -28,4 +28,4 @@ jobs:
       - run: yarn coverage
 
       # send test coverage
-      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/coverage/coverage.lcov
+      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/fbl/coverage/coverage.lcov
