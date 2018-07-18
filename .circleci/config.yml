@@ -25,7 +25,10 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests and generate coverage report
-      - run: yarn coverage
+      - run: yarn test
+
+      # generate coverage report
+      - run: ./node_modules/.bin/nyc report --reporter=text-lcov > /tmp/fbl/coverage.lcov
 
       # send test coverage
-      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/fbl/coverage/coverage.lcov
+      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/fbl/coverage.lcov
