@@ -1,7 +1,6 @@
 # FBL or FireBlink Logistics
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/FireBlinkLTD/fbl.svg)](https://greenkeeper.io/)
-
 [![CircleCI](https://circleci.com/gh/FireBlinkLTD/fbl.svg?style=svg)](https://circleci.com/gh/FireBlinkLTD/fbl)
 
 This project is early in development and not recommended to even look at before version 0.1.0.
