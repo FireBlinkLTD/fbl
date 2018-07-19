@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
@@ -31,16 +31,21 @@ export class AttachedFlowHandler extends ActionHandler {
         return AttachedFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
         const fbl = Container.get(FireBlinkLogistics);
 
-        const file = flowService.getAbsolutePath(options, context);
-
+        const file = flowService.getAbsolutePath(options, snapshot.wd);
+        snapshot.log(`Reading flow from file: ${file}`);
         const flow = await flowService.readFlowFromFile(file);
-        await fbl.execute(flow, <IContext> {
-            ctx: context.ctx,
-            wd: dirname(file)
-        });
+
+        const childSnapshot = await fbl.execute(
+            dirname(file),
+            flow,
+            <IContext> {
+                ctx: context.ctx
+            }
+        );
+        snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

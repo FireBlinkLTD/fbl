@@ -4,7 +4,7 @@ import {FireBlinkLogistics} from '../../src/fbl';
 import {IContext, IFlow} from '../../src/interfaces';
 import {ActionHandler, IHandlerMetadata} from '../../src/models';
 import * as assert from 'assert';
-import {ActionHandlersRegistry} from '../../src/services';
+import {ActionHandlersRegistry, FlowService} from '../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -42,35 +42,44 @@ export class FblTestSuite {
         const registry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         registry
             .unregister(DummyActionHandler.ID);
+
+        Container.remove(FireBlinkLogistics);
+        Container.remove(FlowService);
     }
 
     @test()
     async pipeline(): Promise<void> {
         const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
 
+        fbl.flowService.debug = true;
+
         let result = null;
         fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
             result = opt;
         }, false));
 
-        await fbl.execute(<IFlow> {
+        const context = <IContext> {
+            ctx: {
+                var: 'test123'
+            }
+        };
+
+        const snapshot = await fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {
                 [DummyActionHandler.ID]: 'tst'
             }
-        }, <IContext> {
-            ctx: {},
-            wd: '.'
-        });
+        }, context);
 
+        assert.deepStrictEqual('tst', snapshot.getSteps().find(s => s.type === 'options').payload);
+        assert.deepStrictEqual(context, snapshot.getSteps().find(s => s.type === 'context').payload);
         assert.strictEqual(result, 'tst');
 
-        await chai.expect(fbl.execute(<IFlow> {
+        await chai.expect(fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {}
         }, <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         })).to.be.rejected;
     }
 
@@ -78,19 +87,20 @@ export class FblTestSuite {
     async skippedExecution(): Promise<void> {
         const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
 
+        fbl.flowService.debug = true;
+
         let result = null;
         fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
             result = opt;
         }, true));
 
-        await fbl.execute(<IFlow> {
+        await fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {
                 [DummyActionHandler.ID]: 'tst'
             }
         }, <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         });
 
         assert.strictEqual(result, null);

@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {AttachedFlowHandler} from '../../../../src/plugins/flow/AttachedFlowHandler';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
-import {ActionHandler, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
@@ -31,8 +31,8 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any): Promise<void> {
-        await this.fn(options, context);
+    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+        await this.fn(options, context, snapshot);
     }
 }
 
@@ -50,24 +50,25 @@ export class AttachedFlowHandlerTestSuite {
         const actionHandler = new AttachedFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.',  '');
         
         await chai.expect(
-            actionHandler.validate(123, context)
+            actionHandler.validate(123, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context)
+            actionHandler.validate([], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context)
+            actionHandler.validate('', context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context)
+            actionHandler.validate({}, context, snapshot)
         ).to.be.rejected;
     }
 
@@ -76,12 +77,13 @@ export class AttachedFlowHandlerTestSuite {
         const actionHandler = new AttachedFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
+        const snapshot = new ActionSnapshot('.',  '');
+
         await chai.expect(
-            actionHandler.validate('/tmp/test.tst', context)
+            actionHandler.validate('/tmp/test.tst', context, snapshot)
         ).to.be.not.rejected;
     }
 
@@ -111,18 +113,19 @@ export class AttachedFlowHandlerTestSuite {
 
         const actionHandler = new AttachedFlowHandler();
         const context = <IContext> {
-            wd: '.',
             ctx: {
                 tst: 123
             }
         };
 
+        const snapshot = new ActionSnapshot('.',  '');
+
         await chai.expect(
-            actionHandler.validate(tmpFile.path, context)
+            actionHandler.validate(tmpFile.path, context, snapshot)
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.execute(tmpFile.path, context)
+            actionHandler.execute(tmpFile.path, context, snapshot)
         ).to.be.not.rejected;
 
         assert.strictEqual(actionHandlerOptions, true);

@@ -1,6 +1,6 @@
 import {suite, test} from 'mocha-typescript';
 import {SwitchFlowHandler} from '../../../../src/plugins/flow/SwitchFlowHandler';
-import {ActionHandler, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
 import * as assert from 'assert';
@@ -26,8 +26,8 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any): Promise<void> {
-        await this.fn(options, context);
+    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+        await this.fn(options, context, snapshot);
     }
 }
 
@@ -45,66 +45,67 @@ export class SwitchFlowHandlerTestSuite {
         const actionHandler = new SwitchFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+        
+        const snapshot = new ActionSnapshot('.', '');
 
         await chai.expect(
-            actionHandler.validate([], context)
+            actionHandler.validate([], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context)
+            actionHandler.validate({}, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 is: 'tst'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: 'tst'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: {}
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
@@ -113,7 +114,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: []
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
@@ -122,7 +123,7 @@ export class SwitchFlowHandlerTestSuite {
                 is: {
                     tst: 123
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
@@ -134,7 +135,7 @@ export class SwitchFlowHandlerTestSuite {
                         f2: false
                     }
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
     }
 
@@ -143,9 +144,10 @@ export class SwitchFlowHandlerTestSuite {
         const actionHandler = new SwitchFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '');
 
         await chai.expect(
             actionHandler.validate({
@@ -155,7 +157,7 @@ export class SwitchFlowHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.not.rejected;
     }
 
@@ -183,17 +185,18 @@ export class SwitchFlowHandlerTestSuite {
         const context = <IContext> {
             ctx: {
                 value: 'tst'
-            },
-            wd: '.'
+            }
         };
+
+        const snapshot = new ActionSnapshot('.', '');
 
         // validate first to process template inside options
         await chai.expect(
-            actionHandler.validate(options, context)
+            actionHandler.validate(options, context, snapshot)
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.execute(options, context)
+            actionHandler.execute(options, context, snapshot)
         ).to.be.not.rejected;
 
         assert.strictEqual(actionHandlerOptions, true);
@@ -220,20 +223,21 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
+        const snapshot = new ActionSnapshot('.',  '');
+
         const context = <IContext> {
             ctx: {
                 value: 'tst2'
-            },
-            wd: '.'
+            }
         };
 
         // validate first to process template inside options
         await chai.expect(
-            actionHandler.validate(options, context)
+            actionHandler.validate(options, context, snapshot)
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.execute(options, context)
+            actionHandler.execute(options, context, snapshot)
         ).to.be.not.rejected;
 
         assert.strictEqual(actionHandlerOptions, false);

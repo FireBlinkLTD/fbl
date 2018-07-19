@@ -4,6 +4,7 @@ import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
 import {IContext} from '../../../../src/interfaces';
+import {ActionSnapshot} from '../../../../src/models';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,43 +20,44 @@ export class WriteToFileTestSuite {
         const actionHandler = new WriteToFile();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
+        const snapshot = new ActionSnapshot('.', '');
+
         await chai.expect(
-            actionHandler.validate([], context)
+            actionHandler.validate([], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context)
+            actionHandler.validate({}, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, context)
+            actionHandler.validate(123, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context)
+            actionHandler.validate('test', context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: 'test'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 content: 'test'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '',
                 content: 'test'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
     }
 
@@ -65,15 +67,16 @@ export class WriteToFileTestSuite {
         const actionHandler = new WriteToFile();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '');
 
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp',
                 content: 'test'
-            }, context)
+            }, context, snapshot)
         ).to.be.not.rejected;
     }
 
@@ -84,16 +87,17 @@ export class WriteToFileTestSuite {
         const tmpFile = await tmp.file();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '');
 
         const content = 'test';
         await chai.expect(
             actionHandler.execute({
                 path: tmpFile.path,
                 content: content
-            }, context)
+            }, context, snapshot)
         ).to.be.not.rejected;
 
         const result = await promisify(readFile)(tmpFile.path, 'utf8');

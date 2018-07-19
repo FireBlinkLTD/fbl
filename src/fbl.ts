@@ -3,6 +3,7 @@ import {IContext, IFlow} from './interfaces';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import * as Joi from 'joi';
+import {ActionSnapshot} from './models';
 
 @Service()
 export class FireBlinkLogistics {
@@ -27,11 +28,12 @@ export class FireBlinkLogistics {
 
     /**
      * Execute flow
+     * @param {string} wd Working Directory
      * @param {IFlow} flow,
      * @param {IContext} context
-     * @returns {Promise<FireBlinkLogistics>}
+     * @returns {Promise<ActionSnapshot>}
      */
-    async execute(flow: IFlow, context: IContext): Promise<FireBlinkLogistics> {
+    async execute(wd: string, flow: IFlow, context: IContext): Promise<ActionSnapshot> {
         const result = Joi.validate(flow, FireBlinkLogistics.validationSchema);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
@@ -42,8 +44,6 @@ export class FireBlinkLogistics {
         const idOrAlias = keys[0];
         const options = flow.pipeline[idOrAlias];
 
-        await this.flowService.executeAction(idOrAlias, options, context);
-
-        return this;
+        return await this.flowService.executeAction(wd, idOrAlias, options, context);
     }
 }

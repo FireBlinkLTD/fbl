@@ -6,6 +6,7 @@ import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {IContext} from '../../../../src/interfaces';
 import {basename, dirname} from 'path';
+import {ActionSnapshot} from '../../../../src/models';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,40 +22,41 @@ export class ContextValuesAssignmentTestSuite {
         const actionHandler = new ContextValuesAssignment();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
+        const snapshot = new ActionSnapshot('.', '');
+
         await chai.expect(
-            actionHandler.validate([], context)
+            actionHandler.validate([], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context)
+            actionHandler.validate({}, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
@@ -63,7 +65,7 @@ export class ContextValuesAssignmentTestSuite {
                     inline: 'test',
                     file: '/tmp/test'
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.rejected;
     }
 
@@ -72,16 +74,17 @@ export class ContextValuesAssignmentTestSuite {
         const actionHandler = new ContextValuesAssignment();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '');
 
         await chai.expect(
             actionHandler.validate({
                 test: {
                     inline: 'test'
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -89,7 +92,7 @@ export class ContextValuesAssignmentTestSuite {
                 test: {
                     file: '/tmp/test'
                 }
-            }, context)
+            }, context, snapshot)
         ).to.be.not.rejected;
     }
 
@@ -98,7 +101,6 @@ export class ContextValuesAssignmentTestSuite {
         const actionHandler = new ContextValuesAssignment();
 
         const context: IContext = {
-            wd: '.',
             ctx: {
                 existing: {
                     value: 'value'
@@ -129,8 +131,10 @@ export class ContextValuesAssignmentTestSuite {
             }
         };
 
-        await actionHandler.validate(options, context);
-        await actionHandler.execute(options, context);
+        const snapshot = new ActionSnapshot('.', '');
+
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
@@ -141,10 +145,10 @@ export class ContextValuesAssignmentTestSuite {
 
         // do the same with relative path
         options.fromFile.file = basename(tmpFile.path);
-        context.wd = dirname(tmpFile.path);
+        snapshot.wd = dirname(tmpFile.path);
 
-        await actionHandler.validate(options, context);
-        await actionHandler.execute(options, context);
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);

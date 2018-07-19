@@ -1,4 +1,4 @@
-import {ActionHandler} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {IHandlerMetadata} from '../../models/';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
@@ -14,6 +14,7 @@ export class SequenceFlowHandler extends ActionHandler {
         aliases: [
             'fbl.sequence',
             'sequence',
+            'sync',
             '--',
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
@@ -39,13 +40,19 @@ export class SequenceFlowHandler extends ActionHandler {
         return SequenceFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
         for (const action of options) {
             const keys = Object.keys(action);
             const idOrAlias = keys[0];
-            await flowService.executeAction(idOrAlias, action[idOrAlias], context);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
+            snapshot.registerChildActionSnapshot(childSnapshot);
+
+            // stop processing after first failure
+            if (!childSnapshot.successful) {
+                return;
+            }
         }
     }
 }

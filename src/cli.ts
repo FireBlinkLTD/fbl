@@ -6,6 +6,9 @@ import {ActionHandlersRegistry, FlowService} from './services';
 import {Container} from 'typedi';
 import {IContext, IPlugin} from './interfaces';
 import {dirname, resolve} from 'path';
+import {promisify} from 'util';
+import {writeFile} from 'fs';
+import {dump} from 'js-yaml';
 
 const plugins: string[] = [
     './plugins/flow',
@@ -35,6 +38,7 @@ commander
             defaultKeyValuePairs.push(val);
         }
     )
+    .option('-r --report <file>', 'Generate execution report in the end at given path.')
     .arguments('<file>')
     .action((file, options) => {
         options.file = file;
@@ -78,11 +82,19 @@ const run = async () => {
         }
     }));
 
+    if (commander.report) {
+        // enable debug mode when report generation is requested
+        flowService.debug = true;
+    }
+
     const flow = await flowService.readFlowFromFile(commander.file);
-    await fbl.execute(flow, <IContext> {
-        ctx: ctx,
-        wd: dirname(commander.file)
+    const snapshot = await fbl.execute(dirname(commander.file), flow, <IContext> {
+        ctx: ctx
     });
+
+    if (commander.report) {
+        await promisify(writeFile)(commander.report, dump(snapshot), 'utf8');
+    }
 };
 
 run().catch((e: Error) => {

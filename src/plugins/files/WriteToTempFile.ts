@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
@@ -47,9 +47,10 @@ export class WriteToTempFile extends ActionHandler {
         return WriteToTempFile.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const tmpFile = await tmp.file();
         context.ctx[options.context] = tmpFile.path;
+        snapshot.log(`Writing content to a temp file: ${tmpFile.path}`);
         await promisify(writeFile)(tmpFile.path, options.content, 'utf8');
     }
 }
