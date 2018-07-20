@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
@@ -47,9 +47,10 @@ export class WriteToFile extends ActionHandler {
         return WriteToFile.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const file = flowService.getAbsolutePath(options.path, context);
+        const file = flowService.getAbsolutePath(options.path, snapshot.wd);
+        snapshot.log(`Writing content to a file: ${file}`);
         await promisify(writeFile)(file, options.content, 'utf8');
     }
 }

@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
@@ -13,6 +13,7 @@ export class SwitchFlowHandler extends ActionHandler {
         aliases: [
             'fbl.switch',
             'switch',
+            'if',
             '?'
         ],
         // we don't want to process templates inside options in a default way as it may cause processing of templates
@@ -40,20 +41,21 @@ export class SwitchFlowHandler extends ActionHandler {
         return SwitchFlowHandler.metadata;
     }
 
-    async validate(options: any, context: any): Promise<void> {
+    async validate(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
         // resolve value, as it is mostly likely a template and we're not processing options as a template
         options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context);
+        snapshot.setOptions(options);
 
-        await super.validate(options, context);
+        await super.validate(options, context, snapshot);
     }
 
     getValidationSchema(): SchemaLike | null {
         return SwitchFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const action = options.is[options.value];
@@ -61,7 +63,9 @@ export class SwitchFlowHandler extends ActionHandler {
         if (action) {
             const keys = Object.keys(action);
             const idOrAlias = keys[0];
-            await flowService.executeAction(idOrAlias, action[idOrAlias], context);
+            snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
+            snapshot.registerChildActionSnapshot(childSnapshot);
         }
     }
 }

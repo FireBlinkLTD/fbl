@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {SchemaLike} from 'joi';
@@ -13,6 +13,7 @@ export class ParallelFlowHandler extends ActionHandler {
         aliases: [
             'fbl.parallel',
             'parallel',
+            'async',
             '||'
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
@@ -33,23 +34,15 @@ export class ParallelFlowHandler extends ActionHandler {
         return ParallelFlowHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const errors: Error[] = [];
         const promises = options.map(async (action: any): Promise<void> => {
-            try {
-                const keys = Object.keys(action);
-                const idOrAlias = keys[0];
-                await flowService.executeAction(idOrAlias, action[idOrAlias], context);
-            } catch (e) {
-                errors.push(e);
-            }
+            const keys = Object.keys(action);
+            const idOrAlias = keys[0];
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
+            snapshot.registerChildActionSnapshot(childSnapshot);
         });
 
         await Promise.all(promises);
-
-        if (errors.length) {
-            throw new Error(errors.join('\n\n'));
-        }
     }
 }

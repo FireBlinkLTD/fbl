@@ -7,8 +7,7 @@ export class ActionHandlersRegistry {
     private aliases: {[alias: string]: string};
 
     constructor() {
-        this.registry = {};
-        this.aliases = {};
+        this.cleanup();
     }
 
     /**
@@ -41,6 +40,13 @@ export class ActionHandlersRegistry {
                 delete this.aliases[key];
             }
         });
+
+        return this;
+    }
+
+    public cleanup(): ActionHandlersRegistry {
+        this.registry = {};
+        this.aliases = {};
 
         return this;
     }

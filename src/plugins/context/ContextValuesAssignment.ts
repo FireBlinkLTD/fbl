@@ -1,4 +1,4 @@
-import {ActionHandler, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
@@ -41,7 +41,7 @@ export class ContextValuesAssignment extends ActionHandler {
         return ContextValuesAssignment.validationSchema;
     }
 
-    async execute(options: any, context: IContext): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const names = Object.keys(options);
@@ -51,12 +51,12 @@ export class ContextValuesAssignment extends ActionHandler {
             }
 
             if (options[name].file) {
-                console.log('-> options[name].file:', options[name].file);
-                const file = flowService.getAbsolutePath(options[name].file, context);
-                console.log('-> file:', file);
+                const file = flowService.getAbsolutePath(options[name].file, snapshot.wd);
+                snapshot.log(`Reading from file: ${file} into "ctx.${name}"`);
                 context.ctx[name] = await flowService.readYamlFromFile(file);
             }
         });
+        snapshot.setContext(context);
 
         await Promise.all(promises);
     }

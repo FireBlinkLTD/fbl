@@ -1,0 +1,17 @@
+.idea/
+*.iml
+
+.circleci/
+.nyc_output/
+coverage/
+mochawesome-report/
+node_modules/
+
+.gitignore
+
+src/
+test/
+sample.yml
+tslint.json
+tsconfig.json
+yarn-error.log

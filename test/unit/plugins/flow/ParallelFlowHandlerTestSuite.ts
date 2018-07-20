@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
-import {ActionHandler, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
 import * as assert from 'assert';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ParallelFlowHandler} from '../../../../src/plugins/flow/ParallelFlowHandler';
 import {IContext} from '../../../../src/interfaces';
 
@@ -28,13 +28,13 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any): Promise<void> {
+    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
         // wait first
         await new Promise(resolve => {
             setTimeout(resolve, this.delay);
         });
 
-        await this.fn(options, context);
+        await this.fn(options, context, snapshot);
     }
 }
 
@@ -42,6 +42,8 @@ class DummyActionHandler extends ActionHandler {
 export class ParallelFlowHandlerTestSuite {
 
     after() {
+        Container.remove(FlowService);
+
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
             .unregister(new ParallelFlowHandler().getMetadata().id)
@@ -55,35 +57,36 @@ export class ParallelFlowHandlerTestSuite {
         const actionHandler = new ParallelFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
-            actionHandler.validate(123, context)
+            actionHandler.validate(123, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context)
+            actionHandler.validate('test', context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context)
+            actionHandler.validate({}, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context)
+            actionHandler.validate([], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{}], context)
+            actionHandler.validate([{}], context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 test1: 123,
                 test2: 321
-            }], context)
+            }], context, snapshot)
         ).to.be.rejected;
     }
 
@@ -92,19 +95,21 @@ export class ParallelFlowHandlerTestSuite {
         const actionHandler = new ParallelFlowHandler();
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
+
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate([
                 {test: 123}
-            ], context)
+            ], context, snapshot)
         ).to.be.not.rejected;
     }
 
     @test()
     async validateExecutionOrder(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
@@ -119,6 +124,7 @@ export class ParallelFlowHandlerTestSuite {
         actionHandlersRegistry.register(dummyActionHandler2);
 
         const actionHandler = new ParallelFlowHandler();
+        actionHandlersRegistry.register(actionHandler);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -126,24 +132,19 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
-        await chai.expect(
-            actionHandler.validate(options, context)
-        ).to.be.not.rejected;
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.execute(options, context)
-        ).to.be.not.rejected;
-
+        assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 2);
         assert.strictEqual(results[1], 1);
     }
 
     @test()
     async failureOnFirstShouldNotStopOthers(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
@@ -163,6 +164,7 @@ export class ParallelFlowHandlerTestSuite {
         actionHandlersRegistry.register(dummyActionHandler2);
 
         const actionHandler = new ParallelFlowHandler();
+        actionHandlersRegistry.register(actionHandler);
 
         const options = [
             {[DummyActionHandler.ID + '.0']: 0},
@@ -171,17 +173,13 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
-        await chai.expect(
-            actionHandler.validate(options, context)
-        ).to.be.not.rejected;
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.execute(options, context)
-        ).to.be.rejected;
+        assert.strictEqual(snapshot.successful, false);
+        assert.strictEqual(snapshot.childFailure, true);
 
         assert.strictEqual(results.length, 2);
         assert.strictEqual(results[0], 2);
@@ -190,6 +188,7 @@ export class ParallelFlowHandlerTestSuite {
 
     @test()
     async tree(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new ParallelFlowHandler();
         actionHandlersRegistry.register(actionHandler);
@@ -215,18 +214,12 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {},
-            wd: '.'
+            ctx: {}
         };
 
-        await chai.expect(
-            actionHandler.validate(options, context)
-        ).to.be.not.rejected;
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.execute(options, context)
-        ).to.be.not.rejected;
-
+        assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 2);
         assert.strictEqual(results[1], 1);
     }

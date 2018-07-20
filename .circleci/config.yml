@@ -32,3 +32,11 @@ jobs:
 
       # send test coverage
       - run: bash <(curl -s https://codecov.io/bash) -f /tmp/fbl/coverage.lcov
+
+      # store artifacts
+      - store_artifacts:
+          path: /tmp/fbl/coverage
+
+      # store artifacts
+      - store_artifacts:
+          path: /tmp/fbl/mochawesome-report
