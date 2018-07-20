@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {SequenceFlowHandler} from '../../../../src/plugins/flow/SequenceFlowHandler';
 import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
 import {IContext} from '../../../../src/interfaces';
 
@@ -44,10 +44,7 @@ export class SequenceFlowHandlerTestSuite {
     after() {
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .unregister(new SequenceFlowHandler().getMetadata().id)
-            .unregister(DummyActionHandler.ID + '.0')
-            .unregister(DummyActionHandler.ID + '.1')
-            .unregister(DummyActionHandler.ID + '.2');
+            .cleanup();
     }
 
     @test()
@@ -58,7 +55,7 @@ export class SequenceFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -96,7 +93,7 @@ export class SequenceFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate([
@@ -107,6 +104,7 @@ export class SequenceFlowHandlerTestSuite {
 
     @test()
     async validateExecutionOrder(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
@@ -121,6 +119,7 @@ export class SequenceFlowHandlerTestSuite {
         actionHandlersRegistry.register(dummyActionHandler2);
 
         const actionHandler = new SequenceFlowHandler();
+        actionHandlersRegistry.register(actionHandler);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -131,22 +130,16 @@ export class SequenceFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.validate(options, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.execute(options, context, snapshot)
-        ).to.be.not.rejected;
-
+        assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 1);
         assert.strictEqual(results[1], 2);
     }
 
     @test()
     async shouldStopAfterFirstError(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
@@ -161,6 +154,7 @@ export class SequenceFlowHandlerTestSuite {
         actionHandlersRegistry.register(dummyActionHandler2);
 
         const actionHandler = new SequenceFlowHandler();
+        actionHandlersRegistry.register(actionHandler);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -171,20 +165,16 @@ export class SequenceFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.validate(options, context, snapshot)
-        ).to.be.not.rejected;
-
-        await actionHandler.execute(options, context, snapshot);
-
+        assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
         assert.strictEqual(results.length, 0);
     }
 
     @test()
     async tree(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new SequenceFlowHandler();
         actionHandlersRegistry.register(actionHandler);
@@ -213,14 +203,9 @@ export class SequenceFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
-        await chai.expect(
-            actionHandler.validate(options, context, snapshot)
-        ).to.be.not.rejected;
-
-        await actionHandler.execute(options, context, snapshot);
-
+        assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 1);
         assert.strictEqual(results[1], 2);
     }

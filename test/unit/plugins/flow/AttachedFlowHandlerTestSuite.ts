@@ -53,7 +53,7 @@ export class AttachedFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.',  '');
+        const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -80,7 +80,7 @@ export class AttachedFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.',  '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate('/tmp/test.tst', context, snapshot)
@@ -118,7 +118,7 @@ export class AttachedFlowHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.',  '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate(tmpFile.path, context, snapshot)

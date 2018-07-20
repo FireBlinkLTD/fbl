@@ -19,12 +19,29 @@ FBL generally designed to help with automation related tasks that require flexib
 Flexibility is the key concept of the FBL, so it can be used either as a command line tool, or integrated into any
 existing Node.js app.
 
-## CLI
+## Requirements
 
-`npm i -g fbl`
+- Node.js v8+ (earlier version may also work, but not supported officially)
 
-TODO
+## Installation 
 
-## Node.js API 
+Just run `npm i -g fbl` to install the CLI.
 
-TODO
+## Flow file format
+
+```yaml
+# [Optional] flow version, it is up to the user whether to use it or not
+version: 1.0.0
+
+# [Optional] flow description, it is up to the user whether to describe a flow in a human readable way
+description: |-
+  Sample file to describe all kinds of possibilities fbl can provide inside the descriptor
+
+# [Required] The starting point of the flow.
+pipeline:
+   # Pipeline may only have one key that represents action handler ID or one of its aliases
+   # value is action handler specific, make sure to read corresponding documentation first
+   'plugin.id': 'plugin.options'
+``` 
+
+

@@ -37,7 +37,7 @@ export class SwitchFlowHandlerTestSuite {
     after() {
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .unregister(DummyActionHandler.ID);
+            .cleanup();
     }
 
     @test()
@@ -48,7 +48,7 @@ export class SwitchFlowHandlerTestSuite {
             ctx: {}
         };
         
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -147,7 +147,7 @@ export class SwitchFlowHandlerTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -188,7 +188,7 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         // validate first to process template inside options
         await chai.expect(
@@ -223,7 +223,7 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.',  '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         const context = <IContext> {
             ctx: {

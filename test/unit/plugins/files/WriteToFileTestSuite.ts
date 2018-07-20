@@ -23,7 +23,7 @@ export class WriteToFileTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -70,7 +70,7 @@ export class WriteToFileTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -90,7 +90,7 @@ export class WriteToFileTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         const content = 'test';
         await chai.expect(

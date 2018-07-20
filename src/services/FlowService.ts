@@ -8,9 +8,12 @@ import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {promisify} from 'util';
 import {isAbsolute, resolve} from 'path';
+import * as colors from 'colors';
 
 @Service()
 export class FlowService {
+    private index = 0;
+
     /**
      * Turn to true to capture snapshots
      * @type {boolean}
@@ -29,7 +32,9 @@ export class FlowService {
      * @returns {Promise<void>}
      */
     async executeAction(wd: string, idOrAlias: string, options: any, context: IContext): Promise<ActionSnapshot> {
-        const snapshot = new ActionSnapshot(idOrAlias, wd);
+        const idx = ++this.index;
+        console.log(` -> [${idx}] [${idOrAlias}]`.green + ' Processing.');
+        const snapshot = new ActionSnapshot(idOrAlias, wd, idx);
 
         try {
             snapshot.setContext(context);
@@ -50,10 +55,18 @@ export class FlowService {
                 snapshot.start();
                 await handler.execute(options, context, snapshot);
                 snapshot.success();
+
+                if (snapshot.successful) {
+                    console.log(` <- [${idx}] [${idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
+                } else {
+                    console.log(` <- [${idx}] [${idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
+                }
             } else {
+                console.log(` <- [${idx}] [${idOrAlias}]`.yellow + ' Skipped');
                 snapshot.skipped();
             }
         } catch (e) {
+            console.error(` <- [${idx}] [${idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
             snapshot.failure(e);
         }
 

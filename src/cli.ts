@@ -9,6 +9,9 @@ import {dirname, resolve} from 'path';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
+import * as colors from 'colors';
+
+colors.enable();
 
 const plugins: string[] = [
     './plugins/flow',
@@ -39,6 +42,7 @@ commander
         }
     )
     .option('-r --report <file>', 'Generate execution report in the end at given path.')
+    .option('--no-colors', 'Remove colors from output. Make it boring.')
     .arguments('<file>')
     .action((file, options) => {
         options.file = file;
@@ -51,6 +55,10 @@ if (!commander.file) {
     console.error('Error: flow descriptor file was not provided.');
     commander.outputHelp();
     process.exit(1);
+}
+
+if (!commander.colors) {
+    colors.disable();
 }
 
 const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);

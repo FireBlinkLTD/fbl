@@ -105,4 +105,26 @@ export class FblTestSuite {
 
         assert.strictEqual(result, null);
     }
+
+    @test
+    async failedExecution() {
+        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+
+        fbl.flowService.debug = true;
+
+        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
+            throw new Error('test');
+        }, false));
+
+        const snapshot = await fbl.execute('.', <IFlow> {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: 'tst'
+            }
+        }, <IContext> {
+            ctx: {}
+        });
+
+        assert.strictEqual(snapshot.successful, false);
+    }
 }

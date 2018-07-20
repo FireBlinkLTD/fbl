@@ -1,16 +1,20 @@
 import {Container} from 'typedi';
 import {FlowService} from '../services';
 
+const humanizeDuration = require('humanize-duration');
+
 export class ActionSnapshot {
     private createdAt: Date;
     private steps: IActionStep[];
 
     public successful: boolean;
     public childFailure: boolean;
+    public duration = 0;
 
     constructor(
         public idOrAlias: string,
-        public wd: string
+        public wd: string,
+        public idx: number
     ) {
         this.createdAt = new Date();
         this.steps = [];
@@ -19,13 +23,27 @@ export class ActionSnapshot {
     }
 
     /**
+     * Get human readable duration
+     * @return {string}
+     */
+    getHumanReadableDuration(): string {
+        return humanizeDuration(this.duration);
+    }
+
+    /**
      * Register log message
      * @param {string} message
      */
     log(message: string) {
+        console.log(` -> [${this.idx}] [${this.idOrAlias}]`.green + ' ' + message);
+
         this.registerStep('log', message);
     }
 
+    /**
+     * Set ID of the action handler
+     * @param {string} id
+     */
     setActionHandlerId(id: string) {
         this.registerStep('actionHandler', id);
     }
@@ -70,6 +88,7 @@ export class ActionSnapshot {
      */
     start() {
         this.registerStep('start');
+        this.duration = Date.now() - this.createdAt.getTime();
     }
 
     /**
@@ -95,6 +114,7 @@ export class ActionSnapshot {
         this.registerStep('skipped');
 
         this.successful = !this.childFailure;
+        this.duration = Date.now() - this.createdAt.getTime();
     }
 
     /**
@@ -103,6 +123,8 @@ export class ActionSnapshot {
      */
     failure(error: any) {
         this.registerStep('failure', error && error.toString());
+
+        this.duration = Date.now() - this.createdAt.getTime();
     }
 
     /**

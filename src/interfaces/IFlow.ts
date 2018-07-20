@@ -1,5 +1,5 @@
 export interface IFlow {
-    version: string;
+    version?: string;
     description?: string;
     pipeline: any;
 }

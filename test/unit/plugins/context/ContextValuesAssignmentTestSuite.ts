@@ -25,7 +25,7 @@ export class ContextValuesAssignmentTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -77,7 +77,7 @@ export class ContextValuesAssignmentTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -131,7 +131,7 @@ export class ContextValuesAssignmentTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '');
+        const snapshot = new ActionSnapshot('.', '', 0);
 
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
