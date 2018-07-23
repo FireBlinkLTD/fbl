@@ -1,7 +1,6 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {IHandlerMetadata} from '../../models/';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
 import {IContext} from '../../interfaces';
@@ -36,7 +35,7 @@ export class SequenceFlowHandler extends ActionHandler {
         return SequenceFlowHandler.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return SequenceFlowHandler.validationSchema;
     }
 

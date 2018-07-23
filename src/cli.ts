@@ -5,18 +5,20 @@ import {FireBlinkLogistics} from './fbl';
 import {ActionHandlersRegistry, FlowService} from './services';
 import {Container} from 'typedi';
 import {IContext, IPlugin} from './interfaces';
-import {dirname, resolve} from 'path';
+import {dirname} from 'path';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as colors from 'colors';
 
+const requireg = require('requireg');
+
 colors.enable();
 
 const plugins: string[] = [
-    './plugins/flow',
-    './plugins/context',
-    './plugins/files'
+    __dirname + '/plugins/flow',
+    __dirname + '/plugins/context',
+    __dirname + '/plugins/files'
 ];
 
 const defaultKeyValuePairs: string[] = [];
@@ -28,7 +30,7 @@ commander
         '-p --plugin <file>',
         '[optional] Plugin file.',
         (val) => {
-            plugins.push(resolve(val));
+            plugins.push(val);
         }
     )
     .option(
@@ -66,7 +68,7 @@ const flowService = Container.get<FlowService>(FlowService);
 const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
 plugins.forEach((path: string) => {
-    const plugin: IPlugin = require(path);
+    const plugin: IPlugin = requireg(path);
 
     plugin.getActionHandlers().forEach(actionHander => {
         actionHandlersRegistry.register(actionHander);

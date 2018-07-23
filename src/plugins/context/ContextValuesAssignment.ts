@@ -2,7 +2,6 @@ import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
-import {SchemaLike} from 'joi';
 import {IContext} from '../../interfaces';
 
 export class ContextValuesAssignment extends ActionHandler {
@@ -39,7 +38,7 @@ export class ContextValuesAssignment extends ActionHandler {
         return ContextValuesAssignment.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return ContextValuesAssignment.validationSchema;
     }
 
