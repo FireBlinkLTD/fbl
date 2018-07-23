@@ -12,7 +12,7 @@
     "test": "nyc --reporter=html --reporter=text mocha",
     "build": "rimraf ./dist/ && tsc",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
-    "prepublish": "npm run build && npm run lint",
+    "prepublishOnly": "npm run build && npm run lint",
     "precommit": "npm run lint"
   },
   "bin": {

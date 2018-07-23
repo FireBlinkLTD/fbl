@@ -6,10 +6,12 @@ import {SchemaLike} from 'joi';
 import {IContext} from '../../interfaces';
 
 export class ContextValuesAssignment extends ActionHandler {
+    private static ROOT_KEY = '.';
+
     private static metadata = <IHandlerMetadata> {
         id: 'com.fireblink.fbl.context.assignValues.inline',
         version: '1.0.0',
-        description: 'Context values assignment. Either inline or from file for each key individually. Only top level keys are supported.',
+        description: 'Context values assignment. Either inline or from file for each key individually. Only top level keys are supported. Assignment directly to context is possible when "." key is provided.',
         aliases: [
             'fbl.context.assign.inline',
             'context.assign.inline',
@@ -46,14 +48,21 @@ export class ContextValuesAssignment extends ActionHandler {
 
         const names = Object.keys(options);
         const promises = names.map(async (name: string): Promise<void> => {
+            let value = undefined;
             if (options[name].inline) {
-                context.ctx[name] = options[name].inline;
+                value = options[name].inline;
             }
 
             if (options[name].file) {
                 const file = flowService.getAbsolutePath(options[name].file, snapshot.wd);
                 snapshot.log(`Reading from file: ${file} into "ctx.${name}"`);
-                context.ctx[name] = await flowService.readYamlFromFile(file);
+                value = await flowService.readYamlFromFile(file);
+            }
+
+            if (name === ContextValuesAssignment.ROOT_KEY) {
+                Object.assign(context.ctx, value);
+            } else {
+                context.ctx[name] = value;
             }
         });
         snapshot.setContext(context);

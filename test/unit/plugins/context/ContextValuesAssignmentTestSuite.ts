@@ -155,4 +155,64 @@ export class ContextValuesAssignmentTestSuite {
         assert.strictEqual(context.ctx.existing.other, 'other');
         assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
     }
+
+    @test()
+    async assignRootValues(): Promise<void> {
+        const actionHandler = new ContextValuesAssignment();
+
+        const context: IContext = {
+            ctx: {
+                existing: {
+                    value: 'value'
+                }
+            }
+        };
+
+        const fileContent = {
+            file_content: 'ftpo'
+        };
+
+        const tmpFile = await tmp.file();
+
+        // write to temp file
+        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+
+        const options = {
+            test: {
+                inline: 123
+            },
+            '.': {
+                inline: {
+                    other: 'other'
+                }
+            },
+            fromFile: {
+                file: tmpFile.path
+            }
+        };
+
+        const snapshot = new ActionSnapshot('.', '', 0);
+
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.strictEqual(context.ctx.test, 123);
+        assert.strictEqual(context.ctx.existing.value, 'value');
+        assert.strictEqual(context.ctx.other, 'other');
+        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+
+        console.log('->', tmpFile.path);
+
+        // do the same with relative path
+        options.fromFile.file = basename(tmpFile.path);
+        snapshot.wd = dirname(tmpFile.path);
+
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.strictEqual(context.ctx.test, 123);
+        assert.strictEqual(context.ctx.existing.value, 'value');
+        assert.strictEqual(context.ctx.other, 'other');
+        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+    }
 }
