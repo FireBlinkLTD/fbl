@@ -8,7 +8,8 @@ import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {promisify} from 'util';
 import {isAbsolute, resolve} from 'path';
-import * as colors from 'colors';
+
+const ejsLint = require('ejs-lint');
 
 @Service()
 export class FlowService {
@@ -115,8 +116,31 @@ export class FlowService {
      */
     resolveOptionsWithNoHandlerCheck(options: any, context: IContext): any {
         if (options) {
-            const tpl = dump(options);
-            const yaml = render(tpl, context);
+            let tpl = dump(options);
+
+            // fix template after dump
+            // while in yaml following string is fully valid '<%- ctx[''name''] %>'
+            // for EJS it is broken due to quotes escape
+            const lines: string[] = [];
+            const ejsTemplateRegEx = /<%([^%>]*)%>/g;
+            const doubleQuotesRegEx = /''/g;
+            tpl.split('\n').forEach(line => {
+               if (line.indexOf('\'\'') !== -1) {
+                   // we only want to replace '' to ' inside the EJS template
+                   line = line.replace(ejsTemplateRegEx, function (match, g1): string {
+                        return `<%${g1.replace(doubleQuotesRegEx, '\'')}%>`;
+                   });
+               }
+
+               lines.push(line);
+            });
+
+            tpl = lines.join('\n');
+
+            // validate template
+            ejsLint(tpl);
+
+            const yaml = render(lines.join('\n'), context);
             options = safeLoad(yaml);
         }
 

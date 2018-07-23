@@ -10,6 +10,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
+const jsyaml = require('js-yaml');
+
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
 
@@ -126,5 +128,63 @@ export class FblTestSuite {
         });
 
         assert.strictEqual(snapshot.successful, false);
+    }
+
+    @test()
+    async ejsTemplateValidation() {
+        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+
+        fbl.flowService.debug = true;
+
+        let result = null;
+        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
+            result = opt;
+        }, false));
+
+        const snapshot = await fbl.execute('.', <IFlow> {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: `<%- ctx.t1`
+            }
+        }, <IContext> {
+            ctx: {
+                t1: 'tst'
+            }
+        });
+
+        assert.strictEqual(snapshot.successful, false);
+        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'failure').payload, 'Error: Could not find matching close tag for "<%-".');
+        assert.strictEqual(result, null);
+    }
+
+
+    @test()
+    async templateProcessingStringEscape() {
+        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+
+        fbl.flowService.debug = true;
+
+        let result = null;
+        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
+            result = opt;
+        }, false));
+
+        const snapshot = await fbl.execute('.', <IFlow> {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`
+            }
+        }, <IContext> {
+            ctx: {
+                t1: {
+                    t2: {
+                        value: 'tst'
+                    }
+                }
+            }
+        });
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.strictEqual(result, 'tst');
     }
 }
