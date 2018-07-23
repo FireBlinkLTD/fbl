@@ -16,13 +16,16 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # install app dependencies and build app
+      # install app dependencies
       - run: yarn install
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
+
+      # build it
+      - run: yarn build
 
       # run tests and generate coverage report
       - run: yarn test
