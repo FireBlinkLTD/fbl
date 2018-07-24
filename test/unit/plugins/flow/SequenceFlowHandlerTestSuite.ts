@@ -52,7 +52,8 @@ export class SequenceFlowHandlerTestSuite {
         const actionHandler = new SequenceFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -90,7 +91,8 @@ export class SequenceFlowHandlerTestSuite {
         const actionHandler = new SequenceFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -127,7 +129,8 @@ export class SequenceFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
@@ -162,7 +165,8 @@ export class SequenceFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);

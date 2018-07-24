@@ -44,9 +44,11 @@ export class FlowService {
             snapshot.setActionHandlerId(handler.getMetadata().id);
 
             snapshot.setOptions(options);
-            options = this.resolveOptions(handler, options, context);
             // register options twice to see what's actually has been changed
-            snapshot.setOptions(options);
+            snapshot.setOptions(this.resolveOptions(handler, options, context, true));
+
+            // resolve without masking
+            options = this.resolveOptions(handler, options, context);
 
             await handler.validate(options, context, snapshot);
             snapshot.validated();
@@ -112,9 +114,18 @@ export class FlowService {
      * Resolve options with no handler check
      * @param options
      * @param {IContext} context
+     * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(options: any, context: IContext): any {
+    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets?: boolean): any {
+        if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
+            // make a copy of the context object first
+            let json = JSON.stringify(options);
+            const regex = /<%[^%>|\w]*[^\w]+(secrets[^\w])[^%>]*%>/g;
+            json = json.replace(regex, '{MASKED}');
+            options = JSON.parse(json);
+        }
+
         if (options) {
             let tpl = dump(options);
 
@@ -152,13 +163,14 @@ export class FlowService {
      * @param {ActionHandler} handler
      * @param options
      * @param {IContext} context
+     * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @returns {Promise<any>}
      */
-    resolveOptions(handler: ActionHandler, options: any, context: IContext): any {
+    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets?: boolean): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(options, context);
+        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets);
     }
 }

@@ -4,18 +4,17 @@ import {Container} from 'typedi';
 import {FlowService} from '../../services';
 import {IContext} from '../../interfaces';
 
-export class ContextValuesAssignment extends ActionHandler {
+export class SecretValuesAssignment extends ActionHandler {
     private static ROOT_KEY = '.';
 
     private static metadata = <IHandlerMetadata> {
-        id: 'com.fireblink.fbl.context.values',
+        id: 'com.fireblink.fbl.secrets.values',
         version: '1.0.0',
         description: 'Context values assignment. Either inline or from file for each key individually. Only top level keys are supported. Assignment directly to context is possible when "." key is provided.',
         aliases: [
-            'fbl.context.values',
-            'context.values',
-            'context',
-            'ctx'
+            'fbl.secrets.values',
+            'secrets.values',
+            'secrets'
         ]
     };
 
@@ -23,9 +22,9 @@ export class ContextValuesAssignment extends ActionHandler {
         .pattern(
             /^/,
             Joi.object({
-                    inline: Joi.any(),
-                    file: Joi.string()
-                })
+                inline: Joi.any(),
+                file: Joi.string()
+            })
                 .or('inline', 'file')
                 .without('inline', 'file')
                 .required()
@@ -35,11 +34,11 @@ export class ContextValuesAssignment extends ActionHandler {
         .options({ abortEarly: true });
 
     getMetadata(): IHandlerMetadata {
-        return ContextValuesAssignment.metadata;
+        return SecretValuesAssignment.metadata;
     }
 
     getValidationSchema(): Joi.SchemaLike | null {
-        return ContextValuesAssignment.validationSchema;
+        return SecretValuesAssignment.validationSchema;
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
@@ -58,10 +57,10 @@ export class ContextValuesAssignment extends ActionHandler {
                 value = await flowService.readYamlFromFile(file);
             }
 
-            if (name === ContextValuesAssignment.ROOT_KEY) {
-                Object.assign(context.ctx, value);
+            if (name === SecretValuesAssignment.ROOT_KEY) {
+                Object.assign(context.secrets, value);
             } else {
-                context.ctx[name] = value;
+                context.secrets[name] = value;
             }
         });
         snapshot.setContext(context);

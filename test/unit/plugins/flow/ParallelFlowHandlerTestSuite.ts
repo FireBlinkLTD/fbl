@@ -46,10 +46,7 @@ export class ParallelFlowHandlerTestSuite {
 
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .unregister(new ParallelFlowHandler().getMetadata().id)
-            .unregister(DummyActionHandler.ID + '.0')
-            .unregister(DummyActionHandler.ID + '.1')
-            .unregister(DummyActionHandler.ID + '.2');
+            .cleanup();
     }
 
     @test()
@@ -57,7 +54,8 @@ export class ParallelFlowHandlerTestSuite {
         const actionHandler = new ParallelFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -95,7 +93,8 @@ export class ParallelFlowHandlerTestSuite {
         const actionHandler = new ParallelFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -132,7 +131,8 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
@@ -173,7 +173,8 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
@@ -214,7 +215,8 @@ export class ParallelFlowHandlerTestSuite {
         ];
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);

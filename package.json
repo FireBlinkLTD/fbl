@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "0.0.4ya",
+  "version": "0.0.5",
   "description": "",
   "main": "dist/cli.js",
   "scripts": {

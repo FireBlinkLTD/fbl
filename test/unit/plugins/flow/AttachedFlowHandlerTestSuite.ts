@@ -42,7 +42,7 @@ export class AttachedFlowHandlerTestSuite {
     after() {
         Container
             .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .unregister(DummyActionHandler.ID);
+            .cleanup();
     }
 
     @test()
@@ -50,7 +50,8 @@ export class AttachedFlowHandlerTestSuite {
         const actionHandler = new AttachedFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -77,7 +78,8 @@ export class AttachedFlowHandlerTestSuite {
         const actionHandler = new AttachedFlowHandler();
 
         const context = <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -115,7 +117,8 @@ export class AttachedFlowHandlerTestSuite {
         const context = <IContext> {
             ctx: {
                 tst: 123
-            }
+            },
+            secrets: {}
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);

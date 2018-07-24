@@ -1,5 +1,5 @@
 import {test, suite} from 'mocha-typescript';
-import {ContextValuesAssignment} from '../../../../src/plugins/context/ContextValuesAssignment';
+import {SecretValuesAssignment} from '../../../../src/plugins/context/SecretValuesAssignment';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
@@ -15,11 +15,11 @@ chai.use(chaiAsPromised);
 const tmp = require('tmp-promise');
 
 @suite()
-export class ContextValuesAssignmentTestSuite {
+export class SecretValuesAssignmentTestSuite {
 
     @test()
     async failValidation(): Promise<void> {
-        const actionHandler = new ContextValuesAssignment();
+        const actionHandler = new SecretValuesAssignment();
 
         const context = <IContext> {
             ctx: {},
@@ -72,7 +72,7 @@ export class ContextValuesAssignmentTestSuite {
 
     @test()
     async passValidation(): Promise<void> {
-        const actionHandler = new ContextValuesAssignment();
+        const actionHandler = new SecretValuesAssignment();
 
         const context = <IContext> {
             ctx: {},
@@ -100,15 +100,15 @@ export class ContextValuesAssignmentTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
-        const actionHandler = new ContextValuesAssignment();
+        const actionHandler = new SecretValuesAssignment();
 
         const context: IContext = {
-            ctx: {
+            ctx: {},
+            secrets: {
                 existing: {
                     value: 'value'
                 }
-            },
-            secrets: {}
+            }
         };
 
         const fileContent = {
@@ -139,10 +139,10 @@ export class ContextValuesAssignmentTestSuite {
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
 
-        assert.strictEqual(context.ctx.test, 123);
-        assert.strictEqual(context.ctx.existing.value, undefined);
-        assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.test, 123);
+        assert.strictEqual(context.secrets.existing.value, undefined);
+        assert.strictEqual(context.secrets.existing.other, 'other');
+        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
 
         // do the same with relative path
         options.fromFile.file = basename(tmpFile.path);
@@ -151,23 +151,23 @@ export class ContextValuesAssignmentTestSuite {
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
 
-        assert.strictEqual(context.ctx.test, 123);
-        assert.strictEqual(context.ctx.existing.value, undefined);
-        assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.test, 123);
+        assert.strictEqual(context.secrets.existing.value, undefined);
+        assert.strictEqual(context.secrets.existing.other, 'other');
+        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
     }
 
     @test()
     async assignRootValues(): Promise<void> {
-        const actionHandler = new ContextValuesAssignment();
+        const actionHandler = new SecretValuesAssignment();
 
         const context: IContext = {
-            ctx: {
+            ctx: {},
+            secrets: {
                 existing: {
                     value: 'value'
                 }
-            },
-            secrets: {}
+            }
         };
 
         const fileContent = {
@@ -198,10 +198,10 @@ export class ContextValuesAssignmentTestSuite {
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
 
-        assert.strictEqual(context.ctx.test, 123);
-        assert.strictEqual(context.ctx.existing.value, 'value');
-        assert.strictEqual(context.ctx.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.test, 123);
+        assert.strictEqual(context.secrets.existing.value, 'value');
+        assert.strictEqual(context.secrets.other, 'other');
+        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
 
         // do the same with relative path
         options.fromFile.file = basename(tmpFile.path);
@@ -210,9 +210,9 @@ export class ContextValuesAssignmentTestSuite {
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
 
-        assert.strictEqual(context.ctx.test, 123);
-        assert.strictEqual(context.ctx.existing.value, 'value');
-        assert.strictEqual(context.ctx.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.test, 123);
+        assert.strictEqual(context.secrets.existing.value, 'value');
+        assert.strictEqual(context.secrets.other, 'other');
+        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
     }
 }

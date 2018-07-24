@@ -21,7 +21,8 @@ const plugins: string[] = [
     __dirname + '/plugins/files'
 ];
 
-const defaultKeyValuePairs: string[] = [];
+const configKVPairs: string[] = [];
+const secretKVPairs: string[] = [];
 
 // prepare commander
 commander
@@ -37,10 +38,20 @@ commander
         '-c --context <key=value>',
         [
             'Key value pair of default context values.',
-            'Note if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+            'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
         ].join(' '),
         (val) => {
-            defaultKeyValuePairs.push(val);
+            configKVPairs.push(val);
+        }
+    )
+    .option(
+        '-s --secret <key=value|name>',
+        [
+            'Key value pair of default secret values. Secrets will not be available in report.',
+            'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+        ].join(' '),
+        (val) => {
+            secretKVPairs.push(val);
         }
     )
     .option('-r --report <file>', 'Generate execution report in the end at given path.')
@@ -75,10 +86,10 @@ plugins.forEach((path: string) => {
     });
 });
 
-const run = async () => {
-    const ctx: {[key: string]: any} = {};
+const convertKVPairs = async (pairs: string[]): Promise<{[key: string]: any}> => {
+    const result: {[key: string]: any} = {};
 
-    await Promise.all(defaultKeyValuePairs.map(async (kv: string): Promise<void> => {
+    await Promise.all(pairs.map(async (kv: string): Promise<void> => {
         const chunks = kv.split('=');
         if (chunks.length !== 2) {
             throw new Error('Unable to extract key=value pair from: ' + kv);
@@ -86,11 +97,20 @@ const run = async () => {
 
         if (chunks[1][0] === '@') {
             const file = chunks[1].substring(1);
-            ctx[chunks[0]] = await flowService.readYamlFromFile(file);
+            result[chunks[0]] = await flowService.readYamlFromFile(file);
         } else {
-            ctx[chunks[0]] = chunks[1];
+            result[chunks[0]] = chunks[1];
         }
     }));
+
+    return result;
+};
+
+const run = async () => {
+    const context = <IContext> {
+        ctx: await convertKVPairs(configKVPairs),
+        secrets: await convertKVPairs(secretKVPairs)
+    };
 
     if (commander.report) {
         // enable debug mode when report generation is requested
@@ -98,9 +118,7 @@ const run = async () => {
     }
 
     const flow = await flowService.readFlowFromFile(commander.file);
-    const snapshot = await fbl.execute(dirname(commander.file), flow, <IContext> {
-        ctx: ctx
-    });
+    const snapshot = await fbl.execute(dirname(commander.file), flow, context);
 
     if (commander.report) {
         await promisify(writeFile)(commander.report, dump(snapshot), 'utf8');
