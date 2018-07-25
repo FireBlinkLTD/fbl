@@ -7,6 +7,8 @@ import * as assert from 'assert';
 import {IContext} from '../../../../src/interfaces';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
+import {Container} from 'typedi';
+import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -16,6 +18,11 @@ const tmp = require('tmp-promise');
 
 @suite()
 export class SecretValuesAssignmentTestSuite {
+
+    after() {
+        Container.get(ActionHandlersRegistry).cleanup();
+        Container.remove(FlowService);
+    }
 
     @test()
     async failValidation(): Promise<void> {
@@ -100,7 +107,13 @@ export class SecretValuesAssignmentTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
         const actionHandler = new SecretValuesAssignment();
+
+        flowService.debug = true;
+
+        actionHandlersRegistry.register(actionHandler);
 
         const context: IContext = {
             ctx: {},
@@ -134,32 +147,35 @@ export class SecretValuesAssignmentTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
-
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, undefined);
         assert.strictEqual(context.secrets.existing.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
         options.fromFile.file = basename(tmpFile.path);
-        snapshot.wd = dirname(tmpFile.path);
 
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        snapshot = await flowService.executeAction(dirname(tmpFile.path), actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, undefined);
         assert.strictEqual(context.secrets.existing.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
     }
 
     @test()
     async assignRootValues(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
         const actionHandler = new SecretValuesAssignment();
+
+        flowService.debug = true;
+
+        actionHandlersRegistry.register(actionHandler);
 
         const context: IContext = {
             ctx: {},
@@ -193,26 +209,23 @@ export class SecretValuesAssignmentTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
-
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
         options.fromFile.file = basename(tmpFile.path);
-        snapshot.wd = dirname(tmpFile.path);
 
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        snapshot = await flowService.executeAction(dirname(tmpFile.path), actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
     }
 }

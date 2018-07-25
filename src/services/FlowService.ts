@@ -15,6 +15,8 @@ const ejsLint = require('ejs-lint');
 export class FlowService {
     private index = 0;
 
+    public static MASKED = '{MASKED}';
+
     /**
      * Turn to true to capture snapshots
      * @type {boolean}
@@ -43,9 +45,13 @@ export class FlowService {
             const handler = this.actionHandlersRegistry.find(idOrAlias);
             snapshot.setActionHandlerId(handler.getMetadata().id);
 
-            snapshot.setOptions(options);
-            // register options twice to see what's actually has been changed
-            snapshot.setOptions(this.resolveOptions(handler, options, context, true));
+            if (!handler.getMetadata().considerOptionsAsSecrets) {
+                snapshot.setOptions(options);
+                // register options twice to see what's actually has been changed
+                snapshot.setOptions(this.resolveOptions(handler, options, context, true));
+            } else {
+                snapshot.setOptions(FlowService.MASKED);
+            }
 
             // resolve without masking
             options = this.resolveOptions(handler, options, context);
@@ -122,7 +128,7 @@ export class FlowService {
             // make a copy of the context object first
             let json = JSON.stringify(options);
             const regex = /<%[^%>|\w]*[^\w]+(secrets[^\w])[^%>]*%>/g;
-            json = json.replace(regex, '{MASKED}');
+            json = json.replace(regex, FlowService.MASKED);
             options = JSON.parse(json);
         }
 

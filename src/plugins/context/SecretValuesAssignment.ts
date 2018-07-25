@@ -15,7 +15,8 @@ export class SecretValuesAssignment extends ActionHandler {
             'fbl.secrets.values',
             'secrets.values',
             'secrets'
-        ]
+        ],
+        considerOptionsAsSecrets: true
     };
 
     private static validationSchema = Joi.object()
