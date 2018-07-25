@@ -5,21 +5,24 @@ import {FireBlinkLogistics} from './fbl';
 import {ActionHandlersRegistry, FlowService} from './services';
 import {Container} from 'typedi';
 import {IContext, IPlugin} from './interfaces';
-import {dirname, resolve} from 'path';
+import {dirname} from 'path';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as colors from 'colors';
 
+const requireg = require('requireg');
+
 colors.enable();
 
 const plugins: string[] = [
-    './plugins/flow',
-    './plugins/context',
-    './plugins/files'
+    __dirname + '/plugins/flow',
+    __dirname + '/plugins/context',
+    __dirname + '/plugins/files'
 ];
 
-const defaultKeyValuePairs: string[] = [];
+const configKVPairs: string[] = [];
+const secretKVPairs: string[] = [];
 
 // prepare commander
 commander
@@ -28,17 +31,27 @@ commander
         '-p --plugin <file>',
         '[optional] Plugin file.',
         (val) => {
-            plugins.push(resolve(val));
+            plugins.push(val);
         }
     )
     .option(
         '-c --context <key=value>',
         [
             'Key value pair of default context values.',
-            'Note if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+            'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
         ].join(' '),
         (val) => {
-            defaultKeyValuePairs.push(val);
+            configKVPairs.push(val);
+        }
+    )
+    .option(
+        '-s --secret <key=value|name>',
+        [
+            'Key value pair of default secret values. Secrets will not be available in report.',
+            'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+        ].join(' '),
+        (val) => {
+            secretKVPairs.push(val);
         }
     )
     .option('-r --report <file>', 'Generate execution report in the end at given path.')
@@ -66,17 +79,17 @@ const flowService = Container.get<FlowService>(FlowService);
 const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
 plugins.forEach((path: string) => {
-    const plugin: IPlugin = require(path);
+    const plugin: IPlugin = requireg(path);
 
     plugin.getActionHandlers().forEach(actionHander => {
         actionHandlersRegistry.register(actionHander);
     });
 });
 
-const run = async () => {
-    const ctx: {[key: string]: any} = {};
+const convertKVPairs = async (pairs: string[]): Promise<{[key: string]: any}> => {
+    const result: {[key: string]: any} = {};
 
-    await Promise.all(defaultKeyValuePairs.map(async (kv: string): Promise<void> => {
+    await Promise.all(pairs.map(async (kv: string): Promise<void> => {
         const chunks = kv.split('=');
         if (chunks.length !== 2) {
             throw new Error('Unable to extract key=value pair from: ' + kv);
@@ -84,11 +97,20 @@ const run = async () => {
 
         if (chunks[1][0] === '@') {
             const file = chunks[1].substring(1);
-            ctx[chunks[0]] = await flowService.readYamlFromFile(file);
+            result[chunks[0]] = await flowService.readYamlFromFile(file);
         } else {
-            ctx[chunks[0]] = chunks[1];
+            result[chunks[0]] = chunks[1];
         }
     }));
+
+    return result;
+};
+
+const run = async () => {
+    const context = <IContext> {
+        ctx: await convertKVPairs(configKVPairs),
+        secrets: await convertKVPairs(secretKVPairs)
+    };
 
     if (commander.report) {
         // enable debug mode when report generation is requested
@@ -96,9 +118,7 @@ const run = async () => {
     }
 
     const flow = await flowService.readFlowFromFile(commander.file);
-    const snapshot = await fbl.execute(dirname(commander.file), flow, <IContext> {
-        ctx: ctx
-    });
+    const snapshot = await fbl.execute(dirname(commander.file), flow, context);
 
     if (commander.report) {
         await promisify(writeFile)(commander.report, dump(snapshot), 'utf8');

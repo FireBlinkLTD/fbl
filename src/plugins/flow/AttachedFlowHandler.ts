@@ -1,7 +1,6 @@
 import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
 import {FireBlinkLogistics} from '../../fbl';
 import {IContext} from '../../interfaces';
@@ -27,7 +26,7 @@ export class AttachedFlowHandler extends ActionHandler {
         return AttachedFlowHandler.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return AttachedFlowHandler.validationSchema;
     }
 

@@ -41,10 +41,7 @@ class DummyActionHandler extends ActionHandler {
 @suite()
 export class FblTestSuite {
     after() {
-        const registry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
-        registry
-            .unregister(DummyActionHandler.ID);
-
+        Container.get(ActionHandlersRegistry).cleanup();
         Container.remove(FireBlinkLogistics);
         Container.remove(FlowService);
     }
@@ -62,26 +59,34 @@ export class FblTestSuite {
 
         const context = <IContext> {
             ctx: {
-                var: 'test123'
+                var: 'test'
+            },
+            secrets: {
+                var: '123'
             }
         };
 
         const snapshot = await fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: 'tst'
+                [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>'
             }
         }, context);
 
-        assert.deepStrictEqual('tst', snapshot.getSteps().find(s => s.type === 'options').payload);
-        assert.deepStrictEqual(context, snapshot.getSteps().find(s => s.type === 'context').payload);
-        assert.strictEqual(result, 'tst');
+        const snapshotOptionsSteps = snapshot.getSteps().filter(s => s.type === 'options');
+        const contextOptionsSteps = snapshot.getSteps().filter(s => s.type === 'context');
+        assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
+        assert.deepStrictEqual(contextOptionsSteps[contextOptionsSteps.length - 1].payload, {
+            ctx: context.ctx
+        });
+        assert.strictEqual(result, 'test123');
 
         await chai.expect(fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {}
         }, <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         })).to.be.rejected;
     }
 
@@ -102,7 +107,8 @@ export class FblTestSuite {
                 [DummyActionHandler.ID]: 'tst'
             }
         }, <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         });
 
         assert.strictEqual(result, null);
@@ -124,7 +130,8 @@ export class FblTestSuite {
                 [DummyActionHandler.ID]: 'tst'
             }
         }, <IContext> {
-            ctx: {}
+            ctx: {},
+            secrets: {}
         });
 
         assert.strictEqual(snapshot.successful, false);
@@ -149,7 +156,8 @@ export class FblTestSuite {
         }, <IContext> {
             ctx: {
                 t1: 'tst'
-            }
+            },
+            secrets: {}
         });
 
         assert.strictEqual(snapshot.successful, false);
@@ -181,7 +189,8 @@ export class FblTestSuite {
                         value: 'tst'
                     }
                 }
-            }
+            },
+            secrets: {}
         });
 
         assert.strictEqual(snapshot.successful, true);

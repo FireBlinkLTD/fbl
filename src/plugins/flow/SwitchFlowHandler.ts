@@ -1,7 +1,6 @@
 import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {FlowService} from '../../services';
 import {IContext} from '../../interfaces';
 
@@ -44,14 +43,20 @@ export class SwitchFlowHandler extends ActionHandler {
     async validate(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
+        // register masked options in the snapshot
+        const masked = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, true);
+        snapshot.setOptions({
+            value: masked,
+            is: options.is
+        });
+
         // resolve value, as it is mostly likely a template and we're not processing options as a template
         options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context);
-        snapshot.setOptions(options);
 
         await super.validate(options, context, snapshot);
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return SwitchFlowHandler.validationSchema;
     }
 

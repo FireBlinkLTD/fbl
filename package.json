@@ -1,10 +1,9 @@
 {
   "name": "fbl",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "",
   "main": "dist/cli.js",
   "scripts": {
-    "tsoa": "tsoa",
     "tsc": "tsc",
     "rimraf": "rimraf",
     "depcheck": "yarn-check",
@@ -30,6 +29,7 @@
     "joi": "13.4.0",
     "js-yaml": "3.12.0",
     "reflect-metadata": "0.1.12",
+    "requireg": "0.1.8",
     "tmp-promise": "1.0.5",
     "typedi": "0.8.0"
   },

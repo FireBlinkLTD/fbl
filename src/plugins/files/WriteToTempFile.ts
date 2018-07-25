@@ -1,6 +1,5 @@
 import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {IContext} from '../../interfaces';
@@ -43,7 +42,7 @@ export class WriteToTempFile extends ActionHandler {
         return WriteToTempFile.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return WriteToTempFile.validationSchema;
     }
 
