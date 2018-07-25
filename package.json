@@ -4,7 +4,6 @@
   "description": "",
   "main": "dist/cli.js",
   "scripts": {
-    "tsoa": "tsoa",
     "tsc": "tsc",
     "rimraf": "rimraf",
     "depcheck": "yarn-check",
