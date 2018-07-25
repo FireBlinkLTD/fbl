@@ -43,7 +43,7 @@
     "git-pre-commit": "2.1.4",
     "mocha": "5.2.0",
     "mocha-typescript": "1.1.17",
-    "mochawesome": "3.0.2",
+    "mochawesome": "3.0.3",
     "nyc": "12.0.2",
     "rimraf": "2.6.2",
     "source-map-support": "0.5.6",
