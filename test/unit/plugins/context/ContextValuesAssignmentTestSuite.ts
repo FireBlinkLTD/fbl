@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import {IContext} from '../../../../src/interfaces';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
+import {FlowService} from '../../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,12 +21,7 @@ export class ContextValuesAssignmentTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -73,12 +69,7 @@ export class ContextValuesAssignmentTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -102,13 +93,9 @@ export class ContextValuesAssignmentTestSuite {
     async assignValues(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
 
-        const context: IContext = {
-            ctx: {
-                existing: {
-                    value: 'value'
-                }
-            },
-            secrets: {}
+        const context = FlowService.generateEmptyContext();
+        context.ctx.existing = {
+            value: 'value'
         };
 
         const fileContent = {
@@ -161,13 +148,9 @@ export class ContextValuesAssignmentTestSuite {
     async assignRootValues(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
 
-        const context: IContext = {
-            ctx: {
-                existing: {
-                    value: 'value'
-                }
-            },
-            secrets: {}
+        const context = FlowService.generateEmptyContext();
+        context.ctx.existing = {
+            value: 'value'
         };
 
         const fileContent = {

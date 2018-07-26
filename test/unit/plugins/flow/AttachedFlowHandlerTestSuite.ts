@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {AttachedFlowHandler} from '../../../../src/plugins/flow/AttachedFlowHandler';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
@@ -48,12 +48,7 @@ export class AttachedFlowHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
@@ -76,12 +71,7 @@ export class AttachedFlowHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -114,12 +104,8 @@ export class AttachedFlowHandlerTestSuite {
         await promisify(writeFile)(tmpFile.path, dump(subFlow), 'utf8');
 
         const actionHandler = new AttachedFlowHandler();
-        const context = <IContext> {
-            ctx: {
-                tst: 123
-            },
-            secrets: {}
-        };
+        const context = FlowService.generateEmptyContext();
+        context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', '', 0);
 

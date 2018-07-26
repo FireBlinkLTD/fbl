@@ -51,11 +51,7 @@ export class SequenceFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SequenceFlowHandler();
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
@@ -90,11 +86,7 @@ export class SequenceFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SequenceFlowHandler();
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -128,11 +120,7 @@ export class SequenceFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -164,11 +152,7 @@ export class SequenceFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -203,10 +187,7 @@ export class SequenceFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);

@@ -5,6 +5,7 @@ import * as assert from 'assert';
 import {WriteToTempFile} from '../../../../src/plugins/files/WriteToTempFile';
 import {IContext} from '../../../../src/interfaces';
 import {ActionSnapshot} from '../../../../src/models';
+import {FlowService} from '../../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -18,11 +19,7 @@ export class WriteToTempFileTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -65,11 +62,7 @@ export class WriteToTempFileTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(

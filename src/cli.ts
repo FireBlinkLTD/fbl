@@ -107,11 +107,10 @@ const convertKVPairs = async (pairs: string[]): Promise<{[key: string]: any}> =>
 };
 
 const run = async () => {
-    const context = <IContext> {
-        ctx: await convertKVPairs(configKVPairs),
-        secrets: await convertKVPairs(secretKVPairs)
-    };
-
+    const context = FlowService.generateEmptyContext();
+    context.ctx = await convertKVPairs(configKVPairs);
+    context.secrets = await convertKVPairs(secretKVPairs);
+    
     if (commander.report) {
         // enable debug mode when report generation is requested
         flowService.debug = true;

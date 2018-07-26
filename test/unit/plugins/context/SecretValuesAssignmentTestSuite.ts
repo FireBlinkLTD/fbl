@@ -27,12 +27,7 @@ export class SecretValuesAssignmentTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignment();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -80,12 +75,7 @@ export class SecretValuesAssignmentTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignment();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -115,13 +105,9 @@ export class SecretValuesAssignmentTestSuite {
 
         actionHandlersRegistry.register(actionHandler);
 
-        const context: IContext = {
-            ctx: {},
-            secrets: {
-                existing: {
-                    value: 'value'
-                }
-            }
+        const context = FlowService.generateEmptyContext();
+        context.secrets.existing = {
+            value: 'value'
         };
 
         const fileContent = {
@@ -177,13 +163,9 @@ export class SecretValuesAssignmentTestSuite {
 
         actionHandlersRegistry.register(actionHandler);
 
-        const context: IContext = {
-            ctx: {},
-            secrets: {
-                existing: {
-                    value: 'value'
-                }
-            }
+        const context = FlowService.generateEmptyContext();
+        context.secrets.existing = {
+            value: 'value'
         };
 
         const fileContent = {

@@ -57,14 +57,9 @@ export class FblTestSuite {
             result = opt;
         }, false));
 
-        const context = <IContext> {
-            ctx: {
-                var: 'test'
-            },
-            secrets: {
-                var: '123'
-            }
-        };
+        const context = FlowService.generateEmptyContext();
+        context.ctx.var = 'test';
+        context.secrets.var = '123';
 
         const snapshot = await fbl.execute('.', <IFlow> {
             version: '1.0.0',
@@ -81,13 +76,14 @@ export class FblTestSuite {
         });
         assert.strictEqual(result, 'test123');
 
-        await chai.expect(fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {}
-        }, <IContext> {
-            ctx: {},
-            secrets: {}
-        })).to.be.rejected;
+        await chai.expect(fbl.execute(
+            '.',
+            <IFlow> {
+                version: '1.0.0',
+                pipeline: {}
+            },
+            FlowService.generateEmptyContext())
+        ).to.be.rejected;
     }
 
     @test()
@@ -101,15 +97,16 @@ export class FblTestSuite {
             result = opt;
         }, true));
 
-        await fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: 'tst'
-            }
-        }, <IContext> {
-            ctx: {},
-            secrets: {}
-        });
+        await fbl.execute(
+            '.',
+            <IFlow> {
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: 'tst'
+                }
+            },
+            FlowService.generateEmptyContext()
+        );
 
         assert.strictEqual(result, null);
     }
@@ -124,15 +121,16 @@ export class FblTestSuite {
             throw new Error('test');
         }, false));
 
-        const snapshot = await fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: 'tst'
-            }
-        }, <IContext> {
-            ctx: {},
-            secrets: {}
-        });
+        const snapshot = await fbl.execute(
+            '.',
+            <IFlow> {
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: 'tst'
+                }
+            },
+            FlowService.generateEmptyContext()
+        );
 
         assert.strictEqual(snapshot.successful, false);
     }
@@ -148,17 +146,16 @@ export class FblTestSuite {
             result = opt;
         }, false));
 
-        const snapshot = await fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: `<%- ctx.t1`
-            }
-        }, <IContext> {
-            ctx: {
-                t1: 'tst'
+        const snapshot = await fbl.execute(
+            '.',
+            <IFlow> {
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: `<%- ctx.t1`
+                }
             },
-            secrets: {}
-        });
+            FlowService.generateEmptyContext()
+        );
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'failure').payload, 'Error: Could not find matching close tag for "<%-".');
@@ -177,21 +174,23 @@ export class FblTestSuite {
             result = opt;
         }, false));
 
-        const snapshot = await fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`
+        const context = FlowService.generateEmptyContext();
+        context.ctx.t1 = {
+            t2: {
+                value: 'tst'
             }
-        }, <IContext> {
-            ctx: {
-                t1: {
-                    t2: {
-                        value: 'tst'
-                    }
+        };
+
+        const snapshot = await fbl.execute(
+            '.',
+            <IFlow> {
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`
                 }
             },
-            secrets: {}
-        });
+            context
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(result, 'tst');

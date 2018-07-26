@@ -27,6 +27,24 @@ export class FlowService {
     actionHandlersRegistry: ActionHandlersRegistry;
 
     /**
+     * Generate empty context
+     * @return {IContext}
+     */
+    public static generateEmptyContext(): IContext {
+        return <IContext> {
+            ctx: {},
+            secrets: {},
+            entities: {
+                registered: [],
+                unregistered: [],
+                created: [],
+                updated: [],
+                deleted: []
+            }
+        };
+    }
+
+    /**
      * Execute action
      * @param {string} wd Working Directory
      * @param {string} idOrAlias

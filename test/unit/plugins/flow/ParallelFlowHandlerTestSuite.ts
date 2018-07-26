@@ -52,12 +52,7 @@ export class ParallelFlowHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
@@ -91,12 +86,7 @@ export class ParallelFlowHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
-
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -130,11 +120,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -172,11 +158,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -214,11 +196,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {},
-            secrets: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
