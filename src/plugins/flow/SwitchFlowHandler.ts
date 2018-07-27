@@ -1,11 +1,11 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 export class SwitchFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.switch',
         version: '1.0.0',
         description: 'Flow switcher. Allows to run one of few subflows based on the case.',
@@ -36,7 +36,7 @@ export class SwitchFlowHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return SwitchFlowHandler.metadata;
     }
 

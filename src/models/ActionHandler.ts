@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import {IContext} from '../interfaces';
+import {IActionHandlerMetadata, IContext} from '../interfaces';
 import {ActionSnapshot} from './ActionSnapshot';
 
 /**
@@ -8,9 +8,9 @@ import {ActionSnapshot} from './ActionSnapshot';
 export abstract class ActionHandler {
     /**
      * Get handler metadata
-     * @returns {IHandlerMetadata}
+     * @returns {IActionHandlerMetadata}
      */
-    abstract getMetadata(): IHandlerMetadata;
+    abstract getMetadata(): IActionHandlerMetadata;
 
     /**
      * Validate options before processing.
@@ -56,41 +56,4 @@ export abstract class ActionHandler {
      * @returns {Promise<void>}
      */
     abstract async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void>;
-}
-
-export interface IHandlerMetadata {
-    /**
-     * Action ID
-     */
-    id: string;
-
-    /**
-     * Human readable description
-     */
-    description?: string;
-
-    /**
-     * Optional YAML string formatted examples
-     */
-    examples?: string[];
-
-    /**
-     * Aliases that can be used to reference action handler instead of using long ID
-     */
-    aliases?: string[];
-
-    /**
-     * Version of action handler
-     */
-    version: string;
-
-    /**
-     * If provided options will not be treated as EJS template and as a result won't be resolved
-     */
-    skipTemplateProcessing?: boolean;
-
-    /**
-     * If provided entire options object will be considered as a sensitive information and will be masked in report.
-     */
-    considerOptionsAsSecrets?: boolean;
 }

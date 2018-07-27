@@ -1,11 +1,11 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 export class ParallelFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.parallel',
         version: '1.0.0',
         description: 'Parallel flow handler. Allows to run multiple subflows in parallel.',
@@ -25,7 +25,7 @@ export class ParallelFlowHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return ParallelFlowHandler.metadata;
     }
 

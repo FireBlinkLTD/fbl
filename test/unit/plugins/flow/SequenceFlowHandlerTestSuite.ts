@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
 import {SequenceFlowHandler} from '../../../../src/plugins/flow/SequenceFlowHandler';
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,8 +21,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: DummyActionHandler.ID + '.' + this.idx,
             version: '1.0.0'
         };

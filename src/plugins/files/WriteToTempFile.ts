@@ -1,13 +1,13 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 const tmp = require('tmp-promise');
 
 export class WriteToTempFile extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.files.temp.write',
         version: '1.0.0',
         description: 'Write string content to a temporary file.',
@@ -38,7 +38,7 @@ export class WriteToTempFile extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return WriteToTempFile.metadata;
     }
 

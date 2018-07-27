@@ -1,13 +1,13 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FlowService} from '../../services';
 import {FireBlinkLogistics} from '../../fbl';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
 
 export class AttachedFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.attached',
         version: '1.0.0',
         description: 'Attached flow handler. Allows to attach another flow as a subflow.',
@@ -22,7 +22,7 @@ export class AttachedFlowHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return AttachedFlowHandler.metadata;
     }
 

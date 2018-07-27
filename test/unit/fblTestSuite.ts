@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
 import {Container} from 'typedi';
 import {FireBlinkLogistics} from '../../src/fbl';
-import {IContext, IFlow} from '../../src/interfaces';
-import {ActionHandler, IHandlerMetadata} from '../../src/models';
+import {IActionHandlerMetadata, IFlow} from '../../src/interfaces';
+import {ActionHandler} from '../../src/models';
 import * as assert from 'assert';
 import {ActionHandlersRegistry, FlowService} from '../../src/services';
 
@@ -22,8 +22,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: DummyActionHandler.ID,
             version: '1.0.0'
         };
