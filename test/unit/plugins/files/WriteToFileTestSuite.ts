@@ -3,7 +3,6 @@ import {WriteToFile} from '../../../../src/plugins/files/WriteToFile';
 import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
 

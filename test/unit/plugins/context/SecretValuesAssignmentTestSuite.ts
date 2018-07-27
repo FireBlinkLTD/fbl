@@ -4,7 +4,6 @@ import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';

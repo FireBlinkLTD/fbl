@@ -1,12 +1,11 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IHandlerMetadata} from '../../models/';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 export class SequenceFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.sequence',
         version: '1.0.0',
         description: 'Sequence flow handler. Allows to run multiple subflows in a chain of actions.',
@@ -31,7 +30,7 @@ export class SequenceFlowHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return SequenceFlowHandler.metadata;
     }
 

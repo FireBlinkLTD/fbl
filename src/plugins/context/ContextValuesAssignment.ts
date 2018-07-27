@@ -1,13 +1,13 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 export class ContextValuesAssignment extends ActionHandler {
     private static ROOT_KEY = '.';
 
-    private static metadata = <IHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.context.values',
         version: '1.0.0',
         description: 'Context values assignment. Either inline or from file for each key individually. Only top level keys are supported. Assignment directly to context is possible when "." key is provided.',
@@ -34,7 +34,7 @@ export class ContextValuesAssignment extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return ContextValuesAssignment.metadata;
     }
 
