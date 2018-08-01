@@ -4,7 +4,7 @@ import * as commander from 'commander';
 import {FireBlinkLogistics} from './fbl';
 import {ActionHandlersRegistry, FlowService} from './services';
 import {Container} from 'typedi';
-import {IContext, IPlugin} from './interfaces';
+import {IPlugin} from './interfaces';
 import {dirname} from 'path';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
@@ -78,14 +78,6 @@ const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
 const flowService = Container.get<FlowService>(FlowService);
 const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-plugins.forEach((path: string) => {
-    const plugin: IPlugin = requireg(path);
-
-    plugin.getActionHandlers().forEach(actionHander => {
-        actionHandlersRegistry.register(actionHander);
-    });
-});
-
 const convertKVPairs = async (pairs: string[]): Promise<{[key: string]: any}> => {
     const result: {[key: string]: any} = {};
 
@@ -107,6 +99,15 @@ const convertKVPairs = async (pairs: string[]): Promise<{[key: string]: any}> =>
 };
 
 const run = async () => {
+    // register plugins
+    plugins.forEach((path: string) => {
+        const plugin: IPlugin = requireg(path);
+
+        plugin.getActionHandlers().forEach(actionHander => {
+            actionHandlersRegistry.register(actionHander);
+        });
+    });
+
     const context = FlowService.generateEmptyContext();
     context.ctx = await convertKVPairs(configKVPairs);
     context.secrets = await convertKVPairs(secretKVPairs);
@@ -122,9 +123,13 @@ const run = async () => {
     if (commander.report) {
         await promisify(writeFile)(commander.report, dump(snapshot), 'utf8');
     }
+
+    if (!snapshot.successful) {
+        throw new Error('Execution failed.');
+    }
 };
 
 run().catch((e: Error) => {
-    console.error(e);
+    console.error(e.message);
     process.exit(1);
 });

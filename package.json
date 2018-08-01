@@ -58,8 +58,13 @@
     "statements": 100,
     "functions": 100,
     "branches": 100,
+    "all": true,
+    "include": [
+      "dist/src/**/*.js"
+    ],
     "exclude": [
-      "dist/src/lib/**/index.js",
+      "dist/src/interfaces/**/*.js",
+      "dist/src/**/index.js",
       "dist/test/**/*.js"
     ]
   },
