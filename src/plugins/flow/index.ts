@@ -4,6 +4,7 @@ import {AttachedFlowHandler} from './AttachedFlowHandler';
 import {ParallelFlowHandler} from './ParallelFlowHandler';
 import {SequenceFlowHandler} from './SequenceFlowHandler';
 import {SwitchFlowHandler} from './SwitchFlowHandler';
+import {RepeatFlowHandler} from './RepeatFlowHandler';
 
 class FlowPlugin implements IPlugin {
     getActionHandlers(): ActionHandler[] {
@@ -12,6 +13,7 @@ class FlowPlugin implements IPlugin {
             new ParallelFlowHandler(),
             new SequenceFlowHandler(),
             new SwitchFlowHandler(),
+            new RepeatFlowHandler()
         ];
     }
 }

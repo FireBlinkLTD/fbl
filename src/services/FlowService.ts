@@ -50,9 +50,10 @@ export class FlowService {
      * @param {string} idOrAlias
      * @param options
      * @param {IContext} context
+     * @param {number} [index] - child execution order index
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, options: any, context: IContext): Promise<ActionSnapshot> {
+    async executeAction(wd: string, idOrAlias: string, options: any, context: IContext, index?: number): Promise<ActionSnapshot> {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, wd, idx);
@@ -66,13 +67,13 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed
-                snapshot.setOptions(this.resolveOptions(handler, options, context, true));
+                snapshot.setOptions(this.resolveOptions(handler, options, context, true, index));
             } else {
                 snapshot.setOptions(FlowService.MASKED);
             }
 
             // resolve without masking
-            options = this.resolveOptions(handler, options, context);
+            options = this.resolveOptions(handler, options, context, false, index);
 
             await handler.validate(options, context, snapshot);
             snapshot.validated();
@@ -139,9 +140,10 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
+     * @param {number} [index] execution order index
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets?: boolean): any {
+    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets: boolean, index?: number): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the context object first
             let json = JSON.stringify(options);
@@ -175,7 +177,11 @@ export class FlowService {
             // validate template
             ejsLint(tpl);
 
-            const yaml = render(lines.join('\n'), context);
+            const data: any = {};
+            Object.assign(data, context);
+            Object.assign(data, { index });
+
+            const yaml = render(lines.join('\n'), data);
             options = safeLoad(yaml);
         }
 
@@ -188,13 +194,14 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
+     * @param {number} [index] execution order index
      * @returns {Promise<any>}
      */
-    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets?: boolean): any {
+    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, index?: number): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets);
+        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets, index);
     }
 }
