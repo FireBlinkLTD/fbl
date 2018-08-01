@@ -3,4 +3,3 @@
 dist/test/**/**/*.js
 dist/test/**/*.js
 --reporter mochawesome
---reporter-options output=coverage/testReport.html

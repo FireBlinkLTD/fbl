@@ -181,17 +181,17 @@ export class SequenceFlowHandlerTestSuite {
         const options = [
             {
               '--': [
-                  {[DummyActionHandler.ID + '.1']: 1},
+                  {[DummyActionHandler.ID + '.1']: 0},
               ]
             },
-            {[DummyActionHandler.ID + '.2']: 2},
+            {[DummyActionHandler.ID + '.2']: '<%- index %>'},
         ];
 
         const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 1);
-        assert.strictEqual(results[1], 2);
+        assert.strictEqual(results[0], 0);
+        assert.strictEqual(results[1], 1);
     }
 }

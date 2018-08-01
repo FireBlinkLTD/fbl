@@ -41,11 +41,14 @@ export class SequenceFlowHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
+        let index = 0;
         for (const action of options) {
             const keys = Object.keys(action);
             const idOrAlias = keys[0];
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, index);
             snapshot.registerChildActionSnapshot(childSnapshot);
+
+            index++;
 
             // stop processing after first failure
             if (!childSnapshot.successful) {

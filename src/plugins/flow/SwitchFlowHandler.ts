@@ -51,7 +51,7 @@ export class SwitchFlowHandler extends ActionHandler {
         });
 
         // resolve value, as it is mostly likely a template and we're not processing options as a template
-        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context);
+        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, false);
 
         await super.validate(options, context, snapshot);
     }

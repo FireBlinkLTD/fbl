@@ -177,20 +177,26 @@ export class ParallelFlowHandlerTestSuite {
         actionHandlersRegistry.register(actionHandler);
 
         const results: number[] = [];
-        const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
+        const dummyActionHandler1 = new DummyActionHandler(0, 20, async (opts: any) => {
             results.push(opts);
         });
         actionHandlersRegistry.register(dummyActionHandler1);
 
-        const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
+        const dummyActionHandler2 = new DummyActionHandler(1, 5, async (opts: any) => {
             results.push(opts);
         });
         actionHandlersRegistry.register(dummyActionHandler2);
 
+        const dummyActionHandler3 = new DummyActionHandler(2, 10, async (opts: any) => {
+            results.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler3);
+
         const options = [
             {
                 '||': [
-                    {[DummyActionHandler.ID + '.1']: 1},
+                    {[DummyActionHandler.ID + '.0']: 0},
+                    {[DummyActionHandler.ID + '.1']: '<%- index %>'},
                 ]
             },
             {[DummyActionHandler.ID + '.2']: 2},
@@ -200,7 +206,8 @@ export class ParallelFlowHandlerTestSuite {
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 2);
-        assert.strictEqual(results[1], 1);
+        assert.strictEqual(results[0], 1);
+        assert.strictEqual(results[1], 2);
+        assert.strictEqual(results[2], 0);
     }
 }

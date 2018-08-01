@@ -10,8 +10,6 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const jsyaml = require('js-yaml');
-
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
 

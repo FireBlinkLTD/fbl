@@ -35,13 +35,19 @@ export class ParallelFlowHandler extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const promises = options.map(async (action: any): Promise<void> => {
+
+        const snapshots: ActionSnapshot[] = [];
+        const promises = options.map(async (action: any, index: number): Promise<void> => {
             const keys = Object.keys(action);
             const idOrAlias = keys[0];
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
-            snapshot.registerChildActionSnapshot(childSnapshot);
+            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, index);
         });
 
         await Promise.all(promises);
+
+        // register snapshots in the order of their presence
+        snapshots.forEach(childSnapshot => {
+            snapshot.registerChildActionSnapshot(childSnapshot);
+        });
     }
 }
