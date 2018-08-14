@@ -104,7 +104,8 @@ class CliTestSuite {
                 '-s st=yes',
                 `-p ${__dirname}/../../src/plugins/flow`,
                 `-s .=@${secretsFile.path}`,
-                `-r ${reportFile.path}`,
+                `-o ${reportFile.path}`,
+                '-r json',
                 flowFile.path
             ].join(' ')
         );
@@ -114,6 +115,68 @@ class CliTestSuite {
         const report = await promisify(readFile)(reportFile.path, 'utf8');
         assert(report.length > 0);
         // TODO: validate options inside the report
+    }
+
+    @test()
+    async invalidReportParameters(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            ct: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                '-r json',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'Error: --output parameter is required when --report is provided.');
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                '-o /tmp/report.json',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'Error: --report parameter is required when --output is provided.');
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                '-o /tmp/report.json',
+                '-r unknown',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'Error: Unable to find reporter: unknown');
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                '-o /tmp/report.json',
+                '-r json',
+                '--report-option test=@missing.file',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'ENOENT: no such file or directory, open \'missing.file\'');
     }
 
     @test()
@@ -133,7 +196,6 @@ class CliTestSuite {
         };
 
         const flowFile = await tmp.file();
-
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         const result = await execCmd(
@@ -235,7 +297,8 @@ class CliTestSuite {
         const result = await execCmd(
             [
                 'node dist/src/cli.js',
-                `-r ${reportFile.path}`,
+                `-o ${reportFile.path}`,
+                '-r json',
                 flowFile.path
             ].join(' ')
         );
