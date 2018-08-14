@@ -8,6 +8,7 @@ import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {promisify} from 'util';
 import {isAbsolute, resolve} from 'path';
+import {homedir} from 'os';
 
 const ejsLint = require('ejs-lint');
 
@@ -108,6 +109,11 @@ export class FlowService {
      * @return {string}
      */
     getAbsolutePath(path: string, wd: string): string {
+        if (path.indexOf('~') === 0) {
+            return resolve(homedir(), path.substring(2));
+        }
+
+
         if (isAbsolute(path)) {
             return path;
         }
