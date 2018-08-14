@@ -3,12 +3,11 @@ import * as commander from 'commander';
 import * as colors from 'colors';
 import {FireBlinkLogistics} from '../fbl';
 import {ActionHandlersRegistry, FlowService} from './index';
-import {exists, writeFile} from 'fs';
+import {exists} from 'fs';
 import {promisify} from 'util';
 import {dirname, resolve} from 'path';
 import {homedir} from 'os';
-import {IContext, IPlugin} from '../interfaces';
-import {dump} from 'js-yaml';
+import {IContext, IPlugin, IReporter} from '../interfaces';
 
 const requireg = require('requireg');
 
@@ -19,15 +18,20 @@ export class CLIService {
     private colors = false;
     private flowFilePath: string;
     private reportFilePath?: string;
+    private reportFormat?: string;
+
+    private reporters: {[name: string]: IReporter} = {};
 
     private plugins = [
         __dirname + '/../plugins/flow',
         __dirname + '/../plugins/context',
-        __dirname + '/../plugins/files'
+        __dirname + '/../plugins/files',
+        __dirname + '/../plugins/reporters',
     ];
 
     private configKVPairs: string[] = [];
     private secretKVPairs: string[] = [];
+    private reportKVPairs: string[] = [];
 
     @Inject()
     fireBlinkLogistics: FireBlinkLogistics;
@@ -55,6 +59,14 @@ export class CLIService {
 
         this.registerPlugins();
 
+        if (this.reportFormat) {
+            if (!this.reporters[this.reportFormat]) {
+                console.error(`Error: Unable to find reporter: ${this.reportFormat}`);
+                commander.outputHelp();
+                process.exit(1);
+            }
+        }
+
         const context = await this.prepareContext();
         const flow = await this.flowService.readFlowFromFile(this.flowFilePath);
 
@@ -65,7 +77,9 @@ export class CLIService {
         );
 
         if (this.reportFilePath) {
-            await promisify(writeFile)(this.reportFilePath, dump(snapshot), 'utf8');
+            const options = {};
+            await this.convertKVPairs(this.reportKVPairs, options);
+            await this.reporters[this.reportFormat].generate(this.reportFilePath, options, snapshot);
         }
 
         if (!snapshot.successful) {
@@ -139,7 +153,16 @@ export class CLIService {
                     this.secretKVPairs.push(val);
                 }
             )
-            .option('-r --report <file>', 'Generate execution report in the end at given path.')
+            .option('-o --output <file>', 'Execution report path')
+            .option('-r --report <name>', 'Execution report format')
+            .option('--report-option <key=value>', [
+                    'Key value pair of report option',
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                ].join(' '),
+                (val) => {
+                    this.reportKVPairs.push(val);
+                }
+            )
             .option('--no-colors', 'Remove colors from output. Make it boring.')
             .arguments('<file>')
             .action((file, options) => {
@@ -155,8 +178,21 @@ export class CLIService {
             process.exit(1);
         }
 
-        if (commander.report) {
-            this.reportFilePath = commander.report;
+        if (commander.output || commander.report) {
+            if (!commander.output) {
+                console.error('Error: --output parameter is required when --report is provided.');
+                commander.outputHelp();
+                process.exit(1);
+            }
+
+            if (!commander.report) {
+                console.error('Error: --report parameter is required when --output is provided.');
+                commander.outputHelp();
+                process.exit(1);
+            }
+
+            this.reportFilePath = commander.output;
+            this.reportFormat = commander.report;
         }
 
         this.flowFilePath = commander.file;
@@ -171,9 +207,19 @@ export class CLIService {
         this.plugins.forEach((path: string) => {
             const plugin: IPlugin = requireg(path);
 
-            plugin.getActionHandlers().forEach(actionHander => {
-                this.actionHandlersRegistry.register(actionHander);
-            });
+            const actionHandlers = plugin.getActionHandlers && plugin.getActionHandlers();
+            if (actionHandlers) {
+                actionHandlers.forEach(actionHander => {
+                    this.actionHandlersRegistry.register(actionHander);
+                });
+            }
+
+            const reporters = plugin.getReporters && plugin.getReporters();
+            if (reporters) {
+                reporters.forEach(reporter => {
+                   this.reporters[reporter.getName()] = reporter;
+                });
+            }
         });
     }
 
