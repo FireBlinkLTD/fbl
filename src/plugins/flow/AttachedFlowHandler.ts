@@ -1,8 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {FlowService} from '../../services';
-import {FireBlinkLogistics} from '../../fbl';
+import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
 
@@ -32,7 +31,7 @@ export class AttachedFlowHandler extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const fbl = Container.get(FireBlinkLogistics);
+        const fbl = Container.get(FBLService);
 
         const file = flowService.getAbsolutePath(options, snapshot.wd);
         snapshot.log(`Reading flow from file: ${file}`);

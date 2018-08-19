@@ -6,13 +6,15 @@ import {exec} from 'child_process';
 import * as assert from 'assert';
 import {CLIService} from '../../src/services';
 import {mkdir} from 'shelljs';
-import {dirname} from 'path';
+import {dirname, join} from 'path';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 const tmp = require('tmp-promise');
+const fblVersion = require('../../../package.json').version;
 
 const execCmd = async (cmd: string): Promise<{code: number, stdout: string, stderr: string}> => {
     return await new Promise<{code: number, stdout: string, stderr: string}>((resolve) => {
@@ -59,6 +61,8 @@ class CliTestSuite {
         if (this.globalConfigExists) {
             await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, this.existingGlobalConfig, 'utf8');
         }
+
+        Container.reset();
     }
 
     @test()
@@ -334,5 +338,162 @@ class CliTestSuite {
     async noParams(): Promise<void> {
         const result = await execCmd(`node dist/src/cli.js`);
         assert.strictEqual(result.code, 1);
+    }
+
+    @test()
+    async incompatiblePluginWithFBL(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/incompatibleWithFBL')}`,
+                '--no-colors',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/incompatibleWithFBL')}`,
+                '--no-colors',
+                '--unsafe-plugins',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+
+
+    }
+
+    @test()
+    async incompatiblePluginWithOtherPlugin(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin')}`,
+                '--no-colors',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin')}`,
+                '--no-colors',
+                '--unsafe-plugins',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
+    }
+
+    @test()
+    async missingPluginDependency(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/missingPluginDependency')}`,
+                '--no-colors',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
+
+        result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/missingPluginDependency')}`,
+                '--no-colors',
+                '--unsafe-plugins',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stdout.split('\n')[0], 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
+    }
+
+    @test()
+    async satisfiedPluginDependencies(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            [
+                'node dist/src/cli.js',
+                `-p ${join(__dirname, 'fakePlugins/satisfiesDependencies')}`,
+                '--no-colors',
+                flowFile.path
+            ].join(' ')
+        );
+        assert.strictEqual(result.code, 0);
     }
 }

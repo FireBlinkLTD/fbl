@@ -42,9 +42,7 @@ class DummyActionHandler extends ActionHandler {
 export class SequenceFlowHandlerTestSuite {
 
     after() {
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()

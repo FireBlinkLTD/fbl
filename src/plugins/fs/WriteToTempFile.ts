@@ -8,12 +8,13 @@ const tmp = require('tmp-promise');
 
 export class WriteToTempFile extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.files.temp.write',
+        id: 'com.fireblink.fbl.fs.temp.file.write',
         version: '1.0.0',
         description: 'Write string content to a temporary file.',
         aliases: [
-            'fbl.files.temp.write',
-            'files.temp.write',
+            'fbl.fs.temp.file.write',
+            'fs.temp.file.write',
+            'temp.file.write',
             'tmp.->'
         ],
         examples: [
@@ -47,7 +48,9 @@ export class WriteToTempFile extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const tmpFile = await tmp.file();
+        const tmpFile = await tmp.file({
+            keep: true
+        });
         context.ctx[options.context] = tmpFile.path;
         snapshot.log(`Writing content to a temp file: ${tmpFile.path}`);
         await promisify(writeFile)(tmpFile.path, options.content, 'utf8');

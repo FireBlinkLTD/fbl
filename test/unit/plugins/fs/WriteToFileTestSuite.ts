@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
+import {WriteToFile} from '../../../../src/plugins/fs/WriteToFile';
 import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
-import {WriteToTempFile} from '../../../../src/plugins/files/WriteToTempFile';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
 
@@ -13,11 +13,11 @@ chai.use(chaiAsPromised);
 const tmp = require('tmp-promise');
 
 @suite()
-export class WriteToTempFileTestSuite {
+export class WriteToFileTestSuite {
 
     @test()
     async failValidation(): Promise<void> {
-        const actionHandler = new WriteToTempFile();
+        const actionHandler = new WriteToFile();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
@@ -39,19 +39,19 @@ export class WriteToTempFileTestSuite {
 
         await chai.expect(
             actionHandler.validate({
-                context: 'test'
+                path: 'test'
             }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
-                context: 'test'
+                content: 'test'
             }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
-                context: '',
+                path: '',
                 content: 'test'
             }, context, snapshot)
         ).to.be.rejected;
@@ -60,13 +60,13 @@ export class WriteToTempFileTestSuite {
 
     @test()
     async passValidation(): Promise<void> {
-        const actionHandler = new WriteToTempFile();
+        const actionHandler = new WriteToFile();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
             actionHandler.validate({
-                context: '/tmp',
+                path: '/tmp',
                 content: 'test'
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -74,23 +74,23 @@ export class WriteToTempFileTestSuite {
 
     @test()
     async saveToFile(): Promise<void> {
-        const actionHandler = new WriteToTempFile();
+        const actionHandler = new WriteToFile();
 
-        const context: any = {
-            ctx: {}
-        };
+        const tmpFile = await tmp.file();
+
+        const context = FlowService.generateEmptyContext();
 
         const snapshot = new ActionSnapshot('.', '', 0);
 
         const content = 'test';
         await chai.expect(
             actionHandler.execute({
-                context: 'tst',
+                path: tmpFile.path,
                 content: content
             }, context, snapshot)
         ).to.be.not.rejected;
 
-        const result = await promisify(readFile)(context.ctx.tst, 'utf8');
+        const result = await promisify(readFile)(tmpFile.path, 'utf8');
         assert.strictEqual(result, content);
     }
 }

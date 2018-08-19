@@ -3,14 +3,40 @@ import {IReporter} from './IReporter';
 
 export interface IPlugin {
     /**
-     * Get execution reporters
-     * @return {IReporter[]}
+     * Plugin name
      */
-    getReporters?(): IReporter[];
+    name: string;
+
+    /**
+     * Plugin version
+     */
+    version: string;
+
+    /**
+     * Dependencies
+     */
+    requires: {
+        fbl: string;
+        plugins?: {[id: string]: string}
+    };
+
+    /**
+     * Optional tags associated with plugin
+     */
+    tags?: string[];
+
+    /**
+     * Human readable description
+     */
+    description?: string;
+
+    /**
+     * Get execution reporters
+     */
+    reporters?: IReporter[];
 
     /**
      * Get Action Handlers to register
-     * @returns {ActionHandler[]}
      */
-    getActionHandlers?(): ActionHandler[];
+    actionHandlers?: ActionHandler[];
 }

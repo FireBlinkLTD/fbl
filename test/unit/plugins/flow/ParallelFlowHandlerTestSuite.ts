@@ -42,11 +42,7 @@ class DummyActionHandler extends ActionHandler {
 export class ParallelFlowHandlerTestSuite {
 
     after() {
-        Container.remove(FlowService);
-
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()
