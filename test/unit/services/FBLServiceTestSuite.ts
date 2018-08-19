@@ -1,10 +1,9 @@
 import {suite, test} from 'mocha-typescript';
 import {Container} from 'typedi';
-import {FireBlinkLogistics} from '../../src/fbl';
-import {IActionHandlerMetadata, IFlow} from '../../src/interfaces';
-import {ActionHandler} from '../../src/models';
+import {IActionHandlerMetadata, IFlow} from '../../../src/interfaces';
+import {ActionHandler} from '../../../src/models';
 import * as assert from 'assert';
-import {ActionHandlersRegistry, FlowService} from '../../src/services';
+import {ActionHandlersRegistry, FBLService, FlowService} from '../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -39,14 +38,12 @@ class DummyActionHandler extends ActionHandler {
 @suite()
 export class FblTestSuite {
     after() {
-        Container.get(ActionHandlersRegistry).cleanup();
-        Container.remove(FireBlinkLogistics);
-        Container.remove(FlowService);
+        Container.reset();
     }
 
     @test()
     async pipeline(): Promise<void> {
-        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+        const fbl = Container.get<FBLService>(FBLService);
 
         fbl.flowService.debug = true;
 
@@ -86,7 +83,7 @@ export class FblTestSuite {
 
     @test()
     async skippedExecution(): Promise<void> {
-        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+        const fbl = Container.get<FBLService>(FBLService);
 
         fbl.flowService.debug = true;
 
@@ -111,7 +108,7 @@ export class FblTestSuite {
 
     @test
     async failedExecution() {
-        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+        const fbl = Container.get<FBLService>(FBLService);
 
         fbl.flowService.debug = true;
 
@@ -135,7 +132,7 @@ export class FblTestSuite {
 
     @test()
     async ejsTemplateValidation() {
-        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+        const fbl = Container.get<FBLService>(FBLService);
 
         fbl.flowService.debug = true;
 
@@ -163,7 +160,7 @@ export class FblTestSuite {
 
     @test()
     async templateProcessingStringEscape() {
-        const fbl = Container.get<FireBlinkLogistics>(FireBlinkLogistics);
+        const fbl = Container.get<FBLService>(FBLService);
 
         fbl.flowService.debug = true;
 

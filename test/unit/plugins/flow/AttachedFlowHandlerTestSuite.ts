@@ -40,9 +40,7 @@ class DummyActionHandler extends ActionHandler {
 export class AttachedFlowHandlerTestSuite {
 
     after() {
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()

@@ -35,11 +35,7 @@ class DummyActionHandler extends ActionHandler {
 export class SwitchFlowHandlerTestSuite {
 
     after() {
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
-
-        Container.remove(FlowService);
+        Container.reset();
     }
 
     @test()

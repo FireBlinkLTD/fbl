@@ -1,14 +1,19 @@
-import {IPlugin, IReporter} from '../../interfaces';
+import {IPlugin} from '../../interfaces';
 import {YamlReporter} from './YamlReporter';
 import {JsonReporter} from './JsonReporter';
 
-class FlowPlugin implements IPlugin {
-    getReporters(): IReporter[] {
-        return [
-            new YamlReporter(),
-            new JsonReporter()
-        ];
-    }
-}
+const version: string = require('../../../../package.json').version;
 
-module.exports = new FlowPlugin();
+module.exports = <IPlugin> {
+    name: 'fbl.core.reporters',
+    version: version,
+
+    requires: {
+        fbl: version
+    },
+
+    reporters: [
+        new YamlReporter(),
+        new JsonReporter()
+    ]
+};

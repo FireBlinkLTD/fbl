@@ -1,17 +1,21 @@
 import {IPlugin} from '../../interfaces';
-import {ActionHandler} from '../../models';
 import {ContextValuesAssignment} from './ContextValuesAssignment';
 import {SecretValuesAssignment} from './SecretValuesAssignment';
 import {MarkedEntitiesAsRegistered} from './MarkedEntitiesAsRegistered';
 
-class ContextPlugin implements IPlugin {
-    getActionHandlers(): ActionHandler[] {
-        return [
-            new ContextValuesAssignment(),
-            new SecretValuesAssignment(),
-            new MarkedEntitiesAsRegistered()
-        ];
-    }
-}
+const version: string = require('../../../../package.json').version;
 
-module.exports = new ContextPlugin();
+module.exports = <IPlugin> {
+    name: 'flb.core.context',
+    version: version,
+
+    actionHandlers: [
+        new ContextValuesAssignment(),
+        new SecretValuesAssignment(),
+        new MarkedEntitiesAsRegistered()
+    ],
+
+    requires: {
+        fbl: version
+    }
+};

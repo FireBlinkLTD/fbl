@@ -8,12 +8,13 @@ import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 export class WriteToFile extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.files.write',
+        id: 'com.fireblink.fbl.fs.file.write',
         version: '1.0.0',
         description: 'Write string content to a file.',
         aliases: [
-            'fbl.files.write',
-            'files.write',
+            'fbl.fs.file.write',
+            'fs.file.write',
+            'file.write',
             '->'
         ],
         examples: [

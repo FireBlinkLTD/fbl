@@ -24,7 +24,7 @@ export class FlowService {
      */
     public debug = false;
 
-    @Inject()
+    @Inject(() => ActionHandlersRegistry)
     actionHandlersRegistry: ActionHandlersRegistry;
 
     /**

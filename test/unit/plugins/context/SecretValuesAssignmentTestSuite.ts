@@ -19,8 +19,7 @@ const tmp = require('tmp-promise');
 export class SecretValuesAssignmentTestSuite {
 
     after() {
-        Container.get(ActionHandlersRegistry).cleanup();
-        Container.remove(FlowService);
+        Container.reset();
     }
 
     @test()

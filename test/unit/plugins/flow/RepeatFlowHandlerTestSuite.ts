@@ -35,11 +35,7 @@ class DummyActionHandler extends ActionHandler {
 class RepeatFlowHandlerTestSuite {
 
     after() {
-        Container.remove(FlowService);
-
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()

@@ -1,13 +1,12 @@
 import {Inject, Service} from 'typedi';
 import * as commander from 'commander';
 import * as colors from 'colors';
-import {FireBlinkLogistics} from '../fbl';
-import {ActionHandlersRegistry, FlowService} from './index';
+import {FlowService, FBLService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
 import {dirname, resolve} from 'path';
 import {homedir} from 'os';
-import {IContext, IPlugin, IReporter} from '../interfaces';
+import {IContext} from '../interfaces';
 
 const requireg = require('requireg');
 
@@ -20,27 +19,24 @@ export class CLIService {
     private reportFilePath?: string;
     private reportFormat?: string;
 
-    private reporters: {[name: string]: IReporter} = {};
-
     private plugins = [
-        __dirname + '/../plugins/flow',
         __dirname + '/../plugins/context',
-        __dirname + '/../plugins/files',
+        __dirname + '/../plugins/flow',
+        __dirname + '/../plugins/fs',
         __dirname + '/../plugins/reporters',
     ];
+
+    private unsafePlugins = false;
 
     private configKVPairs: string[] = [];
     private secretKVPairs: string[] = [];
     private reportKVPairs: string[] = [];
 
-    @Inject()
-    fireBlinkLogistics: FireBlinkLogistics;
+    @Inject(() => FBLService)
+    fbl: FBLService;
 
-    @Inject()
+    @Inject(() => FlowService)
     flowService: FlowService;
-
-    @Inject()
-    actionHandlersRegistry: ActionHandlersRegistry;
 
     async run(): Promise<void> {
         await this.readGlobalConfig();
@@ -60,7 +56,7 @@ export class CLIService {
         this.registerPlugins();
 
         if (this.reportFormat) {
-            if (!this.reporters[this.reportFormat]) {
+            if (!this.fbl.getReporter(this.reportFormat)) {
                 console.error(`Error: Unable to find reporter: ${this.reportFormat}`);
                 commander.outputHelp();
                 process.exit(1);
@@ -70,7 +66,7 @@ export class CLIService {
         const context = await this.prepareContext();
         const flow = await this.flowService.readFlowFromFile(this.flowFilePath);
 
-        const snapshot = await this.fireBlinkLogistics.execute(
+        const snapshot = await this.fbl.execute(
             dirname(this.flowFilePath),
             flow,
             context
@@ -79,7 +75,7 @@ export class CLIService {
         if (this.reportFilePath) {
             const options = {};
             await this.convertKVPairs(this.reportKVPairs, options);
-            await this.reporters[this.reportFormat].generate(this.reportFilePath, options, snapshot);
+            await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, snapshot);
         }
 
         if (!snapshot.successful) {
@@ -163,6 +159,7 @@ export class CLIService {
                     this.reportKVPairs.push(val);
                 }
             )
+            .option('--unsafe-plugins', 'If provided incompatible plugins will still be registered and be available for use, but may lead to unexpected results or errors.')
             .option('--no-colors', 'Remove colors from output. Make it boring.')
             .arguments('<file>')
             .action((file, options) => {
@@ -197,30 +194,19 @@ export class CLIService {
 
         this.flowFilePath = commander.file;
         this.colors = commander.colors;
+
+        if (commander.unsafePlugins) {
+            this.unsafePlugins = true;
+        }
     }
 
     /**
      * Register plugins
      */
     private registerPlugins(): void {
-        // register plugins
-        this.plugins.forEach((path: string) => {
-            const plugin: IPlugin = requireg(path);
-
-            const actionHandlers = plugin.getActionHandlers && plugin.getActionHandlers();
-            if (actionHandlers) {
-                actionHandlers.forEach(actionHander => {
-                    this.actionHandlersRegistry.register(actionHander);
-                });
-            }
-
-            const reporters = plugin.getReporters && plugin.getReporters();
-            if (reporters) {
-                reporters.forEach(reporter => {
-                   this.reporters[reporter.getName()] = reporter;
-                });
-            }
-        });
+        const plugins = this.plugins.map((path: string) => requireg(path));
+        this.fbl.registerPlugins(plugins);
+        this.fbl.validatePlugins(this.unsafePlugins);
     }
 
     /**
