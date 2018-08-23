@@ -12,6 +12,11 @@ const fblVersion: string = require('../../../package.json').version;
 export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
 
+    public static STEP_SCHEMA = Joi.object()
+        .min(1)
+        .max(1)
+        .required();
+
     private static validationSchema = Joi.object({
         version: Joi.string()
             .regex(/\d+\.\d+\.\d+/gi)
@@ -19,11 +24,7 @@ export class FBLService {
 
         description: Joi.string(),
 
-        pipeline: Joi.object()
-            .min(1)
-            .max(1)
-            .required()
-
+        pipeline: FBLService.STEP_SCHEMA
     }).options({ abortEarly: true });
 
     private reporters: {[name: string]: IReporter} = {};

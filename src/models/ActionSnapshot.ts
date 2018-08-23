@@ -10,6 +10,7 @@ export class ActionSnapshot {
 
     public successful: boolean;
     public childFailure: boolean;
+    public ignoreChildFailure = false;
     public duration = 0;
 
     constructor(
@@ -101,7 +102,7 @@ export class ActionSnapshot {
     success() {
         this.registerStep('success');
 
-        this.successful = !this.childFailure;
+        this.successful = this.ignoreChildFailure || !this.childFailure;
     }
 
     /**
@@ -117,7 +118,7 @@ export class ActionSnapshot {
     skipped() {
         this.registerStep('skipped');
 
-        this.successful = !this.childFailure;
+        this.successful = this.ignoreChildFailure || !this.childFailure;
         this.duration = Date.now() - this.createdAt.getTime();
     }
 

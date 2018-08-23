@@ -6,11 +6,12 @@ import {Container} from 'typedi';
 import {FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
+const version = require('../../../../package.json').version;
+
 export class WriteToFile extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.file.write',
-        version: '1.0.0',
-        description: 'Write string content to a file.',
+        version: version,
         aliases: [
             'fbl.fs.file.write',
             'fs.file.write',

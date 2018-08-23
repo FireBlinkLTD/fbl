@@ -1,16 +1,18 @@
 import * as Joi from 'joi';
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {FlowService} from '../../services';
+import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
+const version = require('../../../../package.json').version;
+
 export class RepeatFlowHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.repeat',
-        version: '1.0.0',
-        description: 'Parallel flow handler. Allows to run multiple subflows in parallel.',
+        id: 'com.fireblink.fbl.flow.repeat',
+        version: version,
         aliases: [
-            'fbl.repeat',
+            'fbl.flow.repeat',
+            'flow.repeat',
             'repeat'
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
@@ -20,7 +22,7 @@ export class RepeatFlowHandler extends ActionHandler {
     private static validationSchema =
         Joi.object({
             times: Joi.number().min(1).required(),
-            action: Joi.object().min(1).max(1).required(),
+            action: FBLService.STEP_SCHEMA,
             async: Joi.boolean()
         })
         .required()

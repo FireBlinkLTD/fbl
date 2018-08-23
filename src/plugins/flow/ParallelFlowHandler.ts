@@ -1,16 +1,18 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {FlowService} from '../../services';
+import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
+
+const version = require('../../../../package.json').version;
 
 export class ParallelFlowHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.parallel',
-        version: '1.0.0',
-        description: 'Parallel flow handler. Allows to run multiple subflows in parallel.',
+        id: 'com.fireblink.fbl.flow.parallel',
+        version: version,
         aliases: [
-            'fbl.parallel',
+            'fbl.flow.parallel',
+            'flow.parallel',
             'parallel',
             'async',
             '||'
@@ -20,7 +22,7 @@ export class ParallelFlowHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.array()
-        .items(Joi.object().min(1).max(1))
+        .items(FBLService.STEP_SCHEMA)
         .min(1)
         .required()
         .options({ abortEarly: true });

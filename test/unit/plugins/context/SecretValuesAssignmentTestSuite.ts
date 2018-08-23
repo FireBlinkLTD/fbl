@@ -59,15 +59,6 @@ export class SecretValuesAssignmentTestSuite {
                 test: 'tst'
             }, context, snapshot)
         ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                test: {
-                    inline: 'test',
-                    file: '/tmp/test'
-                }
-            }, context, snapshot)
-        ).to.be.rejected;
     }
 
     @test()
@@ -87,7 +78,18 @@ export class SecretValuesAssignmentTestSuite {
         await chai.expect(
             actionHandler.validate({
                 test: {
-                    file: '/tmp/test'
+                    files: ['/tmp/test']
+                }
+            }, context, snapshot)
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                test: {
+                    inline: {
+                        test: true
+                    },
+                    files: ['/tmp/test']
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -127,7 +129,7 @@ export class SecretValuesAssignmentTestSuite {
                 }
             },
             fromFile: {
-                file: tmpFile.path
+                files: [tmpFile.path]
             }
         };
 
@@ -140,7 +142,7 @@ export class SecretValuesAssignmentTestSuite {
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
-        options.fromFile.file = basename(tmpFile.path);
+        options.fromFile.files = [basename(tmpFile.path)];
 
         snapshot = await flowService.executeAction(dirname(tmpFile.path), actionHandler.getMetadata().id, options, context);
 
@@ -166,14 +168,19 @@ export class SecretValuesAssignmentTestSuite {
             value: 'value'
         };
 
-        const fileContent = {
-            file_content: 'ftpo'
+        const file1Content = {
+            file1_content: 'ftpo1'
         };
 
-        const tmpFile = await tmp.file();
+        const file2Content = {
+            file2_content: 'ftpo2'
+        };
+        const tmpFile1 = await tmp.file();
+        const tmpFile2 = await tmp.file();
 
-        // write to temp file
-        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+        // write to temp files
+        await promisify(writeFile)(tmpFile1.path, dump(file1Content), 'utf8');
+        await promisify(writeFile)(tmpFile2.path, dump(file2Content), 'utf8');
 
         const options = {
             test: {
@@ -185,7 +192,10 @@ export class SecretValuesAssignmentTestSuite {
                 }
             },
             fromFile: {
-                file: tmpFile.path
+                files: [
+                    tmpFile1.path,
+                    tmpFile2.path
+                ]
             }
         };
 
@@ -194,18 +204,23 @@ export class SecretValuesAssignmentTestSuite {
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
-        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.fromFile.file1_content, file1Content.file1_content);
+        assert.strictEqual(context.secrets.fromFile.file2_content, file2Content.file2_content);
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
-        options.fromFile.file = basename(tmpFile.path);
+        options.fromFile.files = [
+            basename(tmpFile1.path),
+            tmpFile2.path
+        ];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile.path), actionHandler.getMetadata().id, options, context);
+        snapshot = await flowService.executeAction(dirname(tmpFile1.path), actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
-        assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.secrets.fromFile.file1_content, file1Content.file1_content);
+        assert.strictEqual(context.secrets.fromFile.file2_content, file2Content.file2_content);
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
     }
 }

@@ -1,7 +1,7 @@
 import {test, suite} from 'mocha-typescript';
 import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
-import {MarkedEntitiesAsRegistered} from '../../../../src/plugins/context/MarkedEntitiesAsRegistered';
+import {MarkEntitiesAsUpdated} from '../../../../src/plugins/context/MarkEntitiesAsUpdated';
 import {IContextEntity} from '../../../../src/interfaces';
 import * as assert from 'assert';
 
@@ -10,11 +10,11 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 @suite
-class MarkedEntitiesAsRegisteredTestSuite {
+class MarkEntitiesAsUpdatedTestSuite {
 
     @test()
     async failValidation(): Promise<void> {
-        const actionHandler = new MarkedEntitiesAsRegistered();
+        const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
@@ -75,7 +75,7 @@ class MarkedEntitiesAsRegisteredTestSuite {
 
     @test()
     async passValidation(): Promise<void> {
-        const actionHandler = new MarkedEntitiesAsRegistered();
+        const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
@@ -89,7 +89,7 @@ class MarkedEntitiesAsRegisteredTestSuite {
 
     @test()
     async execution(): Promise<void> {
-        const actionHandler = new MarkedEntitiesAsRegistered();
+        const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
@@ -109,5 +109,6 @@ class MarkedEntitiesAsRegisteredTestSuite {
 
         actionHandler.execute(options, context, snapshot);
         assert.deepStrictEqual(context.entities.registered, options);
+        assert.deepStrictEqual(context.entities.updated, options);
     }
 }
