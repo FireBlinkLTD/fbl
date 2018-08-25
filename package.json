@@ -39,7 +39,7 @@
   "devDependencies": {
     "@types/chai": "4.1.4",
     "@types/ejs": "2.6.0",
-    "@types/joi": "13.4.3",
+    "@types/joi": "13.4.4",
     "@types/js-yaml": "3.11.2",
     "@types/node": "10.7.2",
     "@types/semver": "5.5.0",
