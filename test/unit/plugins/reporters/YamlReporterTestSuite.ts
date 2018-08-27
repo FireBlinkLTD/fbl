@@ -27,6 +27,7 @@ class JsonReporterTestSuite {
             idOrAlias: 'test',
             wd: '.',
             idx: 0,
+            ignoreChildFailure: false,
             duration: 0,
             steps: [],
             createdAt: report.createdAt, // time is a subject for change, so we can't hardcode it

@@ -2,13 +2,15 @@ import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {BaseCrypto} from './BaseCrypto';
 
+const version = require('../../../../package.json').version;
+
 export class Encrypt extends BaseCrypto {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.encrypt',
-        version: '1.0.0',
-        description: 'Encrypt files',
+        id: 'com.fireblink.fbl.fs.encrypt',
+        version: version,
         aliases: [
-            'fbl.encrypt',
+            'fbl.fs.encrypt',
+            'fs.encrypt',
             'encrypt'
         ]
     };

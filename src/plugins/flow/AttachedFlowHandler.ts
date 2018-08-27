@@ -5,13 +5,15 @@ import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
 
+const version = require('../../../../package.json').version;
+
 export class AttachedFlowHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.attached',
-        version: '1.0.0',
-        description: 'Attached flow handler. Allows to attach another flow as a subflow.',
+        id: 'com.fireblink.fbl.flow.attachment',
+        version: version,
         aliases: [
-            'fbl.attachment',
+            'fbl.flow.attachment',
+            'flow.attachment',
             'attachment',
             '@'
         ]

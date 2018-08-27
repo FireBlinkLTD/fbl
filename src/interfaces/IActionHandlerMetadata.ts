@@ -5,16 +5,6 @@ export interface IActionHandlerMetadata {
     id: string;
 
     /**
-     * Human readable description
-     */
-    description?: string;
-
-    /**
-     * Optional YAML string formatted examples
-     */
-    examples?: string[];
-
-    /**
      * Aliases that can be used to reference action handler instead of using long ID
      */
     aliases?: string[];

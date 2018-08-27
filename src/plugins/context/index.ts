@@ -1,7 +1,11 @@
 import {IPlugin} from '../../interfaces';
 import {ContextValuesAssignment} from './ContextValuesAssignment';
 import {SecretValuesAssignment} from './SecretValuesAssignment';
-import {MarkedEntitiesAsRegistered} from './MarkedEntitiesAsRegistered';
+import {MarkEntitiesAsRegistered} from './MarkEntitiesAsRegistered';
+import {MarkEntitiesAsUnRegistered} from './MarkEntitiesAsUnRegistered';
+import {MarkEntitiesAsCreated} from './MarkEntitiesAsCreated';
+import {MarkEntitiesAsUpdated} from './MarkEntitiesAsUpdated';
+import {MarkEntitiesAsDeleted} from './MarkEntitiesAsDeleted';
 
 const version: string = require('../../../../package.json').version;
 
@@ -12,7 +16,11 @@ module.exports = <IPlugin> {
     actionHandlers: [
         new ContextValuesAssignment(),
         new SecretValuesAssignment(),
-        new MarkedEntitiesAsRegistered()
+        new MarkEntitiesAsRegistered(),
+        new MarkEntitiesAsUnRegistered(),
+        new MarkEntitiesAsCreated(),
+        new MarkEntitiesAsUpdated(),
+        new MarkEntitiesAsDeleted(),
     ],
 
     requires: {

@@ -5,27 +5,17 @@ import {promisify} from 'util';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 const tmp = require('tmp-promise');
+const version = require('../../../../package.json').version;
 
 export class WriteToTempFile extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.temp.file.write',
-        version: '1.0.0',
-        description: 'Write string content to a temporary file.',
+        version: version,
         aliases: [
             'fbl.fs.temp.file.write',
             'fs.temp.file.write',
             'temp.file.write',
             'tmp.->'
-        ],
-        examples: [
-`'->':
-  # The name of the variable to store the temp file path to, e.g. in this example file path will be stored at: ctx.varName
-  context: 'varName'
-  # File content to write
-  content: |-
-    {
-      "version": "<%- ctx.version %>"
-    }`
         ]
     };
 

@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {dump} from 'js-yaml';
 import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
-import {exec} from 'child_process';
+import {spawn} from 'child_process';
 import * as assert from 'assert';
 import {CLIService} from '../../src/services';
 import {mkdir} from 'shelljs';
@@ -16,23 +16,33 @@ chai.use(chaiAsPromised);
 const tmp = require('tmp-promise');
 const fblVersion = require('../../../package.json').version;
 
-const execCmd = async (cmd: string): Promise<{code: number, stdout: string, stderr: string}> => {
-    return await new Promise<{code: number, stdout: string, stderr: string}>((resolve) => {
-        exec(cmd, (err, stdout, stderr) => {
-            stdout = stdout && stdout.trim();
-            stderr = stderr && stderr.trim();
-            let code = 0;
+const execCmd = async (cmd: string, args: string[], answer?: string): Promise<{code: number, stdout: string, stderr: string}> => {
+    return new Promise<{code: number, stdout: string, stderr: string}>(async (resolve) => {
+        const process = spawn(cmd, args);
 
-            if (err) {
-                const _err: any = err;
-
-                if (_err.code) {
-                    code = _err.code;
-                }
-            }
-
-            resolve({stdout, stderr, code});
+        const stdout: string[] = [];
+        process.stdout.on('data', (data) => {
+            stdout.push(data.toString().trim());
         });
+
+        const stderr: string[] = [];
+        process.stderr.on('data', (data) => {
+            stderr.push(data.toString().trim());
+        });
+
+        process.on('close', (code) => {
+            resolve({
+                stdout: stdout.join('\n'),
+                stderr: stderr.join('\n'),
+                code: code
+            });
+        });
+
+        if (answer) {
+            await new Promise(r => setTimeout(r, 100));
+            process.stdin.write(answer);
+            process.stdin.end();
+        }
     });
 };
 
@@ -101,17 +111,19 @@ class CliTestSuite {
         await promisify(writeFile)(secretsFile.path, dump(customSecretValues), 'utf8');
 
         const result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js --no-colors',
-                '-c ct=yes',
-                `-c .=@${contextFile.path}`,
-                '-s st=yes',
-                `-p ${__dirname}/../../src/plugins/flow`,
-                `-s .=@${secretsFile.path}`,
-                `-o ${reportFile.path}`,
-                '-r json',
+                'dist/src/cli.js',
+                '--no-colors',
+                '-c', 'ct=yes',
+                '-c', `.=@${contextFile.path}`,
+                '-s', 'st=yes',
+                '-p', `${__dirname}/../../src/plugins/flow`,
+                '-s', `.=@${secretsFile.path}`,
+                '-o', reportFile.path,
+                '-r', 'json',
                 flowFile.path
-            ].join(' ')
+            ]
         );
 
         assert.strictEqual(result.code, 0);
@@ -140,51 +152,55 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         let result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-r json',
+                'dist/src/cli.js',
+                '-r', 'json',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: --output parameter is required when --report is provided.');
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-o /tmp/report.json',
+                'dist/src/cli.js',
+                '-o', '/tmp/report.json',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: --report parameter is required when --output is provided.');
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-o /tmp/report.json',
-                '-r unknown',
+                'dist/src/cli.js',
+                '-o', '/tmp/report.json',
+                '-r', 'unknown',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: Unable to find reporter: unknown');
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-o /tmp/report.json',
-                '-r json',
-                '--report-option test=@missing.file',
+                'dist/src/cli.js',
+                '-o', '/tmp/report.json',
+                '-r', 'json',
+                '--report-option', 'test=@missing.file',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'ENOENT: no such file or directory, open \'missing.file\'');
     }
 
     @test()
-    async invalidContextParameters(): Promise<void> {
+    async readContextParametersFromPrompt(): Promise<void> {
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -203,19 +219,21 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         const result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-c ct.yes',
-                '-s st=yes',
+                'dist/src/cli.js',
+                '-c', 'ct.yes',
+                '-s', 'st=yes',
                 flowFile.path
-            ].join(' ')
+            ],
+            'prompt_value'
         );
-        assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Unable to extract key=value pair from: ct.yes');
+        assert.strictEqual(result.code, 0);
+
     }
 
     @test()
-    async invalidSecretsParameters(): Promise<void> {
+    async readSecretsParametersFromPrompt(): Promise<void> {
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -235,15 +253,16 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         const result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                '-c ct=yes',
-                '-s st.yes',
+                'dist/src/cli.js',
+                '-c', 'ct=yes',
+                '-s', 'st.yes',
                 flowFile.path
-            ].join(' ')
+            ],
+            'prompt_value'
         );
-        assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Unable to extract key=value pair from: st.yes');
+        assert.strictEqual(result.code, 0);
     }
 
     @test()
@@ -299,12 +318,13 @@ class CliTestSuite {
         await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, dump(globalConfig), 'utf8');
 
         const result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-o ${reportFile.path}`,
-                '-r json',
+                'dist/src/cli.js',
+                '-o', reportFile.path,
+                '-r', 'json',
                 flowFile.path
-            ].join(' ')
+            ]
         );
 
         assert.strictEqual(result.code, 0);
@@ -330,13 +350,20 @@ class CliTestSuite {
         const flowFile = await tmp.file();
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
-        const result = await execCmd(`node dist/src/cli.js --no-colors ${flowFile.path}`);
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
         assert.strictEqual(result.code, 1);
     }
 
     @test()
     async noParams(): Promise<void> {
-        const result = await execCmd(`node dist/src/cli.js`);
+        const result = await execCmd('node', ['dist/src/cli.js']);
         assert.strictEqual(result.code, 1);
     }
 
@@ -359,24 +386,26 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         let result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/incompatibleWithFBL')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
                 '--no-colors',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/incompatibleWithFBL')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 0);
         assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
@@ -403,24 +432,26 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         let result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
                 '--no-colors',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 0);
         assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
@@ -445,24 +476,26 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         let result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/missingPluginDependency')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
                 '--no-colors',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
 
         result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/missingPluginDependency')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 0);
         assert.strictEqual(result.stdout.split('\n')[0], 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
@@ -487,12 +520,13 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
 
         const result = await execCmd(
+            'node',
             [
-                'node dist/src/cli.js',
-                `-p ${join(__dirname, 'fakePlugins/satisfiesDependencies')}`,
+                'dist/src/cli.js',
+                '-p', join(__dirname, 'fakePlugins/satisfiesDependencies'),
                 '--no-colors',
                 flowFile.path
-            ].join(' ')
+            ]
         );
         assert.strictEqual(result.code, 0);
     }

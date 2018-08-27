@@ -8,6 +8,7 @@ import {dirname, resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
 
+const prompts = require('prompts');
 const requireg = require('requireg');
 
 @Service()
@@ -143,6 +144,7 @@ export class CLIService {
                 '-s --secret <key=value|name>',
                 [
                     'Key value pair of default secret values. Secrets will not be available in report.',
+                    'If only key is provided you will be prompted to enter the value in the console.',
                     'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
                 ].join(' '),
                 (val) => {
@@ -216,7 +218,7 @@ export class CLIService {
     private async prepareContext(): Promise<IContext> {
         const context = FlowService.generateEmptyContext();
         await this.convertKVPairs(this.configKVPairs, context.ctx);
-        await this.convertKVPairs(this.secretKVPairs, context.secrets);
+        await this.convertKVPairs(this.secretKVPairs, context.secrets, true);
 
         return context;
     }
@@ -225,12 +227,18 @@ export class CLIService {
      * Convert key=value pairs into object
      * @param {string[]} pairs
      * @param target
+     * @param secret
      */
-    private async convertKVPairs(pairs: string[], target: any): Promise<void> {
+    private async convertKVPairs(pairs: string[], target: any, secret?: boolean): Promise<void> {
         await Promise.all(pairs.map(async (kv: string): Promise<void> => {
             const chunks = kv.split('=');
             if (chunks.length !== 2) {
-                throw new Error('Unable to extract key=value pair from: ' + kv);
+                chunks[1] = (await prompts({
+                    type: 'text',
+                    name: 'value',
+                    style: secret ? 'password' : 'default',
+                    message: `${chunks[0]}: `
+                })).value;
             }
 
             if (chunks[1][0] === '@') {
