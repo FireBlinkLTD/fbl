@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import {IContext} from '../interfaces';
+import {IActionHandlerMetadata, IContext} from '../interfaces';
 import {ActionSnapshot} from './ActionSnapshot';
 
 /**
@@ -8,9 +8,9 @@ import {ActionSnapshot} from './ActionSnapshot';
 export abstract class ActionHandler {
     /**
      * Get handler metadata
-     * @returns {IHandlerMetadata}
+     * @returns {IActionHandlerMetadata}
      */
-    abstract getMetadata(): IHandlerMetadata;
+    abstract getMetadata(): IActionHandlerMetadata;
 
     /**
      * Validate options before processing.
@@ -56,13 +56,4 @@ export abstract class ActionHandler {
      * @returns {Promise<void>}
      */
     abstract async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void>;
-}
-
-export interface IHandlerMetadata {
-    id: string;
-    description?: string;
-    examples?: string[];
-    aliases?: string[];
-    version: string;
-    skipTemplateProcessing?: boolean;
 }

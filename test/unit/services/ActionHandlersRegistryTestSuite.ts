@@ -1,7 +1,8 @@
 import {suite, test} from 'mocha-typescript';
-import {ActionHandler, IHandlerMetadata} from '../../../src/models';
+import {ActionHandler} from '../../../src/models';
 import {ActionHandlersRegistry} from '../../../src/services';
 import * as assert from 'assert';
+import {IActionHandlerMetadata} from '../../../src/interfaces';
 
 const chai = require('chai');
 
@@ -12,8 +13,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: this.id,
             aliases: [
                 this.id + '.1',

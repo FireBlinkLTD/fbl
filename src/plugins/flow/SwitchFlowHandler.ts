@@ -1,17 +1,18 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
-import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {FBLService, FlowService} from '../../services';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
+
+const version = require('../../../../package.json').version;
 
 export class SwitchFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
-        id: 'com.fireblink.fbl.switch',
-        version: '1.0.0',
-        description: 'Flow switcher. Allows to run one of few subflows based on the case.',
+    private static metadata = <IActionHandlerMetadata> {
+        id: 'com.fireblink.fbl.flow.switch',
+        version: version,
         aliases: [
-            'fbl.switch',
+            'fbl.flow.switch',
+            'flow.switch',
             'switch',
             'if',
             '?'
@@ -24,34 +25,34 @@ export class SwitchFlowHandler extends ActionHandler {
     private static validationSchema = Joi.object({
         value: Joi.alternatives(Joi.string(), Joi.number()).required(),
         is: Joi.object()
-            .pattern(
-                /^/,
-                Joi.object()
-                    .min(1)
-                    .max(1)
-                    .required()
-            )
+            .pattern(/^/, FBLService.STEP_SCHEMA)
             .min(1)
             .required()
     })
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return SwitchFlowHandler.metadata;
     }
 
     async validate(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
+        // register masked options in the snapshot
+        const masked = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, true);
+        snapshot.setOptions({
+            value: masked,
+            is: options.is
+        });
+
         // resolve value, as it is mostly likely a template and we're not processing options as a template
-        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context);
-        snapshot.setOptions(options);
+        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, false);
 
         await super.validate(options, context, snapshot);
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return SwitchFlowHandler.validationSchema;
     }
 

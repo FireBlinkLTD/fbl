@@ -1,31 +1,22 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
+
+const version = require('../../../../package.json').version;
 
 export class WriteToFile extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
-        id: 'com.fireblink.fbl.files.write',
-        version: '1.0.0',
-        description: 'Write string content to a file.',
+    private static metadata = <IActionHandlerMetadata> {
+        id: 'com.fireblink.fbl.fs.file.write',
+        version: version,
         aliases: [
-            'fbl.files.write',
-            'files.write',
+            'fbl.fs.file.write',
+            'fs.file.write',
+            'file.write',
             '->'
-        ],
-        examples: [
-`'->':
-  # Path of file to where write the "content"
-  path: '/tmp/test.json'
-  # File content to write
-  content: |-
-    {
-      "version": "<%- ctx.version %>"
-    }`
         ]
     };
 
@@ -39,11 +30,11 @@ export class WriteToFile extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return WriteToFile.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return WriteToFile.validationSchema;
     }
 

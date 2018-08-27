@@ -1,19 +1,27 @@
 import {IPlugin} from '../../interfaces';
-import {ActionHandler} from '../../models';
 import {AttachedFlowHandler} from './AttachedFlowHandler';
 import {ParallelFlowHandler} from './ParallelFlowHandler';
 import {SequenceFlowHandler} from './SequenceFlowHandler';
 import {SwitchFlowHandler} from './SwitchFlowHandler';
+import {RepeatFlowHandler} from './RepeatFlowHandler';
+import {TryCatchFinallyFlowHandler} from './TryCatchFinallyFlowHandler';
 
-class FlowPlugin implements IPlugin {
-    getActionHandlers(): ActionHandler[] {
-        return [
-            new AttachedFlowHandler(),
-            new ParallelFlowHandler(),
-            new SequenceFlowHandler(),
-            new SwitchFlowHandler(),
-        ];
-    }
-}
+const version: string = require('../../../../package.json').version;
 
-module.exports = new FlowPlugin();
+module.exports = <IPlugin> {
+    name: 'fbl.core.flow',
+    version: version,
+
+    requires: {
+        fbl: version
+    },
+
+    actionHandlers: [
+        new AttachedFlowHandler(),
+        new ParallelFlowHandler(),
+        new SequenceFlowHandler(),
+        new SwitchFlowHandler(),
+        new RepeatFlowHandler(),
+        new TryCatchFinallyFlowHandler()
+    ]
+};

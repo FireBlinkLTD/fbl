@@ -1,5 +1,6 @@
 import {Container} from 'typedi';
 import {FlowService} from '../services';
+import {IContext} from '../interfaces';
 
 const humanizeDuration = require('humanize-duration');
 
@@ -9,6 +10,7 @@ export class ActionSnapshot {
 
     public successful: boolean;
     public childFailure: boolean;
+    public ignoreChildFailure = false;
     public duration = 0;
 
     constructor(
@@ -52,9 +54,12 @@ export class ActionSnapshot {
      * Register context
      * @param context
      */
-    setContext(context: any) {
+    setContext(context: IContext) {
         if (Container.get(FlowService).debug) {
-            this.registerStep('context', JSON.parse(JSON.stringify(context)));
+            // only ctx field should be exposed
+            this.registerStep('context', JSON.parse(JSON.stringify({
+                ctx: context.ctx
+            })));
         }
     }
 
@@ -97,7 +102,7 @@ export class ActionSnapshot {
     success() {
         this.registerStep('success');
 
-        this.successful = !this.childFailure;
+        this.successful = this.ignoreChildFailure || !this.childFailure;
     }
 
     /**
@@ -113,7 +118,7 @@ export class ActionSnapshot {
     skipped() {
         this.registerStep('skipped');
 
-        this.successful = !this.childFailure;
+        this.successful = this.ignoreChildFailure || !this.childFailure;
         this.duration = Date.now() - this.createdAt.getTime();
     }
 

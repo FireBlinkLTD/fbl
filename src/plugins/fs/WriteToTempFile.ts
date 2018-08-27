@@ -1,31 +1,21 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
-import {IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 
 const tmp = require('tmp-promise');
+const version = require('../../../../package.json').version;
 
 export class WriteToTempFile extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
-        id: 'com.fireblink.fbl.files.temp.write',
-        version: '1.0.0',
-        description: 'Write string content to a temporary file.',
+    private static metadata = <IActionHandlerMetadata> {
+        id: 'com.fireblink.fbl.fs.temp.file.write',
+        version: version,
         aliases: [
-            'fbl.files.temp.write',
-            'files.temp.write',
+            'fbl.fs.temp.file.write',
+            'fs.temp.file.write',
+            'temp.file.write',
             'tmp.->'
-        ],
-        examples: [
-`'->':
-  # The name of the variable to store the temp file path to, e.g. in this example file path will be stored at: ctx.varName
-  context: 'varName'
-  # File content to write
-  content: |-
-    {
-      "version": "<%- ctx.version %>"
-    }`
         ]
     };
 
@@ -39,16 +29,18 @@ export class WriteToTempFile extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return WriteToTempFile.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return WriteToTempFile.validationSchema;
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const tmpFile = await tmp.file();
+        const tmpFile = await tmp.file({
+            keep: true
+        });
         context.ctx[options.context] = tmpFile.path;
         snapshot.log(`Writing content to a temp file: ${tmpFile.path}`);
         await promisify(writeFile)(tmpFile.path, options.content, 'utf8');

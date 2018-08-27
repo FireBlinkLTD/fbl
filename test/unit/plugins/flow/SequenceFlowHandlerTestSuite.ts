@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
 import {SequenceFlowHandler} from '../../../../src/plugins/flow/SequenceFlowHandler';
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,8 +21,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: DummyActionHandler.ID + '.' + this.idx,
             version: '1.0.0'
         };
@@ -42,19 +42,14 @@ class DummyActionHandler extends ActionHandler {
 export class SequenceFlowHandlerTestSuite {
 
     after() {
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SequenceFlowHandler();
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
@@ -89,10 +84,7 @@ export class SequenceFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SequenceFlowHandler();
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -126,10 +118,7 @@ export class SequenceFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -161,10 +150,7 @@ export class SequenceFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -193,20 +179,17 @@ export class SequenceFlowHandlerTestSuite {
         const options = [
             {
               '--': [
-                  {[DummyActionHandler.ID + '.1']: 1},
+                  {[DummyActionHandler.ID + '.1']: 0},
               ]
             },
-            {[DummyActionHandler.ID + '.2']: 2},
+            {[DummyActionHandler.ID + '.2']: '<%- index %>'},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 1);
-        assert.strictEqual(results[1], 2);
+        assert.strictEqual(results[0], 0);
+        assert.strictEqual(results[1], 1);
     }
 }

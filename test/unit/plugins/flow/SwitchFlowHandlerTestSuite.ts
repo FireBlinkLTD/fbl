@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
 import {SwitchFlowHandler} from '../../../../src/plugins/flow/SwitchFlowHandler';
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,8 +19,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: DummyActionHandler.ID,
             version: '1.0.0'
         };
@@ -35,19 +35,13 @@ class DummyActionHandler extends ActionHandler {
 export class SwitchFlowHandlerTestSuite {
 
     after() {
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .cleanup();
+        Container.reset();
     }
 
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-        
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -142,11 +136,7 @@ export class SwitchFlowHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -163,7 +153,8 @@ export class SwitchFlowHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatch(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        Container.get(FlowService).debug = true;
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
@@ -174,36 +165,34 @@ export class SwitchFlowHandlerTestSuite {
         const actionHandler = new SwitchFlowHandler();
 
         const options = {
-            value: '<%- ctx.value %>',
+            value: '<%- secrets.value %><%- ctx.value %>',
             is: {
-                tst: {
+                test: {
                     [DummyActionHandler.ID]: true
                 }
             }
         };
 
-        const context = <IContext> {
-            ctx: {
-                value: 'tst'
-            }
-        };
+        const context = FlowService.generateEmptyContext();
+        context.ctx.value = 'st';
+        context.secrets.value = 'te';
 
         const snapshot = new ActionSnapshot('.', '', 0);
 
         // validate first to process template inside options
-        await chai.expect(
-            actionHandler.validate(options, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.execute(options, context, snapshot)
-        ).to.be.not.rejected;
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
+        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+            value: '{MASKED}st',
+            is: options.is
+        });
     }
 
     @test()
     async doNotTriggerActionHandlerDueToMismatch(): Promise<void> {
+        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
@@ -215,31 +204,28 @@ export class SwitchFlowHandlerTestSuite {
         const actionHandler = new SwitchFlowHandler();
 
         const options = {
-            value: '<%- ctx.value %>',
+            value: '<%- secrets.value %><%- ctx.value %>',
             is: {
-                tst: {
+                stte: {
                     [DummyActionHandler.ID]: true
                 }
             }
         };
 
         const snapshot = new ActionSnapshot('.', '', 0);
-
-        const context = <IContext> {
-            ctx: {
-                value: 'tst2'
-            }
-        };
+        const context = FlowService.generateEmptyContext();
+        context.ctx.value = 'st';
+        context.secrets.value = 'te';
 
         // validate first to process template inside options
-        await chai.expect(
-            actionHandler.validate(options, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.execute(options, context, snapshot)
-        ).to.be.not.rejected;
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, false);
+
+        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+            value: '{MASKED}st',
+            is: options.is
+        });
     }
 }

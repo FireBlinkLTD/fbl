@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../../../src/models';
+import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ParallelFlowHandler} from '../../../../src/plugins/flow/ParallelFlowHandler';
-import {IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,8 +21,8 @@ class DummyActionHandler extends ActionHandler {
         super();
     }
 
-    getMetadata(): IHandlerMetadata {
-        return  <IHandlerMetadata> {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
             id: DummyActionHandler.ID + '.' + this.idx,
             version: '1.0.0'
         };
@@ -42,24 +42,13 @@ class DummyActionHandler extends ActionHandler {
 export class ParallelFlowHandlerTestSuite {
 
     after() {
-        Container.remove(FlowService);
-
-        Container
-            .get<ActionHandlersRegistry>(ActionHandlersRegistry)
-            .unregister(new ParallelFlowHandler().getMetadata().id)
-            .unregister(DummyActionHandler.ID + '.0')
-            .unregister(DummyActionHandler.ID + '.1')
-            .unregister(DummyActionHandler.ID + '.2');
+        Container.reset();
     }
 
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
         
         await chai.expect(
@@ -93,11 +82,7 @@ export class ParallelFlowHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ParallelFlowHandler();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -131,10 +116,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -172,10 +154,7 @@ export class ParallelFlowHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -194,33 +173,37 @@ export class ParallelFlowHandlerTestSuite {
         actionHandlersRegistry.register(actionHandler);
 
         const results: number[] = [];
-        const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
+        const dummyActionHandler1 = new DummyActionHandler(0, 20, async (opts: any) => {
             results.push(opts);
         });
         actionHandlersRegistry.register(dummyActionHandler1);
 
-        const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
+        const dummyActionHandler2 = new DummyActionHandler(1, 5, async (opts: any) => {
             results.push(opts);
         });
         actionHandlersRegistry.register(dummyActionHandler2);
 
+        const dummyActionHandler3 = new DummyActionHandler(2, 10, async (opts: any) => {
+            results.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler3);
+
         const options = [
             {
                 '||': [
-                    {[DummyActionHandler.ID + '.1']: 1},
+                    {[DummyActionHandler.ID + '.0']: 0},
+                    {[DummyActionHandler.ID + '.1']: '<%- index %>'},
                 ]
             },
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 2);
-        assert.strictEqual(results[1], 1);
+        assert.strictEqual(results[0], 1);
+        assert.strictEqual(results[1], 2);
+        assert.strictEqual(results[2], 0);
     }
 }

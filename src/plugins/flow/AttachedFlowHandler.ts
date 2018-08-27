@@ -1,19 +1,19 @@
-import {ActionHandler, ActionSnapshot, IHandlerMetadata} from '../../models';
+import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
-import {SchemaLike} from 'joi';
-import {FlowService} from '../../services';
-import {FireBlinkLogistics} from '../../fbl';
-import {IContext} from '../../interfaces';
+import {FBLService, FlowService} from '../../services';
+import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
 
+const version = require('../../../../package.json').version;
+
 export class AttachedFlowHandler extends ActionHandler {
-    private static metadata = <IHandlerMetadata> {
-        id: 'com.fireblink.fbl.attached',
-        version: '1.0.0',
-        description: 'Attached flow handler. Allows to attach another flow as a subflow.',
+    private static metadata = <IActionHandlerMetadata> {
+        id: 'com.fireblink.fbl.flow.attachment',
+        version: version,
         aliases: [
-            'fbl.attachment',
+            'fbl.flow.attachment',
+            'flow.attachment',
             'attachment',
             '@'
         ]
@@ -23,17 +23,17 @@ export class AttachedFlowHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
-    getMetadata(): IHandlerMetadata {
+    getMetadata(): IActionHandlerMetadata {
         return AttachedFlowHandler.metadata;
     }
 
-    getValidationSchema(): SchemaLike | null {
+    getValidationSchema(): Joi.SchemaLike | null {
         return AttachedFlowHandler.validationSchema;
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const fbl = Container.get(FireBlinkLogistics);
+        const fbl = Container.get(FBLService);
 
         const file = flowService.getAbsolutePath(options, snapshot.wd);
         snapshot.log(`Reading flow from file: ${file}`);

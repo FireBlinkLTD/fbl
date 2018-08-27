@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
-import {WriteToFile} from '../../../../src/plugins/files/WriteToFile';
+import {WriteToFile} from '../../../../src/plugins/fs/WriteToFile';
 import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
-import {IContext} from '../../../../src/interfaces';
 import {ActionSnapshot} from '../../../../src/models';
+import {FlowService} from '../../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -18,11 +18,7 @@ export class WriteToFileTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFile();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -65,11 +61,7 @@ export class WriteToFileTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToFile();
-
-        const context = <IContext> {
-            ctx: {}
-        };
-
+        const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
 
         await chai.expect(
@@ -86,9 +78,7 @@ export class WriteToFileTestSuite {
 
         const tmpFile = await tmp.file();
 
-        const context = <IContext> {
-            ctx: {}
-        };
+        const context = FlowService.generateEmptyContext();
 
         const snapshot = new ActionSnapshot('.', '', 0);
 
