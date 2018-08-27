@@ -1,15 +1,15 @@
 # Flow control plugin
 
-Control the way your steps are executed.
+Flow order control.
 
 Available steps:
 - sequence (sync)
 - parallel (async)
 - attachment (external sub-flow file)
 - switch (conditional)
+- try-catch-finally
 
-
-## Sequential steps execution
+## Action Handler: Sequential steps execution
 
 Run steps one by one, if any of steps fail - chain of execution will stop on it.
 
@@ -37,7 +37,7 @@ Aliases:
           - test.yml 
 ```
 
-## Parallel steps execution
+## Action Handler: Parallel steps execution
 
 Run all steps in parallel. If any of steps will fail - it will not affect others. However parallel step itself will be marked as failed.
 
@@ -65,7 +65,7 @@ Aliases:
           - test.yml 
 ```
 
-## Attached flow
+## Action Handler: Attached flow
 
 Allows to reference external flow by its pass. Helps to logically split big flows for better organized structure.
 
@@ -84,7 +84,7 @@ Aliases:
 @: flow.yml 
 ```
 
-## Repeat flow
+## Action Handler: Repeat flow
 
 Repeat action multiple times.
 
@@ -109,7 +109,7 @@ repeat:
     @: flow_<%- index %>.yml                 
 ```
 
-## Switch flow
+## Action Handler: Switch flow
 
 Allows to run action based on some condition
 
@@ -138,7 +138,7 @@ Aliases:
       @: bar.yml
 ```
 
-## Try -> Catch -> Finally Flow
+## Action Handler: Try - Catch - Finally Flow
 
 Allows to run sub-step in isolation causing its failure to be ignored by parent step.
 Optionally catch and finally steps can be invoked.

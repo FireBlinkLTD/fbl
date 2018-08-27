@@ -17,16 +17,6 @@ export class WriteToFile extends ActionHandler {
             'fs.file.write',
             'file.write',
             '->'
-        ],
-        examples: [
-`'->':
-  # Path of file to where write the "content"
-  path: '/tmp/test.json'
-  # File content to write
-  content: |-
-    {
-      "version": "<%- ctx.version %>"
-    }`
         ]
     };
 

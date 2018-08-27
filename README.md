@@ -4,8 +4,6 @@
 [![CircleCI](https://circleci.com/gh/FireBlinkLTD/fbl.svg?style=svg)](https://circleci.com/gh/FireBlinkLTD/fbl)
 [![codecov](https://codecov.io/gh/FireBlinkLTD/fbl/branch/master/graph/badge.svg)](https://codecov.io/gh/FireBlinkLTD/fbl)
 
-This project is early in development and not recommended to even look at before version 0.1.0.
-
 This is a second reincarnation on internal tool that FireBlink LTD used to deploy its own projects.
 Original tool was vendor locked and had pretty much limited functionality.
 
@@ -18,6 +16,8 @@ FBL generally designed to help with automation related tasks that require flexib
 
 Flexibility is the key concept of the FBL, so it can be used either as a command line tool, or integrated into any
 existing Node.js app.
+
+FBL by its own just provides a generally limited amount of embedded plugins and for real life usage may require 3rd party plugins.
 
 ## Requirements
 
@@ -35,7 +35,7 @@ version: 1.0.0
 
 # [Optional] flow description, it is up to the user whether to describe a flow in a human readable way
 description: |-
-  Sample file to describe all kinds of possibilities fbl can provide inside the descriptor
+  Plugn invoker.
 
 # [Required] The starting point of the flow.
 pipeline:
@@ -44,4 +44,9 @@ pipeline:
    'plugin.id': 'plugin.options'
 ``` 
 
+## Default Plugins
 
+- [Context](docs/plugins/context.md)
+- [Flow Control](docs/plugins/flow.md)
+- [File System](docs/plugins/flow.md)
+- [Execution Reporters](docs/plugins/reporters.md)

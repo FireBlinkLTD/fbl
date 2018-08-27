@@ -16,16 +16,6 @@ export class WriteToTempFile extends ActionHandler {
             'fs.temp.file.write',
             'temp.file.write',
             'tmp.->'
-        ],
-        examples: [
-`'->':
-  # The name of the variable to store the temp file path to, e.g. in this example file path will be stored at: ctx.varName
-  context: 'varName'
-  # File content to write
-  content: |-
-    {
-      "version": "<%- ctx.version %>"
-    }`
         ]
     };
 
