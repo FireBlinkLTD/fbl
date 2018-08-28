@@ -9,7 +9,7 @@ export class YamlReporter implements IReporter {
         return 'yaml';
     }
 
-    async generate(output: string, snapshot: ActionSnapshot): Promise<void> {
+    async generate(output: string, options: {[key: string]: any}, snapshot: ActionSnapshot): Promise<void> {
         await promisify(writeFile)(output, dump(snapshot), 'utf8');
     }
 }

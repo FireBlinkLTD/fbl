@@ -1,6 +1,7 @@
 import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {BaseCrypto} from './BaseCrypto';
+import {FSUtil} from '../../utils/FSUtil';
 
 const version = require('../../../../package.json').version;
 
@@ -20,8 +21,9 @@ export class Decrypt extends BaseCrypto {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const files = await this.findFilesByMasks(options.include, options.exclude, snapshot.wd);
+        const files = await FSUtil.findFilesByMasks(options.include, options.exclude, snapshot.wd);
         for (const file of files) {
+            snapshot.log(`Decrypting ${file}`);
             await this.decrypt(file, options.password);
         }
     }

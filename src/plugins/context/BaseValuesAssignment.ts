@@ -1,8 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {Container} from 'typedi';
-import {FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IContext} from '../../interfaces';
+import {FSUtil} from '../../utils/FSUtil';
 
 const version = require('../../../../package.json').version;
 
@@ -31,7 +30,6 @@ export abstract class BaseValuesAssignment extends ActionHandler {
     abstract getAssignmentKey(): 'ctx' | 'secrets';
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const flowService = Container.get(FlowService);
         const key = this.getAssignmentKey();
 
         const names = Object.keys(options);
@@ -45,10 +43,11 @@ export abstract class BaseValuesAssignment extends ActionHandler {
             }
 
             if (options[name].files) {
-                for (const file of options[name].files) {
-                    const path = flowService.getAbsolutePath(file, snapshot.wd);
+                const files = await FSUtil.findFilesByMasks(options[name].files, [], snapshot.wd);
+
+                for (const path of files) {
                     snapshot.log(`Reading from file: ${path} for key ${name}`);
-                    const fileContent = await flowService.readYamlFromFile(path);
+                    const fileContent = await FSUtil.readYamlFromFile(path);
                     if (value) {
                         Object.assign(value, fileContent);
                     } else {

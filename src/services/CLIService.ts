@@ -7,6 +7,7 @@ import {promisify} from 'util';
 import {dirname, resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
+import {FSUtil} from '../utils/FSUtil';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -92,7 +93,7 @@ export class CLIService {
         const globalConfigExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
 
         if (globalConfigExists) {
-            const globalConfig = await this.flowService.readYamlFromFile(CLIService.GLOBAL_CONFIG_PATH);
+            const globalConfig = await FSUtil.readYamlFromFile(CLIService.GLOBAL_CONFIG_PATH);
 
             /* istanbul ignore else */
             if (globalConfig.plugins) {
@@ -243,7 +244,7 @@ export class CLIService {
 
             if (chunks[1][0] === '@') {
                 const file = chunks[1].substring(1);
-                target[chunks[0]] = await this.flowService.readYamlFromFile(file);
+                target[chunks[0]] = await FSUtil.readYamlFromFile(file);
             } else {
                 target[chunks[0]] = chunks[1];
             }

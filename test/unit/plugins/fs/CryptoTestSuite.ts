@@ -97,7 +97,7 @@ class CryptoTestSuite {
             join(tmpDir.path, 'c.ign'),
         ];
 
-        const fileContent = 'test';
+        const fileContent = 'test@'.repeat(100);
 
         for (const file of files) {
             await writeFileAsync(file, fileContent, 'utf8');

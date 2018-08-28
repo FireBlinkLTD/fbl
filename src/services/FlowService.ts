@@ -9,6 +9,7 @@ import {Inject, Service} from 'typedi';
 import {promisify} from 'util';
 import {isAbsolute, resolve} from 'path';
 import {homedir} from 'os';
+import {FSUtil} from '../utils/FSUtil';
 
 const ejsLint = require('ejs-lint');
 
@@ -103,42 +104,12 @@ export class FlowService {
     }
 
     /**
-     * Get absolute based on current working directory
-     * @param {string} path
-     * @param {string} wd Working Directory
-     * @return {string}
-     */
-    getAbsolutePath(path: string, wd: string): string {
-        if (path.indexOf('~') === 0) {
-            return resolve(homedir(), path.substring(2));
-        }
-
-
-        if (isAbsolute(path)) {
-            return path;
-        }
-
-        return resolve(wd, path);
-    }
-
-    /**
-     * Read and parse yaml file
-     * @param {string} file
-     * @returns {Promise<any>}
-     */
-    async readYamlFromFile(file: string): Promise<any> {
-        const source = await promisify(readFile)(file, 'utf8');
-
-        return safeLoad(source);
-    }
-
-    /**
      * Read flow from file
      * @param {string} file
      * @returns {Promise<IFlow>}
      */
     async readFlowFromFile(file: string): Promise<IFlow> {
-        return await this.readYamlFromFile(file) as IFlow;
+        return await FSUtil.readYamlFromFile(file) as IFlow;
     }
 
     /**

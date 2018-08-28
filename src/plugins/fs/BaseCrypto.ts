@@ -5,8 +5,9 @@ import * as glob from 'glob-promise';
 import * as Joi from 'joi';
 import {createCipheriv, createDecipheriv, pbkdf2, randomBytes} from 'crypto';
 import * as tmp from 'tmp-promise';
-import {createReadStream, createWriteStream, readFile, ReadStream, rename} from 'fs';
+import {createReadStream, createWriteStream, ReadStream, rename} from 'fs';
 import {promisify} from 'util';
+import {FSUtil} from '../../utils/FSUtil';
 
 export abstract class BaseCrypto extends ActionHandler {
     private static encryptionAlgorithm = 'aes-256-cbc';
@@ -30,26 +31,6 @@ export abstract class BaseCrypto extends ActionHandler {
 
     getValidationSchema(): Joi.SchemaLike | null {
         return BaseCrypto.validationSchema;
-    }
-
-    protected async findFilesByMasks(masks: string[], ignore: string[], wd: string): Promise<string[]> {
-        const flowService = Container.get(FlowService);
-
-        const result = <string[]>[];
-
-        for (const mask of masks) {
-            const absolutePathMask = flowService.getAbsolutePath(mask, wd);
-            const matches = await glob(absolutePathMask, {
-                ignore: ignore.map(i => flowService.getAbsolutePath(i, wd)),
-                nodir: true,
-                absolute: true,
-                dot: true
-            });
-
-            result.push(...matches);
-        }
-
-        return result;
     }
 
     private static async getPasswordHash(password: string, salt?: Buffer): Promise<{hash: Buffer, salt: Buffer}> {
@@ -84,7 +65,7 @@ export abstract class BaseCrypto extends ActionHandler {
         await new Promise<void>(resolve => {
             rs.pipe(cipher).pipe(ws);
             rs.on('close', () => {
-                ws.close();
+                ws.end();
                 resolve();
             });
         });
@@ -126,7 +107,7 @@ export abstract class BaseCrypto extends ActionHandler {
         await new Promise<void>(resolve => {
             rs.pipe(decipher).pipe(ws);
             rs.on('close', () => {
-                ws.close();
+                ws.end();
                 resolve();
             });
         });

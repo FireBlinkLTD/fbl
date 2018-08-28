@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
+import {FSUtil} from '../../utils/FSUtil';
 
 const version = require('../../../../package.json').version;
 
@@ -35,16 +36,14 @@ export class AttachedFlowHandler extends ActionHandler {
         const flowService = Container.get(FlowService);
         const fbl = Container.get(FBLService);
 
-        const file = flowService.getAbsolutePath(options, snapshot.wd);
+        const file = FSUtil.getAbsolutePath(options, snapshot.wd);
         snapshot.log(`Reading flow from file: ${file}`);
         const flow = await flowService.readFlowFromFile(file);
 
         const childSnapshot = await fbl.execute(
             dirname(file),
             flow,
-            <IContext> {
-                ctx: context.ctx
-            }
+            context
         );
         snapshot.registerChildActionSnapshot(childSnapshot);
     }

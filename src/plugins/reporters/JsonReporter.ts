@@ -8,7 +8,7 @@ export class JsonReporter implements IReporter {
         return 'json';
     }
 
-    async generate(output: string, snapshot: ActionSnapshot): Promise<void> {
+    async generate(output: string, options: {[key: string]: any}, snapshot: ActionSnapshot): Promise<void> {
         const json = JSON.stringify(snapshot, null, 2);
         await promisify(writeFile)(output, json, 'utf8');
     }
