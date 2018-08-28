@@ -5,6 +5,7 @@ import {promisify} from 'util';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {FSUtil} from '../../utils/FSUtil';
 
 const version = require('../../../../package.json').version;
 
@@ -40,7 +41,7 @@ export class WriteToFile extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        const file = flowService.getAbsolutePath(options.path, snapshot.wd);
+        const file = FSUtil.getAbsolutePath(options.path, snapshot.wd);
         snapshot.log(`Writing content to a file: ${file}`);
         await promisify(writeFile)(file, options.content, 'utf8');
     }
