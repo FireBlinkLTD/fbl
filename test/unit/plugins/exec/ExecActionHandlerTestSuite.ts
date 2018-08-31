@@ -303,7 +303,7 @@ class ExecActionHandlerTestSuite {
     }
 
     @test()
-    async noAssignment(): Promise<void> {
+    async noAssignmentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = FlowService.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '', 0);
@@ -312,6 +312,23 @@ class ExecActionHandlerTestSuite {
             actionHandler.execute({
                 command: 'echo',
                 args: ['test']
+            }, context, snapshot)
+        ).to.be.not.rejected;
+    }
+
+    @test()
+    async noAssignmentStderr(): Promise<void> {
+        const actionHandler = new ExecActionHandler();
+        const context = FlowService.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', '', 0);
+
+        await chai.expect(
+            actionHandler.execute({
+                command: 'bash',
+                args: [resolve(__dirname, '../../../../../test/unit/assets/echo_to_stderr.sh'), 'test'],
+                options: {
+                    stdout: true
+                }
             }, context, snapshot)
         ).to.be.not.rejected;
     }
