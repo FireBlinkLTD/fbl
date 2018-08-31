@@ -23,6 +23,7 @@ export class CLIService {
 
     private plugins = [
         __dirname + '/../plugins/context',
+        __dirname + '/../plugins/exec',
         __dirname + '/../plugins/flow',
         __dirname + '/../plugins/fs',
         __dirname + '/../plugins/reporters',

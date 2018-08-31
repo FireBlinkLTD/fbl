@@ -62,8 +62,7 @@ export class SwitchFlowHandler extends ActionHandler {
         const action = options.is[options.value];
 
         if (action) {
-            const keys = Object.keys(action);
-            const idOrAlias = keys[0];
+            const idOrAlias = FBLService.extractIdOrAlias(action);
             snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
             snapshot.registerChildActionSnapshot(childSnapshot);

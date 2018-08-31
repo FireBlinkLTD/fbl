@@ -5,6 +5,8 @@ import {SequenceFlowHandler} from './SequenceFlowHandler';
 import {SwitchFlowHandler} from './SwitchFlowHandler';
 import {RepeatFlowHandler} from './RepeatFlowHandler';
 import {TryCatchFinallyFlowHandler} from './TryCatchFinallyFlowHandler';
+import {ForEachFlowHandler} from './ForEachFlowHandler';
+import {TemplateFlowHandler} from './TemplateFlowHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -18,10 +20,12 @@ module.exports = <IPlugin> {
 
     actionHandlers: [
         new AttachedFlowHandler(),
+        new ForEachFlowHandler(),
         new ParallelFlowHandler(),
         new SequenceFlowHandler(),
         new SwitchFlowHandler(),
         new RepeatFlowHandler(),
+        new TemplateFlowHandler(),
         new TryCatchFinallyFlowHandler()
     ]
 };

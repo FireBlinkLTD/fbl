@@ -36,6 +36,17 @@ export class FBLService {
     actionHandlersRegistry: ActionHandlersRegistry;
 
     /**
+     * Extract idOrAlias from step object
+     * @param {object} step
+     * @return {string}
+     */
+    static extractIdOrAlias(step: object): string {
+        const keys = Object.keys(step);
+
+        return keys[0];
+    }
+
+    /**
      * Get reporter by name
      * @param {string} name
      * @return {IReporter | undefined}
@@ -120,9 +131,7 @@ export class FBLService {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
         }
 
-        const keys = Object.keys(flow.pipeline);
-
-        const idOrAlias = keys[0];
+        const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         const options = flow.pipeline[idOrAlias];
 
         return await this.flowService.executeAction(wd, idOrAlias, options, context);
