@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {RepeatFlowHandler} from '../../../../src/plugins/flow/RepeatFlowHandler';
-import {IActionHandlerMetadata, IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 
@@ -131,7 +131,7 @@ class RepeatFlowHandlerTestSuite {
             times: 3,
             action: {
                 [DummyActionHandler.ID]: {
-                    index: '<%- index %>'
+                    index: '<%- iteration.index %>'
                 }
             }
         };
@@ -167,7 +167,7 @@ class RepeatFlowHandlerTestSuite {
             times: 3,
             action: {
                 [DummyActionHandler.ID]: {
-                    index: '<%- index %>'
+                    index: '<%- iteration.index %>'
                 }
             },
             async: true

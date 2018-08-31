@@ -1,15 +1,12 @@
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
-import {readFile} from 'fs';
-import {IContext, IFlow} from '../interfaces';
+import {IContext, IFlow, IIteration} from '../interfaces';
 import {safeLoad, dump} from 'js-yaml';
 import {render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
-import {promisify} from 'util';
-import {isAbsolute, resolve} from 'path';
-import {homedir} from 'os';
 import {FSUtil} from '../utils/FSUtil';
+import {EJSTemplateUtils} from '../utils/EJSTemplateUtils';
 
 const ejsLint = require('ejs-lint');
 
@@ -52,10 +49,10 @@ export class FlowService {
      * @param {string} idOrAlias
      * @param options
      * @param {IContext} context
-     * @param {number} [index] - child execution order index
+     * @param {IIteration} [iteration] - child execution iteration
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, options: any, context: IContext, index?: number): Promise<ActionSnapshot> {
+    async executeAction(wd: string, idOrAlias: string, options: any, context: IContext, iteration?: IIteration): Promise<ActionSnapshot> {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, wd, idx);
@@ -69,13 +66,13 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed
-                snapshot.setOptions(this.resolveOptions(handler, options, context, true, index));
+                snapshot.setOptions(this.resolveOptions(handler, options, context, true, iteration));
             } else {
                 snapshot.setOptions(FlowService.MASKED);
             }
 
             // resolve without masking
-            options = this.resolveOptions(handler, options, context, false, index);
+            options = this.resolveOptions(handler, options, context, false, iteration);
 
             await handler.validate(options, context, snapshot);
             snapshot.validated();
@@ -117,10 +114,10 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
-     * @param {number} [index] execution order index
+     * @param {IIteration} [iteration] execution iteration
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets: boolean, index?: number): any {
+    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the context object first
             let json = JSON.stringify(options);
@@ -154,9 +151,15 @@ export class FlowService {
             // validate template
             ejsLint(tpl);
 
-            const data: any = {};
+            const data: any = {
+                $: EJSTemplateUtils
+            };
             Object.assign(data, context);
-            Object.assign(data, { index });
+            if (iteration) {
+                Object.assign(data, {
+                    iteration
+                });
+            }
 
             const yaml = render(lines.join('\n'), data);
             options = safeLoad(yaml);
@@ -171,14 +174,14 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
-     * @param {number} [index] execution order index
+     * @param {IIteration} [iteration] execution iteration
      * @returns {Promise<any>}
      */
-    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, index?: number): any {
+    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets, index);
+        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets, iteration);
     }
 }

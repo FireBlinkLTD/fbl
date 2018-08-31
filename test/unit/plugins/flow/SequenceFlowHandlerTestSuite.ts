@@ -182,7 +182,7 @@ export class SequenceFlowHandlerTestSuite {
                   {[DummyActionHandler.ID + '.1']: 0},
               ]
             },
-            {[DummyActionHandler.ID + '.2']: '<%- index %>'},
+            {[DummyActionHandler.ID + '.2']: '<%- iteration.index %>'},
         ];
 
         const context = FlowService.generateEmptyContext();

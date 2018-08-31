@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -40,9 +40,10 @@ export class SequenceFlowHandler extends ActionHandler {
 
         let index = 0;
         for (const action of options) {
-            const keys = Object.keys(action);
-            const idOrAlias = keys[0];
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, index);
+            const idOrAlias = FBLService.extractIdOrAlias(action);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, <IIteration> {
+                index
+            });
             snapshot.registerChildActionSnapshot(childSnapshot);
 
             index++;

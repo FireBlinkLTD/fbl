@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -40,9 +40,10 @@ export class ParallelFlowHandler extends ActionHandler {
 
         const snapshots: ActionSnapshot[] = [];
         const promises = options.map(async (action: any, index: number): Promise<void> => {
-            const keys = Object.keys(action);
-            const idOrAlias = keys[0];
-            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, index);
+            const idOrAlias = FBLService.extractIdOrAlias(action);
+            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, <IIteration> {
+                index
+            });
         });
 
         await Promise.all(promises);

@@ -47,6 +47,7 @@ pipeline:
 ## Default Plugins
 
 - [Context](docs/plugins/context.md)
+- [Exec](docs/plugins/exec.md)
 - [Flow Control](docs/plugins/flow.md)
-- [File System](docs/plugins/flow.md)
+- [File System](docs/plugins/fs.md)
 - [Execution Reporters](docs/plugins/reporters.md)

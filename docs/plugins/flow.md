@@ -8,6 +8,9 @@ Available steps:
 - attachment (external sub-flow file)
 - switch (conditional)
 - try-catch-finally
+- repeat (async and sync)
+- foreach (async and sync)
+- based on template
 
 ## Action Handler: Sequential steps execution
 
@@ -106,7 +109,7 @@ repeat:
   # action to run
   action: 
     # run flow_0.yml and flow_1.yml flows
-    @: flow_<%- index %>.yml                 
+    @: flow_<%- iteration.index %>.yml                 
 ```
 
 ## Action Handler: Switch flow
@@ -162,4 +165,84 @@ try:
       @: error.yml
     finally:
       @: cleanup.yml
+```
+
+## Action Handler: For Each
+
+Allows to execute action for every item in the array or key of an object.
+
+ID: com.fireblink.fbl.flow.foreach
+
+Aliases:
+ - fbl.flow.foreach
+ - flow.foreach
+ - foreach
+ - each
+ 
+**Example:**
+
+```yaml
+each:  
+  of: [1, 2, 3]
+  action:
+    ctx: 
+      test_<%- iteration.index %>: 
+        inline: <%- iteration.value %>
+```
+
+## Action Handler: Template
+
+Run action based on dynamically constructed template. This is handy as you generally can not dynamically construct YAML with EJS template inside most of the actions. 
+
+E.g: following is invalid:
+
+```yaml
+ctx:
+  something: 
+    <% [1, 2, 3].forEach(item => { %>
+    - <%- item %>
+    <% }) %>    
+```
+
+It will fail as upon processing everything that goes after something will be treated as string, causing to produce following action:
+
+```yaml
+ctx:
+  something: '-1\n -2\n -3' 
+```
+
+But there is a template handler that can help you with that.
+
+ID: com.fireblink.fbl.flow.template
+
+Aliases:
+ - fbl.flow.template
+ - flow.template
+ - template
+ - tpl
+ 
+**Example:**
+
+```yaml
+tpl: |-
+  ctx:
+    something: 
+      <% [1, 2, 3].forEach(item => { %>
+      - <%- item %>
+      <% }) %>    
+```
+
+or the same with helper function that converts anything to JSON string (JSON is a valid YAML):
+
+```yaml
+tpl: |-
+  ctx:
+    something: <%- $.toJSON([1, 2, 3]) %> 
+```
+
+that will generally produce:
+
+```yaml
+ctx:
+  something: [1, 2, 3]
 ```

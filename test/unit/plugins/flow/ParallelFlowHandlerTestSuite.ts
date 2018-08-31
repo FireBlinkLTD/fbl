@@ -192,7 +192,7 @@ export class ParallelFlowHandlerTestSuite {
             {
                 '||': [
                     {[DummyActionHandler.ID + '.0']: 0},
-                    {[DummyActionHandler.ID + '.1']: '<%- index %>'},
+                    {[DummyActionHandler.ID + '.1']: '<%- iteration.index %>'},
                 ]
             },
             {[DummyActionHandler.ID + '.2']: 2},

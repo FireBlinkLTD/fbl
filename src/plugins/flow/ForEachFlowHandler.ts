@@ -1,19 +1,20 @@
-import * as Joi from 'joi';
 import {ActionHandler, ActionSnapshot} from '../../models';
+import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
-export class RepeatFlowHandler extends ActionHandler {
+export class ForEachFlowHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.flow.repeat',
+        id: 'com.fireblink.fbl.flow.foreach',
         version: version,
         aliases: [
-            'fbl.flow.repeat',
-            'flow.repeat',
-            'repeat'
+            'fbl.flow.foreach',
+            'flow.foreach',
+            'foreach',
+            'each'
         ],
         // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
         skipTemplateProcessing: true
@@ -21,19 +22,33 @@ export class RepeatFlowHandler extends ActionHandler {
 
     private static validationSchema =
         Joi.object({
-            times: Joi.number().min(1).required(),
+            of: Joi.alternatives(
+                Joi.object(),
+                Joi.array()
+            ).required(),
             action: FBLService.STEP_SCHEMA,
             async: Joi.boolean()
         })
-        .required()
-        .options({ abortEarly: true });
+            .required()
+            .options({ abortEarly: true });
 
     getMetadata(): IActionHandlerMetadata {
-        return RepeatFlowHandler.metadata;
+        return ForEachFlowHandler.metadata;
     }
 
     getValidationSchema(): Joi.SchemaLike | null {
-        return RepeatFlowHandler.validationSchema;
+        return ForEachFlowHandler.validationSchema;
+    }
+
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+        const flowService = Container.get(FlowService);
+        options.of = flowService.resolveOptions(this, options.of, context, false);
+
+        if (options.async) {
+            options.async = flowService.resolveOptions(this, options.async, context, false);
+        }
+
+        await super.validate(options, context, snapshot);
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
@@ -44,9 +59,12 @@ export class RepeatFlowHandler extends ActionHandler {
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
 
-        for (let i = 0; i < options.times; i++) {
+        const iterable = Array.isArray(options.of) ? options.of : Object.keys(options.of);
+        for (let i = 0; i < iterable.length; i++) {
             const iteration = <IIteration> {
-                index: i
+                index: i,
+                name: Array.isArray(options.of) ? undefined : iterable[i],
+                value: Array.isArray(options.of) ? options.of[i] : options.of[iterable[i]]
             };
 
             if (options.async) {
