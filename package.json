@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Command Line tool to automate any kind of work. Originally designed to help with deployments.",
   "keywords": ["fireblink", "fbl", "automation", "cli", "flows"],
   "main": "dist/cli.js",
