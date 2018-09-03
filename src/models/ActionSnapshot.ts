@@ -1,6 +1,6 @@
 import {Container} from 'typedi';
 import {FlowService} from '../services';
-import {IContext} from '../interfaces';
+import {IContext, IIteration} from '../interfaces';
 
 const humanizeDuration = require('humanize-duration');
 
@@ -16,7 +16,8 @@ export class ActionSnapshot {
     constructor(
         public idOrAlias: string,
         public wd: string,
-        public idx: number
+        public idx: number,
+        public iteration?: IIteration
     ) {
         this.createdAt = new Date();
         this.steps = [];

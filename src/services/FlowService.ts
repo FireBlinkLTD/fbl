@@ -55,7 +55,7 @@ export class FlowService {
     async executeAction(wd: string, idOrAlias: string, options: any, context: IContext, iteration?: IIteration): Promise<ActionSnapshot> {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${idOrAlias}]`.green + ' Processing.');
-        const snapshot = new ActionSnapshot(idOrAlias, wd, idx);
+        const snapshot = new ActionSnapshot(idOrAlias, wd, idx, iteration);
 
         try {
             snapshot.setContext(context);

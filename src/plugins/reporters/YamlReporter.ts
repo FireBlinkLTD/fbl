@@ -10,6 +10,7 @@ export class YamlReporter implements IReporter {
     }
 
     async generate(output: string, options: {[key: string]: any}, snapshot: ActionSnapshot): Promise<void> {
-        await promisify(writeFile)(output, dump(snapshot), 'utf8');
+        const sanitisedSnapshot = JSON.parse(JSON.stringify(snapshot));
+        await promisify(writeFile)(output, dump(sanitisedSnapshot), 'utf8');
     }
 }
