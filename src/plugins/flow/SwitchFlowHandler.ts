@@ -40,14 +40,14 @@ export class SwitchFlowHandler extends ActionHandler {
         const flowService = Container.get(FlowService);
 
         // register masked options in the snapshot
-        const masked = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, true);
+        const masked = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, options.value, context, true);
         snapshot.setOptions({
             value: masked,
             is: options.is
         });
 
         // resolve value, as it is mostly likely a template and we're not processing options as a template
-        options.value = flowService.resolveOptionsWithNoHandlerCheck(options.value, context, false);
+        options.value = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, options.value, context, false);
 
         await super.validate(options, context, snapshot);
     }

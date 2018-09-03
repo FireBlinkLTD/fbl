@@ -6,7 +6,7 @@ import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils/FSUtil';
-import {EJSTemplateUtils} from '../utils/EJSTemplateUtils';
+import {EJSTemplateUtil} from '../utils/EJSTemplateUtil';
 
 const ejsLint = require('ejs-lint');
 
@@ -66,13 +66,13 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed
-                snapshot.setOptions(this.resolveOptions(handler, options, context, true, iteration));
+                snapshot.setOptions(this.resolveOptions(wd, handler, options, context, true, iteration));
             } else {
                 snapshot.setOptions(FlowService.MASKED);
             }
 
             // resolve without masking
-            options = this.resolveOptions(handler, options, context, false, iteration);
+            options = this.resolveOptions(wd, handler, options, context, false, iteration);
 
             await handler.validate(options, context, snapshot);
             snapshot.validated();
@@ -111,13 +111,14 @@ export class FlowService {
 
     /**
      * Resolve options with no handler check
+     * @param {string} wd current working directory
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
+    resolveOptionsWithNoHandlerCheck(wd: string, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the context object first
             let json = JSON.stringify(options);
@@ -152,8 +153,10 @@ export class FlowService {
             ejsLint(tpl);
 
             const data: any = {
-                $: EJSTemplateUtils
+                $: new EJSTemplateUtil(wd),
+                env: process.env
             };
+
             Object.assign(data, context);
             if (iteration) {
                 Object.assign(data, {
@@ -170,6 +173,7 @@ export class FlowService {
 
     /**
      * Resolve options for handler
+     * @param {string} wd current working directory
      * @param {ActionHandler} handler
      * @param options
      * @param {IContext} context
@@ -177,11 +181,11 @@ export class FlowService {
      * @param {IIteration} [iteration] execution iteration
      * @returns {Promise<any>}
      */
-    resolveOptions(handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
+    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(options, context, maskSecrets, iteration);
+        return this.resolveOptionsWithNoHandlerCheck(wd, options, context, maskSecrets, iteration);
     }
 }

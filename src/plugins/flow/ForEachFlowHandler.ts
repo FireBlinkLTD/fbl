@@ -42,10 +42,10 @@ export class ForEachFlowHandler extends ActionHandler {
 
     async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
-        options.of = flowService.resolveOptions(this, options.of, context, false);
+        options.of = flowService.resolveOptions(snapshot.wd, this, options.of, context, false);
 
         if (options.async) {
-            options.async = flowService.resolveOptions(this, options.async, context, false);
+            options.async = flowService.resolveOptions(snapshot.wd, this, options.async, context, false);
         }
 
         await super.validate(options, context, snapshot);
