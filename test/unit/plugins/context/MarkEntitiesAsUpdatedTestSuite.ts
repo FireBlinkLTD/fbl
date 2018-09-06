@@ -16,7 +16,7 @@ class MarkEntitiesAsUpdatedTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({}, context, snapshot)
@@ -77,7 +77,7 @@ class MarkEntitiesAsUpdatedTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([{
@@ -91,7 +91,7 @@ class MarkEntitiesAsUpdatedTestSuite {
     async execution(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdated();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const options = [
             <IContextEntity> {

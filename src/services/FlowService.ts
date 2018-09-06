@@ -7,6 +7,7 @@ import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils/FSUtil';
 import {EJSTemplateUtil} from '../utils/EJSTemplateUtil';
+import {IMetadata} from '../interfaces/IMetadata';
 
 const ejsLint = require('ejs-lint');
 
@@ -47,15 +48,16 @@ export class FlowService {
      * Execute action
      * @param {string} wd Working Directory
      * @param {string} idOrAlias
+     * @param {IMetadata} metadata
      * @param options
      * @param {IContext} context
      * @param {IIteration} [iteration] - child execution iteration
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, options: any, context: IContext, iteration?: IIteration): Promise<ActionSnapshot> {
+    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, iteration?: IIteration): Promise<ActionSnapshot> {
         const idx = ++this.index;
-        console.log(` -> [${idx}] [${idOrAlias}]`.green + ' Processing.');
-        const snapshot = new ActionSnapshot(idOrAlias, wd, idx, iteration);
+        console.log(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
+        const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, iteration);
 
         try {
             snapshot.setContext(context);
@@ -84,16 +86,16 @@ export class FlowService {
                 snapshot.success();
 
                 if (snapshot.successful) {
-                    console.log(` <- [${idx}] [${idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
+                    console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
                 } else {
-                    console.log(` <- [${idx}] [${idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
+                    console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
                 }
             } else {
-                console.log(` <- [${idx}] [${idOrAlias}]`.yellow + ' Skipped');
+                console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped');
                 snapshot.skipped();
             }
         } catch (e) {
-            console.error(` <- [${idx}] [${idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
+            console.error(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
             snapshot.failure(e);
         }
 

@@ -3,6 +3,7 @@ import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
+import {meta} from 'joi';
 
 const version = require('../../../../package.json').version;
 
@@ -58,6 +59,8 @@ export class ForEachFlowHandler extends ActionHandler {
         const snapshots: ActionSnapshot[] = [];
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
+        let metadata = FBLService.extractMetadata(options.action);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
 
         const iterable = Array.isArray(options.of) ? options.of : Object.keys(options.of);
         for (let i = 0; i < iterable.length; i++) {
@@ -69,10 +72,10 @@ export class ForEachFlowHandler extends ActionHandler {
 
             if (options.async) {
                 promises.push((async (iter): Promise<void> => {
-                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, options.action[idOrAlias], context, iter);
+                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iter);
                 })(iteration));
             } else {
-                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, options.action[idOrAlias], context, iteration);
+                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iteration);
             }
         }
 

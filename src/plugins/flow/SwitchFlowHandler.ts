@@ -63,8 +63,11 @@ export class SwitchFlowHandler extends ActionHandler {
 
         if (action) {
             const idOrAlias = FBLService.extractIdOrAlias(action);
+            let metadata = FBLService.extractMetadata(action);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
+
             snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context);
             snapshot.registerChildActionSnapshot(childSnapshot);
         }
     }

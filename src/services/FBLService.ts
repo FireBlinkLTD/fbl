@@ -5,17 +5,46 @@ import {FlowService} from './index';
 import {ActionSnapshot} from '../models';
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
 import * as semver from 'semver';
+import {IMetadata} from '../interfaces/IMetadata';
 
 const fblVersion: string = require('../../../package.json').version;
+
+const METADATA_PREFIX = '$';
+
+const joiStepSchemaExt = Joi.extend({
+    name: 'FBLStep',
+    base: Joi.object().min(1).required(),
+    language: {
+        fields: ''
+    },
+    rules: [
+        {
+            name: 'fields',
+            validate (params, value, state, options) {
+                const keys = Object.keys(value);
+
+                let nonAnnotationKeys = 0;
+                for (const key of keys) {
+                    if (!key.startsWith(METADATA_PREFIX)) {
+                        nonAnnotationKeys++;
+                    }
+                }
+
+                if (nonAnnotationKeys !== 1) {
+                    return this.createError(`Found ${nonAnnotationKeys} non-annotation fields, but only one is required.`, {}, state, options);
+                }
+
+                return value;
+            }
+        }
+    ]
+});
 
 @Service()
 export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
 
-    public static STEP_SCHEMA = Joi.object()
-        .min(1)
-        .max(1)
-        .required();
+    public static STEP_SCHEMA = joiStepSchemaExt.FBLStep().fields();
 
     private static validationSchema = Joi.object({
         version: Joi.string()
@@ -37,13 +66,38 @@ export class FBLService {
 
     /**
      * Extract idOrAlias from step object
-     * @param {object} step
-     * @return {string}
+     * @param {{[key: string]: any}} step
+     * @return {{[key: string]: any}}
      */
-    static extractIdOrAlias(step: object): string {
+    static extractIdOrAlias(step: {[key: string]: any}): string {
         const keys = Object.keys(step);
 
-        return keys[0];
+        for (const key of keys) {
+            if (!key.startsWith(METADATA_PREFIX)) {
+                return key;
+            }
+        }
+
+        // this error should potentially never be thrown as all steps should be pre-validated
+        throw new Error(`Unable to extract id or alias from keys: ${keys.join(', ')}`);
+    }
+
+    /**
+     * Extract step metadata
+     * @param {{[key: string]: any}} step
+     * @return {IMetadata}
+     */
+    static extractMetadata(step: {[key: string]: any}): IMetadata {
+        const result: {[key: string]: any} = {};
+        const keys = Object.keys(step);
+
+        for (const key of keys) {
+            if (key.startsWith(METADATA_PREFIX)) {
+                result[key] = step[key];
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -65,6 +119,18 @@ export class FBLService {
 
             if (plugin.actionHandlers) {
                 plugin.actionHandlers.forEach(actionHander => {
+                    if (actionHander.getMetadata().aliases) {
+                        for (const alias of actionHander.getMetadata().aliases) {
+                            if (alias.startsWith(METADATA_PREFIX)) {
+                                throw new Error(`Unable to register plugin ${plugin.name}. Action handler alias "${alias}" could not start with ${METADATA_PREFIX}`);
+                            }
+                        }
+                    }
+
+                    if (actionHander.getMetadata().id.startsWith(METADATA_PREFIX)) {
+                        throw new Error(`Unable to register plugin ${plugin.name}. Action handler ID "${actionHander.getMetadata().id}" could not start with ${METADATA_PREFIX}`);
+                    }
+
                     this.actionHandlersRegistry.register(actionHander);
                 });
             }
@@ -132,8 +198,11 @@ export class FBLService {
         }
 
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
+        let metadata = FBLService.extractMetadata(flow.pipeline);
+        metadata = this.flowService.resolveOptionsWithNoHandlerCheck(wd, metadata, context, false);
+
         const options = flow.pipeline[idOrAlias];
 
-        return await this.flowService.executeAction(wd, idOrAlias, options, context);
+        return await this.flowService.executeAction(wd, idOrAlias, metadata, options, context);
     }
 }

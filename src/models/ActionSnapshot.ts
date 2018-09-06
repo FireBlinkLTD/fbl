@@ -1,11 +1,13 @@
 import {Container} from 'typedi';
 import {FlowService} from '../services';
 import {IContext, IIteration} from '../interfaces';
+import {IMetadata} from '../interfaces/IMetadata';
 
 const humanizeDuration = require('humanize-duration');
 
 export class ActionSnapshot {
     private createdAt: Date;
+    private completedAt: Date;
     private steps: IActionStep[];
 
     public successful: boolean;
@@ -15,6 +17,7 @@ export class ActionSnapshot {
 
     constructor(
         public idOrAlias: string,
+        public metadata: IMetadata,
         public wd: string,
         public idx: number,
         public iteration?: IIteration
@@ -38,7 +41,7 @@ export class ActionSnapshot {
      * @param {string} message
      */
     log(message: string) {
-        console.log(` -> [${this.idx}] [${this.idOrAlias}]`.green + ' ' + message);
+        console.log(` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message);
 
         this.registerStep('log', message);
     }
@@ -94,16 +97,6 @@ export class ActionSnapshot {
      */
     start() {
         this.registerStep('start');
-        this.duration = Date.now() - this.createdAt.getTime();
-    }
-
-    /**
-     * Record successful execution state
-     */
-    success() {
-        this.registerStep('success');
-
-        this.successful = this.ignoreChildFailure || !this.childFailure;
     }
 
     /**
@@ -114,13 +107,24 @@ export class ActionSnapshot {
     }
 
     /**
+     * Record successful execution state
+     */
+    success() {
+        this.registerStep('success');
+        this.completedAt = new Date();
+        this.duration = this.completedAt.getTime() - this.createdAt.getTime();
+        this.successful = this.ignoreChildFailure || !this.childFailure;
+
+    }
+
+    /**
      * Record when skipped execution
      */
     skipped() {
         this.registerStep('skipped');
-
         this.successful = this.ignoreChildFailure || !this.childFailure;
-        this.duration = Date.now() - this.createdAt.getTime();
+        this.completedAt = new Date();
+        this.duration = this.completedAt.getTime() - this.createdAt.getTime();
     }
 
     /**
@@ -129,8 +133,8 @@ export class ActionSnapshot {
      */
     failure(error: any) {
         this.registerStep('failure', error && error.toString());
-
-        this.duration = Date.now() - this.createdAt.getTime();
+        this.completedAt = new Date();
+        this.duration = this.completedAt.getTime() - this.createdAt.getTime();
     }
 
     /**

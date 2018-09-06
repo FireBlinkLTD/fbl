@@ -29,7 +29,7 @@ Aliases:
 
 ```yaml
 # Run steps in a sequence
---:
+'--':
   - ctx:
       '.':
         inline: 
@@ -57,7 +57,7 @@ Aliases:
  
 ```yaml
 # Run steps in parallel
-||:
+'||':
   - ctx:
       '.':
         inline: 

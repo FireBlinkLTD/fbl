@@ -42,7 +42,7 @@ class RepeatFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new RepeatFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -97,7 +97,7 @@ class RepeatFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new RepeatFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -137,7 +137,7 @@ class RepeatFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);
@@ -174,7 +174,7 @@ class RepeatFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);

@@ -19,7 +19,7 @@ export class WriteToTempFileTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -62,7 +62,7 @@ export class WriteToTempFileTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToTempFile();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -80,7 +80,7 @@ export class WriteToTempFileTestSuite {
             ctx: {}
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const content = 'test';
         await chai.expect(
