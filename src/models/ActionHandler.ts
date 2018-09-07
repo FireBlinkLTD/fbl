@@ -25,7 +25,7 @@ export abstract class ActionHandler {
         if (schema) {
             const result = Joi.validate(options, schema);
             if (result.error) {
-                throw new Error(this.getMetadata().id + ': ' + result.error.details.map(d => d.message).join('\n'));
+                throw new Error(result.error.details.map(d => d.message).join('\n'));
             }
         }
     }

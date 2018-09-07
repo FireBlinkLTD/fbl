@@ -1,3 +1,6 @@
+import {ActionHandler} from '../models';
+import {ActionHandlersRegistry} from '../services/ActionHandlersRegistry';
+
 export interface IContext {
     /**
      * Context variables
@@ -40,6 +43,8 @@ export interface IContext {
          */
         deleted: IContextEntity[];
     };
+
+    dynamicActionHandlers: ActionHandlersRegistry;
 }
 
 export interface IContextEntity {

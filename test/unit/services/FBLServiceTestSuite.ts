@@ -38,7 +38,7 @@ class DummyActionHandler extends ActionHandler {
 class InvalidIdActionHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
         return  <IActionHandlerMetadata> {
-            id: '$invalid',
+            id: FBLService.METADATA_PREFIX + 'invalid',
             version: '1.0.0'
         };
     }
@@ -54,7 +54,7 @@ class InvalidAliasActionHandler extends ActionHandler {
             id: 'valid',
             version: '1.0.0',
             aliases: [
-                '$invalid.alias'
+                FBLService.METADATA_PREFIX + 'invalid.alias'
             ]
         };
     }
@@ -65,7 +65,7 @@ class InvalidAliasActionHandler extends ActionHandler {
 }
 
 @suite()
-export class FblTestSuite {
+export class FBLServiceTestSuite {
     after() {
         Container.reset();
     }
@@ -111,7 +111,8 @@ export class FblTestSuite {
         const contextOptionsSteps = snapshot.getSteps().filter(s => s.type === 'context');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
         assert.deepStrictEqual(contextOptionsSteps[contextOptionsSteps.length - 1].payload, {
-            ctx: context.ctx
+            ctx: context.ctx,
+            entities: context.entities
         });
         assert.strictEqual(result, 'test123');
 
@@ -226,7 +227,7 @@ export class FblTestSuite {
             error = e;
         }
 
-        assert.strictEqual(error.message, `Unable to register plugin invalid_id. Action handler ID "${new InvalidIdActionHandler().getMetadata().id}" could not start with $`);
+        assert.strictEqual(error.message, `Unable to register action handler with id "${new InvalidIdActionHandler().getMetadata().id}". It can not start with ${FBLService.METADATA_PREFIX}`);
 
         error = undefined;
         try {
@@ -246,7 +247,7 @@ export class FblTestSuite {
             error = e;
         }
 
-        assert.strictEqual(error.message, `Unable to register plugin invalid_alias. Action handler alias "${new InvalidAliasActionHandler().getMetadata().aliases[0]}" could not start with $`);
+        assert.strictEqual(error.message, `Unable to register action handler with alias "${new InvalidAliasActionHandler().getMetadata().aliases[0]}". It can not start with ${FBLService.METADATA_PREFIX}`);
     }
 
     @test()

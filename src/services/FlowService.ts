@@ -40,7 +40,8 @@ export class FlowService {
                 created: [],
                 updated: [],
                 deleted: []
-            }
+            },
+            dynamicActionHandlers: new ActionHandlersRegistry()
         };
     }
 
@@ -52,9 +53,10 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {IIteration} [iteration] - child execution iteration
+     * @param {{[key: string}: any}} additionalTemplateParameters
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, iteration?: IIteration): Promise<ActionSnapshot> {
+    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): Promise<ActionSnapshot> {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, iteration);
@@ -62,19 +64,27 @@ export class FlowService {
         try {
             snapshot.setContext(context);
 
-            const handler = this.actionHandlersRegistry.find(idOrAlias);
+            let handler = this.actionHandlersRegistry.find(idOrAlias);
+            if (!handler) {
+                handler = context.dynamicActionHandlers.find(idOrAlias);
+            }
+
+            if (!handler) {
+                throw new Error(`Unable to find action handler for: ${idOrAlias}`);
+            }
+
             snapshot.setActionHandlerId(handler.getMetadata().id);
 
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed
-                snapshot.setOptions(this.resolveOptions(wd, handler, options, context, true, iteration));
+                snapshot.setOptions(this.resolveOptions(wd, handler, options, context, true, iteration, additionalTemplateParameters));
             } else {
                 snapshot.setOptions(FlowService.MASKED);
             }
 
             // resolve without masking
-            options = this.resolveOptions(wd, handler, options, context, false, iteration);
+            options = this.resolveOptions(wd, handler, options, context, false, iteration, additionalTemplateParameters);
 
             await handler.validate(options, context, snapshot);
             snapshot.validated();
@@ -118,9 +128,17 @@ export class FlowService {
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
+     * @param {{[key: string]: any }} additionalTemplateParameters
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(wd: string, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
+    resolveOptionsWithNoHandlerCheck(
+        wd: string,
+        options: any,
+        context: IContext,
+        maskSecrets: boolean,
+        iteration?: IIteration,
+        additionalTemplateParameters?: {[key: string]: any}
+    ): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the context object first
             let json = JSON.stringify(options);
@@ -159,6 +177,10 @@ export class FlowService {
                 env: process.env
             };
 
+            if (additionalTemplateParameters) {
+                Object.assign(data, additionalTemplateParameters);
+            }
+
             Object.assign(data, context);
             if (iteration) {
                 Object.assign(data, {
@@ -181,13 +203,14 @@ export class FlowService {
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
+     * @param {{[key: string]: any}} additionalTemplateParameters
      * @returns {Promise<any>}
      */
-    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration): any {
+    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(wd, options, context, maskSecrets, iteration);
+        return this.resolveOptionsWithNoHandlerCheck(wd, options, context, maskSecrets, iteration, additionalTemplateParameters);
     }
 }
