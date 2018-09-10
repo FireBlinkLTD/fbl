@@ -1,13 +1,9 @@
 import {ActionHandler} from '../../models';
-import {Container} from 'typedi';
-import {FlowService} from '../../services';
-import * as glob from 'glob-promise';
 import * as Joi from 'joi';
 import {createCipheriv, createDecipheriv, pbkdf2, randomBytes} from 'crypto';
 import * as tmp from 'tmp-promise';
 import {createReadStream, createWriteStream, ReadStream, rename} from 'fs';
 import {promisify} from 'util';
-import {FSUtil} from '../../utils/FSUtil';
 
 export abstract class BaseCrypto extends ActionHandler {
     private static encryptionAlgorithm = 'aes-256-cbc';

@@ -7,6 +7,7 @@ import {RepeatFlowHandler} from './RepeatFlowHandler';
 import {TryCatchFinallyFlowHandler} from './TryCatchFinallyFlowHandler';
 import {ForEachFlowHandler} from './ForEachFlowHandler';
 import {TemplateFlowHandler} from './TemplateFlowHandler';
+import {VirtualFlowHandler} from './VirtualFlowHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -26,6 +27,7 @@ module.exports = <IPlugin> {
         new SwitchFlowHandler(),
         new RepeatFlowHandler(),
         new TemplateFlowHandler(),
-        new TryCatchFinallyFlowHandler()
+        new TryCatchFinallyFlowHandler(),
+        new VirtualFlowHandler()
     ]
 };

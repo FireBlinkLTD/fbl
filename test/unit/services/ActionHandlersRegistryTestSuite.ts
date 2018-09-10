@@ -56,18 +56,9 @@ export class ActionHandlersRegistryTestSuite {
         registry.unregister(id1);
 
         // make sure action handler 1 can no longer be found by id
-        chai.expect(() => {
-            registry.find(id1);
-        }).to.throw('Unable to find action handler for: ' + id1);
-
-        // make sure action handler 1 can no longer be found by aliases
-        chai.expect(() => {
-            registry.find(id1 + '.1');
-        }).to.throw('Unable to find action handler for: ' + id1 + '.1');
-
-        chai.expect(() => {
-            registry.find(id1 + '.2');
-        }).to.throw('Unable to find action handler for: ' + id1 + '.2');
+        assert.strictEqual(registry.find(id1), null);
+        assert.strictEqual(registry.find(id1 + '.1'), null);
+        assert.strictEqual(registry.find(id1 + '.2'), null);
 
         // make sure action handler 2 can be found by id
         assert.strictEqual(actionHandler2, registry.find(id2));

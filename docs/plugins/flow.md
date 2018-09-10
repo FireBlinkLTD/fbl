@@ -246,3 +246,47 @@ that will generally produce:
 ctx:
   something: [1, 2, 3]
 ```
+
+## Action Handler: Virtual
+
+Allows to create virtual action handler for another action (that can be represented as one of the flows).
+
+ID: com.fireblink.fbl.flow.virtual
+
+Aliases:
+ - fbl.flow.virtual
+ - flow.virtual
+ - virtual
+ 
+ **Example:**
+ 
+ ```yaml
+ virtual:
+  # [required] virtual handler ID
+  id: handler.id
+  
+  # [optional] aliases for the handler to reference
+  aliases:
+    - handler.alias
+  
+  # [optional] JSON Schema of options that can/should be passed to the generated handler     
+  validationSchema:
+    type: object
+    properties:
+      test: 
+        type: string
+  
+  # [required] action to invoke
+  action:
+    ctx:
+      some_field:
+        # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+        inline: <%- parameters.test %> 
+ ```
+ 
+ Then you can reference your generated handler like any other:
+ 
+ ```yaml
+handler.id:
+  test: some_field_value
+```

@@ -60,9 +60,10 @@ export class ActionSnapshot {
      */
     setContext(context: IContext) {
         if (Container.get(FlowService).debug) {
-            // only ctx field should be exposed
+            // only "ctx" and "entities" fields should be exposed
             this.registerStep('context', JSON.parse(JSON.stringify({
-                ctx: context.ctx
+                ctx: context.ctx,
+                entities: context.entities
             })));
         }
     }

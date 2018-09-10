@@ -9,8 +9,6 @@ import {IMetadata} from '../interfaces/IMetadata';
 
 const fblVersion: string = require('../../../package.json').version;
 
-const METADATA_PREFIX = '$';
-
 const joiStepSchemaExt = Joi.extend({
     name: 'FBLStep',
     base: Joi.object().min(1).required(),
@@ -25,7 +23,7 @@ const joiStepSchemaExt = Joi.extend({
 
                 let nonAnnotationKeys = 0;
                 for (const key of keys) {
-                    if (!key.startsWith(METADATA_PREFIX)) {
+                    if (!key.startsWith(FBLService.METADATA_PREFIX)) {
                         nonAnnotationKeys++;
                     }
                 }
@@ -45,6 +43,7 @@ export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
 
     public static STEP_SCHEMA = joiStepSchemaExt.FBLStep().fields();
+    public static METADATA_PREFIX = '$';
 
     private static validationSchema = Joi.object({
         version: Joi.string()
@@ -73,7 +72,7 @@ export class FBLService {
         const keys = Object.keys(step);
 
         for (const key of keys) {
-            if (!key.startsWith(METADATA_PREFIX)) {
+            if (!key.startsWith(FBLService.METADATA_PREFIX)) {
                 return key;
             }
         }
@@ -92,7 +91,7 @@ export class FBLService {
         const keys = Object.keys(step);
 
         for (const key of keys) {
-            if (key.startsWith(METADATA_PREFIX)) {
+            if (key.startsWith(FBLService.METADATA_PREFIX)) {
                 result[key] = step[key];
             }
         }
@@ -119,18 +118,6 @@ export class FBLService {
 
             if (plugin.actionHandlers) {
                 plugin.actionHandlers.forEach(actionHander => {
-                    if (actionHander.getMetadata().aliases) {
-                        for (const alias of actionHander.getMetadata().aliases) {
-                            if (alias.startsWith(METADATA_PREFIX)) {
-                                throw new Error(`Unable to register plugin ${plugin.name}. Action handler alias "${alias}" could not start with ${METADATA_PREFIX}`);
-                            }
-                        }
-                    }
-
-                    if (actionHander.getMetadata().id.startsWith(METADATA_PREFIX)) {
-                        throw new Error(`Unable to register plugin ${plugin.name}. Action handler ID "${actionHander.getMetadata().id}" could not start with ${METADATA_PREFIX}`);
-                    }
-
                     this.actionHandlersRegistry.register(actionHander);
                 });
             }
