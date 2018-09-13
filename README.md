@@ -8,9 +8,18 @@ This is a second reincarnation on internal tool that FireBlink LTD used to deplo
 Original tool was vendor locked and had pretty much limited functionality.
 
 The new one, README of which you're currently reading is redesigned from scratch to fix that limitation.
-Even more, due to plugin nature it can process any kind of flows, even non related to deployments.
+Even more, due to plugin nature it can process any kind of flows, even non related to deployments. 
 
 FBL generally designed to help with automation related tasks that require flexible control over the flow.
+
+Here is how a very basic flow may FBL handle:
+
+![Sample Flow](docs/images/sample_flow.png)
+
+FBL can run steps "A" then "B" and "C" in a chain, but step "E" in parallel with that chain.
+Once all are completed step "D" is invoked.
+
+Out of the box FBL contains lots of default steps that can help to control the flow. 
 
 # Usage
 
