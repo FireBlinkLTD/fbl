@@ -3,14 +3,15 @@
 Flow order control.
 
 Available steps:
-- sequence (sync)
-- parallel (async)
-- attachment (external sub-flow file)
-- switch (conditional)
-- try-catch-finally
-- repeat (async and sync)
-- foreach (async and sync)
-- based on template
+- [sequence (sync)](#action-handler-sequential-steps-execution)
+- [parallel (async)](#action-handler-parallel-steps-execution)
+- [attachment](#action-handler-attached-flow)
+- [repeat](#action-handler-repeat-flow)
+- [for each of](#action-handler-for-each)
+- [switch (conditional)](#action-handler-switch-flow)
+- [try-catch-finally](#action-handler-try---catch---finally-flow)
+- [template](#action-handler-template)
+- [virtual](#action-handler-virtual)
 
 ## Action Handler: Sequential steps execution
 
@@ -112,6 +113,29 @@ repeat:
     @: flow_<%- iteration.index %>.yml                 
 ```
 
+## Action Handler: For Each
+
+Allows to execute action for every item in the array or key of an object.
+
+ID: com.fireblink.fbl.flow.foreach
+
+Aliases:
+ - fbl.flow.foreach
+ - flow.foreach
+ - foreach
+ - each
+ 
+**Example:**
+
+```yaml
+each:  
+  of: [1, 2, 3]
+  action:
+    ctx: 
+      test_<%- iteration.index %>: 
+        inline: <%- iteration.value %>
+```
+
 ## Action Handler: Switch flow
 
 Allows to run action based on some condition
@@ -165,29 +189,6 @@ try:
       @: error.yml
     finally:
       @: cleanup.yml
-```
-
-## Action Handler: For Each
-
-Allows to execute action for every item in the array or key of an object.
-
-ID: com.fireblink.fbl.flow.foreach
-
-Aliases:
- - fbl.flow.foreach
- - flow.foreach
- - foreach
- - each
- 
-**Example:**
-
-```yaml
-each:  
-  of: [1, 2, 3]
-  action:
-    ctx: 
-      test_<%- iteration.index %>: 
-        inline: <%- iteration.value %>
 ```
 
 ## Action Handler: Template

@@ -45,6 +45,11 @@ export interface IContext {
     };
 
     dynamicActionHandlers: ActionHandlersRegistry;
+
+    ejsTemplateDelimiters: {
+        global: string,
+        local: string
+    };
 }
 
 export interface IContextEntity {

@@ -44,7 +44,7 @@ export class RepeatFlowHandler extends ActionHandler {
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
         let metadata = FBLService.extractMetadata(options.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
         for (let i = 0; i < options.times; i++) {
             const iteration = <IIteration> {

@@ -59,6 +59,8 @@ pipeline:
    $title: 'Human readable title of action'
 ``` 
 
+Flow files can use EJS [templates](docs/templates.md) for a flexible control over the flow.
+
 ## Default Plugins
 
 - [Context](docs/plugins/context.md)
@@ -93,4 +95,10 @@ secrets:
 # Disable console colorful output
 # Has same effect as "--no-colors" option
 no-colors: true
+
+# Custom global EJS template delimiter
+global-template-delimiter: $
+
+# Custom local EJS template delimiter
+local-template-delimiter: %
 ```
