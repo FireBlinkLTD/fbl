@@ -3,7 +3,7 @@ import {Container} from 'typedi';
 import {IActionHandlerMetadata, IFlow, IPlugin} from '../../../src/interfaces';
 import {ActionHandler, ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';
-import {ActionHandlersRegistry, FBLService, FlowService} from '../../../src/services';
+import {FBLService, FlowService} from '../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

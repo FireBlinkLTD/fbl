@@ -41,7 +41,11 @@ export class FlowService {
                 updated: [],
                 deleted: []
             },
-            dynamicActionHandlers: new ActionHandlersRegistry()
+            dynamicActionHandlers: new ActionHandlersRegistry(),
+            ejsTemplateDelimiters: {
+                global: '$',
+                local: '%'
+            }
         };
     }
 
@@ -115,23 +119,87 @@ export class FlowService {
     /**
      * Read flow from file
      * @param {string} file
+     * @param {IContext} context
+     * @param {string} wd working directory
      * @returns {Promise<IFlow>}
      */
-    async readFlowFromFile(file: string): Promise<IFlow> {
-        return await FSUtil.readYamlFromFile(file) as IFlow;
+    async readFlowFromFile(file: string, context: IContext, wd: string): Promise<IFlow> {
+        const absolutePath = FSUtil.getAbsolutePath(file, wd);
+        console.log(` -> Reading flow file:`.green + absolutePath);
+        let content = await FSUtil.readTextFile(absolutePath);
+
+        content = this.resolveTemplate(
+            context.ejsTemplateDelimiters.global,
+            wd,
+            content,
+            context
+        );
+
+        let flow;
+        try {
+            flow = safeLoad(content) as IFlow;
+        } catch (e) {
+            console.error(` -> Reading flow failed from file:`.red + absolutePath + ' Error: ' + e.message.red);
+            console.error(content.gray);
+            throw (e);
+        }
+
+        return flow;
+    }
+
+    /**
+     * Resolve template
+     * @param {string} delimiter - EJS template delimiter
+     * @param {string} wd - working directory
+     * @param {string} tpl - template to resolve
+     * @param {IContext} context
+     * @param {IIteration} [iteration]
+     * @param {{[p: string]: any}} [additionalTemplateParameters]
+     * @return {string}
+     */
+    resolveTemplate(
+        delimiter: string,
+        wd: string,
+        tpl: string,
+        context: IContext,
+        iteration?: IIteration,
+        additionalTemplateParameters?: {[key: string]: any}
+    ): string {
+        // validate template
+        ejsLint(tpl, { delimiter });
+
+        const data: any = {
+            $: new EJSTemplateUtil(wd),
+            env: process.env
+        };
+
+        if (additionalTemplateParameters) {
+            Object.assign(data, additionalTemplateParameters);
+        }
+
+        Object.assign(data, context);
+        if (iteration) {
+            Object.assign(data, {
+                iteration
+            });
+        }
+
+        return render(tpl, data, { delimiter });
     }
 
     /**
      * Resolve options with no handler check
+     * @param {string} delimiter - EJS template delimiter, by default EJS is using %
      * @param {string} wd current working directory
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
-     * @param {{[key: string]: any }} additionalTemplateParameters
+     * @param {{[key: string]: any}} [additionalTemplateParameters]
      * @return {any}
      */
     resolveOptionsWithNoHandlerCheck(
+        delimiter: string,
         wd: string,
         options: any,
         context: IContext,
@@ -140,9 +208,11 @@ export class FlowService {
         additionalTemplateParameters?: {[key: string]: any}
     ): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
-            // make a copy of the context object first
+            // make a copy of the options object first
             let json = JSON.stringify(options);
-            const regex = /<%[^%>|\w]*[^\w]+(secrets[^\w])[^%>]*%>/g;
+
+            const pattern = `<${delimiter}[^${delimiter}>|\\w]*[^\\w]+(secrets[^\\w])[^${delimiter}>]*${delimiter}>`;
+            const regex = new RegExp(pattern, 'g');
             json = json.replace(regex, FlowService.MASKED);
             options = JSON.parse(json);
         }
@@ -154,13 +224,13 @@ export class FlowService {
             // while in yaml following string is fully valid '<%- ctx[''name''] %>'
             // for EJS it is broken due to quotes escape
             const lines: string[] = [];
-            const ejsTemplateRegEx = /<%([^%>]*)%>/g;
+            const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
             const doubleQuotesRegEx = /''/g;
             tpl.split('\n').forEach(line => {
                if (line.indexOf('\'\'') !== -1) {
                    // we only want to replace '' to ' inside the EJS template
                    line = line.replace(ejsTemplateRegEx, function (match, g1): string {
-                        return `<%${g1.replace(doubleQuotesRegEx, '\'')}%>`;
+                        return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
                    });
                }
 
@@ -168,27 +238,7 @@ export class FlowService {
             });
 
             tpl = lines.join('\n');
-
-            // validate template
-            ejsLint(tpl);
-
-            const data: any = {
-                $: new EJSTemplateUtil(wd),
-                env: process.env
-            };
-
-            if (additionalTemplateParameters) {
-                Object.assign(data, additionalTemplateParameters);
-            }
-
-            Object.assign(data, context);
-            if (iteration) {
-                Object.assign(data, {
-                    iteration
-                });
-            }
-
-            const yaml = render(lines.join('\n'), data);
+            const yaml = this.resolveTemplate(delimiter, wd, tpl, context, iteration, additionalTemplateParameters);
             options = safeLoad(yaml);
         }
 
@@ -211,6 +261,6 @@ export class FlowService {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(wd, options, context, maskSecrets, iteration, additionalTemplateParameters);
+        return this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, iteration, additionalTemplateParameters);
     }
 }

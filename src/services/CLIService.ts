@@ -20,6 +20,8 @@ export class CLIService {
     private flowFilePath: string;
     private reportFilePath?: string;
     private reportFormat?: string;
+    private globalEJSDelimiter?: string;
+    private localEJSDelimiter?: string;
 
     private plugins = [
         __dirname + '/../plugins/context',
@@ -67,10 +69,20 @@ export class CLIService {
         }
 
         const context = await this.prepareContext();
-        const flow = await this.flowService.readFlowFromFile(this.flowFilePath);
+
+        if (this.globalEJSDelimiter) {
+            context.ejsTemplateDelimiters.global = this.globalEJSDelimiter;
+        }
+
+        if (this.localEJSDelimiter) {
+            context.ejsTemplateDelimiters.local = this.localEJSDelimiter;
+        }
+
+        const wd = dirname(this.flowFilePath);
+        const flow = await this.flowService.readFlowFromFile(this.flowFilePath, context, wd);
 
         const snapshot = await this.fbl.execute(
-            dirname(this.flowFilePath),
+            wd,
             flow,
             context
         );
@@ -114,6 +126,16 @@ export class CLIService {
             /* istanbul ignore else */
             if (globalConfig['no-colors']) {
                 this.colors = false;
+            }
+
+            /* istanbul ignore else */
+            if (globalConfig['global-template-delimiter']) {
+                this.globalEJSDelimiter = globalConfig['global-template-delimiter'];
+            }
+
+            /* istanbul ignore else */
+            if (globalConfig['local-template-delimiter']) {
+                this.localEJSDelimiter = globalConfig['local-template-delimiter'];
             }
         }
     }
@@ -165,6 +187,8 @@ export class CLIService {
             )
             .option('--unsafe-plugins', 'If provided incompatible plugins will still be registered and be available for use, but may lead to unexpected results or errors.')
             .option('--no-colors', 'Remove colors from output. Make it boring.')
+            .option('--global-template-delimiter <delimiter>', 'Global EJS template delimiter. Default: $')
+            .option('--local-template-delimiter <delimiter>', 'Local EJS template delimiter. Default: %')
             .arguments('<file>')
             .action((file, options) => {
                 options.file = file;
@@ -201,6 +225,14 @@ export class CLIService {
 
         if (commander.unsafePlugins) {
             this.unsafePlugins = true;
+        }
+
+        if (commander.globalTemplateDelimiter) {
+            this.globalEJSDelimiter = commander.globalTemplateDelimiter;
+        }
+
+        if (commander.localTemplateDelimiter) {
+            this.localEJSDelimiter = commander.localTemplateDelimiter;
         }
     }
 

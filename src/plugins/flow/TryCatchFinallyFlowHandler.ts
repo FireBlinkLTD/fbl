@@ -39,7 +39,7 @@ export class TryCatchFinallyFlowHandler extends ActionHandler {
         // run try
         let idOrAlias = FBLService.extractIdOrAlias(options.action);
         let metadata = FBLService.extractMetadata(options.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
         let childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context);
         snapshot.ignoreChildFailure = true;
@@ -49,7 +49,7 @@ export class TryCatchFinallyFlowHandler extends ActionHandler {
         if (snapshot.childFailure && options.catch) {
             idOrAlias = FBLService.extractIdOrAlias(options.catch);
             metadata = FBLService.extractMetadata(options.catch);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
             childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.catch[idOrAlias], context);
             snapshot.ignoreChildFailure = childSnapshot.successful;
@@ -60,7 +60,7 @@ export class TryCatchFinallyFlowHandler extends ActionHandler {
         if (snapshot.childFailure && options.finally) {
             idOrAlias = FBLService.extractIdOrAlias(options.finally);
             metadata = FBLService.extractMetadata(options.finally);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(snapshot.wd, metadata, context, false);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
             childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.finally[idOrAlias], context);
             if (snapshot.ignoreChildFailure) {
