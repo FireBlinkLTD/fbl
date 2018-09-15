@@ -21,7 +21,7 @@ export class ContextValuesAssignmentTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -60,7 +60,7 @@ export class ContextValuesAssignmentTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignment();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -115,7 +115,7 @@ export class ContextValuesAssignmentTestSuite {
             }
         };
 
-        let snapshot = new ActionSnapshot('.', '', 0);
+        let snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
         assert.strictEqual(context.ctx.content, 'inline');
@@ -123,7 +123,7 @@ export class ContextValuesAssignmentTestSuite {
         // explicitly set priority to inline
         options['.'].priority = 'inline';
 
-        snapshot = new ActionSnapshot('.', '', 0);
+        snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
         assert.strictEqual(context.ctx.content, 'inline');
@@ -131,7 +131,7 @@ export class ContextValuesAssignmentTestSuite {
         // change priority to files
         options['.'].priority = 'files';
 
-        snapshot = new ActionSnapshot('.', '', 0);
+        snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
         assert.strictEqual(context.ctx.content, 'file');
@@ -170,7 +170,7 @@ export class ContextValuesAssignmentTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
@@ -235,7 +235,7 @@ export class ContextValuesAssignmentTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);

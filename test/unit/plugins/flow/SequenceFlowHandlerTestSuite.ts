@@ -50,7 +50,7 @@ export class SequenceFlowHandlerTestSuite {
         const actionHandler = new SequenceFlowHandler();
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
         
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -85,7 +85,7 @@ export class SequenceFlowHandlerTestSuite {
         const actionHandler = new SequenceFlowHandler();
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([
@@ -119,7 +119,7 @@ export class SequenceFlowHandlerTestSuite {
         ];
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 1);
@@ -151,7 +151,7 @@ export class SequenceFlowHandlerTestSuite {
         ];
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
@@ -186,7 +186,7 @@ export class SequenceFlowHandlerTestSuite {
         ];
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);

@@ -14,7 +14,7 @@ class JsonReporterTestSuite {
         const reporter = new JsonReporter();
         const file = await tmp.file();
 
-        await reporter.generate(file.path, {}, new ActionSnapshot('test', '.', 0));
+        await reporter.generate(file.path, {}, new ActionSnapshot('test', {}, '.', 0));
         const strReport = await promisify(readFile)(file.path, 'utf8');
 
         const report = JSON.parse(strReport);
@@ -24,6 +24,7 @@ class JsonReporterTestSuite {
 
         assert.deepStrictEqual(report, {
             idOrAlias: 'test',
+            metadata: {},
             wd: '.',
             idx: 0,
             ignoreChildFailure: false,

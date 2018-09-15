@@ -41,7 +41,7 @@ class TemplateFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new TemplateFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -56,7 +56,7 @@ class TemplateFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new TemplateFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(`
@@ -85,7 +85,7 @@ class TemplateFlowHandlerTestSuite {
         context.ctx.test = ['a1', 'b2', {
             ab: true
         }];
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(actionHandlerOptions, context.ctx.test);

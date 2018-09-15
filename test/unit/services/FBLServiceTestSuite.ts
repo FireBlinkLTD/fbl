@@ -1,9 +1,9 @@
 import {suite, test} from 'mocha-typescript';
 import {Container} from 'typedi';
-import {IActionHandlerMetadata, IFlow} from '../../../src/interfaces';
-import {ActionHandler} from '../../../src/models';
+import {IActionHandlerMetadata, IFlow, IPlugin} from '../../../src/interfaces';
+import {ActionHandler, ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';
-import {ActionHandlersRegistry, FBLService, FlowService} from '../../../src/services';
+import {FBLService, FlowService} from '../../../src/services';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -35,10 +35,53 @@ class DummyActionHandler extends ActionHandler {
     }
 }
 
+class InvalidIdActionHandler extends ActionHandler {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
+            id: FBLService.METADATA_PREFIX + 'invalid',
+            version: '1.0.0'
+        };
+    }
+
+    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+        return;
+    }
+}
+
+class InvalidAliasActionHandler extends ActionHandler {
+    getMetadata(): IActionHandlerMetadata {
+        return  <IActionHandlerMetadata> {
+            id: 'valid',
+            version: '1.0.0',
+            aliases: [
+                FBLService.METADATA_PREFIX + 'invalid.alias'
+            ]
+        };
+    }
+
+    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+        return;
+    }
+}
+
 @suite()
-export class FblTestSuite {
+export class FBLServiceTestSuite {
     after() {
         Container.reset();
+    }
+
+    @test()
+    async extractIdOrAliasMissingKey(): Promise<void> {
+        let error;
+        try {
+            FBLService.extractIdOrAlias({
+                $title: 'test'
+            });
+        } catch (e) {
+            error = e;
+        }
+
+        assert.strictEqual(error.message, 'Unable to extract id or alias from keys: $title');
     }
 
     @test()
@@ -59,6 +102,7 @@ export class FblTestSuite {
         const snapshot = await fbl.execute('.', <IFlow> {
             version: '1.0.0',
             pipeline: {
+                $title: 'Dummy Action Handler',
                 [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>'
             }
         }, context);
@@ -67,7 +111,8 @@ export class FblTestSuite {
         const contextOptionsSteps = snapshot.getSteps().filter(s => s.type === 'context');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
         assert.deepStrictEqual(contextOptionsSteps[contextOptionsSteps.length - 1].payload, {
-            ctx: context.ctx
+            ctx: context.ctx,
+            entities: context.entities
         });
         assert.strictEqual(result, 'test123');
 
@@ -157,6 +202,53 @@ export class FblTestSuite {
         assert.strictEqual(result, null);
     }
 
+
+    @test()
+    async failActionIdAndAliasValidation() {
+        const fbl = Container.get<FBLService>(FBLService);
+
+        fbl.flowService.debug = true;
+
+        let error;
+        try {
+            fbl.registerPlugins([
+                <IPlugin> {
+                    name: 'invalid_id',
+                    version: '1.0.0',
+                    requires: {
+                        fbl: require('../../../../package.json').version
+                    },
+                    actionHandlers: [
+                        new InvalidIdActionHandler()
+                    ]
+                }
+            ]);
+        } catch (e) {
+            error = e;
+        }
+
+        assert.strictEqual(error.message, `Unable to register action handler with id "${new InvalidIdActionHandler().getMetadata().id}". It can not start with ${FBLService.METADATA_PREFIX}`);
+
+        error = undefined;
+        try {
+            fbl.registerPlugins([
+                <IPlugin> {
+                    name: 'invalid_alias',
+                    version: '1.0.0',
+                    requires: {
+                        fbl: require('../../../../package.json').version
+                    },
+                    actionHandlers: [
+                        new InvalidAliasActionHandler()
+                    ]
+                }
+            ]);
+        } catch (e) {
+            error = e;
+        }
+
+        assert.strictEqual(error.message, `Unable to register action handler with alias "${new InvalidAliasActionHandler().getMetadata().aliases[0]}". It can not start with ${FBLService.METADATA_PREFIX}`);
+    }
 
     @test()
     async templateProcessingStringEscape() {

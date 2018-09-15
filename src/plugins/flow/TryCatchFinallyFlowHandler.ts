@@ -37,26 +37,32 @@ export class TryCatchFinallyFlowHandler extends ActionHandler {
         const flowService = Container.get(FlowService);
 
         // run try
-        let idOrAlias = Object.keys(options.action)[0];
+        let idOrAlias = FBLService.extractIdOrAlias(options.action);
+        let metadata = FBLService.extractMetadata(options.action);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
-        let childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, options.action[idOrAlias], context);
+        let childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context);
         snapshot.ignoreChildFailure = true;
         snapshot.registerChildActionSnapshot(childSnapshot);
 
         // run catch
         if (snapshot.childFailure && options.catch) {
-            idOrAlias = Object.keys(options.catch)[0];
+            idOrAlias = FBLService.extractIdOrAlias(options.catch);
+            metadata = FBLService.extractMetadata(options.catch);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
-            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, options.catch[idOrAlias], context);
+            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.catch[idOrAlias], context);
             snapshot.ignoreChildFailure = childSnapshot.successful;
             snapshot.registerChildActionSnapshot(childSnapshot);
         }
 
         // run finally
-        if (snapshot.childFailure && options.catch) {
-            idOrAlias = Object.keys(options.finally)[0];
+        if (snapshot.childFailure && options.finally) {
+            idOrAlias = FBLService.extractIdOrAlias(options.finally);
+            metadata = FBLService.extractMetadata(options.finally);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
-            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, options.finally[idOrAlias], context);
+            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.finally[idOrAlias], context);
             if (snapshot.ignoreChildFailure) {
                 snapshot.ignoreChildFailure = childSnapshot.successful;
             }

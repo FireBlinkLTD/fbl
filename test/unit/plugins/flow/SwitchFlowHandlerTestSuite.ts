@@ -42,7 +42,7 @@ export class SwitchFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -137,7 +137,7 @@ export class SwitchFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -177,7 +177,7 @@ export class SwitchFlowHandlerTestSuite {
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         // validate first to process template inside options
         await actionHandler.validate(options, context, snapshot);
@@ -212,7 +212,7 @@ export class SwitchFlowHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
         const context = FlowService.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';

@@ -43,6 +43,8 @@ export class RepeatFlowHandler extends ActionHandler {
         const snapshots: ActionSnapshot[] = [];
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
+        let metadata = FBLService.extractMetadata(options.action);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
         for (let i = 0; i < options.times; i++) {
             const iteration = <IIteration> {
@@ -51,10 +53,10 @@ export class RepeatFlowHandler extends ActionHandler {
 
             if (options.async) {
                 promises.push((async (iter): Promise<void> => {
-                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, options.action[idOrAlias], context, iter);
+                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iter);
                 })(iteration));
             } else {
-                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, options.action[idOrAlias], context, iteration);
+                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iteration);
             }
         }
 

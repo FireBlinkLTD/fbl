@@ -8,9 +8,18 @@ This is a second reincarnation on internal tool that FireBlink LTD used to deplo
 Original tool was vendor locked and had pretty much limited functionality.
 
 The new one, README of which you're currently reading is redesigned from scratch to fix that limitation.
-Even more, due to plugin nature it can process any kind of flows, even non related to deployments.
+Even more, due to plugin nature it can process any kind of flows, even non related to deployments. 
 
 FBL generally designed to help with automation related tasks that require flexible control over the flow.
+
+Here is how a very basic flow may FBL handle:
+
+![Sample Flow](docs/images/sample_flow.png)
+
+FBL can run steps "A" then "B" and "C" in a chain, but step "E" in parallel with that chain.
+Once all are completed step "D" is invoked.
+
+Out of the box FBL contains lots of default steps that can help to control the flow. 
 
 # Usage
 
@@ -40,9 +49,17 @@ description: |-
 # [Required] The starting point of the flow.
 pipeline:
    # Pipeline may only have one key that represents action handler ID or one of its aliases
-   # value is action handler specific, make sure to read corresponding documentation first
+   # value is action handler specific, make sure to read corresponding documentation first  
    'plugin.id': 'plugin.options'
+   
+   # Metadata
+   # Each action may have additional metadata associated with it
+   # Naming convention: all metadata fields should start with dollar sign - $.
+   # Action Ids or aliases could not start with $.   
+   $title: 'Human readable title of action'
 ``` 
+
+Flow files can use EJS [templates](docs/templates.md) for a flexible control over the flow.
 
 ## Default Plugins
 
@@ -51,3 +68,37 @@ pipeline:
 - [Flow Control](docs/plugins/flow.md)
 - [File System](docs/plugins/fs.md)
 - [Execution Reporters](docs/plugins/reporters.md)
+
+## Global Config
+
+Create folder `.fbl` inside your user home directory. Put `config` file inside it with following format:
+
+```yaml
+# Provide a list of globally installed plugins or absolute paths
+# Has same effect as "-p" option.
+plugins:
+  - fbl-plugin-name
+  - /home/user/test/fbl-plugins/fbl-plugin-name
+  
+# Provide list of context key=value pairs
+# Has same effect as "-c" option.
+# Note: if you will provide just a key you will get prompted to provide a value each time you invoke the "fbl" cli
+context:
+  - key=value
+
+# Provide list of secrets key=value pairs
+# Has same effect as "-s" option.
+# Note: if you will provide just a key you will get prompted to provide a value each time you invoke the "fbl" cli
+secrets:
+  - key=value
+
+# Disable console colorful output
+# Has same effect as "--no-colors" option
+no-colors: true
+
+# Custom global EJS template delimiter
+global-template-delimiter: $
+
+# Custom local EJS template delimiter
+local-template-delimiter: %
+```

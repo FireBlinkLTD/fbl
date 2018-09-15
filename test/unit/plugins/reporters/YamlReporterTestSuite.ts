@@ -9,13 +9,13 @@ import {safeLoad} from 'js-yaml';
 const tmp = require('tmp-promise');
 
 @suite()
-class JsonReporterTestSuite {
+class YamlReporterTestSuite {
     @test()
     async generate(): Promise<void> {
         const reporter = new YamlReporter();
         const file = await tmp.file();
 
-        await reporter.generate(file.path, {}, new ActionSnapshot('test', '.', 0));
+        await reporter.generate(file.path, {}, new ActionSnapshot('test', {}, '.', 0));
         const strReport = await promisify(readFile)(file.path, 'utf8');
 
         const report = safeLoad(strReport);
@@ -25,6 +25,7 @@ class JsonReporterTestSuite {
 
         assert.deepStrictEqual(report, {
             idOrAlias: 'test',
+            metadata: {},
             wd: '.',
             idx: 0,
             ignoreChildFailure: false,

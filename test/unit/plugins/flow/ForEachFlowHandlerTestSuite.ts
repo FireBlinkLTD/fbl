@@ -41,7 +41,7 @@ class ForEachFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ForEachFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -93,7 +93,7 @@ class ForEachFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ForEachFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -134,7 +134,7 @@ class ForEachFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results[0], {index: 0, value: 1});
@@ -172,7 +172,7 @@ class ForEachFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results[0], {index: 0, value: 1});
@@ -214,7 +214,7 @@ class ForEachFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results[0], {index: 0, value: 1, name: 'a'});
@@ -257,7 +257,7 @@ class ForEachFlowHandlerTestSuite {
         };
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, options, context);
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results[0], {index: 0, value: 1, name: 'a'});

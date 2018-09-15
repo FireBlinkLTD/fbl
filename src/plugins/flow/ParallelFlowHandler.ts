@@ -41,7 +41,10 @@ export class ParallelFlowHandler extends ActionHandler {
         const snapshots: ActionSnapshot[] = [];
         const promises = options.map(async (action: any, index: number): Promise<void> => {
             const idOrAlias = FBLService.extractIdOrAlias(action);
-            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, action[idOrAlias], context, <IIteration> {
+            let metadata = FBLService.extractMetadata(action);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+
+            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, <IIteration> {
                 index
             });
         });

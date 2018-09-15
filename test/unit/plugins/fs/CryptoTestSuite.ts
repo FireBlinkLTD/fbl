@@ -20,7 +20,7 @@ class CryptoTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new Encrypt();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate([], context, snapshot)
@@ -65,7 +65,7 @@ class CryptoTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new Encrypt();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         actionHandler.validate({
             password: 'secret',
@@ -89,7 +89,7 @@ class CryptoTestSuite {
         const readFileAsync = promisify(readFile);
 
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', tmpDir.path, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpDir.path, 0);
 
         const files = [
             join(tmpDir.path, 'a.txt'),

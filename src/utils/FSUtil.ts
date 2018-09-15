@@ -50,13 +50,17 @@ export class FSUtil {
         return resolve(wd, path);
     }
 
+    static async readTextFile(file: string): Promise<string> {
+        return await promisify(readFile)(file, 'utf8');
+    }
+
     /**
      * Read and parse yaml file
      * @param {string} file
      * @returns {Promise<any>}
      */
     static async readYamlFromFile(file: string): Promise<any> {
-        const source = await promisify(readFile)(file, 'utf8');
+        const source = await FSUtil.readTextFile(file);
 
         return safeLoad(source);
     }

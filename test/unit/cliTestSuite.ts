@@ -1,5 +1,5 @@
 import {suite, test} from 'mocha-typescript';
-import {dump} from 'js-yaml';
+import {dump, safeLoad} from 'js-yaml';
 import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
 import {spawn} from 'child_process';
@@ -8,6 +8,7 @@ import {CLIService} from '../../src/services';
 import {mkdir} from 'shelljs';
 import {dirname, join} from 'path';
 import {Container} from 'typedi';
+import {IActionStep} from '../../src/models';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -229,7 +230,6 @@ class CliTestSuite {
             'prompt_value'
         );
         assert.strictEqual(result.code, 0);
-
     }
 
     @test()
@@ -312,7 +312,9 @@ class CliTestSuite {
                 'st=yes',
                 `.=@${secretsFile.path}`
             ],
-            'no-colors': true
+            'no-colors': true,
+            'global-template-delimiter': '$',
+            'local-template-delimiter': '%'
         };
 
         await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, dump(globalConfig), 'utf8');
@@ -529,5 +531,87 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
+    }
+
+    @test()
+    async testCustomTemplateDelimiters(): Promise<void> {
+        const flow: string = [
+            'version: 1.0.0',
+            'pipeline:',
+            '  "--":',
+            '  <@ [1,2].forEach(i => { @>',
+            '    - ctx:',
+            '        test_<@- i @>:',
+            '          inline: <@- i @>',
+            '  <@ }) @>',
+            '    - ctx:',
+            '        local:',
+            '          inline: <&- ctx.test_1 &>',
+        ].join('\n');
+
+
+        const flowFile = await tmp.file();
+        const reportFile = await tmp.file();
+
+        await promisify(writeFile)(flowFile.path, flow, 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-o', reportFile.path,
+                '-r', 'json',
+                '--global-template-delimiter', '@',
+                '--local-template-delimiter', '&',
+                flowFile.path
+            ],
+            'prompt_value'
+        );
+
+
+        assert.strictEqual(result.code, 0);
+
+        const report = JSON.parse(await promisify(readFile)(reportFile.path, 'utf8'));
+        const children = report.steps.filter((v: IActionStep) => v.type === 'child');
+        const contextSteps = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
+
+        assert.deepStrictEqual(contextSteps[0].payload.ctx, {
+            test_1: 1,
+            test_2: 2
+        });
+
+        assert.deepStrictEqual(contextSteps[1].payload.ctx, {
+            test_1: 1,
+            test_2: 2,
+            local: 1
+        });
+    }
+
+    @test()
+    async testBrokenFlowFile(): Promise<void> {
+        const flow: string = [
+            'version: 1.0.0',
+            'pipeline:',
+            '  "--":',
+            '    - ctx:',
+            '     local:',
+            '          inline: 1',
+        ].join('\n');
+
+
+        const flowFile = await tmp.file();
+
+        await promisify(writeFile)(flowFile.path, flow, 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                flowFile.path
+            ],
+            'prompt_value'
+        );
+
+        assert.strictEqual(result.code, 1);
     }
 }

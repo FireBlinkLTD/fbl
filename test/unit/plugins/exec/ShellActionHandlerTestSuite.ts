@@ -21,7 +21,7 @@ class ShellActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -50,7 +50,7 @@ class ShellActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate({
@@ -97,7 +97,7 @@ class ShellActionHandlerTestSuite {
 
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -129,7 +129,7 @@ class ShellActionHandlerTestSuite {
 
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -156,7 +156,7 @@ class ShellActionHandlerTestSuite {
 
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -181,7 +181,7 @@ class ShellActionHandlerTestSuite {
     async checkSilentStdout(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -212,7 +212,7 @@ class ShellActionHandlerTestSuite {
     async checkSilentStderr(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -244,7 +244,7 @@ class ShellActionHandlerTestSuite {
     async checkFailure(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.execute({
@@ -263,7 +263,7 @@ class ShellActionHandlerTestSuite {
     async stderr(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
             executable: '/bin/bash',
@@ -285,7 +285,7 @@ class ShellActionHandlerTestSuite {
     async missingExecutable(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.execute({
@@ -304,7 +304,7 @@ class ShellActionHandlerTestSuite {
     async noAssignmentStdout(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.execute({
@@ -318,7 +318,7 @@ class ShellActionHandlerTestSuite {
     async noAssignmentStderr(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.execute({

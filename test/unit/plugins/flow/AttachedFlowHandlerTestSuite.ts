@@ -47,7 +47,7 @@ export class AttachedFlowHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
         
         await chai.expect(
             actionHandler.validate(123, context, snapshot)
@@ -70,7 +70,7 @@ export class AttachedFlowHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowHandler();
         const context = FlowService.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate('/tmp/test.tst', context, snapshot)
@@ -105,7 +105,7 @@ export class AttachedFlowHandlerTestSuite {
         const context = FlowService.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
             actionHandler.validate(tmpFile.path, context, snapshot)

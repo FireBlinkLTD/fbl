@@ -1,11 +1,13 @@
 version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:8.11.4
+
 jobs:
   build:
-    docker:
-      - image: node:8.11.3
-
-    working_directory: /tmp/fbl
-
+    <<: *defaults
     steps:
       - checkout
 
@@ -27,19 +29,56 @@ jobs:
       # build it
       - run: yarn build
 
+      # persist build
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
       # run tests and generate coverage report
       - run: yarn test
 
       # generate coverage report
-      - run: ./node_modules/.bin/nyc report --reporter=text-lcov > /tmp/fbl/coverage.lcov
+      - run: ./node_modules/.bin/nyc report --reporter=text-lcov > ./coverage.lcov
 
       # send test coverage
-      - run: bash <(curl -s https://codecov.io/bash) -f /tmp/fbl/coverage.lcov
+      - run: bash <(curl -s https://codecov.io/bash) -f ./coverage.lcov
 
       # store artifacts
       - store_artifacts:
-          path: /tmp/fbl/coverage
+          path: ./coverage
 
       # store artifacts
       - store_artifacts:
-          path: /tmp/fbl/mochawesome-report
+          path: ./mochawesome-report
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+
+      - run:
+          name: Publish package
+          command: npm publish
+
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^[0-9]+\.[0-9]+\.[0-9]+/
+            branches:
+              ignore: /.*/

@@ -1,3 +1,6 @@
+import {ActionHandler} from '../models';
+import {ActionHandlersRegistry} from '../services/ActionHandlersRegistry';
+
 export interface IContext {
     /**
      * Context variables
@@ -39,6 +42,13 @@ export interface IContext {
          * Entities that were removed/deleted
          */
         deleted: IContextEntity[];
+    };
+
+    dynamicActionHandlers: ActionHandlersRegistry;
+
+    ejsTemplateDelimiters: {
+        global: string,
+        local: string
     };
 }
 

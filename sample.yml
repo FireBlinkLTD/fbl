@@ -29,3 +29,7 @@ pipeline:
               '@': './test.yml' # load from file
       - '@': './test2.yml' # load from file
       - 'test':
+
+        # generate action from the template string
+      - tpl: |-
+          @: <%- ctx.filename %>

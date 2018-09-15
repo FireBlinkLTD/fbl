@@ -3,14 +3,15 @@
 Flow order control.
 
 Available steps:
-- sequence (sync)
-- parallel (async)
-- attachment (external sub-flow file)
-- switch (conditional)
-- try-catch-finally
-- repeat (async and sync)
-- foreach (async and sync)
-- based on template
+- [sequence (sync)](#action-handler-sequential-steps-execution)
+- [parallel (async)](#action-handler-parallel-steps-execution)
+- [attachment](#action-handler-attached-flow)
+- [repeat](#action-handler-repeat-flow)
+- [for each of](#action-handler-for-each)
+- [switch (conditional)](#action-handler-switch-flow)
+- [try-catch-finally](#action-handler-try---catch---finally-flow)
+- [template](#action-handler-template)
+- [virtual](#action-handler-virtual)
 
 ## Action Handler: Sequential steps execution
 
@@ -29,7 +30,7 @@ Aliases:
 
 ```yaml
 # Run steps in a sequence
---:
+'--':
   - ctx:
       '.':
         inline: 
@@ -57,7 +58,7 @@ Aliases:
  
 ```yaml
 # Run steps in parallel
-||:
+'||':
   - ctx:
       '.':
         inline: 
@@ -110,6 +111,29 @@ repeat:
   action: 
     # run flow_0.yml and flow_1.yml flows
     @: flow_<%- iteration.index %>.yml                 
+```
+
+## Action Handler: For Each
+
+Allows to execute action for every item in the array or key of an object.
+
+ID: com.fireblink.fbl.flow.foreach
+
+Aliases:
+ - fbl.flow.foreach
+ - flow.foreach
+ - foreach
+ - each
+ 
+**Example:**
+
+```yaml
+each:  
+  of: [1, 2, 3]
+  action:
+    ctx: 
+      test_<%- iteration.index %>: 
+        inline: <%- iteration.value %>
 ```
 
 ## Action Handler: Switch flow
@@ -167,29 +191,6 @@ try:
       @: cleanup.yml
 ```
 
-## Action Handler: For Each
-
-Allows to execute action for every item in the array or key of an object.
-
-ID: com.fireblink.fbl.flow.foreach
-
-Aliases:
- - fbl.flow.foreach
- - flow.foreach
- - foreach
- - each
- 
-**Example:**
-
-```yaml
-each:  
-  of: [1, 2, 3]
-  action:
-    ctx: 
-      test_<%- iteration.index %>: 
-        inline: <%- iteration.value %>
-```
-
 ## Action Handler: Template
 
 Run action based on dynamically constructed template. This is handy as you generally can not dynamically construct YAML with EJS template inside most of the actions. 
@@ -245,4 +246,48 @@ that will generally produce:
 ```yaml
 ctx:
   something: [1, 2, 3]
+```
+
+## Action Handler: Virtual
+
+Allows to create virtual action handler for another action (that can be represented as one of the flows).
+
+ID: com.fireblink.fbl.flow.virtual
+
+Aliases:
+ - fbl.flow.virtual
+ - flow.virtual
+ - virtual
+ 
+ **Example:**
+ 
+ ```yaml
+ virtual:
+  # [required] virtual handler ID
+  id: handler.id
+  
+  # [optional] aliases for the handler to reference
+  aliases:
+    - handler.alias
+  
+  # [optional] JSON Schema of options that can/should be passed to the generated handler     
+  validationSchema:
+    type: object
+    properties:
+      test: 
+        type: string
+  
+  # [required] action to invoke
+  action:
+    ctx:
+      some_field:
+        # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+        inline: <%- parameters.test %> 
+ ```
+ 
+ Then you can reference your generated handler like any other:
+ 
+ ```yaml
+handler.id:
+  test: some_field_value
 ```
