@@ -228,4 +228,46 @@ export class SwitchFlowHandlerTestSuite {
             is: options.is
         });
     }
+
+    @test()
+    async elseFlowHandler(): Promise<void> {
+        Container.get(FlowService).debug = true;
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const actionHandlerOptions: number[] = [];
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            actionHandlerOptions.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const actionHandler = new SwitchFlowHandler();
+
+        const options = {
+            value: '<%- secrets.value %><%- ctx.value %>',
+            is: {
+                stte: {
+                    [DummyActionHandler.ID]: 1
+                }
+            },
+            else: {
+                [DummyActionHandler.ID]: 2
+            }
+        };
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = FlowService.generateEmptyContext();
+        context.ctx.value = 'st';
+        context.secrets.value = 'te';
+
+        // validate first to process template inside options
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.deepStrictEqual(actionHandlerOptions, [2]);
+
+        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+            value: '{MASKED}st',
+            is: options.is
+        });
+    }
 }

@@ -42,8 +42,11 @@ const joiStepSchemaExt = Joi.extend({
 export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
 
-    public static STEP_SCHEMA = joiStepSchemaExt.FBLStep().fields();
     public static METADATA_PREFIX = '$';
+
+    public static get STEP_SCHEMA() {
+        return joiStepSchemaExt.FBLStep().fields();
+    }
 
     private static validationSchema = Joi.object({
         version: Joi.string()
