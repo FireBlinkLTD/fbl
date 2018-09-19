@@ -66,7 +66,7 @@ encrypt:
     # List of masks to find files to be encrypted
     inlude:
       - /tmp/*.*      
-    # List of masks to exclude
+    # [optional] list of masks to exclude
     exclude:
       - /tmp/*.log
 ```
@@ -92,7 +92,7 @@ encrypt:
     # List of masks to find files to be decrypted
     inlude:
       - /tmp/*.*      
-    # List of masks to exclude
+    # [optional] list of masks to exclude
     exclude:
       - /tmp/*.log    
 ```

@@ -6,8 +6,8 @@ import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils/FSUtil';
-import {EJSTemplateUtil} from '../utils/EJSTemplateUtil';
 import {IMetadata} from '../interfaces/IMetadata';
+import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 
 const ejsLint = require('ejs-lint');
 
@@ -25,6 +25,9 @@ export class FlowService {
 
     @Inject(() => ActionHandlersRegistry)
     actionHandlersRegistry: ActionHandlersRegistry;
+
+    @Inject(() => TemplateUtilitiesRegistry)
+    templateUtilityRegistry: TemplateUtilitiesRegistry;
 
     /**
      * Generate empty context
@@ -169,7 +172,7 @@ export class FlowService {
         ejsLint(tpl, { delimiter });
 
         const data: any = {
-            $: new EJSTemplateUtil(wd),
+            $: this.templateUtilityRegistry.generateUtilities(wd),
             env: process.env
         };
 

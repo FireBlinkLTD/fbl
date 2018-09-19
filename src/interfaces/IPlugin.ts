@@ -1,5 +1,6 @@
 import {ActionHandler} from '../models';
 import {IReporter} from './IReporter';
+import {ITemplateUtility} from './ITemplateUtility';
 
 export interface IPlugin {
     /**
@@ -39,4 +40,9 @@ export interface IPlugin {
      * Get Action Handlers to register
      */
     actionHandlers?: ActionHandler[];
+
+    /**
+     * Custom template utilities
+     */
+    templateUtils?: ITemplateUtility[];
 }

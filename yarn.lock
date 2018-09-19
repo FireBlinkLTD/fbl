@@ -106,9 +106,9 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/joi@13.4.4":
-  version "13.4.4"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.4.4.tgz#258bda71b30b6f3f9a11eea3e122fccdab8df053"
+"@types/joi@13.4.5":
+  version "13.4.5"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.4.5.tgz#1329006d79c4db16d1e201d1e35f7bf371137f64"
 
 "@types/js-yaml@3.11.2":
   version "3.11.2"
@@ -132,9 +132,9 @@
   version "10.5.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.5.tgz#8e84d24e896cd77b0d4f73df274027e3149ec2ba"
 
-"@types/node@10.9.4":
-  version "10.9.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.9.4.tgz#0f4cb2dc7c1de6096055357f70179043c33e9897"
+"@types/node@10.10.0":
+  version "10.10.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.0.tgz#2b08a1a7d1fa317173a776c2130bf240545cc33e"
 
 "@types/semver@5.5.0":
   version "5.5.0"
@@ -1587,9 +1587,9 @@ hosted-git-info@^2.1.4:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.6.0.tgz#23235b29ab230c576aab0d4f13fc046b0b038222"
 
-humanize-duration@3.15.2:
-  version "3.15.2"
-  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.15.2.tgz#32dc73d4f99c9f0873671066781c070e29bd8597"
+humanize-duration@3.15.3:
+  version "3.15.3"
+  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.15.3.tgz#600a939bd9d9a16b696e907b3fc08d1a4f15e8c9"
 
 iconv-lite@~0.4.13:
   version "0.4.23"
@@ -3657,6 +3657,10 @@ user-home@^1.1.1:
 util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
+
+uuid@3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
 
 uuid@^3.0.1:
   version "3.2.1"

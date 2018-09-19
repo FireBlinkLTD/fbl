@@ -163,6 +163,10 @@ Aliases:
     # execute "bar.yml" if "bar"
     bar: 
       @: bar.yml
+  
+  # [optional] if no match found "else" handler will get executed
+  else:
+    @: else.yml
 ```
 
 ## Action Handler: Try - Catch - Finally Flow
@@ -183,10 +187,13 @@ Aliases:
 
 ```yaml
 try:
+    # [optional] try to run action
     action:
       @: foo.yml
+    # [optional] call error.yml if foo.yml failed
     catch:
       @: error.yml
+    # [optional] call cleanup.yml either after successful execution of foo.yml or error.yml
     finally:
       @: cleanup.yml
 ```
@@ -277,7 +284,7 @@ Aliases:
       test: 
         type: string
   
-  # [required] action to invoke
+  # action to invoke
   action:
     ctx:
       some_field:
@@ -285,7 +292,7 @@ Aliases:
         inline: <%- parameters.test %> 
  ```
  
- Then you can reference your generated handler like any other:
+Then you can reference your generated handler like any other:
  
  ```yaml
 handler.id:

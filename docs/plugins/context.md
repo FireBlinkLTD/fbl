@@ -43,11 +43,11 @@ Example:
 ```yaml
 version: 1.0.0
 pipeline:
-    plugin:
-      # Pass "something" from "ctx" 
-      contextValue: <%- ctx.something  %>
-      # Pass "password" from "secrets"
-      secretValue: <%- secrets.password %>
+  plugin:
+    # Pass "something" from "ctx" 
+    contextValue: <%- ctx.something  %>
+    # Pass "password" from "secrets"
+    secretValue: <%- secrets.password %>
 ``` 
 
 ## Action Handler: Context Values Assignment
@@ -133,7 +133,8 @@ Aliases:
        test: true 
      files: 
       - vars.yml 
-     # specify that files have a priority over inline vars
+     
+     # [optional] specify that files have a priority over inline vars
      # if not provided inline vars will have priority over files
      priority: 'files'   
  ```
@@ -160,7 +161,7 @@ ctx.entities.registered:
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
-    # Optional payload that may represent other or all fields of the entity
+    # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
 ```
@@ -184,7 +185,7 @@ ctx.entities.unregistered:
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
-    # Optional payload that may represent other or all fields of the entity
+    # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
 ```
@@ -208,7 +209,7 @@ ctx.entities.created:
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
-    # Optional payload that may represent other or all fields of the entity
+    # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
 ```
@@ -232,7 +233,7 @@ ctx.entities.created:
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
-    # Optional payload that may represent other or all fields of the entity
+    # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
 ```
@@ -256,7 +257,7 @@ ctx.entities.deleted:
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
-    # Optional payload that may represent other or all fields of the entity
+    # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
 ```

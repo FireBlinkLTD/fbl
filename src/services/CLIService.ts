@@ -29,6 +29,7 @@ export class CLIService {
         __dirname + '/../plugins/flow',
         __dirname + '/../plugins/fs',
         __dirname + '/../plugins/reporters',
+        __dirname + '/../plugins/templateUtilities',
     ];
 
     private unsafePlugins = false;

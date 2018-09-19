@@ -20,20 +20,20 @@ command: 'echo'
 args: 
   - 'test'
 
-# optional options :)
+# [optional] options
 options:
-  # if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
+  # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
   stdout: true
-  # if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
+  # [optional]  if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
   stderr: true
-  # if provided - stdout and stderr will not be printed into console
+  # [optional] if provided - stdout and stderr will not be printed into console
   silent: true
 
-# assign execution result {code: 0-255, stdout?: string, stderr?: string }
+# [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
-  # "ctx" variable name to assign results to
+  # [optional] "ctx" variable name to assign results to
   ctx: 'test'
-  # "secrets" variable name to assign results to
+  # [optional] "secrets" variable name to assign results to
   secrets: 'test'
 ```
 
@@ -56,19 +56,19 @@ script: |-
   cd /tmp
   touch test.txt
   
-# optional options :)
+# [optional] options
 options:
-  # if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
+  # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
   stdout: true
-  # if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
+  # [optional] if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
   stderr: true
-  # if provided - stdout and stderr will not be printed into console
+  # [optional] if provided - stdout and stderr will not be printed into console
   silent: true
 
-# assign execution result {code: 0-255, stdout?: string, stderr?: string }
+# [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
-  # "ctx" variable name to assign results to
+  # [optional] "ctx" variable name to assign results to
   ctx: 'test'
-  # "secrets" variable name to assign results to
+  # [optional] "secrets" variable name to assign results to
   secrets: 'test'
 ```

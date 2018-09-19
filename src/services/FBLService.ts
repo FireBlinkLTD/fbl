@@ -6,6 +6,7 @@ import {ActionSnapshot} from '../models';
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
 import * as semver from 'semver';
 import {IMetadata} from '../interfaces/IMetadata';
+import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 
 const fblVersion: string = require('../../../package.json').version;
 
@@ -42,8 +43,11 @@ const joiStepSchemaExt = Joi.extend({
 export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
 
-    public static STEP_SCHEMA = joiStepSchemaExt.FBLStep().fields();
     public static METADATA_PREFIX = '$';
+
+    public static get STEP_SCHEMA() {
+        return joiStepSchemaExt.FBLStep().fields();
+    }
 
     private static validationSchema = Joi.object({
         version: Joi.string()
@@ -62,6 +66,9 @@ export class FBLService {
 
     @Inject(() => ActionHandlersRegistry)
     actionHandlersRegistry: ActionHandlersRegistry;
+
+    @Inject(() => TemplateUtilitiesRegistry)
+    templateUtilityRegistry: TemplateUtilitiesRegistry;
 
     /**
      * Extract idOrAlias from step object
@@ -126,6 +133,10 @@ export class FBLService {
                 plugin.reporters.forEach(reporter => {
                     this.reporters[reporter.getName()] = reporter;
                 });
+            }
+
+            if (plugin.templateUtils) {
+                this.templateUtilityRegistry.register(...plugin.templateUtils);
             }
         });
     }

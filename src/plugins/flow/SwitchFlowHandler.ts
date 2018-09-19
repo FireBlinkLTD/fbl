@@ -27,7 +27,8 @@ export class SwitchFlowHandler extends ActionHandler {
         is: Joi.object()
             .pattern(/^/, FBLService.STEP_SCHEMA)
             .min(1)
-            .required()
+            .required(),
+        else: FBLService.STEP_SCHEMA.optional()
     })
         .required()
         .options({ abortEarly: true });
@@ -59,7 +60,12 @@ export class SwitchFlowHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        const action = options.is[options.value];
+        let action = options.is[options.value];
+        if (!action) {
+            if (options.else) {
+                action = options.else;
+            }
+        }
 
         if (action) {
             const idOrAlias = FBLService.extractIdOrAlias(action);
@@ -69,6 +75,8 @@ export class SwitchFlowHandler extends ActionHandler {
             snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context);
             snapshot.registerChildActionSnapshot(childSnapshot);
+        } else {
+            snapshot.log(`Unable to find handler for value: ${options.value}`);
         }
     }
 }

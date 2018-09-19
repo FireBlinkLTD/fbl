@@ -1,10 +1,11 @@
 import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService, TemplateUtilitiesRegistry} from '../../../../src/services';
 import {IActionHandlerMetadata, IIteration} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {TemplateFlowHandler} from '../../../../src/plugins/flow/TemplateFlowHandler';
+import {ToJSONTemplateUtility} from '../../../../src/plugins/templateUtilities/ToJSONTemplateUtility';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -70,8 +71,10 @@ class TemplateFlowHandlerTestSuite {
     async execute(): Promise<void> {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const templateUtilitiesRegistry = Container.get(TemplateUtilitiesRegistry);
         const actionHandler = new TemplateFlowHandler();
         actionHandlersRegistry.register(actionHandler);
+        templateUtilitiesRegistry.register(new ToJSONTemplateUtility());
 
         let actionHandlerOptions: any;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
