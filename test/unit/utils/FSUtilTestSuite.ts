@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import * as assert from 'assert';
 import {homedir} from 'os';
-import {FSUtil} from '../../../../src/utils/FSUtil';
+import {FSUtil} from '../../../src/utils/FSUtil';
 import {join} from 'path';
 import {writeFile} from 'fs';
 import {promisify} from 'util';

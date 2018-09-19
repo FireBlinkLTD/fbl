@@ -57,3 +57,62 @@ usecase for them. However, as template processed at loading time shared context 
 Note: if you're using [attached flow action handler](plugins/flow.md#action-handler-attached-flow) that used global template - 
 template will be resolved upon loading that file, e.g. when attached flow action gets executed (not upon main flow loading),
 causing template to use shared context snapshot available at that time (that might be modified by any previous action in main flow).
+
+## Template Utilities
+
+FBL also provides few handy utility functions you can use inside the template. They all assigned to '$' variable, etc:
+
+```yaml
+value: <%- $.toJSON({}) %>
+```
+
+### JSON Stringification
+
+```js
+// Convert "something" into JSON formatted string
+$.toJSON(something);
+```
+
+Note: JSON is also a valid YAML, so you may want to use it to quickly construct your definitions inside the templates.
+
+### File System
+
+```js
+// get absolute path
+$.fs.getAbsolutePath(path);
+
+// read text file
+$.fs.read.text(path);
+
+// read file into base64 encoded string
+$.fs.read.base64(path);
+```
+
+### UUID
+
+```js
+// generate UUID (v4)
+$.UUID.v4();
+
+// generate UUID (v5) for given DNS namespace
+$.UUID.v5.DNS('fireblink.com');
+
+// generate UUID (v5) for given URL namespace
+$.UUID.v5.URL('http://fireblink.com');
+
+// generate UUID (v5) for custom namespace (should be UUID)
+$.UUID.v5.custom('seed', $.UUID.v4());
+```
+
+### Hash
+
+```js
+// generate sha256 hash encoded as HEX
+$.hash('test');
+
+// generate hash for custom algorithm encoded as HEX
+$.hash('test', 'md5');
+
+// generate hash for custom algorithm as Base64
+$.hash('test', 'md5', 'base64');
+```
