@@ -39,14 +39,28 @@ Just run `npm i -g fbl` to install the CLI.
 ## Flow file format
 
 ```yaml
-# [Optional] flow version, it is up to the user whether to use it or not
+# [optional] flow version, it is up to the user whether to use it or not
 version: 1.0.0
 
-# [Optional] flow description, it is up to the user whether to describe a flow in a human readable way
+# [optional] flow specific requirements 
+requires:
+  # [optional] fbl version requirements, value should conform with semantic versioning 
+  fbl: >0.2.0
+  
+  # [optional] fbl plugins and their semantic versioning
+  plugins: 
+    - fbl.plugin.ftpo@^0.1.0
+  
+  # [optional] native application/commands presented in the PATH environment variable
+  applications:
+    - kubectl
+    - helm
+
+# [optional] flow description, it is up to the user whether to describe a flow in a human readable way
 description: |-
   Plugn invoker.
 
-# [Required] The starting point of the flow.
+# The starting point of the flow.
 pipeline:
    # Pipeline may only have one key that represents action handler ID or one of its aliases
    # value is action handler specific, make sure to read corresponding documentation first  

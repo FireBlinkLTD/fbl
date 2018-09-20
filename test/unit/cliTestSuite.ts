@@ -410,9 +410,239 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+        assert.strictEqual(result.stderr.split('\n')[0], `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+    }
 
+    @test()
+    async incompatibleFlowWithFBL(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            requires: {
+                fbl: '0.0.0'
+            },
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
 
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, `actual fbl version ${fblVersion} doesn't satisfy required 0.0.0`);
+
+        result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--unsafe-flows',
+                flowFile.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stderr.split('\n')[0], `actual fbl version ${fblVersion} doesn't satisfy required 0.0.0`);
+    }
+
+    @test()
+    async incompatibleFlowWithPluginByVersion(): Promise<void> {
+        const plugin = require('../../src/plugins/flow');
+
+        const flow: any = {
+            version: '1.0.0',
+            requires: {
+                plugins: [
+                    `${plugin.name}@0.0.0`
+                ]
+            },
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, `actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
+
+        result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--unsafe-flows',
+                flowFile.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stderr.split('\n')[0], `actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
+    }
+
+    @test()
+    async incompatibleFlowWithMissingPlugin(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            requires: {
+                plugins: [
+                    'test@0.0.1'
+                ]
+            },
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'required plugin test is not registered');
+
+        result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--unsafe-flows',
+                flowFile.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stderr.split('\n')[0], 'required plugin test is not registered');
+    }
+
+    @test()
+    async incompatibleFlowWithMissingApplication(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            requires: {
+                applications: [
+                    'missing_app_1234'
+                ]
+            },
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        let result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
+        assert.strictEqual(result.code, 1);
+        assert.strictEqual(result.stderr, 'application missing_app_1234 not found, make sure it is installed and its location presents in the PATH environment variable');
+
+        result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--unsafe-flows',
+                flowFile.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stderr.split('\n')[0], 'application missing_app_1234 not found, make sure it is installed and its location presents in the PATH environment variable');
+    }
+
+    @test()
+    async compatibleFlow(): Promise<void> {
+        const plugin = require('../../src/plugins/flow');
+
+        const flow: any = {
+            version: '1.0.0',
+            requires: {
+                fbl: fblVersion,
+                plugins: [
+                    `${plugin.name}@${plugin.version}`
+                ],
+                applications: [
+                    'echo'
+                ]
+            },
+            pipeline: {
+                ctx: {
+                    test: {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
+        assert.strictEqual(result.code, 0);
     }
 
     @test()
@@ -456,7 +686,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stdout.split('\n')[0], `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
+        assert.strictEqual(result.stderr.split('\n')[0], `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
     }
 
     @test()
@@ -500,7 +730,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stdout.split('\n')[0], 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
+        assert.strictEqual(result.stderr.split('\n')[0], 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
     }
 
     @test()

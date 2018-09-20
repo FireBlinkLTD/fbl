@@ -2788,9 +2788,9 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prompts@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/prompts/-/prompts-1.1.0.tgz#8a8b33030943e8355e06f81bebc436f7aa669d42"
+prompts@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/prompts/-/prompts-1.1.1.tgz#c687590e472c08cd84cfa4b8694b1cab5de45144"
   dependencies:
     kleur "^2.0.1"
     sisteransi "^1.0.0"
