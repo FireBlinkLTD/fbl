@@ -7,6 +7,7 @@ import {ActionHandlersRegistry} from './ActionHandlersRegistry';
 import * as semver from 'semver';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
+import {which} from 'shelljs';
 
 const fblVersion: string = require('../../../package.json').version;
 
@@ -54,12 +55,26 @@ export class FBLService {
             .regex(/\d+\.\d+\.\d+/gi)
             .required(),
 
+        requires: Joi.object({
+            fbl: Joi.string().min(1),
+            plugins: Joi.array().items(
+                Joi.string().regex(/[^@]+@[^@]+/gi).min(1)
+            ).min(1),
+            applications: Joi.array().items(Joi.string().min(1)).min(1)
+        }),
+
         description: Joi.string(),
 
         pipeline: FBLService.STEP_SCHEMA
     }).options({ abortEarly: true });
 
     private reporters: {[name: string]: IReporter} = {};
+
+    // if plugin dependencies are not satisfied instead of throwing error log statements will be printed only
+    public allowUnsafePlugins = false;
+
+    // if flow requirements are not satisfied instead of throwing error log statements will be printed only
+    public allowUnsafeFlows = false;
 
     @Inject(() => FlowService)
     flowService: FlowService;
@@ -143,15 +158,14 @@ export class FBLService {
 
     /**
      * Validate plugins to be compatible
-     * @param {boolean} unsafe if provided instead of rising an error - warning will be logged.
      */
-    validatePlugins(unsafe?: boolean): void {
+    validatePlugins(): void {
         for (const name of Object.keys(this.plugins)) {
             const plugin = this.plugins[name];
 
             if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
-                if (unsafe) {
-                    console.log(`${plugin.name}`.red + ' plugin is not compatible with current fbl version (' + `${fblVersion}`.red + ')');
+                if (this.allowUnsafePlugins) {
+                    console.error(`${plugin.name}`.red + ' plugin is not compatible with current fbl version (' + `${fblVersion}`.red + ')');
                 } else {
                     throw new Error(`${plugin.name} plugin is not compatible with current fbl version (${fblVersion})`);
                 }
@@ -163,21 +177,63 @@ export class FBLService {
                     const dependencyPlugin = this.plugins[dependencyPluginName];
 
                     if (!dependencyPlugin) {
-                        if (unsafe) {
-                            console.log(`${plugin.name}`.red + ' plugin requires missing plugin ' + `${dependencyPluginName}@${dependencyPluginRequiredVersion}`.red);
+                        if (this.allowUnsafePlugins) {
+                            console.error(`${plugin.name}`.red + ' plugin requires missing plugin ' + `${dependencyPluginName}@${dependencyPluginRequiredVersion}`.red);
                         } else {
                             throw new Error(`${plugin.name} plugin requires missing plugin ${dependencyPluginName}@${dependencyPluginRequiredVersion}`);
                         }
                     } else {
                         if (!semver.satisfies(dependencyPlugin.version, dependencyPluginRequiredVersion)) {
-                            if (unsafe) {
-                                console.log(`${plugin.name}`.red + ' plugin is not compatible with plugin ' + `${dependencyPluginName}@${dependencyPlugin.version}`.red);
+                            if (this.allowUnsafePlugins) {
+                                console.error(`${plugin.name}`.red + ' plugin is not compatible with plugin ' + `${dependencyPluginName}@${dependencyPlugin.version}`.red);
                             } else {
                                 throw new Error(`${plugin.name} plugin is not compatible with plugin ${dependencyPluginName}@${dependencyPlugin.version}`);
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    async validateFlowRequirements(flow: IFlow): Promise<void> {
+        const errors: string[] = [];
+        if (flow.requires) {
+            if (flow.requires.fbl) {
+                if (!semver.satisfies(flow.requires.fbl, fblVersion)) {
+                    errors.push(`actual fbl version ${fblVersion.green} doesn't satisfy required ${flow.requires.fbl.green}`);
+                }
+            }
+
+            if (flow.requires.plugins) {
+                for (const pluginNameVersion of flow.requires.plugins) {
+                    const chunks = pluginNameVersion.split('@');
+
+                    const plugin = this.plugins[chunks[0]];
+                    if (!plugin) {
+                        errors.push(`required plugin ${chunks[0].green} is not registered`);
+                    } else {
+                        if (!semver.satisfies(chunks[1], plugin.version)) {
+                            errors.push(`actual plugin ${chunks[0].green} version ${plugin.version.green} doesn't satisfy required ${chunks[1].green}`);
+                        }
+                    }
+                }
+            }
+
+            if (flow.requires.applications) {
+                for (const application of flow.requires.applications) {
+                    if (!which(application)) {
+                        errors.push(`application ${application.green} not found, make sure it is installed and its location presents in the PATH environment variable`);
+                    }
+                }
+            }
+        }
+
+        if (errors.length) {
+            if (this.allowUnsafeFlows) {
+                errors.forEach(err => console.error(err));
+            } else {
+                throw new Error(errors.join('\n'));
             }
         }
     }
@@ -190,6 +246,8 @@ export class FBLService {
      * @returns {Promise<ActionSnapshot>}
      */
     async execute(wd: string, flow: IFlow, context: IContext): Promise<ActionSnapshot> {
+        await this.validateFlowRequirements(flow);
+
         const result = Joi.validate(flow, FBLService.validationSchema);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));

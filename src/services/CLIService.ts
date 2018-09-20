@@ -32,8 +32,6 @@ export class CLIService {
         __dirname + '/../plugins/templateUtilities',
     ];
 
-    private unsafePlugins = false;
-
     private configKVPairs: string[] = [];
     private secretKVPairs: string[] = [];
     private reportKVPairs: string[] = [];
@@ -187,6 +185,7 @@ export class CLIService {
                 }
             )
             .option('--unsafe-plugins', 'If provided incompatible plugins will still be registered and be available for use, but may lead to unexpected results or errors.')
+            .option('--unsafe-flows', 'If provided incompatible flow requirements will be ignored, but may lead to unexpected results or errors.')
             .option('--no-colors', 'Remove colors from output. Make it boring.')
             .option('--global-template-delimiter <delimiter>', 'Global EJS template delimiter. Default: $')
             .option('--local-template-delimiter <delimiter>', 'Local EJS template delimiter. Default: %')
@@ -225,7 +224,11 @@ export class CLIService {
         this.colors = commander.colors;
 
         if (commander.unsafePlugins) {
-            this.unsafePlugins = true;
+            this.fbl.allowUnsafePlugins = true;
+        }
+
+        if (commander.unsafeFlows) {
+            this.fbl.allowUnsafeFlows = true;
         }
 
         if (commander.globalTemplateDelimiter) {
@@ -243,7 +246,7 @@ export class CLIService {
     private registerPlugins(): void {
         const plugins = this.plugins.map((path: string) => requireg(path));
         this.fbl.registerPlugins(plugins);
-        this.fbl.validatePlugins(this.unsafePlugins);
+        this.fbl.validatePlugins();
     }
 
     /**
