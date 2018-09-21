@@ -132,9 +132,9 @@
   version "10.5.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.5.tgz#8e84d24e896cd77b0d4f73df274027e3149ec2ba"
 
-"@types/node@10.10.0":
-  version "10.10.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.0.tgz#2b08a1a7d1fa317173a776c2130bf240545cc33e"
+"@types/node@10.10.2":
+  version "10.10.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.10.2.tgz#2a55b8d66f6945efc5da38489774e551248aa169"
 
 "@types/semver@5.5.0":
   version "5.5.0"
