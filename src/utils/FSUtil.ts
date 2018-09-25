@@ -4,6 +4,7 @@ import {isAbsolute, resolve} from 'path';
 import {safeLoad} from 'js-yaml';
 import {promisify} from 'util';
 import {readFile} from 'fs';
+import {mkdir, test} from 'shelljs';
 
 export class FSUtil {
     /**
@@ -50,8 +51,28 @@ export class FSUtil {
         return resolve(wd, path);
     }
 
+    /**
+     * Get text file content
+     * @param {string} file
+     * @return {Promise<string>}
+     */
     static async readTextFile(file: string): Promise<string> {
         return await promisify(readFile)(file, 'utf8');
+    }
+
+    /**
+     * Create directory and all its parents recursively
+     * @param {string} path
+     * @return {Promise<void>}
+     */
+    static async mkdirp(path: string): Promise<void> {
+        if (!test('-e', path)) {
+            mkdir('-p', path);
+        } else {
+            if (!test('-d', path)) {
+                throw new Error(`Unable to create folder at path: ${path}. Path already exists and it is not a folder.`);
+            }
+        }
     }
 
     /**

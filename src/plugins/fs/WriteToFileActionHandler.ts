@@ -4,6 +4,7 @@ import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {FSUtil} from '../../utils/FSUtil';
+import {dirname} from 'path';
 
 const version = require('../../../../package.json').version;
 const tmp = require('tmp-promise');
@@ -54,6 +55,9 @@ export class WriteToFileActionHandler extends ActionHandler {
             });
             file = tmpFile.path;
         }
+
+        // create folders structure if needed
+        await FSUtil.mkdirp(dirname(file));
 
         snapshot.log(`Writing content to a file: ${file}`);
         await promisify(writeFile)(file, options.content, 'utf8');

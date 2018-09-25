@@ -16,8 +16,8 @@ Aliases:
 
 ```yaml
 ->: 
-  # [optional] file path, make sure parent dirs exists
-  # If not provided content will be written to temporary location directory
+  # [optional] file path, if not provided content will be written to temporary location directory.
+  # Note: all missing parent directories will be automatically created
   path: /tmp/test.txt
   
   # [optional] but required if "path" above is not provided.
