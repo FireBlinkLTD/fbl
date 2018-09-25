@@ -2,7 +2,7 @@
 
 File System plugin.
 
-## Action Handler: Write to specific file
+## Action Handler: Write to file
 
 ID: com.fireblink.fbl.fs.file.write
 
@@ -16,31 +16,17 @@ Aliases:
 
 ```yaml
 ->: 
-  # File path, make sure parent dirs exists
+  # [optional] file path, make sure parent dirs exists
+  # If not provided content will be written to temporary location directory
   path: /tmp/test.txt
-  # Content of the file
-  content: |-
-    test content
-``` 
-
-## Action Handler: Write to temp file
-
-ID: com.fireblink.fbl.fs.temp.file.write
-
-Aliases:
- - fbl.fs.temp.file.write
- - fs.temp.file.write
- - temp.file.write
- - tmp.->
- 
-**Example:**
- 
-```yaml
-tmp.->: 
-  # "ctx" variable name that will host the path to temp file,
-  # e.g: ctx.test in this case will host it
-  context: test
-  # Content of the file
+  
+  # [optional] but required if "path" above is not provided.
+  # Assign file path to "ctx" and or "secrets" context objects
+  assignPathTo:
+    ctx: name
+    secrets: name
+  
+  # [required] content of the file
   content: |-
     test content
 ``` 
@@ -60,15 +46,17 @@ Aliases:
 
 ```yaml
 encrypt:
-    # Password used to encrypt files
-    # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
-    password: <%- secrets.password %>
-    # List of masks to find files to be encrypted
-    inlude:
-      - /tmp/*.*      
-    # [optional] list of masks to exclude
-    exclude:
-      - /tmp/*.log
+  # [required] password used to encrypt files
+  # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
+  password: <%- secrets.password %>
+  
+  # [required] list of masks to find files to be encrypted
+  inlude:
+  - /tmp/*.*      
+    
+  # [optional] list of masks to exclude
+  exclude:
+    - /tmp/*.log
 ```
 
 ## Action Handler: Decrypt files
@@ -85,14 +73,16 @@ Aliases:
 **Example:**
 
 ```yaml
-encrypt:
-    # Password used to decrypt files
-    # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
-    password: <%- secrets.password %>
-    # List of masks to find files to be decrypted
-    inlude:
-      - /tmp/*.*      
-    # [optional] list of masks to exclude
-    exclude:
-      - /tmp/*.log    
+decrypt:
+  # [required] password used to decrypt files
+  # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
+  password: <%- secrets.password %>
+
+  # [required] list of masks to find files to be decrypted
+  inlude:
+    - /tmp/*.*      
+
+  # [optional] list of masks to exclude
+  exclude:
+    - /tmp/*.log    
 ```

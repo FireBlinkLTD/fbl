@@ -1,13 +1,13 @@
 import {IPlugin} from '../../interfaces';
-import {AttachedFlowHandler} from './AttachedFlowHandler';
-import {ParallelFlowHandler} from './ParallelFlowHandler';
-import {SequenceFlowHandler} from './SequenceFlowHandler';
-import {SwitchFlowHandler} from './SwitchFlowHandler';
-import {RepeatFlowHandler} from './RepeatFlowHandler';
-import {TryCatchFinallyFlowHandler} from './TryCatchFinallyFlowHandler';
-import {ForEachFlowHandler} from './ForEachFlowHandler';
-import {TemplateFlowHandler} from './TemplateFlowHandler';
-import {VirtualFlowHandler} from './VirtualFlowHandler';
+import {AttachedFlowActionHandler} from './AttachedFlowActionHandler';
+import {ForEachFlowActionHandler} from './ForEachFlowActionHandler';
+import {ParallelFlowActionHandler} from './ParallelFlowActionHandler';
+import {SequenceFlowActionHandler} from './SequenceFlowActionHandler';
+import {SwitchFlowActionHandler} from './SwitchFlowActionHandler';
+import {RepeatFlowActionHandler} from './RepeatFlowActionHandler';
+import {TemplateFlowActionHandler} from './TemplateFlowActionHandler';
+import {TryCatchFinallyFlowActionHandler} from './TryCatchFinallyFlowActionHandler';
+import {VirtualFlowActionHandler} from './VirtualFlowActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -20,14 +20,14 @@ module.exports = <IPlugin> {
     },
 
     actionHandlers: [
-        new AttachedFlowHandler(),
-        new ForEachFlowHandler(),
-        new ParallelFlowHandler(),
-        new SequenceFlowHandler(),
-        new SwitchFlowHandler(),
-        new RepeatFlowHandler(),
-        new TemplateFlowHandler(),
-        new TryCatchFinallyFlowHandler(),
-        new VirtualFlowHandler()
+        new AttachedFlowActionHandler(),
+        new ForEachFlowActionHandler(),
+        new ParallelFlowActionHandler(),
+        new SequenceFlowActionHandler(),
+        new SwitchFlowActionHandler(),
+        new RepeatFlowActionHandler(),
+        new TemplateFlowActionHandler(),
+        new TryCatchFinallyFlowActionHandler(),
+        new VirtualFlowActionHandler()
     ]
 };
