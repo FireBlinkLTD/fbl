@@ -1,10 +1,11 @@
 import {suite, test} from 'mocha-typescript';
 import {WriteToFileActionHandler} from '../../../../src/plugins/fs/WriteToFileActionHandler';
 import {promisify} from 'util';
-import {readFile, unlinkSync} from 'fs';
+import {mkdir, readFile, unlinkSync, writeFileSync} from 'fs';
 import * as assert from 'assert';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
+import {resolve} from 'path';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -163,5 +164,59 @@ export class WriteToFileTestSuite {
 
         // cleanup
         unlinkSync(context.ctx.ct);
+    }
+
+    @test()
+    async mkdirp(): Promise<void> {
+        const actionHandler = new WriteToFileActionHandler();
+        const context = FlowService.generateEmptyContext();
+
+        const tmpdir = await tmp.dir();
+        const path = resolve(tmpdir.path, 'l1', 'l2', 'l3', 'test.txt');
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        const content = 'test';
+        await actionHandler.execute({
+            path: path,
+            content: content
+        }, context, snapshot);
+
+        const result = await promisify(readFile)(path, 'utf8');
+        assert.strictEqual(result, content);
+    }
+
+    @test()
+    async fileInsteadOfFolderInParentPath(): Promise<void> {
+        const actionHandler = new WriteToFileActionHandler();
+        const context = FlowService.generateEmptyContext();
+
+        const tmpdir = await tmp.dir();
+        let path = resolve(tmpdir.path, 'l1', 'test.txt');
+
+        // write file on the folder level
+        writeFileSync(resolve(tmpdir.path, 'l1'), '', 'utf8');
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        const content = 'test';
+        await chai.expect(
+            actionHandler.execute({
+                path: path,
+                content: content
+            }, context, snapshot)
+        ).to.be.rejected;
+
+        path = resolve(tmpdir.path, 't1', 't2', 'test.txt');
+        // write file on the folder level
+        await promisify(mkdir)(resolve(tmpdir.path, 't1'));
+        writeFileSync(resolve(tmpdir.path, 't1', 't2'), '', 'utf8');
+
+        await chai.expect(
+            actionHandler.execute({
+                path: path,
+                content: content
+            }, context, snapshot)
+        ).to.be.rejected;
     }
 }
