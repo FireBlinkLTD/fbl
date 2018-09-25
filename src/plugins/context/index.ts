@@ -1,11 +1,11 @@
 import {IPlugin} from '../../interfaces';
-import {ContextValuesAssignment} from './ContextValuesAssignment';
-import {SecretValuesAssignment} from './SecretValuesAssignment';
-import {MarkEntitiesAsRegistered} from './MarkEntitiesAsRegistered';
-import {MarkEntitiesAsUnRegistered} from './MarkEntitiesAsUnRegistered';
-import {MarkEntitiesAsCreated} from './MarkEntitiesAsCreated';
-import {MarkEntitiesAsUpdated} from './MarkEntitiesAsUpdated';
-import {MarkEntitiesAsDeleted} from './MarkEntitiesAsDeleted';
+import {ContextValuesAssignmentActionHandler} from './ContextValuesAssignmentActionHandler';
+import {SecretValuesAssignmentActionHandler} from './SecretValuesAssignmentActionHandler';
+import {MarkEntitiesAsRegisteredActionHandler} from './MarkEntitiesAsRegisteredActionHandler';
+import {MarkEntitiesAsUnRegisteredActionHandler} from './MarkEntitiesAsUnRegisteredActionHandler';
+import {MarkEntitiesAsCreatedActionHandler} from './MarkEntitiesAsCreatedActionHandler';
+import {MarkEntitiesAsUpdatedActionHandler} from './MarkEntitiesAsUpdatedActionHandler';
+import {MarkEntitiesAsDeletedActionHandler} from './MarkEntitiesAsDeletedActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -14,13 +14,13 @@ module.exports = <IPlugin> {
     version: version,
 
     actionHandlers: [
-        new ContextValuesAssignment(),
-        new SecretValuesAssignment(),
-        new MarkEntitiesAsRegistered(),
-        new MarkEntitiesAsUnRegistered(),
-        new MarkEntitiesAsCreated(),
-        new MarkEntitiesAsUpdated(),
-        new MarkEntitiesAsDeleted(),
+        new ContextValuesAssignmentActionHandler(),
+        new SecretValuesAssignmentActionHandler(),
+        new MarkEntitiesAsRegisteredActionHandler(),
+        new MarkEntitiesAsUnRegisteredActionHandler(),
+        new MarkEntitiesAsCreatedActionHandler(),
+        new MarkEntitiesAsUpdatedActionHandler(),
+        new MarkEntitiesAsDeletedActionHandler(),
     ],
 
     requires: {
