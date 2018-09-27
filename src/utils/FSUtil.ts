@@ -1,10 +1,17 @@
 import * as glob from 'glob-promise';
 import {homedir} from 'os';
-import {isAbsolute, resolve} from 'path';
+import {basename, dirname, isAbsolute, normalize, resolve, sep} from 'path';
 import {safeLoad} from 'js-yaml';
 import {promisify} from 'util';
-import {readFile} from 'fs';
-import {mkdir, test} from 'shelljs';
+import {exists, mkdir, readdir, readFile, rename, rmdir, stat, unlink} from 'fs';
+
+const unlinkAsync = promisify(unlink);
+const existsAsync = promisify(exists);
+const readdirAsync = promisify(readdir);
+const statAsync = promisify(stat);
+const rmdirAsync = promisify(rmdir);
+const readFileAsync = promisify(readFile);
+const renameAsync = promisify(rename);
 
 export class FSUtil {
     /**
@@ -57,7 +64,7 @@ export class FSUtil {
      * @return {Promise<string>}
      */
     static async readTextFile(file: string): Promise<string> {
-        return await promisify(readFile)(file, 'utf8');
+        return await readFileAsync(file, 'utf8');
     }
 
     /**
@@ -66,11 +73,92 @@ export class FSUtil {
      * @return {Promise<void>}
      */
     static async mkdirp(path: string): Promise<void> {
-        if (!test('-e', path)) {
-            mkdir('-p', path);
+        const exist = await existsAsync(path);
+        if (!exist) {
+            path = normalize(path);
+            const parent = dirname(path);
+
+            /* istanbul ignore else */
+            if (parent !== path) {
+                await this.mkdirp(parent);
+                await promisify(mkdir)(path);
+            }
         } else {
-            if (!test('-d', path)) {
+            const stats = await statAsync(path);
+            if (!stats.isDirectory()) {
                 throw new Error(`Unable to create folder at path: ${path}. Path already exists and it is not a folder.`);
+            }
+        }
+    }
+
+    /**
+     * Remove files and folders at given path recursively
+     * @param {string} path
+     * @return {Promise<void>}
+     */
+    static async remove(path: string): Promise<void> {
+        if (await existsAsync(path)) {
+            const stats = await statAsync(path);
+            if (!stats.isDirectory()) {
+                await unlinkAsync(path);
+            } else {
+                const children = await readdirAsync(path);
+                for (const child of children) {
+                    await FSUtil.remove(resolve(path, child));
+                }
+                await rmdirAsync(path);
+            }
+        }
+    }
+
+    /**
+     * Move file/folder
+     * @param {string} from
+     * @param {string} to
+     * @return {Promise<void>}
+     */
+    static async move(from: string, to: string): Promise<void> {
+        if (await existsAsync(from)) {
+            const stats = await statAsync(from);
+            if (!stats.isDirectory()) {
+                // if destination path has an OS specific path separator in the end
+                if (to.endsWith(sep)) {
+                    // create folders first
+                    await FSUtil.mkdirp(to);
+
+                    // move file preserving its original name
+                    await renameAsync(from, resolve(to, basename(from)));
+                } else {
+                    // create folders first
+                    await FSUtil.mkdirp(dirname(to));
+
+                    // move file ignoring its name
+                    await renameAsync(from, to);
+                }
+            } else {
+                // if source path has an OS specific path separator in the end
+                if (from.endsWith(sep)) {
+                    // move its content instead of the folder itself
+                    const children = await readdirAsync(from);
+                    for (const child of children) {
+                        await FSUtil.move(resolve(from, child), normalize(to) + sep);
+                    }
+                } else {
+                    // if destination path has an OS specific path separator in the end
+                    if (to.endsWith(sep)) {
+                        // create folders first
+                        await FSUtil.mkdirp(to);
+
+                        // move folder preserving its original name
+                        await renameAsync(from, resolve(to, basename(from)));
+                    } else {
+                        // create folders first
+                        await FSUtil.mkdirp(dirname(to));
+
+                        // move folder ignoring its name
+                        await renameAsync(from, to);
+                    }
+                }
             }
         }
     }

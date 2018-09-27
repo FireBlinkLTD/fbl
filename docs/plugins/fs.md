@@ -86,3 +86,94 @@ decrypt:
   exclude:
     - /tmp/*.log    
 ```
+
+## Action Handler: Create Directories
+
+Create directory (and all parent ones if missing).
+
+ID: com.fireblink.fbl.fs.dir.create
+
+Aliases:
+ - fbl.fs.dir.create
+ - fs.dir.create
+ - dir.create
+ - mkdir -p
+ - mkdir
+ 
+**Example:**
+
+```yaml
+# create "child" directory
+# if "parent" is missing it will be also created
+mkdir: /tmp/parent/child
+```
+
+## Action Handler: Remove File or Folder
+
+Removes file or folder for given path.
+
+ID: com.fireblink.fbl.fs.remove
+
+Aliases:
+ - fbl.fs.remove
+ - fbl.fs.rm
+ - fs.remove
+ - fs.rm
+ - rm -rf
+ - remove
+ - rm
+ 
+```yaml
+# remove "child"
+mkdir: /tmp/parent/child
+```
+ 
+## Action Handler: Move File or Folder
+
+Allows to move/rename file or entire folder.
+
+ID: com.fireblink.fbl.fs.move
+
+Aliases:
+ - fbl.fs.move
+ - fbl.fs.mv
+ - fs.move
+ - fs.mv
+ - move
+ - mv
+ 
+
+**Example 1: Move file to other folder**
+ 
+ ```yaml
+mv: 
+  # move file.txt
+  from: /tmp/source/file.txt
+  
+  # to "target" folder
+  # note: slash in the end is required if you want to specify a target folder
+  to: /tmp/target/
+ ```
+ 
+**Example 2: Move file to other folder and rename it**
+ 
+```yaml
+mv: 
+  # move file.txt
+  from: /tmp/source/file.txt
+  
+  # to "target" folder and rename it to "renamed.txt"
+  to: /tmp/target/renamed.txt
+```
+
+**Example 3: Move folder contents to other folder**
+
+```yaml
+mv: 
+  # move everything from "source" folder
+  # note: slash in the end is required if you want to move folder contents rather then the folder itself
+  from: /tmp/source/
+  
+  # to "target"
+  to: /tmp/target
+```
