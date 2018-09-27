@@ -73,6 +73,8 @@ export class WriteToFileActionHandler extends ActionHandler {
             if (options.assignPathTo.secrets) {
                 context.secrets[options.assignPathTo.secrets] = file;
             }
+
+            snapshot.setContext(context);
         }
     }
 }
