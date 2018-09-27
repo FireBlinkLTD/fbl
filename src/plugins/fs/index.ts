@@ -5,6 +5,7 @@ import {WriteToFileActionHandler} from './WriteToFileActionHandler';
 import {MakeDirActionHandler} from './MakeDirActionHandler';
 import {RemovePathActionHandler} from './RemovePathActionHandler';
 import {MovePathActionHandler} from './MovePathActionHandler';
+import {CopyPathActionHandler} from './CopyPathActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -13,6 +14,7 @@ module.exports = <IPlugin> {
     version: version,
 
     actionHandlers: [
+        new CopyPathActionHandler(),
         new EncryptActionHandler(),
         new DecryptActionHandler(),
         new MakeDirActionHandler(),

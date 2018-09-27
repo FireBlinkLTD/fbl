@@ -85,6 +85,6 @@ class MakeDirActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.execute(path_l1, context, snapshot)
-        ).to.be.not.rejected;
+        ).to.be.rejected;
     }
 }
