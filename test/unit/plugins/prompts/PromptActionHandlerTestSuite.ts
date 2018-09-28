@@ -25,9 +25,14 @@ const printChar = (char: string, name: string): void => {
  * @param {string} chars
  */
 const printLine = (chars: string): void => {
+    for (let i = 0; i < 100; i++) {
+        printChar('', 'backspace');
+    }
+
     for (const char of chars) {
         printChar(char, char);
     }
+
     printChar('\n', 'return');
 };
 
@@ -239,9 +244,6 @@ class PromptActionHandlerTestSuite {
                 setTimeout(() => {
                     printLine(invalid);
                     setTimeout(() => {
-                        for (let i = 0; i < invalid.length; i++) {
-                            printChar('', 'backspace');
-                        }
                         printLine(correct);
                         resolve();
                     }, 50);
