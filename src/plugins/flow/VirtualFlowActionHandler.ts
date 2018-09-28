@@ -129,7 +129,19 @@ class DynamicFlowHandler extends ActionHandler {
         if (this.validationSchema) {
             const result = new Validator().validate(options, this.validationSchema);
             if (!result.valid) {
-                throw new Error(result.errors.map(e => `"${e.property.substring('instance.'.length)}" ${e.message}`).join('\n'));
+                throw new Error(result.errors
+                    .map(e => {
+                        let key = 'value';
+
+                        /* istanbul ignore else */
+                        if (e.property !== 'instance') {
+                            key = e.property.substring('instance.'.length);
+                        }
+
+                        return `${key} ${e.message}`;
+                    })
+                    .join('\n')
+                );
             }
         }
     }
