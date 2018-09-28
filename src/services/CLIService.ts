@@ -28,6 +28,7 @@ export class CLIService {
         __dirname + '/../plugins/exec',
         __dirname + '/../plugins/flow',
         __dirname + '/../plugins/fs',
+        __dirname + '/../plugins/prompts',
         __dirname + '/../plugins/reporters',
         __dirname + '/../plugins/templateUtilities',
     ];
