@@ -177,3 +177,53 @@ mv:
   # to "target"
   to: /tmp/target
 ```
+
+## Action Handler: Copy File or Folder
+
+Allows to copy file or entire folder.
+
+ID: com.fireblink.fbl.fs.copy
+
+Aliases:
+ - fbl.fs.copy
+ - fbl.fs.cp
+ - fs.copy
+ - fs.cp
+ - copy
+ - cp
+ 
+
+**Example 1: Copy file to other folder**
+ 
+ ```yaml
+cp: 
+  # copy file.txt
+  from: /tmp/source/file.txt
+  
+  # to "target" folder
+  # note: slash in the end is required if you want to specify a target folder
+  to: /tmp/target/
+ ```
+ 
+**Example 2: Copy file to other folder with different name**
+ 
+```yaml
+mv: 
+  # copy file.txt
+  from: /tmp/source/file.txt
+  
+  # to "target" folder and name it "renamed.txt"
+  to: /tmp/target/renamed.txt
+```
+
+**Example 3: Copy folder contents to other folder**
+
+```yaml
+mv: 
+  # copy everything from "source" folder
+  # note: slash in the end is required if you want to copy folder contents rather then the folder itself
+  from: /tmp/source/
+  
+  # to "target"
+  to: /tmp/target
+```

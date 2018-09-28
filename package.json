@@ -50,7 +50,7 @@
     "@types/bluebird": "3.5.24",
     "@types/chai": "4.1.4",
     "@types/ejs": "2.6.0",
-    "@types/joi": "13.4.5",
+    "@types/joi": "13.6.0",
     "@types/js-yaml": "3.11.2",
     "@types/jsonschema": "1.1.1",
     "@types/node": "10.11.2",
