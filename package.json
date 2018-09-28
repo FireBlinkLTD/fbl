@@ -54,7 +54,7 @@
     "@types/joi": "13.6.0",
     "@types/js-yaml": "3.11.2",
     "@types/jsonschema": "1.1.1",
-    "@types/node": "10.11.2",
+    "@types/node": "10.11.3",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.0",
     "@types/tmp": "0.0.33",
