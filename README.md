@@ -81,6 +81,7 @@ Flow files can use EJS [templates](docs/templates.md) for a flexible control ove
 - [Exec](docs/plugins/exec.md)
 - [Flow Control](docs/plugins/flow.md)
 - [File System](docs/plugins/fs.md)
+- [CLI Prompts](docs/plugins/prompts.md)
 - [Execution Reporters](docs/plugins/reporters.md)
 
 ## Global Config

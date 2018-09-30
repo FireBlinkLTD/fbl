@@ -7,11 +7,12 @@ const prompts = require('prompts');
 
 export class MultiSelectActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.cli.multiselect',
+        id: 'com.fireblink.fbl.cli.prompts.multiselect',
         version: version,
         aliases: [
-            'fbl.cli.multiselect',
-            'cli.multiselect',
+            'fbl.cli.prompts.multiselect',
+            'cli.prompts.multiselect',
+            'prompts.multiselect',
             'multiselect'
         ]
     };
