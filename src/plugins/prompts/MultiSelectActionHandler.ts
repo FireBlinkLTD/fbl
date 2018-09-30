@@ -49,13 +49,13 @@ export class MultiSelectActionHandler extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const value = (await prompts({
-            type: 'select',
+            type: 'multiselect',
             name: 'value',
             choices: options.options.map((o: string | number) => {
                 return {
                     title: o.toString,
                     value: o,
-                    selected: options.default.indexOf(0) >= 0
+                    selected: options.default && options.default.indexOf(o) >= 0
                 };
             }),
             message: options.message,
