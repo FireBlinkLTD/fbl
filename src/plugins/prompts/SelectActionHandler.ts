@@ -7,12 +7,13 @@ const prompts = require('prompts');
 
 export class SelectActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.cli.select',
+        id: 'com.fireblink.fbl.cli.prompts.select',
         version: version,
         aliases: [
-            'fbl.cli.select',
-            'cli.select',
-            'select'
+            'fbl.cli.prompts.select',
+            'cli.prompts.select',
+            'prompts.select',
+            'select',
         ]
     };
 

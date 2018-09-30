@@ -8,11 +8,12 @@ const prompts = require('prompts');
 
 export class PromptActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.cli.prompt',
+        id: 'com.fireblink.fbl.cli.prompts.prompt',
         version: version,
         aliases: [
-            'fbl.cli.prompt',
-            'cli.prompt',
+            'fbl.cli.prompts.prompt',
+            'cli.prompts.prompt',
+            'prompts.prompt',
             'prompt'
         ]
     };
