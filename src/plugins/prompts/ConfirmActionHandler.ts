@@ -7,11 +7,12 @@ const prompts = require('prompts');
 
 export class ConfirmActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.cli.confirm',
+        id: 'com.fireblink.fbl.cli.prompts.confirm',
         version: version,
         aliases: [
-            'fbl.cli.confirm',
-            'cli.confirm',
+            'fbl.cli.prompts.confirm',
+            'cli.prompts.confirm',
+            'prompts.confirm',
             'confirm'
         ]
     };
