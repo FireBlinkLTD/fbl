@@ -18,7 +18,12 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # install app dependencies
+      # link production version
+      - run: yarn link --prod
+      # make sure it can be executed
+      - run: fbl -V
+
+      # install all app dependencies
       - run: yarn install
 
       - save_cache:
