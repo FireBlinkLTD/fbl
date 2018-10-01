@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {WriteToFileActionHandler} from '../../../../src/plugins/fs/WriteToFileActionHandler';
 import {promisify} from 'util';
-import {mkdir, readFile, unlinkSync, writeFileSync} from 'fs';
+import {mkdir, readFile, unlinkSync, writeFile, writeFileSync} from 'fs';
 import * as assert from 'assert';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
@@ -119,7 +119,6 @@ export class WriteToFileTestSuite {
         const tmpFile = await tmp.file();
 
         const context = FlowService.generateEmptyContext();
-
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const content = 'test';
@@ -138,6 +137,31 @@ export class WriteToFileTestSuite {
         assert.strictEqual(result, content);
         assert.strictEqual(context.ctx.ct, tmpFile.path);
         assert.strictEqual(context.secrets.st, tmpFile.path);
+    }
+
+    @test()
+    async saveToFileBasedOnTemplate(): Promise<void> {
+        const actionHandler = new WriteToFileActionHandler();
+
+        const templateFile = await tmp.file();
+        const destinationFile = await tmp.file();
+
+        const context = FlowService.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        const content = '<$- ctx.global $>-<%- ctx.local %>';
+        await promisify(writeFile)(templateFile.path, content, 'utf8');
+
+        context.ctx.global = 'g';
+        context.ctx.local = 'l';
+
+        await actionHandler.execute({
+            path: destinationFile.path,
+            contentFromFile: templateFile.path,
+        }, context, snapshot);
+
+        const result = await promisify(readFile)(destinationFile.path, 'utf8');
+        assert.strictEqual(result, 'g-l');
     }
 
     @test()
