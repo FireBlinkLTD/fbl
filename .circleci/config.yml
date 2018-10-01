@@ -18,11 +18,6 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # link production version
-      - run: yarn link --prod
-      # make sure it can be executed
-      - run: fbl -V
-
       # install all app dependencies
       - run: yarn install
 
@@ -47,6 +42,10 @@ jobs:
 
       # send test coverage
       - run: bash <(curl -s https://codecov.io/bash) -f ./coverage.lcov
+
+      # test if app can run with prod dependencies
+      - run: yarn install --prod
+      - run: node dist/src/cli.js -V
 
       # store artifacts
       - store_artifacts:
