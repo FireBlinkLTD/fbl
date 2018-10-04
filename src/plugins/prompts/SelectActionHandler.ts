@@ -1,6 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
+import {ContextUtil} from '../../utils/ContextUtil';
 
 const version = require('../../../../package.json').version;
 const prompts = require('prompts');
@@ -31,8 +32,12 @@ export class SelectActionHandler extends ActionHandler {
         ),
 
         assignResponseTo: Joi.object({
-            ctx: Joi.string().min(1),
-            secrets: Joi.string().min(1)
+            ctx: Joi.string()
+                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                .min(1),
+            secrets: Joi.string()
+                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                .min(1)
         }).required(),
     }).required();
 
@@ -60,12 +65,12 @@ export class SelectActionHandler extends ActionHandler {
 
         /* istanbul ignore else */
         if (options.assignResponseTo.ctx) {
-            context.ctx[options.assignResponseTo.ctx] = value;
+            await ContextUtil.assignToField(context.ctx, options.assignResponseTo.ctx, value);
         }
 
         /* istanbul ignore else */
         if (options.assignResponseTo.secrets) {
-            context.secrets[options.assignResponseTo.secrets] = value;
+            await ContextUtil.assignToField(context.secrets, options.assignResponseTo.secrets, value);
         }
 
         snapshot.setContext(context);

@@ -11,7 +11,7 @@ export class MarkEntitiesAsDeletedActionHandler extends BaseMarkEntityAsActionHa
         aliases: [
             'fbl.context.entities.deleted',
             'context.entities.deleted',
-            'ctx.entities.deleted'
+            'entities.deleted'
         ]
     };
 

@@ -5,13 +5,12 @@ const version = require('../../../../package.json').version;
 
 export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.context.values',
+        id: 'com.fireblink.fbl.context.ctx',
         version: version,
         aliases: [
-            'fbl.context.values',
-            'context.values',
-            'context',
-            'ctx'
+            'fbl.context.ctx',
+            'context.ctx',
+            'ctx',
         ]
     };
 
@@ -20,6 +19,6 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
     }
 
     getAssignmentKey(): 'ctx' | 'secrets' {
-        return 'ctx';
+        return 'ctx'
     }
 }

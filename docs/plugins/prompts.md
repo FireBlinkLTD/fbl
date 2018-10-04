@@ -25,10 +25,10 @@ default: false
 
 # [required] assign response to given context fields
 assignResponseTo:
-  # [optional] "ctx" field to assign value to
-  ctx: "ctx_field"
-  # [optional] "secrets" field to assign value to
-  secrets: "secrets_field"
+  # [optional] "ctx" field to assign value to "ctx_field"
+  ctx: "$.ctx_field"
+  # [optional] "secrets" field to assign value to "secrets_field"
+  secrets: "$.secrets_field"
 ```
 
 ##  Action Handler: Prompt
@@ -59,10 +59,10 @@ schema:
 
 # [required] assign response to given context fields
 assignResponseTo:
-  # [optional] "ctx" field to assign value to
-  ctx: "ctx_field"
-  # [optional] "secrets" field to assign value to
-  secrets: "secrets_field"  
+  # [optional] "ctx" field to assign value to "ctx_field"
+  ctx: "$.ctx_field"
+  # [optional] "secrets" field to assign value to "secrets_field"
+  secrets: "$.secrets_field"  
 ```
 
 ##  Action Handler: Select
@@ -95,10 +95,10 @@ options:
 
 # [required] assign picked value to given context fields
 assignResponseTo:
-  # [optional] "ctx" field to assign value to
-  ctx: "ctx_field"
-  # [optional] "secrets" field to assign value to
-  secrets: "secrets_field"  
+  # [optional] "ctx" field to assign value to "ctx_field"
+  ctx: "$.ctx_field"
+  # [optional] "secrets" field to assign value to "secrets_field"
+  secrets: "$.secrets_field"  
 ```
 
 ##  Action Handler: Multi Select
@@ -129,8 +129,8 @@ options:
  
 # [required] assign picked values to given context fields 
 assignResponseTo:
-  # [optional] "ctx" field to assign value to
-  ctx: "ctx_field"
-  # [optional] "secrets" field to assign value to
-  secrets: "secrets_field"  
+  # [optional] "ctx" field to assign value to "ctx_field"
+  ctx: "$.ctx_field"
+  # [optional] "secrets" field to assign value to "secrets_field"
+  secrets: "$.secrets_field"  
 ```

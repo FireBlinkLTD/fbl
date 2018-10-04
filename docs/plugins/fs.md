@@ -12,7 +12,7 @@ Aliases:
  - file.write
  - \->
  
-**Example:**
+**Example 1: Define File Content Inline**
 
 ```yaml
 ->: 
@@ -28,7 +28,26 @@ Aliases:
   
   # [required] content of the file
   content: |-
-    test content
+    test content    
+``` 
+
+**Example 2: Define File Content From Other File**
+
+```yaml
+->: 
+  # [optional] file path, if not provided content will be written to temporary location directory.
+  # Note: all missing parent directories will be automatically created
+  path: /tmp/test.txt
+  
+  # [optional] but required if "path" above is not provided.
+  # Assign file path to "ctx" and or "secrets" context objects as "name" field
+  assignPathTo:
+    ctx: $.name
+    secrets: $.name
+  
+  # [required] template file
+  # Note: global and then local EJS template processing will be applied to the template before writing
+  contentFromFile: /tmp/template.ejs 
 ``` 
  
 ## Action Handler: Encrypt files

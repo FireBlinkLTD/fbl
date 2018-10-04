@@ -2,20 +2,23 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {IContext} from '../../interfaces';
 import {FSUtil} from '../../utils/FSUtil';
+import {ContextUtil} from '../../utils/ContextUtil';
 
 export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
     private static ROOT_KEY = '.';
 
     private static validationSchema = Joi.object()
         .pattern(
-            /^/,
+            /^\$(\.[^.]+)*$/,
             Joi.object({
-                inline: Joi.any(),
+                inline: Joi.object(),
                 files: Joi.array().items(Joi.string()).min(1),
-                priority: Joi.string().valid(['inline', 'files'])
+                priority: Joi.string().valid(['inline', 'files']),
+                override: Joi.boolean()
             })
                 .required()
                 .or('inline', 'files')
+                .unknown(false)
         )
         .min(1)
         .required()
@@ -46,6 +49,12 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                 for (const path of files) {
                     snapshot.log(`Reading from file: ${path} for key ${name}`);
                     const fileContent = await FSUtil.readYamlFromFile(path);
+
+                    const fileContentValidationResult = Joi.validate(fileContent, Joi.object().required());
+                    if (fileContentValidationResult.error) {
+                        throw new Error(fileContentValidationResult.error.details.map(d => d.message).join('\n'));
+                    }
+
                     if (value) {
                         Object.assign(value, fileContent);
                     } else {
@@ -62,11 +71,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                 }
             }
 
-            if (name === BaseValuesAssignmentActionHandler.ROOT_KEY) {
-                Object.assign(context[key], value);
-            } else {
-                context[key][name] = value;
-            }
+            await ContextUtil.assign(context[key], name, value, options[name].override);
         });
         snapshot.setContext(context);
 

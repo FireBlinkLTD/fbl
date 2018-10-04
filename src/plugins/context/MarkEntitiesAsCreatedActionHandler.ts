@@ -11,7 +11,7 @@ export class MarkEntitiesAsCreatedActionHandler extends BaseMarkEntityAsActionHa
         aliases: [
             'fbl.context.entities.created',
             'context.entities.created',
-            'ctx.entities.created'
+            'entities.created'
         ]
     };
 

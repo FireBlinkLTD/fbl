@@ -75,7 +75,7 @@ class ShellActionHandlerTestSuite {
                 executable: 'test',
                 script: 'echo "hello!"',
                 assignTo: {
-                    ctx: 'something'
+                    ctx: '$.something'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -85,7 +85,7 @@ class ShellActionHandlerTestSuite {
                 executable: 'test',
                 script: 'echo "hello!"',
                 assignTo: {
-                    secrets: 'something'
+                    secrets: '$.something'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -107,8 +107,8 @@ class ShellActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -139,7 +139,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1'
+                ctx: '$.tst1'
             }
         }, context, snapshot);
 
@@ -166,7 +166,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                secrets: 'tst2'
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -192,8 +192,8 @@ class ShellActionHandlerTestSuite {
                 silent: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -223,8 +223,8 @@ class ShellActionHandlerTestSuite {
                 silent: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -251,7 +251,7 @@ class ShellActionHandlerTestSuite {
                 executable: '/bin/bash',
                 script: 'return 1',
                 assignTo: {
-                    ctx: 'tst1'
+                    ctx: '$.tst1'
                 }
             }, context, snapshot)
         ).to.be.rejected;
@@ -272,7 +272,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1'
+                ctx: '$.tst1'
             }
         }, context, snapshot);
 
@@ -292,7 +292,7 @@ class ShellActionHandlerTestSuite {
                 executable: 'missing_executable',
                 script: 'echo "hello!"',
                 assignTo: {
-                    ctx: 'tst1'
+                    ctx: '$.tst1'
                 }
             }, context, snapshot)
         ).to.be.rejected;

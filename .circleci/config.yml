@@ -18,7 +18,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # install app dependencies
+      # install all app dependencies
       - run: yarn install
 
       - save_cache:
@@ -42,6 +42,10 @@ jobs:
 
       # send test coverage
       - run: bash <(curl -s https://codecov.io/bash) -f ./coverage.lcov
+
+      # test if app can run with prod dependencies
+      - run: yarn install --prod
+      - run: node dist/src/cli.js -V
 
       # store artifacts
       - store_artifacts:
