@@ -7,6 +7,7 @@ import {FSUtil} from '../../utils/FSUtil';
 import {dirname} from 'path';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
+import {ContextUtil} from '../../utils/ContextUtil';
 
 const version = require('../../../../package.json').version;
 const tmp = require('tmp-promise');
@@ -28,8 +29,12 @@ export class WriteToFileActionHandler extends ActionHandler {
             .min(1),
 
         assignPathTo: Joi.object({
-            ctx: Joi.string().min(1),
-            secrets: Joi.string().min(1)
+            ctx: Joi.string()
+                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                .min(1),
+            secrets: Joi.string()
+                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                .min(1)
         }),
 
         contentFromFile: Joi.string().min(1),
@@ -92,12 +97,12 @@ export class WriteToFileActionHandler extends ActionHandler {
         if (options.assignPathTo) {
             /* istanbul ignore else */
             if (options.assignPathTo.ctx) {
-                context.ctx[options.assignPathTo.ctx] = file;
+                await ContextUtil.assignToField(context.ctx, options.assignPathTo.ctx, file);
             }
 
             /* istanbul ignore else */
             if (options.assignPathTo.secrets) {
-                context.secrets[options.assignPathTo.secrets] = file;
+                await ContextUtil.assignToField(context.secrets, options.assignPathTo.secrets, file);
             }
 
             snapshot.setContext(context);

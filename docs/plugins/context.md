@@ -65,18 +65,20 @@ Aliases:
 **Example 1: Assign values to context root directly:**
 
 ```yaml
-ctx: 
-  '.': 
+ctx:
+  # assign to "ctx" directly 
+  '$': 
     inline:
       something: true
       else: false  
 ```
 
-**Example 2: Assign values from file "vars.yml" to field "vars.from.file":**
+**Example 2: Assign values from file "vars.yml" to field "vars -> files":**
 
 ```yaml
 ctx: 
-  vars.from.file: 
+  # create hierarchy of objects: "files" inside "vars" that is inside "ctx"
+  $.vars: 
     files: 
      - vars.yml    
 ```
@@ -84,7 +86,7 @@ ctx:
 **Example 3: Assign values from file "vars.yml" after inline ones:**
 ```yaml
 ctx: 
-  '.':
+  '$':
     inline: 
       test: true 
     files: 
@@ -92,6 +94,17 @@ ctx:
     # specify that files have a priority over inline vars
     # if not provided inline vars will have priority over files
     priority: 'files'   
+```
+
+**Example 4: Override instead of assigning**
+```yaml
+ctx: 
+  '$.test':
+    inline: 
+      test: true
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true       
 ```
 
 ## Action Handler: Secret Values Assignment
@@ -110,17 +123,17 @@ Aliases:
  
  ```yaml
  secrets: 
-   '.': 
+   '$': 
      inline:
        something: true
        else: false  
  ```
  
-**Example 2: Assign values from file "vars.yml" to field "vars.from.file":**
+**Example 2: Assign values from file "vars.yml" to field "vars -> files":**
  
  ```yaml
  secrets: 
-   vars.from.file: 
+   $.vars: 
      files: 
       - vars.yml    
  ```
@@ -139,6 +152,18 @@ Aliases:
      priority: 'files'   
  ```
  
+ **Example 4: Override instead of assigning**
+ ```yaml
+ secrets: 
+   '$.test':
+     inline: 
+       test: true
+     # [optional] override everything tha tis inside "test" object with { test: true }
+     # use with caution
+     override: true       
+ ```
+
+ 
 ## Action Handler: Mark entities as registered
 
 Mark some entity as registered, meaning it supposed to exist.
@@ -151,12 +176,12 @@ ID: com.fireblink.fbl.context.entities.registered
 Aliases:
  - fbl.context.entities.registered
  - context.entities.registered
- - ctx.entities.registered
+ - entities.registered
  
 **Example:**
   
 ```yaml
-ctx.entities.registered: 
+entities.registered: 
     # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
@@ -175,12 +200,12 @@ ID: com.fireblink.fbl.context.entities.registered
 Aliases:
  - fbl.context.entities.unregistered
  - context.entities.unregistered
- - ctx.entities.unregistered
+ - entities.unregistered
  
 **Example:**
   
 ```yaml
-ctx.entities.unregistered: 
+entities.unregistered: 
     # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
@@ -199,12 +224,12 @@ ID: com.fireblink.fbl.context.entities.created
 Aliases:
  - fbl.context.entities.created
  - context.entities.created
- - ctx.entities.created
+ - entities.created
  
 **Example:**
   
 ```yaml
-ctx.entities.created: 
+entities.created: 
     # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
@@ -223,12 +248,12 @@ ID: com.fireblink.fbl.context.entities.updated
 Aliases:
  - fbl.context.entities.updated
  - context.entities.updated
- - ctx.entities.updated
+ - entities.updated
  
 **Example:**
   
 ```yaml
-ctx.entities.created: 
+entities.created: 
     # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
@@ -247,12 +272,12 @@ ID: com.fireblink.fbl.context.entities.deleted
 Aliases:
  - fbl.context.entities.deleted
  - context.entities.deleted
- - ctx.entities.deleted
+ - entities.deleted
  
 **Example:**
   
 ```yaml
-ctx.entities.deleted: 
+entities.deleted: 
     # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number

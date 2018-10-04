@@ -7,6 +7,7 @@ import * as assert from 'assert';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -16,6 +17,9 @@ const tmp = require('tmp-promise');
 
 @suite()
 export class ContextValuesAssignmentActionHandlerTestSuite {
+    after() {
+        Container.reset();
+    }
 
     @test()
     async failValidation(): Promise<void> {
@@ -39,19 +43,19 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.validate({
-                test: []
+                '$.test': []
             }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
-                test: 123
+                '$.test': 123
             }, context, snapshot)
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
-                test: 'tst'
+                '$.test': 'tst'
             }, context, snapshot)
         ).to.be.rejected;
     }
@@ -64,15 +68,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.validate({
-                test: {
-                    inline: 'test'
-                }
-            }, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                test: {
+                '$.test': {
                     files: ['/tmp/test']
                 }
             }, context, snapshot)
@@ -80,7 +76,17 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.validate({
-                test: {
+                '$': {
+                    inline: {
+                        'test': true
+                    }
+                }
+            }, context, snapshot)
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                '$.test': {
                     inline: {
                         test: true
                     },
@@ -109,7 +115,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
 
         const options = {
-            '.': <{[key: string]: any}>{
+            '$': <{[key: string]: any}>{
                 inline: inlineContent,
                 files: [tmpFile.path]
             }
@@ -121,7 +127,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.content, 'inline');
 
         // explicitly set priority to inline
-        options['.'].priority = 'inline';
+        options['$'].priority = 'inline';
 
         snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(options, context, snapshot);
@@ -129,7 +135,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.content, 'inline');
 
         // change priority to files
-        options['.'].priority = 'files';
+        options['$'].priority = 'files';
 
         snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(options, context, snapshot);
@@ -140,6 +146,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        flowService.debug = true;
+
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
         const context = FlowService.generateEmptyContext();
@@ -157,15 +166,18 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
 
         const options = {
-            test: {
-                inline: 123
-            },
-            existing: {
+            '$': {
                 inline: {
-                    other: 'other'
+                    test: 123
                 }
             },
-            fromFile: {
+            '$.existing': {
+                inline: {
+                    other: 'other'
+                },
+                override: true
+            },
+            '$.fromFile': {
                 files: [tmpFile.path]
             }
         };
@@ -181,7 +193,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
 
         // do the same with relative path
-        options.fromFile.files = [basename(tmpFile.path)];
+        options['$.fromFile'].files = [basename(tmpFile.path)];
         snapshot.wd = dirname(tmpFile.path);
 
         await actionHandler.validate(options, context, snapshot);
@@ -219,15 +231,12 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile2.path, dump(file2Content), 'utf8');
 
         const options = {
-            test: {
-                inline: 123
-            },
-            '.': {
+            '$': {
                 inline: {
-                    other: 'other'
+                    test: 123
                 }
             },
-            fromFile: {
+            '$.fromFile': {
                 files: [
                     tmpFile1.path,
                     tmpFile2.path
@@ -242,12 +251,11 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, 'value');
-        assert.strictEqual(context.ctx.other, 'other');
         assert.strictEqual(context.ctx.fromFile.file1_content, file1Content.file1_content);
         assert.strictEqual(context.ctx.fromFile.file2_content, file2Content.file2_content);
 
         // do the same with relative path
-        options.fromFile.files = [
+        options['$.fromFile'].files = [
             basename(tmpFile1.path),
             tmpFile2.path
         ];
@@ -258,8 +266,60 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, 'value');
-        assert.strictEqual(context.ctx.other, 'other');
         assert.strictEqual(context.ctx.fromFile.file1_content, file1Content.file1_content);
         assert.strictEqual(context.ctx.fromFile.file2_content, file2Content.file2_content);
+    }
+
+    @test()
+    async failToAssignDueToConflictInPath(): Promise<void> {
+        const actionHandler = new ContextValuesAssignmentActionHandler();
+
+        const context = FlowService.generateEmptyContext();
+        context.ctx.value = 'value';
+
+        const options = {
+            '$.value': {
+                inline: {
+                    test: 123
+                }
+            }
+        };
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        await actionHandler.validate(options, context, snapshot);
+
+        await chai.expect(
+            actionHandler.execute(options, context, snapshot)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async failToAssignDueToWrongFileStructure(): Promise<void> {
+        const actionHandler = new ContextValuesAssignmentActionHandler();
+        const context = FlowService.generateEmptyContext();
+
+        const fileContent = [{
+            file_content: 'ftpo2'
+        }];
+
+        const tmpFile = await tmp.file();
+        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+
+        const options = {
+            '$.fromFile': {
+                files: [
+                    tmpFile.path
+                ]
+            }
+        };
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        await actionHandler.validate(options, context, snapshot);
+
+        await chai.expect(
+            actionHandler.execute(options, context, snapshot)
+        ).to.be.rejected;
     }
 }

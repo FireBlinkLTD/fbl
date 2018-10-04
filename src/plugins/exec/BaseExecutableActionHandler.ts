@@ -1,6 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {spawn} from 'child_process';
 import {IContext} from '../../interfaces';
+import {ContextUtil} from '../../utils/ContextUtil';
 
 export abstract class BaseExecutableActionHandler extends ActionHandler {
     async exec(
@@ -87,11 +88,11 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
             };
 
             if (assignTo.ctx) {
-                context.ctx[assignTo.ctx] = value;
+                await ContextUtil.assignToField(context.ctx, assignTo.ctx, value);
             }
 
             if (assignTo.secrets) {
-                context.secrets[assignTo.secrets] = value;
+                await ContextUtil.assignToField(context.secrets, assignTo.secrets, value);
             }
 
             snapshot.setContext(context);

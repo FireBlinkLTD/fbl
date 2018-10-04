@@ -82,7 +82,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             ct: '<%- ctx.ct %>',
                             st: '<%- secrets.st %>',
@@ -140,7 +140,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             ct: true
                         }
@@ -206,7 +206,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             ct: '<%- ctx.ct %>',
                             st: '<%- secrets.st %>'
@@ -238,7 +238,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             ct: '<%- ctx.ct %>',
                             st: '<%- secrets.st %>'
@@ -271,7 +271,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             ct: '<%- ctx.ct %>',
                             st: '<%- secrets.st %>',
@@ -375,7 +375,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -422,7 +422,7 @@ class CliTestSuite {
             },
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -472,7 +472,7 @@ class CliTestSuite {
             },
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -520,7 +520,7 @@ class CliTestSuite {
             },
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -568,7 +568,7 @@ class CliTestSuite {
             },
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -622,7 +622,7 @@ class CliTestSuite {
             },
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -651,7 +651,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -695,7 +695,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -739,7 +739,7 @@ class CliTestSuite {
             version: '1.0.0',
             pipeline: {
                 ctx: {
-                    test: {
+                    '$.test': {
                         inline: {
                             tst: true
                         }
@@ -771,12 +771,14 @@ class CliTestSuite {
             '  "--":',
             '  <@ [1,2].forEach(i => { @>',
             '    - ctx:',
-            '        test_<@- i @>:',
-            '          inline: <@- i @>',
+            '        $:',
+            '          inline:',
+            '            test_<@- i @>: <@- i @>',
             '  <@ }) @>',
             '    - ctx:',
-            '        local:',
-            '          inline: <&- ctx.test_1 &>',
+            '        $:',
+            '          inline:',
+            '            local: <&- ctx.test_1 &>',
         ].join('\n');
 
 
@@ -797,7 +799,6 @@ class CliTestSuite {
             ],
             'prompt_value'
         );
-
 
         assert.strictEqual(result.code, 0);
 
@@ -824,7 +825,7 @@ class CliTestSuite {
             'pipeline:',
             '  "--":',
             '    - ctx:',
-            '     local:',
+            '     $.local:',
             '          inline: 1',
         ].join('\n');
 

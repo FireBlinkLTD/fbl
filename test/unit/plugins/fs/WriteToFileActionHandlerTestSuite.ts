@@ -76,8 +76,8 @@ export class WriteToFileTestSuite {
             actionHandler.validate({
                 path: '/tmp',
                 assignPathTo: {
-                    ctx: 'test',
-                    secrets: 'test'
+                    ctx: '$.test',
+                    secrets: '$.test'
                 },
                 content: 'test'
             }, context, snapshot)
@@ -86,8 +86,8 @@ export class WriteToFileTestSuite {
         await chai.expect(
             actionHandler.validate({
                 assignPathTo: {
-                    ctx: 'test',
-                    secrets: 'test'
+                    ctx: '$.test',
+                    secrets: '$.test'
                 },
                 content: 'test'
             }, context, snapshot)
@@ -96,7 +96,7 @@ export class WriteToFileTestSuite {
         await chai.expect(
             actionHandler.validate({
                 assignPathTo: {
-                    secrets: 'test'
+                    secrets: '$.test'
                 },
                 content: 'test'
             }, context, snapshot)
@@ -105,7 +105,7 @@ export class WriteToFileTestSuite {
         await chai.expect(
             actionHandler.validate({
                 assignPathTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 content: 'test'
             }, context, snapshot)
@@ -126,8 +126,8 @@ export class WriteToFileTestSuite {
             actionHandler.execute({
                 path: tmpFile.path,
                 assignPathTo: {
-                    ctx: 'ct',
-                    secrets: 'st'
+                    ctx: '$.ct',
+                    secrets: '$.st'
                 },
                 content: content
             }, context, snapshot)
@@ -175,8 +175,8 @@ export class WriteToFileTestSuite {
         await chai.expect(
             actionHandler.execute({
                 assignPathTo: {
-                    ctx: 'ct',
-                    secrets: 'st'
+                    ctx: '$.ct',
+                    secrets: '$.st'
                 },
                 content: content
             }, context, snapshot)

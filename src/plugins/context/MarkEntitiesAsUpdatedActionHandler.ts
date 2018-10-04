@@ -11,7 +11,7 @@ export class MarkEntitiesAsUpdatedActionHandler extends BaseMarkEntityAsActionHa
         aliases: [
             'fbl.context.entities.updated',
             'context.entities.updated',
-            'ctx.entities.updated'
+            'entities.updated'
         ]
     };
 

@@ -40,10 +40,10 @@ Aliases:
   path: /tmp/test.txt
   
   # [optional] but required if "path" above is not provided.
-  # Assign file path to "ctx" and or "secrets" context objects
+  # Assign file path to "ctx" and or "secrets" context objects as "name" field
   assignPathTo:
-    ctx: name
-    secrets: name
+    ctx: $.name
+    secrets: $.name
   
   # [required] template file
   # Note: global and then local EJS template processing will be applied to the template before writing

@@ -11,7 +11,7 @@ export class MarkEntitiesAsUnRegisteredActionHandler extends BaseMarkEntityAsAct
         aliases: [
             'fbl.context.entities.unregistered',
             'context.entities.unregistered',
-            'ctx.entities.unregistered'
+            'entities.unregistered'
         ]
     };
 

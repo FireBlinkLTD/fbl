@@ -31,10 +31,10 @@ options:
 
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
-  # [optional] "ctx" variable name to assign results to
-  ctx: 'test'
-  # [optional] "secrets" variable name to assign results to
-  secrets: 'test'
+  # [optional] "ctx" variable name to assign results to ("test")
+  ctx: '$.test'
+  # [optional] "secrets" variable name to assign results to ("test")
+  secrets: '$.test'
 ```
 
 ## Action Handler: Shell
@@ -67,8 +67,8 @@ options:
 
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
-  # [optional] "ctx" variable name to assign results to
-  ctx: 'test'
-  # [optional] "secrets" variable name to assign results to
-  secrets: 'test'
+  # [optional] "ctx" variable name to assign results to ("test")
+  ctx: '$.test'
+  # [optional] "secrets" variable name to assign results to ("test")
+  secrets: '$.test'
 ```

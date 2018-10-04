@@ -11,7 +11,7 @@ export class MarkEntitiesAsRegisteredActionHandler extends BaseMarkEntityAsActio
         aliases: [
             'fbl.context.entities.registered',
             'context.entities.registered',
-            'ctx.entities.registered'
+            'entities.registered'
         ]
     };
 

@@ -64,7 +64,7 @@ class ConfirmActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 default: 'str'
             }, context, snapshot)
@@ -81,7 +81,7 @@ class ConfirmActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -90,7 +90,7 @@ class ConfirmActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 default: true
             }, context, snapshot)
@@ -107,8 +107,8 @@ class ConfirmActionHandlerTestSuite {
             actionHandler.execute({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test',
-                    secrets: 'tst'
+                    ctx: '$.test',
+                    secrets: '$.tst'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {

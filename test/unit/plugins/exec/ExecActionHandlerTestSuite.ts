@@ -79,7 +79,7 @@ class ExecActionHandlerTestSuite {
             actionHandler.validate({
                 command: 'test',
                 assignTo: {
-                    ctx: 'something'
+                    ctx: '$.something'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -88,7 +88,7 @@ class ExecActionHandlerTestSuite {
             actionHandler.validate({
                 command: 'test',
                 assignTo: {
-                    secrets: 'something'
+                    secrets: '$.something'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -110,8 +110,8 @@ class ExecActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -142,7 +142,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1'
+                ctx: '$.tst1'
             }
         }, context, snapshot);
 
@@ -169,7 +169,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                secrets: 'tst2'
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -195,8 +195,8 @@ class ExecActionHandlerTestSuite {
                 silent: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -226,8 +226,8 @@ class ExecActionHandlerTestSuite {
                 silent: true
             },
             assignTo: {
-                ctx: 'tst1',
-                secrets: 'tst2'
+                ctx: '$.tst1',
+                secrets: '$.tst2'
             }
         }, context, snapshot);
 
@@ -254,7 +254,7 @@ class ExecActionHandlerTestSuite {
                 command: 'return',
                 args: ['1'],
                 assignTo: {
-                    ctx: 'tst1'
+                    ctx: '$.tst1'
                 }
             }, context, snapshot)
         ).to.be.rejected;
@@ -275,7 +275,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true
             },
             assignTo: {
-                ctx: 'tst1'
+                ctx: '$.tst1'
             }
         }, context, snapshot);
 
@@ -294,7 +294,7 @@ class ExecActionHandlerTestSuite {
             actionHandler.execute({
                 command: 'missing_executable',
                 assignTo: {
-                    ctx: 'tst1'
+                    ctx: '$.tst1'
                 }
             }, context, snapshot)
         ).to.be.rejected;

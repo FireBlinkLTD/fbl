@@ -64,7 +64,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 schema: {}
             }, context, snapshot)
@@ -74,7 +74,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 schema: {
                     type: 'object' // not valid type
@@ -93,7 +93,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -102,7 +102,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 schema: {
                     type: 'number'
@@ -114,7 +114,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 schema: {
                     type: 'string',
@@ -136,7 +136,7 @@ class PromptActionHandlerTestSuite {
             actionHandler.execute({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {
@@ -169,7 +169,7 @@ class PromptActionHandlerTestSuite {
                     maximum: 345
                 },
                 assignResponseTo: {
-                    secrets: 'test'
+                    secrets: '$.test'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {
@@ -202,7 +202,7 @@ class PromptActionHandlerTestSuite {
                     maximum: 345
                 },
                 assignResponseTo: {
-                    secrets: 'test'
+                    secrets: '$.test'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {
@@ -237,7 +237,7 @@ class PromptActionHandlerTestSuite {
                     pattern: '^tst$'
                 },
                 assignResponseTo: {
-                    secrets: 'test'
+                    secrets: '$.test'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {

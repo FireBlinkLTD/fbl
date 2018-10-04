@@ -48,7 +48,7 @@ class SelectActionHandlerTestSuite {
             actionHandler.validate({
                 message: 'test',
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 }
             }, context, snapshot)
         ).to.be.rejected;
@@ -65,7 +65,7 @@ class SelectActionHandlerTestSuite {
                 message: 'test',
                 options: ['Test'],
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
@@ -75,7 +75,7 @@ class SelectActionHandlerTestSuite {
                 message: 'test',
                 options: ['Test'],
                 assignResponseTo: {
-                    ctx: 'test'
+                    ctx: '$.test'
                 },
                 default: 'Test'
             }, context, snapshot)
@@ -93,8 +93,8 @@ class SelectActionHandlerTestSuite {
                 message: 'test',
                 options: ['Test1', 'Test2'],
                 assignResponseTo: {
-                    ctx: 'test',
-                    secrets: 'tst'
+                    ctx: '$.test',
+                    secrets: '$.tst'
                 }
             }, context, snapshot),
             new Promise<void>(resolve => {
@@ -113,8 +113,8 @@ class SelectActionHandlerTestSuite {
                 message: 'test',
                 options: ['Test1', 'Test2'],
                 assignResponseTo: {
-                    ctx: 'test',
-                    secrets: 'tst'
+                    ctx: '$.test',
+                    secrets: '$.tst'
                 },
                 default: 'Test2'
             }, context, snapshot),

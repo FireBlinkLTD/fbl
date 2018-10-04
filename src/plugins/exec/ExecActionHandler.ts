@@ -29,8 +29,12 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
                 silent: Joi.boolean()
             }),
             assignTo: Joi.object({
-                ctx: Joi.string().min(1),
-                secrets: Joi.string().min(1)
+                ctx: Joi.string()
+                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                    .min(1),
+                secrets: Joi.string()
+                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
+                    .min(1)
             })
         })
         .required()
