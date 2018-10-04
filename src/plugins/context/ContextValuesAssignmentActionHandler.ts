@@ -19,6 +19,6 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
     }
 
     getAssignmentKey(): 'ctx' | 'secrets' {
-        return 'ctx'
+        return 'ctx';
     }
 }

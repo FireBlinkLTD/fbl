@@ -9,7 +9,7 @@ export class ContextUtil {
      * @param value
      * @param {boolean} [override]
      */
-    static async assign(obj: {[key: string]: any}, path: string, value: {[key: string]: any}, override: boolean = false): Promise<void> {
+    static async assign(obj: {[key: string]: any}, path: string, value: {[key: string]: any}, override = false): Promise<void> {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
         }
@@ -60,6 +60,6 @@ export class ContextUtil {
         const fieldName = chunks[chunks.length - 1];
         const parentPath = path.substring(0, path.length - (fieldName.length + 1));
 
-        await ContextUtil.assign(obj, parentPath,{ [fieldName]: value }, false);
+        await ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
     }
 }
