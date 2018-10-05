@@ -66,7 +66,7 @@ class CliTestSuite {
     async after(): Promise<void> {
         const configExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
         if (configExists) {
-            promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
+            await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
         }
 
         if (this.globalConfigExists) {
