@@ -53,7 +53,7 @@ export class ContextUtil {
      */
     static async assignToField(obj: {[key: string]: any}, path: string, value: any): Promise<void> {
         if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
-            throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
+            throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
         const chunks = path.split('.');

@@ -1,14 +1,14 @@
 import {suite, test} from 'mocha-typescript';
-import {dump, safeLoad} from 'js-yaml';
+import {dump} from 'js-yaml';
 import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
 import {spawn} from 'child_process';
 import * as assert from 'assert';
 import {CLIService} from '../../src/services';
-import {mkdir} from 'shelljs';
 import {dirname, join} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
+import {FSUtil} from '../../src/utils/FSUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -49,15 +49,16 @@ const execCmd = async (cmd: string, args: string[], answer?: string): Promise<{c
 
 @suite()
 class CliTestSuite {
-    private existingGlobalConfig?: string;
-    private globalConfigExists?: boolean;
+    private static existingGlobalConfig?: string;
+    private static globalConfigExists?: boolean;
 
     async before(): Promise<void> {
-        if (this.globalConfigExists === undefined) {
-            mkdir('-p', dirname(CLIService.GLOBAL_CONFIG_PATH));
-            this.globalConfigExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
-            if (this.globalConfigExists) {
-                this.existingGlobalConfig = await promisify(readFile)(CLIService.GLOBAL_CONFIG_PATH, 'utf8');
+        if (CliTestSuite.globalConfigExists === undefined) {
+            await FSUtil.mkdirp(dirname(CLIService.GLOBAL_CONFIG_PATH));
+            CliTestSuite.globalConfigExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
+            if (CliTestSuite.globalConfigExists) {
+                CliTestSuite.existingGlobalConfig = await promisify(readFile)(CLIService.GLOBAL_CONFIG_PATH, 'utf8');
+                await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
             }
         }
 
@@ -69,8 +70,8 @@ class CliTestSuite {
             await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
         }
 
-        if (this.globalConfigExists) {
-            await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, this.existingGlobalConfig, 'utf8');
+        if (CliTestSuite.globalConfigExists) {
+            await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, CliTestSuite.existingGlobalConfig, 'utf8');
         }
 
         Container.reset();
@@ -116,11 +117,11 @@ class CliTestSuite {
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                '-c', 'ct=yes',
-                '-c', `.=@${contextFile.path}`,
-                '-s', 'st=yes',
+                '-c', '$.ct=yes',
+                '-c', `$=@${contextFile.path}`,
+                '-s', '$.st=yes',
                 '-p', `${__dirname}/../../src/plugins/flow`,
-                '-s', `.=@${secretsFile.path}`,
+                '-s', `$=@${secretsFile.path}`,
                 '-o', reportFile.path,
                 '-r', 'json',
                 flowFile.path
@@ -223,8 +224,8 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                '-c', 'ct.yes',
-                '-s', 'st=yes',
+                '-c', '$.ct.yes',
+                '-s', '$.st=yes',
                 flowFile.path
             ],
             'prompt_value'
@@ -256,8 +257,8 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                '-c', 'ct=yes',
-                '-s', 'st.yes',
+                '-c', '$.ct=yes',
+                '-s', '$.st.yes',
                 flowFile.path
             ],
             'prompt_value'
@@ -305,12 +306,12 @@ class CliTestSuite {
                 `${__dirname}/../../src/plugins/flow`
             ],
             context: [
-                'ct=yes',
-                `.=@${contextFile.path}`
+                '$.ct=yes',
+                `$=@${contextFile.path}`
             ],
             secrets: [
-                'st=yes',
-                `.=@${secretsFile.path}`
+                '$.st=yes',
+                `$=@${secretsFile.path}`
             ],
             'no-colors': true,
             'global-template-delimiter': '$',
@@ -366,6 +367,36 @@ class CliTestSuite {
     @test()
     async noParams(): Promise<void> {
         const result = await execCmd('node', ['dist/src/cli.js']);
+        assert.strictEqual(result.code, 1);
+    }
+
+    @test()
+    async nonObjectContextRootAssignment(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    '$.test': {
+                        inline: {
+                            ct: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tmp.file();
+        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-c', '$=test',
+                '--no-colors',
+                flowFile.path
+            ]
+        );
         assert.strictEqual(result.code, 1);
     }
 
@@ -844,5 +875,20 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 1);
+    }
+
+    @test()
+    async outputHelp(): Promise<void> {
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-h'
+            ],
+            'prompt_value'
+        );
+
+        assert.strictEqual(result.code, 0);
+        assert.strictEqual(result.stdout.split('\n')[0], 'Usage: fbl [command] [options]');
     }
 }
