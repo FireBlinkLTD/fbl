@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
 import {PromptActionHandler} from '../../../../src/plugins/prompts/PromptActionHandler';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +41,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -86,7 +86,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -127,7 +127,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async testDefaults(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const line = 'l1n3';
@@ -153,7 +153,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async testNumber(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const line = '344.53';
@@ -186,7 +186,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async testInteger(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const line = '344';
@@ -219,7 +219,7 @@ class PromptActionHandlerTestSuite {
     @test()
     async testStringWithValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const invalid = 'test';

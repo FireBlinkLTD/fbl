@@ -7,8 +7,7 @@ import {promisify} from 'util';
 import {dirname, resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
-import {FSUtil} from '../utils/FSUtil';
-import {ContextUtil} from '../utils/ContextUtil';
+import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 
 const prompts = require('prompts');
@@ -381,7 +380,7 @@ export class CLIService {
      * @return {Promise<IContext>}
      */
     private async prepareContext(): Promise<IContext> {
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         await this.convertKVPairs(this.configKVPairs, context.ctx);
         await this.convertKVPairs(this.secretKVPairs, context.secrets, true);
 

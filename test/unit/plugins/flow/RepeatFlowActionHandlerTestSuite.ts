@@ -5,6 +5,7 @@ import {RepeatFlowActionHandler} from '../../../../src/plugins/flow/RepeatFlowAc
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +42,7 @@ class RepeatFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new RepeatFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -96,7 +97,7 @@ class RepeatFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new RepeatFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -136,7 +137,7 @@ class RepeatFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -173,7 +174,7 @@ class RepeatFlowActionHandlerTestSuite {
             async: true
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);

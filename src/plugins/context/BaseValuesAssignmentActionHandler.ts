@@ -1,12 +1,9 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {IContext} from '../../interfaces';
-import {FSUtil} from '../../utils/FSUtil';
-import {ContextUtil} from '../../utils/ContextUtil';
+import {ContextUtil, FSUtil} from '../../utils';
 
 export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
-    private static ROOT_KEY = '.';
-
     private static validationSchema = Joi.object()
         .pattern(
             /^\$(\.[^.]+)*$/,

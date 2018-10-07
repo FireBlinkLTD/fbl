@@ -1,7 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {spawn} from 'child_process';
 import {IContext} from '../../interfaces';
-import {ContextUtil} from '../../utils/ContextUtil';
+import {ContextUtil} from '../../utils';
 
 export abstract class BaseExecutableActionHandler extends ActionHandler {
     async exec(

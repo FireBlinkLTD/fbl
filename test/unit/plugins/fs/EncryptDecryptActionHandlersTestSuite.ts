@@ -1,5 +1,4 @@
 import {suite, test} from 'mocha-typescript';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import {EncryptActionHandler} from '../../../../src/plugins/fs/EncryptActionHandler';
 import {promisify} from 'util';
@@ -7,6 +6,7 @@ import {readFile, writeFile} from 'fs';
 import {join} from 'path';
 import {DecryptActionHandler} from '../../../../src/plugins/fs/DecryptActionHandler';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,7 +19,7 @@ class CryptoTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new EncryptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -64,7 +64,7 @@ class CryptoTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new EncryptActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         actionHandler.validate({
@@ -88,7 +88,7 @@ class CryptoTestSuite {
         const writeFileAsync = promisify(writeFile);
         const readFileAsync = promisify(readFile);
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, tmpDir.path, 0);
 
         const files = [

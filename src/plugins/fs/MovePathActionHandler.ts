@@ -1,7 +1,7 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
-import {FSUtil} from '../../utils/FSUtil';
+import {FSUtil} from '../../utils';
 
 const version = require('../../../../package.json').version;
 

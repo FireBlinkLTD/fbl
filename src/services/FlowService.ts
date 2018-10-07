@@ -5,7 +5,7 @@ import {render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
-import {FSUtil} from '../utils/FSUtil';
+import {FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 
@@ -28,29 +28,6 @@ export class FlowService {
 
     @Inject(() => TemplateUtilitiesRegistry)
     templateUtilityRegistry: TemplateUtilitiesRegistry;
-
-    /**
-     * Generate empty context
-     * @return {IContext}
-     */
-    public static generateEmptyContext(): IContext {
-        return <IContext> {
-            ctx: {},
-            secrets: {},
-            entities: {
-                registered: [],
-                unregistered: [],
-                created: [],
-                updated: [],
-                deleted: []
-            },
-            dynamicActionHandlers: new ActionHandlersRegistry(),
-            ejsTemplateDelimiters: {
-                global: '$',
-                local: '%'
-            }
-        };
-    }
 
     /**
      * Execute action

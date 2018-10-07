@@ -4,8 +4,8 @@ import {promisify} from 'util';
 import {mkdir, readFile, unlinkSync, writeFile, writeFileSync} from 'fs';
 import * as assert from 'assert';
 import {ActionSnapshot} from '../../../../src/models';
-import {FlowService} from '../../../../src/services';
 import {resolve} from 'path';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,7 +19,7 @@ export class WriteToFileTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -62,7 +62,7 @@ export class WriteToFileTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -118,7 +118,7 @@ export class WriteToFileTestSuite {
 
         const tmpFile = await tmp.file();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const content = 'test';
@@ -146,7 +146,7 @@ export class WriteToFileTestSuite {
         const templateFile = await tmp.file();
         const destinationFile = await tmp.file();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const content = '<$- ctx.global $>-<%- ctx.local %>';
@@ -167,7 +167,7 @@ export class WriteToFileTestSuite {
     @test()
     async saveToTempFile(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
@@ -193,7 +193,7 @@ export class WriteToFileTestSuite {
     @test()
     async mkdirp(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
 
         const tmpdir = await tmp.dir();
         const path = resolve(tmpdir.path, 'l1', 'l2', 'l3', 'test.txt');
@@ -213,7 +213,7 @@ export class WriteToFileTestSuite {
     @test()
     async fileInsteadOfFolderInParentPath(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
 
         const tmpdir = await tmp.dir();
         let path = resolve(tmpdir.path, 'l1', 'test.txt');

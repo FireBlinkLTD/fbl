@@ -5,6 +5,7 @@ import {ExecActionHandler} from '../../../../src/plugins/exec/ExecActionHandler'
 import * as assert from 'assert';
 import {Container} from 'typedi';
 import {resolve} from 'path';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,7 +20,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -49,7 +50,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -99,7 +100,7 @@ class ExecActionHandlerTestSuite {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -131,7 +132,7 @@ class ExecActionHandlerTestSuite {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -158,7 +159,7 @@ class ExecActionHandlerTestSuite {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -183,7 +184,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async checkSilentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -214,7 +215,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async checkSilentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -246,7 +247,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async checkFailure(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -265,7 +266,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async stderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await actionHandler.execute({
@@ -287,7 +288,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async missingExecutable(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -305,7 +306,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async noAssignmentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -319,7 +320,7 @@ class ExecActionHandlerTestSuite {
     @test()
     async noAssignmentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(

@@ -1,5 +1,4 @@
 import {suite, test} from 'mocha-typescript';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import {sep, resolve} from 'path';
 import {existsSync, writeFile} from 'fs';
@@ -8,6 +7,7 @@ import {MovePathActionHandler} from '../../../../src/plugins/fs/MovePathActionHa
 import {promisify} from 'util';
 import {FSUtil} from '../../../../src/utils/FSUtil';
 import {homedir} from 'os';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,7 +20,7 @@ class MovePathActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -55,7 +55,7 @@ class MovePathActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -69,7 +69,7 @@ class MovePathActionHandlerTestSuite {
     @test()
     async move(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const tmpdir = await tmp.dir();
@@ -130,7 +130,7 @@ class MovePathActionHandlerTestSuite {
     @test()
     async moveMissingPath(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(

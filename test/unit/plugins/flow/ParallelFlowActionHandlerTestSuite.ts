@@ -5,6 +5,7 @@ import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ParallelFlowActionHandler} from '../../../../src/plugins/flow/ParallelFlowActionHandler';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -48,7 +49,7 @@ export class ParallelFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ParallelFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
         
         await chai.expect(
@@ -82,7 +83,7 @@ export class ParallelFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ParallelFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -116,7 +117,7 @@ export class ParallelFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -154,7 +155,7 @@ export class ParallelFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -198,7 +199,7 @@ export class ParallelFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);

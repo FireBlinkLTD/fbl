@@ -1,9 +1,9 @@
 import {test, suite} from 'mocha-typescript';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import {MarkEntitiesAsUpdatedActionHandler} from '../../../../src/plugins/context/MarkEntitiesAsUpdatedActionHandler';
 import {IContextEntity} from '../../../../src/interfaces';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,7 +15,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -76,7 +76,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -90,7 +90,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     @test()
     async execution(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const options = [

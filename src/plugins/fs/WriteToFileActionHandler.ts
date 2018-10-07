@@ -3,11 +3,10 @@ import * as Joi from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
-import {FSUtil} from '../../utils/FSUtil';
+import {ContextUtil, FSUtil} from '../../utils';
 import {dirname} from 'path';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
-import {ContextUtil} from '../../utils/ContextUtil';
 
 const version = require('../../../../package.json').version;
 const tmp = require('tmp-promise');

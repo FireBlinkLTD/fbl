@@ -8,6 +8,7 @@ import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService} from '../../../../src/services';
 import {Container} from 'typedi';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,7 +25,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -63,7 +64,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -99,7 +100,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     @test()
     async priorityCheck(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
 
         const fileContent = {
             content: 'file'
@@ -151,7 +152,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.existing = {
             value: 'value'
         };
@@ -209,7 +210,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     async assignRootValues(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.existing = {
             value: 'value'
         };
@@ -274,7 +275,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     async failToAssignDueToConflictInPath(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'value';
 
         const options = {
@@ -297,7 +298,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     @test()
     async failToAssignDueToWrongFileStructure(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
 
         const fileContent = [{
             file_content: 'ftpo2'

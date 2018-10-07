@@ -8,6 +8,7 @@ import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,7 +26,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -64,7 +65,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -107,7 +108,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         actionHandlersRegistry.register(actionHandler);
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {
             value: 'value'
         };
@@ -167,7 +168,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         actionHandlersRegistry.register(actionHandler);
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {
             value: 'value'
         };

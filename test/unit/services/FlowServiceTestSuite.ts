@@ -4,6 +4,7 @@ import {writeFile} from 'fs';
 import {Container} from 'typedi';
 import {FlowService} from '../../../src/services';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../src/utils/ContextUtil';
 
 const tmp = require('tmp-promise');
 
@@ -31,7 +32,7 @@ class FlowServiceTestSuite {
         await promisify(writeFile)(file.path, tpl, 'utf8');
 
         // generate context
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.test = 'tst';
 
         const flowService = Container.get(FlowService);

@@ -1,10 +1,10 @@
 import {suite, test} from 'mocha-typescript';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import {MakeDirActionHandler} from '../../../../src/plugins/fs/MakeDirActionHandler';
 import {resolve} from 'path';
 import {existsSync, statSync} from 'fs';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -17,7 +17,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new MakeDirActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -40,7 +40,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new MakeDirActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -51,7 +51,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async mkdir(): Promise<void> {
         const actionHandler = new MakeDirActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const tmpdir = await tmp.dir();
