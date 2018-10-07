@@ -4,11 +4,11 @@ Plugin allows to invoke any shell command.
 
 ## Action Handler: Exec
 
-ID: com.fireblink.fbl.exec
+**ID:** `com.fireblink.fbl.exec`
 
-Aliases:
- - fbl.exec
- - exec
+**Aliases:**
+ - `fbl.exec`
+ - `exec`
 
 **Example:**
 
@@ -39,11 +39,11 @@ assignTo:
 
 ## Action Handler: Shell
 
-ID: com.fireblink.fbl.shell
+**ID:** `com.fireblink.fbl.shell`
 
-Aliases:
- - fbl.shell
- - shell
+**Aliases:**
+ - `fbl.shell`
+ - `shell`
 
 **Example:**
 
