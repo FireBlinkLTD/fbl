@@ -5,6 +5,9 @@ Upon flow execution each action handler gets access to shared context.
 Shared Context structure:
 
 ```yaml
+# directory path from where fbl command was executed
+cwd: string
+
 # ctx is generally the place where non-secret transient data should be stored
 ctx:
   key: value 
