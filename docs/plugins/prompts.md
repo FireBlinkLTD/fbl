@@ -6,13 +6,13 @@ Prompt user over CLI.
    
 Ask user to confirm something.
    
-ID: com.fireblink.fbl.cli.prompts.confirm
+**ID:** `com.fireblink.fbl.cli.prompts.confirm`
 
-Aliases:
-- fbl.cli.prompts.confirm
-- cli.prompts.confirm
-- prompts.confirm
-- confirm
+**Aliases:**
+- `fbl.cli.prompts.confirm`
+- `cli.prompts.confirm`
+- `prompts.confirm`
+- `confirm`
 
 **Example:**
 
@@ -35,13 +35,13 @@ assignResponseTo:
 
 Ask user to type the response.
 
-ID: com.fireblink.fbl.cli.prompts.prompt
+**ID:** `com.fireblink.fbl.cli.prompts.prompt`
 
-Aliases:
-- fbl.cli.prompts.prompt
-- cli.prompts.prompt
-- prompts.prompt
-- prompt
+**Aliases:**
+- `fbl.cli.prompts.prompt`
+- `cli.prompts.prompt`
+- `prompts.prompt`
+- `prompt`
 
 **Example:**
 
@@ -69,13 +69,13 @@ assignResponseTo:
 
 Ask user to select one given answer from provided options.
 
-ID: com.fireblink.fbl.cli.prompts.select
+**ID:** `com.fireblink.fbl.cli.prompts.select`
 
-Aliases:
-- fbl.cli.prompts.select
-- cli.prompts.select
-- prompts.select
-- select
+**Aliases:**
+- `fbl.cli.prompts.select`
+- `cli.prompts.select`
+- `prompts.select`
+- `select`
 
 **Example:**
 
@@ -105,13 +105,13 @@ assignResponseTo:
 
 Aks user to pick one or more options.
 
-ID: com.fireblink.fbl.cli.prompts.multiselect
+**ID:** `com.fireblink.fbl.cli.prompts.multiselect`
 
-Aliases:
-- fbl.cli.prompts.multiselect
-- cli.prompts.multiselect
-- prompts.multiselect
-- multiselect
+**Aliases:**
+- `fbl.cli.prompts.multiselect`
+- `cli.prompts.multiselect`
+- `prompts.multiselect`
+- `multiselect`
 
 **Example:**
 

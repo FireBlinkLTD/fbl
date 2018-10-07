@@ -1,4 +1,4 @@
-# FBL or FireBlink Logistics
+# FBL \(FireBlink Logistics\)
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/FireBlinkLTD/fbl.svg)](https://greenkeeper.io/)
 [![CircleCI](https://circleci.com/gh/FireBlinkLTD/fbl.svg?style=svg)](https://circleci.com/gh/FireBlinkLTD/fbl)

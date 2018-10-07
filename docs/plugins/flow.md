@@ -17,14 +17,14 @@ Available steps:
 
 Run steps one by one, if any of steps fail - chain of execution will stop on it.
 
-ID: com.fireblink.fbl.flow.sequence
+**ID:** `com.fireblink.fbl.flow.sequence`
 
-Aliases:
- - fbl.flow.sequence
- - flow.sequence
- - sequence
- - sync
- - \--
+**Aliases:**
+ - `fbl.flow.sequence`
+ - `flow.sequence`
+ - `sequence`
+ - `sync`
+ - `--`
 
 **Example:**
 
@@ -45,14 +45,14 @@ Aliases:
 
 Run all steps in parallel. If any of steps will fail - it will not affect others. However parallel step itself will be marked as failed.
 
-ID: com.fireblink.fbl.flow.parallel
+**ID:** `com.fireblink.fbl.flow.parallel`
 
-Aliases:
- - fbl.flow.parallel
- - flow.parallel
- - parallel
- - async
- - ||
+**Aliases:**
+ - `fbl.flow.parallel`
+ - `flow.parallel`
+ - `parallel`
+ - `async`
+ - `||`
  
 **Example:** 
  
@@ -73,13 +73,13 @@ Aliases:
 
 Allows to reference external flow by its pass. Helps to logically split big flows for better organized structure.
 
-ID: com.fireblink.fbl.flow.attachment
+**ID:** `com.fireblink.fbl.flow.attachment`
 
-Aliases:
- - fbl.flow.attachment
- - flow.attachment
- - attachment
- - @
+**Aliases:**
+ - `fbl.flow.attachment`
+ - `flow.attachment`
+ - `attachment`
+ - `@`
  
 **Example:**
 
@@ -92,12 +92,12 @@ Aliases:
 
 Repeat action multiple times.
 
-ID: com.fireblink.fbl.flow.repeat
+**ID:** `com.fireblink.fbl.flow.repeat`
 
-Aliases:
- - fbl.flow.repeat
- - flow.repeat
- - repeat
+**Aliases:**
+ - `fbl.flow.repeat`
+ - `flow.repeat`
+ - `repeat`
 
 **Example:**
 
@@ -117,13 +117,13 @@ repeat:
 
 Allows to execute action for every item in the array or key of an object.
 
-ID: com.fireblink.fbl.flow.foreach
+**ID:** `com.fireblink.fbl.flow.foreach`
 
-Aliases:
- - fbl.flow.foreach
- - flow.foreach
- - foreach
- - each
+**Aliases:**
+ - `fbl.flow.foreach`
+ - `flow.foreach`
+ - `foreach`
+ - `each`
  
 **Example:**
 
@@ -140,14 +140,14 @@ each:
 
 Allows to run action based on some condition
 
-ID: com.fireblink.fbl.flow.switch
+**ID:** `com.fireblink.fbl.flow.switch`
 
-Aliases:
- - fbl.flow.switch
- - flow.switch
- - switch
- - if
- - ? 
+**Aliases:**
+ - `fbl.flow.switch`
+ - `flow.switch`
+ - `switch`
+ - `if`
+ - `?` 
  
 **Example:**
 
@@ -176,12 +176,12 @@ Optionally catch and finally steps can be invoked.
 
 If catch or finally step block will be failed - this step will also be marked as failed even try block passes successfully.
 
-ID: com.fireblink.fbl.flow.try
+**ID:** `com.fireblink.fbl.flow.try`
 
-Aliases:
- - fbl.flow.try
- - flow.try
- - try
+**Aliases:**
+ - `fbl.flow.try`
+ - `flow.try`
+ - `try`
  
 **Example:**
 
@@ -221,13 +221,13 @@ ctx:
 
 But there is a template handler that can help you with that.
 
-ID: com.fireblink.fbl.flow.template
+**ID:** `com.fireblink.fbl.flow.template`
 
-Aliases:
- - fbl.flow.template
- - flow.template
- - template
- - tpl
+**Aliases:**
+ - `fbl.flow.template`
+ - `flow.template`
+ - `template`
+ - `tpl`
  
 **Example:**
 
@@ -259,12 +259,12 @@ ctx:
 
 Allows to create virtual action handler for another action (that can be represented as one of the flows).
 
-ID: com.fireblink.fbl.flow.virtual
+**ID:** `com.fireblink.fbl.flow.virtual`
 
-Aliases:
- - fbl.flow.virtual
- - flow.virtual
- - virtual
+**Aliases:**
+ - `fbl.flow.virtual`
+ - `flow.virtual`
+ - `virtual`
  
  **Example:**
  

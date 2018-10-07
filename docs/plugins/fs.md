@@ -4,13 +4,13 @@ File System plugin.
 
 ## Action Handler: Write to file
 
-ID: com.fireblink.fbl.fs.file.write
+**ID:** `com.fireblink.fbl.fs.file.write`
 
-Aliases:
- - fbl.fs.file.write
- - fs.file.write
- - file.write
- - \->
+**Aliases:**
+ - `fbl.fs.file.write`
+ - `fs.file.write`
+ - `file.write`
+ - `->`
  
 **Example 1: Define File Content Inline**
 
@@ -54,12 +54,12 @@ Aliases:
  
 Encrypt files by mask with aes-256-cbc and password converted with pbkdf2 algorithm into sha512 hash.
 
-ID: com.fireblink.fbl.fs.encrypt
+**ID:** `com.fireblink.fbl.fs.encrypt`
 
-Aliases:
- - fbl.fs.encrypt
- - fs.encrypt
- - encrypt
+**Aliases:**
+ - `fbl.fs.encrypt`
+ - `fs.encrypt`
+ - `encrypt`
  
 **Example:**
 
@@ -82,12 +82,12 @@ encrypt:
 
 Same as above, but instead of encryption will decrypt files.
 
-ID: com.fireblink.fbl.fs.decrypt
+**ID:** `com.fireblink.fbl.fs.decrypt`
 
-Aliases:
- - fbl.fs.decrypt
- - fs.decrypt
- - decrypt
+**Aliases:**
+ - `fbl.fs.decrypt`
+ - `fs.decrypt`
+ - `decrypt`
  
 **Example:**
 
@@ -110,14 +110,14 @@ decrypt:
 
 Create directory (and all parent ones if missing).
 
-ID: com.fireblink.fbl.fs.dir.create
+**ID:** `com.fireblink.fbl.fs.dir.create`
 
-Aliases:
- - fbl.fs.dir.create
- - fs.dir.create
- - dir.create
- - mkdir -p
- - mkdir
+**Aliases:**
+ - `fbl.fs.dir.create`
+ - `fs.dir.create`
+ - `dir.create`
+ - `mkdir -p`
+ - `mkdir`
  
 **Example:**
 
@@ -131,16 +131,16 @@ mkdir: /tmp/parent/child
 
 Removes file or folder for given path.
 
-ID: com.fireblink.fbl.fs.remove
+**ID:** `com.fireblink.fbl.fs.remove`
 
-Aliases:
- - fbl.fs.remove
- - fbl.fs.rm
- - fs.remove
- - fs.rm
- - rm -rf
- - remove
- - rm
+**Aliases:**
+ - `fbl.fs.remove`
+ - `fbl.fs.rm`
+ - `fs.remove`
+ - `fs.rm`
+ - `rm -rf`
+ - `remove`
+ - `rm`
  
 ```yaml
 # remove "child"
@@ -151,17 +151,16 @@ mkdir: /tmp/parent/child
 
 Allows to move/rename file or entire folder.
 
-ID: com.fireblink.fbl.fs.move
+**ID:** `com.fireblink.fbl.fs.move`
 
-Aliases:
- - fbl.fs.move
- - fbl.fs.mv
- - fs.move
- - fs.mv
- - move
- - mv
+**Aliases:**
+ - `fbl.fs.move`
+ - `fbl.fs.mv`
+ - `fs.move`
+ - `fs.mv`
+ - `move`
+ - `mv`
  
-
 **Example 1: Move file to other folder**
  
  ```yaml
@@ -201,17 +200,16 @@ mv:
 
 Allows to copy file or entire folder.
 
-ID: com.fireblink.fbl.fs.copy
+**ID:** `com.fireblink.fbl.fs.copy`
 
-Aliases:
- - fbl.fs.copy
- - fbl.fs.cp
- - fs.copy
- - fs.cp
- - copy
- - cp
+**Aliases:**
+ - `fbl.fs.copy`
+ - `fbl.fs.cp`
+ - `fs.copy`
+ - `fs.cp`
+ - `copy`
+ - `cp`
  
-
 **Example 1: Copy file to other folder**
  
  ```yaml

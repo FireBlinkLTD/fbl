@@ -57,13 +57,13 @@ pipeline:
 
 Assign non-secret values to context ("ctx"). May be used to provide "global" configuration. 
 
-ID: com.fireblink.fbl.context.values
+**ID:** `com.fireblink.fbl.context.values`
 
-Aliases:
- - fbl.context.values
- - context.values
- - context
- - ctx
+**Aliases:**
+ - `fbl.context.values`
+ - `context.values`
+ - `context`
+ - `ctx`
  
 **Example 1: Assign values to context root directly:**
 
@@ -114,13 +114,13 @@ ctx:
 
 Same as above, but for secrets. All the options will me masked in report to prevent any security leakage. 
 
-ID: com.fireblink.fbl.secret.values
+**ID:** `com.fireblink.fbl.secret.values`
 
-Aliases:
- - fbl.secret.values
- - secret.values
- - secrets
- - secret
+**Aliases:**
+ - `fbl.secret.values`
+ - `secret.values`
+ - `secrets`
+ - `secret`
  
 **Example 1: Assign values to secrets root directly:**
  
@@ -166,7 +166,6 @@ Aliases:
      override: true       
  ```
 
- 
 ## Action Handler: Mark entities as registered
 
 Mark some entity as registered, meaning it supposed to exist.
@@ -174,12 +173,12 @@ Mark some entity as registered, meaning it supposed to exist.
 Example use case: you want to keep some default entity upon cleanup that is not created/update with your script, 
 but script itself in the end has some cleanup logic based on "registered" entities list. 
 
-ID: com.fireblink.fbl.context.entities.registered
+**ID:** `com.fireblink.fbl.context.entities.registered`
 
-Aliases:
- - fbl.context.entities.registered
- - context.entities.registered
- - entities.registered
+**Aliases:**
+ - `fbl.context.entities.registered`
+ - `context.entities.registered`
+ - `entities.registered`
  
 **Example:**
   
@@ -198,12 +197,12 @@ entities.registered:
 
 Opposite to one above. Mark some entity to no longer exist. 
 
-ID: com.fireblink.fbl.context.entities.registered
+**ID:** `com.fireblink.fbl.context.entities.registered`
 
-Aliases:
- - fbl.context.entities.unregistered
- - context.entities.unregistered
- - entities.unregistered
+**Aliases:**
+ - `fbl.context.entities.unregistered`
+ - `context.entities.unregistered`
+ - `entities.unregistered`
  
 **Example:**
   
@@ -222,12 +221,12 @@ entities.unregistered:
 
 Mark some entity as just created. Will also register entity, so it will be presented in 2 places: `entities.registered` and `entities.created` 
 
-ID: com.fireblink.fbl.context.entities.created
+**ID:** `com.fireblink.fbl.context.entities.created`
 
 Aliases:
- - fbl.context.entities.created
- - context.entities.created
- - entities.created
+ - `fbl.context.entities.created`
+ - `context.entities.created`
+ - `entities.created`
  
 **Example:**
   
@@ -246,12 +245,12 @@ entities.created:
 
 Mark some entity as just updated. Will also register entity, so it will be presented in 2 places: `entities.registered` and `entities.updated` 
 
-ID: com.fireblink.fbl.context.entities.updated
+**ID:** `com.fireblink.fbl.context.entities.updated`
 
-Aliases:
- - fbl.context.entities.updated
- - context.entities.updated
- - entities.updated
+**Aliases:**
+ - `fbl.context.entities.updated`
+ - `context.entities.updated`
+ - `entities.updated`
  
 **Example:**
   
@@ -270,12 +269,12 @@ entities.created:
 
 Mark some entity as just deleted. Will also un-register entity, so it will be presented in 2 places: `entities.unregistered` and `entities.deleted` 
 
-ID: com.fireblink.fbl.context.entities.deleted
+**ID:** `com.fireblink.fbl.context.entities.deleted`
 
-Aliases:
- - fbl.context.entities.deleted
- - context.entities.deleted
- - entities.deleted
+**Aliases:**
+ - `fbl.context.entities.deleted`
+ - `context.entities.deleted`
+ - `entities.deleted`
  
 **Example:**
   
@@ -288,4 +287,27 @@ entities.deleted:
     # [optional] payload that may represent other or all fields of the entity
     payload:
       username: foobar        
+```
+
+## Action Handler: Function
+
+Allows to define custom JS script (ES6) to modify context state.
+
+**ID:** `com.fireblink.fbl.context.function`
+
+**Aliases:**
+ - `fbl.context.function`
+ - `context.function`
+ - `function`
+ - `function()`
+ - `fn`
+ - `fn()`
+ 
+**Example:**
+
+```yaml
+# Action handler expects valid JS function content string.
+# Context is available via "context" variable. 
+fn: |-
+  context.ctx.test = 1;
 ```
