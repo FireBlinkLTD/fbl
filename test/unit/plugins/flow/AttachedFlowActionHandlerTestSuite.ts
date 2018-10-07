@@ -1,13 +1,14 @@
 import {suite, test} from 'mocha-typescript';
 import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFlowActionHandler';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
+import {ActionHandlersRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -46,7 +47,7 @@ export class AttachedFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
         
         await chai.expect(
@@ -69,7 +70,7 @@ export class AttachedFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -102,7 +103,7 @@ export class AttachedFlowActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile.path, dump(subFlow), 'utf8');
 
         const actionHandler = new AttachedFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);

@@ -1,11 +1,12 @@
 import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {ActionHandlersRegistry, FlowService, TemplateUtilitiesRegistry} from '../../../../src/services';
-import {IActionHandlerMetadata, IIteration} from '../../../../src/interfaces';
+import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {TemplateFlowActionHandler} from '../../../../src/plugins/flow/TemplateFlowActionHandler';
 import {ToJSONTemplateUtility} from '../../../../src/plugins/templateUtilities/ToJSONTemplateUtility';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +42,7 @@ class TemplateFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new TemplateFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -56,7 +57,7 @@ class TemplateFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new TemplateFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -84,7 +85,7 @@ class TemplateFlowActionHandlerTestSuite {
 
         const options = `${DummyActionHandler.ID}: <%- $.toJSON(ctx.test) %>`;
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.test = ['a1', 'b2', {
             ab: true
         }];

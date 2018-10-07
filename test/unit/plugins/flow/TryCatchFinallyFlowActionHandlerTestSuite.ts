@@ -5,6 +5,7 @@ import {TryCatchFinallyFlowActionHandler} from '../../../../src/plugins/flow/Try
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +42,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -99,7 +100,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -184,7 +185,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -230,7 +231,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -278,7 +279,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -325,7 +326,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, false);

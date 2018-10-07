@@ -3,7 +3,8 @@ import {Container} from 'typedi';
 import {IActionHandlerMetadata, IFlow, IPlugin} from '../../../src/interfaces';
 import {ActionHandler, ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';
-import {FBLService, FlowService} from '../../../src/services';
+import {FBLService} from '../../../src/services';
+import {ContextUtil} from '../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -95,7 +96,7 @@ export class FBLServiceTestSuite {
             result = opt;
         }, false));
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.var = 'test';
         context.secrets.var = '123';
 
@@ -122,7 +123,7 @@ export class FBLServiceTestSuite {
                 version: '1.0.0',
                 pipeline: {}
             },
-            FlowService.generateEmptyContext())
+            ContextUtil.generateEmptyContext())
         ).to.be.rejected;
     }
 
@@ -145,7 +146,7 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: 'tst'
                 }
             },
-            FlowService.generateEmptyContext()
+            ContextUtil.generateEmptyContext()
         );
 
         assert.strictEqual(result, null);
@@ -169,7 +170,7 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: 'tst'
                 }
             },
-            FlowService.generateEmptyContext()
+            ContextUtil.generateEmptyContext()
         );
 
         assert.strictEqual(snapshot.successful, false);
@@ -194,7 +195,7 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: `<%- ctx.t1`
                 }
             },
-            FlowService.generateEmptyContext()
+            ContextUtil.generateEmptyContext()
         );
 
         assert.strictEqual(snapshot.successful, false);
@@ -261,7 +262,7 @@ export class FBLServiceTestSuite {
             result = opt;
         }, false));
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.t1 = {
             t2: {
                 value: 'tst'

@@ -6,6 +6,7 @@ import {VirtualFlowActionHandler} from '../../../../src/plugins/flow/VirtualFlow
 import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -42,7 +43,7 @@ class VirtualFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -99,7 +100,7 @@ class VirtualFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -151,7 +152,7 @@ class VirtualFlowActionHandlerTestSuite {
             }
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
 
         assert(snapshot.successful);
@@ -203,7 +204,7 @@ class VirtualFlowActionHandlerTestSuite {
             }
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
 
         assert(!snapshot.successful);
@@ -243,7 +244,7 @@ class VirtualFlowActionHandlerTestSuite {
             }
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
 
         assert(snapshot.successful);

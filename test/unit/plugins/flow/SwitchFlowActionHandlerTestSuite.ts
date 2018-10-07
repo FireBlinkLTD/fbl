@@ -5,6 +5,7 @@ import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +42,7 @@ export class SwitchFlowActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -136,7 +137,7 @@ export class SwitchFlowActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -173,7 +174,7 @@ export class SwitchFlowActionHandlerTestSuite {
             }
         };
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
@@ -213,7 +214,7 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
@@ -255,7 +256,7 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 

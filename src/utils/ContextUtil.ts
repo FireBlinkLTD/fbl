@@ -1,3 +1,6 @@
+import {IContext} from '../interfaces';
+import {ActionHandlersRegistry} from '../services/ActionHandlersRegistry';
+
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
@@ -53,7 +56,7 @@ export class ContextUtil {
      */
     static async assignToField(obj: {[key: string]: any}, path: string, value: any): Promise<void> {
         if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
-            throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
+            throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
         const chunks = path.split('.');
@@ -61,5 +64,29 @@ export class ContextUtil {
         const parentPath = path.substring(0, path.length - (fieldName.length + 1));
 
         await ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
+    }
+
+    /**
+     * Generate empty context
+     * @return {IContext}
+     */
+    public static generateEmptyContext(): IContext {
+        return <IContext> {
+            cwd: process.cwd(),
+            ctx: {},
+            secrets: {},
+            entities: {
+                registered: [],
+                unregistered: [],
+                created: [],
+                updated: [],
+                deleted: []
+            },
+            dynamicActionHandlers: new ActionHandlersRegistry(),
+            ejsTemplateDelimiters: {
+                global: '$',
+                local: '%'
+            }
+        };
     }
 }

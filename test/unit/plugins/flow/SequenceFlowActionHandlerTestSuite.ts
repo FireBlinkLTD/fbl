@@ -5,6 +5,7 @@ import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -49,7 +50,7 @@ export class SequenceFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SequenceFlowActionHandler();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
         
         await chai.expect(
@@ -84,7 +85,7 @@ export class SequenceFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SequenceFlowActionHandler();
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -118,7 +119,7 @@ export class SequenceFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);
@@ -150,7 +151,7 @@ export class SequenceFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: 2},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, false);
@@ -185,7 +186,7 @@ export class SequenceFlowActionHandlerTestSuite {
             {[DummyActionHandler.ID + '.2']: '<%- iteration.index %>'},
         ];
 
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(snapshot.successful, true);

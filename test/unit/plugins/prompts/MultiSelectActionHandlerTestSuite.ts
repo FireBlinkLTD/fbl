@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
 import {MultiSelectActionHandler} from '../../../../src/plugins/prompts/MultiSelectActionHandler';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -25,7 +25,7 @@ class SelectActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new MultiSelectActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -57,7 +57,7 @@ class SelectActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new MultiSelectActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -85,7 +85,7 @@ class SelectActionHandlerTestSuite {
     @test()
     async confirm(): Promise<void> {
         const actionHandler = new MultiSelectActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await Promise.all([

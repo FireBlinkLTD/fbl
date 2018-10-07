@@ -7,10 +7,12 @@ import {promisify} from 'util';
 import {dirname, resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
-import {FSUtil} from '../utils/FSUtil';
+import {ContextUtil, FSUtil} from '../utils';
+import * as Joi from 'joi';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
+const cliui = require('cliui');
 
 @Service()
 export class CLIService {
@@ -144,56 +146,129 @@ export class CLIService {
      * Parse parameters passed via CLI
      */
     private parseParameters(): void {
+        const options: {flags: string, description: string[], fn?: Function}[] = [
+            {
+                flags: '-p --plugin <file>',
+                description: [
+                    'Plugin file.'
+                ],
+                fn: (val: string) => {
+                    this.plugins.push(val);
+                }
+            },
+
+            {
+                flags: '-c --context <key=value>',
+                description: [
+                    'Key value pair of default context values.',
+                    'Expected key format: $[.<parent>][.child][...]',
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                ],
+                fn: (val: string) => {
+                    this.configKVPairs.push(val);
+                }
+            },
+
+            {
+                flags: '-s --secret <key=value|name>',
+                description: [
+                    'Key value pair of default secret values. Secrets will not be available in report.',
+                    'Expected key format: $[.<parent>][.child][...]',
+                    'If only key is provided you will be prompted to enter the value in the console.',
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                ],
+                fn: (val: string) => {
+                    this.secretKVPairs.push(val);
+                }
+            },
+
+            {
+                flags: '-o --output <file>',
+                description: [
+                    'Execution report path'
+                ]
+            },
+
+            {
+                flags: '-r --report <name>',
+                description: [
+                    'Execution report format'
+                ]
+            },
+
+            {
+                flags: '--report-option <key=value>',
+                description: [
+                    'Key value pair of report option',
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                ],
+                fn: (val: string) => {
+                    this.reportKVPairs.push(val);
+                }
+            },
+
+            {
+                flags: '--unsafe-plugins',
+                description: [
+                    'If provided incompatible plugins will still be registered and be available for use,',
+                    'but may lead to unexpected results or errors.'
+                ]
+            },
+
+            {
+                flags: '--unsafe-flows',
+                description: [
+                    'If provided incompatible flow requirements will be ignored,',
+                    'but may lead to unexpected results or errors.'
+                ]
+            },
+
+            {
+                flags: '--no-colors',
+                description: [
+                    'Remove colors from output. Make it boring.'
+                ]
+            },
+
+            {
+                flags: '--global-template-delimiter <delimiter>',
+                description: [
+                    'Global EJS template delimiter. Default: $'
+                ]
+            },
+
+            {
+                flags: '--local-template-delimiter <delimiter>',
+                description: [
+                    'Local EJS template delimiter. Default: %'
+                ]
+            },
+
+            {
+                flags: '-h --help',
+                description: [
+                    'Output usage information'
+                ],
+                fn: () => {
+                    this.printHelp(options);
+                    process.exit(0);
+                }
+            }
+        ];
+
+
         // prepare commander
         commander
             .version(require('../../../package.json').version)
-            .option(
-                '-p --plugin <file>',
-                '[optional] Plugin file.',
-                (val) => {
-                    this.plugins.push(val);
-                }
-            )
-            .option(
-                '-c --context <key=value>',
-                [
-                    'Key value pair of default context values.',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
-                ].join(' '),
-                (val) => {
-                    this.configKVPairs.push(val);
-                }
-            )
-            .option(
-                '-s --secret <key=value|name>',
-                [
-                    'Key value pair of default secret values. Secrets will not be available in report.',
-                    'If only key is provided you will be prompted to enter the value in the console.',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
-                ].join(' '),
-                (val) => {
-                    this.secretKVPairs.push(val);
-                }
-            )
-            .option('-o --output <file>', 'Execution report path')
-            .option('-r --report <name>', 'Execution report format')
-            .option('--report-option <key=value>', [
-                    'Key value pair of report option',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
-                ].join(' '),
-                (val) => {
-                    this.reportKVPairs.push(val);
-                }
-            )
-            .option('--unsafe-plugins', 'If provided incompatible plugins will still be registered and be available for use, but may lead to unexpected results or errors.')
-            .option('--unsafe-flows', 'If provided incompatible flow requirements will be ignored, but may lead to unexpected results or errors.')
-            .option('--no-colors', 'Remove colors from output. Make it boring.')
-            .option('--global-template-delimiter <delimiter>', 'Global EJS template delimiter. Default: $')
-            .option('--local-template-delimiter <delimiter>', 'Local EJS template delimiter. Default: %')
             .arguments('<file>')
-            .action((file, options) => {
-                options.file = file;
+            .action((file, opts) => {
+                opts.file = file;
             });
+
+        // register options
+        options.forEach(option => {
+            commander.option(option.flags, option.description.join(' '), option.fn);
+        });
 
         // parse environment variables
         commander.parse(process.argv);
@@ -242,6 +317,56 @@ export class CLIService {
     }
 
     /**
+     * Output help to stdout
+     * @param options
+     */
+    private printHelp(options: {flags: string, description: string[]}[]): void {
+        const allOptions: {flags: string, description: string[]}[] = [
+            ...options,
+            {
+                flags: '-V, --version',
+                description: [
+                    'Output the version number'
+                ]
+            }
+        ];
+
+        let maxFlagsLength = 0;
+        let maxDescriptionLength = 0;
+
+        allOptions.forEach(option => {
+            maxFlagsLength = Math.max(maxFlagsLength, option.flags.length);
+            for (const line of option.description) {
+                maxDescriptionLength = Math.max(maxDescriptionLength, line.length);
+            }
+        });
+
+        const ui = cliui();
+
+        ui.div('Usage: fbl [command] [options]');
+        ui.div({
+            text: 'Options:',
+            padding: [1, 0, 1, 0]
+        });
+
+        allOptions.forEach(option => {
+            ui.div(
+                {
+                    text: option.flags,
+                    width: maxFlagsLength + 4,
+                    padding: [0, 2, 0, 2]
+                },
+                {
+                    text: option.description.join('\n'),
+                    width: maxDescriptionLength
+                }
+            );
+        });
+
+        console.log(ui.toString());
+    }
+
+    /**
      * Register plugins
      */
     private registerPlugins(): void {
@@ -255,7 +380,7 @@ export class CLIService {
      * @return {Promise<IContext>}
      */
     private async prepareContext(): Promise<IContext> {
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         await this.convertKVPairs(this.configKVPairs, context.ctx);
         await this.convertKVPairs(this.secretKVPairs, context.secrets, true);
 
@@ -280,11 +405,27 @@ export class CLIService {
                 })).value;
             }
 
+            let value;
+            let isObject = false;
             if (chunks[1][0] === '@') {
                 const file = chunks[1].substring(1);
-                target[chunks[0]] = await FSUtil.readYamlFromFile(file);
+                value = await FSUtil.readYamlFromFile(file);
+
+                // validate file content to be object
+                const fileContentValidationResult = Joi.validate(value, Joi.object().required());
+                isObject = !fileContentValidationResult.error;
             } else {
-                target[chunks[0]] = chunks[1];
+                value = chunks[1];
+            }
+
+            if (chunks[0] === '$') {
+                if (isObject) {
+                    await ContextUtil.assign(target, chunks[0], value);
+                } else {
+                    throw new Error('Unable to assign non-object value to root path "$"');
+                }
+            } else {
+                await ContextUtil.assignToField(target, chunks[0], value);
             }
         }));
     }

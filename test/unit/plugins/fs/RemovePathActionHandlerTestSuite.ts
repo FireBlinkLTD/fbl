@@ -1,11 +1,11 @@
 import {suite, test} from 'mocha-typescript';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import {resolve} from 'path';
-import {exists, existsSync, mkdir, statSync, writeFile} from 'fs';
+import {exists, mkdir, writeFile} from 'fs';
 import * as assert from 'assert';
 import {RemovePathActionHandler} from '../../../../src/plugins/fs/RemovePathActionHandler';
 import {promisify} from 'util';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -18,7 +18,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -41,7 +41,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -52,7 +52,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async removePath(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const tmpdir = await tmp.dir();
@@ -76,7 +76,7 @@ class MakeDirActionHandlerTestSuite {
     @test()
     async removeNonExistingPath(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const tmpdir = await tmp.dir();

@@ -1,6 +1,6 @@
 import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
-import {FSUtil} from '../../utils/FSUtil';
+import {FSUtil} from '../../utils';
 import {BaseCryptoActionHandler} from './BaseCryptoActionHandler';
 
 const version = require('../../../../package.json').version;

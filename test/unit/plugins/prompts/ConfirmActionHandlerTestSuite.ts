@@ -1,8 +1,8 @@
 import {suite, test} from 'mocha-typescript';
 import {ConfirmActionHandler} from '../../../../src/plugins/prompts/ConfirmActionHandler';
-import {FlowService} from '../../../../src/services';
 import {ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
+import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +41,7 @@ class ConfirmActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ConfirmActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -74,7 +74,7 @@ class ConfirmActionHandlerTestSuite {
     @test()
     async passValidation(): Promise<void> {
         const actionHandler = new ConfirmActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await chai.expect(
@@ -100,7 +100,7 @@ class ConfirmActionHandlerTestSuite {
     @test()
     async confirm(): Promise<void> {
         const actionHandler = new ConfirmActionHandler();
-        const context = FlowService.generateEmptyContext();
+        const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         await Promise.all([

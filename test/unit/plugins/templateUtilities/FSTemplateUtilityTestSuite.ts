@@ -15,8 +15,11 @@ class FSTemplateUtilityTestSuite {
         assert(fs);
         assert(fs.getAbsolutePath);
 
-        const path = fs.getAbsolutePath('./test');
+        let path = fs.getAbsolutePath('./test');
         assert.strictEqual(path, '/tmp/test');
+
+        path = fs.getAbsolutePath('./test', '/home/user');
+        assert.strictEqual(path, '/home/user/test');
     }
 
     @test()

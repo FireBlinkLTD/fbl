@@ -4,7 +4,7 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {dirname} from 'path';
-import {FSUtil} from '../../utils/FSUtil';
+import {FSUtil} from '../../utils';
 
 const version = require('../../../../package.json').version;
 
