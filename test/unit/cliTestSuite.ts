@@ -654,9 +654,9 @@ class CliTestSuite {
         const flow: any = {
             version: '1.0.0',
             requires: {
-                fbl: fblVersion,
+                fbl: `>=${fblVersion}`,
                 plugins: [
-                    `${plugin.name}@${plugin.version}`
+                    `${plugin.name}@~${plugin.version}`
                 ],
                 applications: [
                     'echo'
@@ -684,6 +684,7 @@ class CliTestSuite {
                 flowFile.path
             ]
         );
+
         assert.strictEqual(result.code, 0);
     }
 
