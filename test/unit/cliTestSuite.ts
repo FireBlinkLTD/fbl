@@ -5,10 +5,10 @@ import {exists, readFile, unlink, writeFile} from 'fs';
 import {spawn} from 'child_process';
 import * as assert from 'assert';
 import {CLIService} from '../../src/services';
-import {dirname, join} from 'path';
+import {basename, dirname, join, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
-import {FSUtil} from '../../src/utils/FSUtil';
+import {FSUtil} from '../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -17,9 +17,11 @@ chai.use(chaiAsPromised);
 const tmp = require('tmp-promise');
 const fblVersion = require('../../../package.json').version;
 
-const execCmd = async (cmd: string, args: string[], answer?: string): Promise<{code: number, stdout: string, stderr: string}> => {
+const execCmd = async (cmd: string, args: string[], answer?: string, cwd?: string): Promise<{code: number, stdout: string, stderr: string}> => {
     return new Promise<{code: number, stdout: string, stderr: string}>(async (resolve) => {
-        const process = spawn(cmd, args);
+        const process = spawn(cmd, args, {
+            cwd: cwd
+        });
 
         const stdout: string[] = [];
         process.stdout.on('data', (data) => {
@@ -112,10 +114,17 @@ class CliTestSuite {
         await promisify(writeFile)(contextFile.path, dump(customContextValues), 'utf8');
         await promisify(writeFile)(secretsFile.path, dump(customSecretValues), 'utf8');
 
+        const parentDirName = basename(dirname(flowFile.path));
+        const cwdPath = dirname(flowFile.path).split(sep);
+        cwdPath.pop();
+
+        const flowPath = join(parentDirName, basename(flowFile.path));
+        const cwd = cwdPath.join(sep);
+
         const result = await execCmd(
             'node',
             [
-                'dist/src/cli.js',
+                `${__dirname}/../../src/cli.js`,
                 '--no-colors',
                 '-c', '$.ct=yes',
                 '-c', `$=@${contextFile.path}`,
@@ -124,8 +133,10 @@ class CliTestSuite {
                 '-s', `$=@${secretsFile.path}`,
                 '-o', reportFile.path,
                 '-r', 'json',
-                flowFile.path
-            ]
+                flowPath
+            ],
+            null,
+            cwd
         );
 
         assert.strictEqual(result.code, 0);

@@ -4,7 +4,7 @@ import * as colors from 'colors';
 import {FlowService, FBLService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
-import {dirname, resolve} from 'path';
+import {basename, dirname, resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
@@ -81,7 +81,11 @@ export class CLIService {
         }
 
         const wd = dirname(this.flowFilePath);
-        const flow = await this.flowService.readFlowFromFile(this.flowFilePath, context, wd);
+        const flow = await this.flowService.readFlowFromFile(
+            basename(this.flowFilePath),
+            context,
+            wd
+        );
 
         const snapshot = await this.fbl.execute(
             wd,
