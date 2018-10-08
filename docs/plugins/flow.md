@@ -81,11 +81,19 @@ Allows to reference external flow by its pass. Helps to logically split big flow
  - `attachment`
  - `@`
  
-**Example:**
+**Example 1: Specify flow file**
 
 ```yaml
 # Run steps from external flow file
 @: flow.yml 
+```
+
+**Example 2: Specify directory**
+
+```yaml
+# Run steps from external flow file (index.yml) inside "flow" directory
+# Note: slash in the end of path is not required
+@: flow/ 
 ```
 
 ## Action Handler: Repeat flow

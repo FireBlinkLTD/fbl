@@ -10,9 +10,9 @@ module.exports = <IPlugin> {
     name: 'incompatible.plugin',
     version: '1.0.0',
     requires: {
-        fbl: version,
+        fbl: `>=${version}`,
         plugins: {
-            'fbl.core.flow': version
+            'fbl.core.flow': `~${version}`
         }
     }
 };

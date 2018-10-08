@@ -85,8 +85,8 @@ export class FSUtil {
                 await promisify(mkdir)(path);
             }
         } else {
-            const stats = await statAsync(path);
-            if (!stats.isDirectory()) {
+            const directory = await FSUtil.isDirectory(path);
+            if (!directory) {
                 throw new Error(`Unable to create folder at path: ${path}. Path already exists and it is not a folder.`);
             }
         }
@@ -102,8 +102,8 @@ export class FSUtil {
             throw new Error(`Unable to find file or folder at path: ${path}`);
         }
 
-        const stats = await statAsync(path);
-        if (!stats.isDirectory()) {
+        const directory = await FSUtil.isDirectory(path);
+        if (!directory) {
             await unlinkAsync(path);
         } else {
             const children = await readdirAsync(path);
@@ -112,6 +112,17 @@ export class FSUtil {
             }
             await rmdirAsync(path);
         }
+    }
+
+    /**
+     * Check if path represents a directory
+     * @param {string} path
+     * @return {Promise<boolean>}
+     */
+    static async isDirectory(path: string): Promise<boolean> {
+        const stats = await statAsync(path);
+
+        return stats.isDirectory();
     }
 
     /**
@@ -125,8 +136,8 @@ export class FSUtil {
             throw new Error(`Unable to find file or folder at path: ${from}`);
         }
 
-        const stats = await statAsync(from);
-        if (!stats.isDirectory()) {
+        const directory = await FSUtil.isDirectory(from);
+        if (!directory) {
             // if destination path has an OS specific path separator in the end
             if (to.endsWith(sep)) {
                 // create folders first
@@ -179,8 +190,8 @@ export class FSUtil {
             throw new Error(`Unable to find file or folder at path: ${from}`);
         }
 
-        const stats = await statAsync(from);
-        if (!stats.isDirectory()) {
+        const directory = await FSUtil.isDirectory(from);
+        if (!directory) {
             // if destination path has an OS specific path separator in the end
             if (to.endsWith(sep)) {
                 // create folders first

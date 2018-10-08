@@ -200,7 +200,7 @@ export class FBLService {
         const errors: string[] = [];
         if (flow.requires) {
             if (flow.requires.fbl) {
-                if (!semver.satisfies(flow.requires.fbl, fblVersion)) {
+                if (!semver.satisfies(fblVersion, flow.requires.fbl)) {
                     errors.push(`actual fbl version ${fblVersion.green} doesn't satisfy required ${flow.requires.fbl.green}`);
                 }
             }
@@ -213,7 +213,7 @@ export class FBLService {
                     if (!plugin) {
                         errors.push(`required plugin ${chunks[0].green} is not registered`);
                     } else {
-                        if (!semver.satisfies(chunks[1], plugin.version)) {
+                        if (!semver.satisfies(plugin.version, chunks[1])) {
                             errors.push(`actual plugin ${chunks[0].green} version ${plugin.version.green} doesn't satisfy required ${chunks[1].green}`);
                         }
                     }

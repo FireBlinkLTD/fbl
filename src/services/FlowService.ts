@@ -8,6 +8,7 @@ import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
+import {join} from 'path';
 
 const ejsLint = require('ejs-lint');
 
@@ -104,7 +105,13 @@ export class FlowService {
      * @returns {Promise<IFlow>}
      */
     async readFlowFromFile(file: string, context: IContext, wd: string): Promise<IFlow> {
-        const absolutePath = FSUtil.getAbsolutePath(file, wd);
+        let absolutePath = FSUtil.getAbsolutePath(file, wd);
+
+        const directory = await FSUtil.isDirectory(absolutePath);
+        if (directory) {
+            absolutePath = join(absolutePath, 'index.yml');
+        }
+
         console.log(` -> Reading flow file:`.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);
 

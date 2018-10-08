@@ -9,6 +9,7 @@ import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {join} from 'path';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -114,6 +115,48 @@ export class AttachedFlowActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.execute(tmpFile.path, context, snapshot)
+        ).to.be.not.rejected;
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    @test()
+    async directoryAsPath(): Promise<void> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const subFlow = {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: true
+            }
+        };
+
+        const tmpDir = await tmp.dir();
+
+        await promisify(writeFile)(join(tmpDir.path, 'index.yml'), dump(subFlow), 'utf8');
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        await chai.expect(
+            actionHandler.validate(tmpDir.path, context, snapshot)
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.execute(tmpDir.path, context, snapshot)
         ).to.be.not.rejected;
 
         assert.strictEqual(actionHandlerOptions, true);
