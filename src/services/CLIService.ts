@@ -346,7 +346,7 @@ export class CLIService {
 
         const ui = cliui();
 
-        ui.div('Usage: fbl [command] [options]');
+        ui.div('Usage: fbl [options] <file or url>');
         ui.div({
             text: 'Options:',
             padding: [1, 0, 1, 0]

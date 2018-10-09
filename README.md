@@ -117,3 +117,9 @@ global-template-delimiter: $
 # Custom local EJS template delimiter
 local-template-delimiter: %
 ```
+
+## Packaging
+
+You can also optionally package your flow (in a tarball) and reference it via file or url if it stored remotelly.
+
+Read more about it [here](docs/tarball.md).
