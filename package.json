@@ -41,6 +41,7 @@
     "requireg": "0.2.1",
     "semver": "5.5.0",
     "shelljs": "0.8.2",
+    "tar": "4.4.6",
     "tmp-promise": "1.0.5",
     "typedi": "0.8.0",
     "uuid": "3.3.2"
@@ -53,6 +54,7 @@
     "@types/node": "10.11.5",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.0",
+    "@types/tar": "4.0.0",
     "@types/tmp": "0.0.33",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
