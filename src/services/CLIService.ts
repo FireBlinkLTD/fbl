@@ -80,16 +80,15 @@ export class CLIService {
             context.ejsTemplateDelimiters.local = this.localEJSDelimiter;
         }
 
-        const wd = dirname(this.flowFilePath);
         const flow = await this.flowService.readFlowFromFile(
-            basename(this.flowFilePath),
+            this.flowFilePath,
             context,
-            wd
+            '.'
         );
 
         const snapshot = await this.fbl.execute(
-            wd,
-            flow,
+            flow.wd,
+            flow.flow,
             context
         );
 
