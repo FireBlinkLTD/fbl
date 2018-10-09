@@ -901,6 +901,6 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stdout.split('\n')[0], 'Usage: fbl [command] [options]');
+        assert.strictEqual(result.stdout.split('\n')[0], 'Usage: fbl [options] <file or url>');
     }
 }
