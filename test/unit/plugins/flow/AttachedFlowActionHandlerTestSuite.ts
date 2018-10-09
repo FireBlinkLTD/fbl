@@ -3,13 +3,15 @@ import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFl
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {writeFile} from 'fs';
+import {createReadStream, writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
-import {join} from 'path';
+import {ContextUtil} from '../../../../src/utils';
+import {dirname, join} from 'path';
+import {c} from 'tar';
+import {createServer, Server} from 'http';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,8 +43,14 @@ class DummyActionHandler extends ActionHandler {
 @suite()
 export class AttachedFlowActionHandlerTestSuite {
 
+    private server: Server | null = null;
+
     after() {
         Container.reset();
+        if (this.server) {
+            this.server.close();
+            this.server = null;
+        }
     }
 
     @test()
@@ -108,14 +116,8 @@ export class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-
-        await chai.expect(
-            actionHandler.validate(tmpFile.path, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.execute(tmpFile.path, context, snapshot)
-        ).to.be.not.rejected;
+        await actionHandler.validate(tmpFile.path, context, snapshot);
+        await actionHandler.execute(tmpFile.path, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -150,16 +152,134 @@ export class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-
-        await chai.expect(
-            actionHandler.validate(tmpDir.path, context, snapshot)
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.execute(tmpDir.path, context, snapshot)
-        ).to.be.not.rejected;
+        await actionHandler.validate(tmpDir.path, context, snapshot);
+        await actionHandler.execute(tmpDir.path, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    @test()
+    async tarballAsPath(): Promise<void> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const subFlow = {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: true
+            }
+        };
+
+        const tmpDir = await tmp.dir();
+
+        const indexYmlPath = join(tmpDir.path, 'index.yml');
+        const tarballPath = join(tmpDir.path, 'test.tar.gz');
+
+        await promisify(writeFile)(indexYmlPath, dump(subFlow), 'utf8');
+
+        await c({
+            gzip: true,
+            cwd: dirname(tarballPath),
+            file: tarballPath
+        }, [
+            'index.yml'
+        ]);
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        await actionHandler.validate(tarballPath, context, snapshot);
+        await actionHandler.execute(tarballPath, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    @test()
+    async httpUrlAsPath(): Promise<void> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const subFlow = {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: true
+            }
+        };
+
+        const tmpDir = await tmp.dir();
+
+        const indexYmlPath = join(tmpDir.path, 'index.yml');
+        const tarballPath = join(tmpDir.path, 'test.tar.gz');
+
+        await promisify(writeFile)(indexYmlPath, dump(subFlow), 'utf8');
+
+        await c({
+            gzip: true,
+            cwd: dirname(tarballPath),
+            file: tarballPath
+        }, [
+            'index.yml'
+        ]);
+
+        // create dummy static server
+        let status = 200;
+        this.server = createServer((request, response) => {
+            const fileStream = createReadStream(tarballPath);
+
+            response.writeHead(status);
+
+            fileStream.on('data', function (data) {
+                response.write(data);
+            });
+
+            fileStream.on('end', function() {
+                response.end();
+            });
+        }).listen(61999);
+
+        let url = 'http://localhost:61999';
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.execute(url, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+
+        // expect to reject on non 200 status
+        status = 404;
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
+
+        // expect to reject on invalid url
+        url = 'https://localhost:61888';
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
     }
 }

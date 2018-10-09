@@ -8,9 +8,14 @@ import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
-import {join} from 'path';
+import {dirname, join} from 'path';
+import {x} from 'tar';
+import {createWriteStream, unlink} from 'fs';
+import * as http from 'http';
+import * as https from 'https';
 
 const ejsLint = require('ejs-lint');
+const tmp = require('tmp-promise');
 
 @Service()
 export class FlowService {
@@ -98,15 +103,94 @@ export class FlowService {
     }
 
     /**
+     * Download tarball into temp location
+     * @param {string} url
+     * @return {Promise<string>} temp tarball location
+     */
+    private static async downloadTarball(url: string): Promise<string> {
+        const path = await tmp.file({
+            postfix: '.tar.gz'
+        });
+
+        await new Promise((resolve, reject) => {
+            const ws = createWriteStream(path.path);
+            const get = (url.startsWith('http://') ? http.get : https.get);
+
+            const request = get(url, response => {
+                if (response.statusCode === 200) {
+                    response.pipe(ws);
+                } else {
+                    ws.close();
+                    unlink(path.path, () => {
+                        reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
+                    });
+
+                }
+            });
+
+            request.on('error', err => {
+                ws.close();
+                unlink(path.path, () => {
+                    reject(err);
+                });
+            });
+
+            ws.on('finish', () => {
+                resolve();
+            });
+
+            /* istanbul ignore next */
+            ws.on('error', err => {
+                ws.close();
+
+                unlink(path.path, () => {
+                    reject(err);
+                });
+            });
+        });
+
+        return path.path;
+    }
+
+    /**
+     * Extract tarball to temp dir
+     * @param {string} path
+     * @return {Promise<string>} path to temp dir
+     */
+    private static async extractTarball(path: string): Promise<string> {
+        const tarball = path;
+        const result = (await tmp.dir()).path;
+
+        await x({
+            file: tarball,
+            C: result
+        });
+
+        return result;
+    }
+
+    /**
      * Read flow from file
-     * @param {string} file
+     * @param {string} fileOrURL
      * @param {IContext} context
      * @param {string} wd working directory
      * @returns {Promise<IFlow>}
      */
-    async readFlowFromFile(file: string, context: IContext, wd: string): Promise<IFlow> {
-        let absolutePath = FSUtil.getAbsolutePath(file, wd);
+    async readFlowFromFile(fileOrURL: string, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
+        let absolutePath;
 
+        if (fileOrURL.startsWith('http://') || fileOrURL.startsWith('https://')) {
+            absolutePath = await FlowService.downloadTarball(fileOrURL);
+        } else {
+            absolutePath = FSUtil.getAbsolutePath(fileOrURL, wd);
+        }
+
+        // if path leads to tarball - extract it to temp dir
+        if (absolutePath.endsWith('.tar.gz')) {
+            absolutePath = await FlowService.extractTarball(absolutePath);
+        }
+
+        // if path lead to directory - use index.yml inside it as a starting point
         const directory = await FSUtil.isDirectory(absolutePath);
         if (directory) {
             absolutePath = join(absolutePath, 'index.yml');
@@ -131,7 +215,7 @@ export class FlowService {
             throw (e);
         }
 
-        return flow;
+        return {flow, wd: dirname(absolutePath)};
     }
 
     /**
@@ -141,7 +225,7 @@ export class FlowService {
      * @param {string} tpl - template to resolve
      * @param {IContext} context
      * @param {IIteration} [iteration]
-     * @param {{[p: string]: any}} [additionalTemplateParameters]
+     * @param [additionalTemplateParameters]
      * @return {string}
      */
     resolveTemplate(
@@ -182,7 +266,7 @@ export class FlowService {
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
-     * @param {{[key: string]: any}} [additionalTemplateParameters]
+     * @param [additionalTemplateParameters]
      * @return {any}
      */
     resolveOptionsWithNoHandlerCheck(
