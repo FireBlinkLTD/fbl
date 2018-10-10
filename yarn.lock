@@ -122,9 +122,9 @@
   version "10.5.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.5.tgz#8e84d24e896cd77b0d4f73df274027e3149ec2ba"
 
-"@types/node@10.11.5":
-  version "10.11.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.5.tgz#6489ebda4452592d3fd37aefa57eedc01ed13378"
+"@types/node@10.11.6":
+  version "10.11.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.6.tgz#ce5690df6cd917a9178439a1013e39a7e565c46e"
 
 "@types/semver@5.5.0":
   version "5.5.0"
@@ -137,7 +137,7 @@
     "@types/glob" "*"
     "@types/node" "*"
 
-"@types/tar@^4.0.0":
+"@types/tar@4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/tar/-/tar-4.0.0.tgz#e3239d969eeb693a012200613860d0eb871c94f0"
   dependencies:
@@ -2777,7 +2777,7 @@ syntax-error@^1.1.6:
   dependencies:
     acorn-node "^1.2.0"
 
-tar@^4.4.6:
+tar@4.4.6:
   version "4.4.6"
   resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.6.tgz#63110f09c00b4e60ac8bcfe1bf3c8660235fbc9b"
   dependencies:

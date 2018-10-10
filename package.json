@@ -51,7 +51,7 @@
     "@types/ejs": "2.6.0",
     "@types/joi": "13.6.0",
     "@types/js-yaml": "3.11.2",
-    "@types/node": "10.11.5",
+    "@types/node": "10.11.6",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.0",
     "@types/tar": "4.0.0",
