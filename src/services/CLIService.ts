@@ -4,7 +4,7 @@ import * as colors from 'colors';
 import {FlowService, FBLService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
-import {basename, dirname, resolve} from 'path';
+import {resolve} from 'path';
 import {homedir} from 'os';
 import {IContext} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';

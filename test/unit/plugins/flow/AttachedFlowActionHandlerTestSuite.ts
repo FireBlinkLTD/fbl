@@ -3,7 +3,7 @@ import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFl
 import {Container} from 'typedi';
 import {ActionHandlersRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {createReadStream, writeFile} from 'fs';
+import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
@@ -11,7 +11,7 @@ import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils';
 import {dirname, join} from 'path';
 import {c} from 'tar';
-import {createServer, Server} from 'http';
+import {ChildProcess, fork} from 'child_process';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -43,13 +43,87 @@ class DummyActionHandler extends ActionHandler {
 @suite()
 export class AttachedFlowActionHandlerTestSuite {
 
-    private server: Server | null = null;
+    private server: ChildProcess | null = null;
+    private onServerClose: Function | null = null;
 
-    after() {
+    async after(): Promise<void> {
         Container.reset();
-        if (this.server) {
-            this.server.close();
+        await this.killServer();
+    }
+
+    /**
+     * Spawn server
+     * @param {number} port
+     * @param {number} status
+     * @param {string} file
+     * @param {boolean} ignoreRequest
+     * @return {"child_process".ChildProcess}
+     */
+    private async spawnServer(port: number, status: number, file: string, ignoreRequest = false): Promise<void> {
+        await this.killServer();
+
+        console.log('-> Starting server on port: ' + port + ' that returns status: ' + status + ' and ignores request: ' + ignoreRequest);
+
+        const options = [
+            '-p', port.toString(),
+            '-s', status.toString(),
+            '-t', '1',
+        ];
+
+        if (ignoreRequest) {
+            options.push('--ignore-request');
+        }
+
+        options.push(file);
+
+        this.server = fork('dummy.http.server', options, {
+            cwd: join(__dirname, '../../../assets'),
+            silent: true
+        });
+
+        this.server.stdout.on('data', (data) => {
+            console.error(`-> Server.stdout: ${data.toString().trim()}`);
+        });
+
+        this.server.stderr.on('data', (data) => {
+            console.error(`-> Server.stderr: ${data.toString().trim()}`);
+        });
+
+        this.server.on('close', (code) => {
+            console.log('-> Server is stopped. Code: ' + code);
             this.server = null;
+
+            if (this.onServerClose) {
+                this.onServerClose();
+                this.onServerClose = null;
+            }
+        });
+
+        await new Promise((resolve, reject) => {
+            this.server.on('message', (msg) => {
+                if (msg === 'started') {
+                    return resolve();
+                }
+
+                if (msg === 'failed') {
+                    return reject(new Error('Server failed to start'));
+                }
+            });
+        });
+    }
+
+    /**
+     * Kill http server if running
+     */
+    private async killServer(): Promise<void> {
+        if (this.server) {
+            console.log('-> Killing server...');
+
+            // give system time to free port
+            await new Promise(resolve => {
+                this.onServerClose = resolve;
+                this.server.kill('SIGINT');
+            });
         }
     }
 
@@ -241,23 +315,9 @@ export class AttachedFlowActionHandlerTestSuite {
             'index.yml'
         ]);
 
-        // create dummy static server
-        let status = 200;
-        this.server = createServer((request, response) => {
-            const fileStream = createReadStream(tarballPath);
-
-            response.writeHead(status);
-
-            fileStream.on('data', function (data) {
-                response.write(data);
-            });
-
-            fileStream.on('end', function() {
-                response.end();
-            });
-        }).listen(61999);
-
-        let url = 'http://localhost:61999';
+        const port = 61222;
+        await this.spawnServer(port, 200, tarballPath);
+        let url = `http://localhost:${port}`;
 
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
@@ -265,19 +325,38 @@ export class AttachedFlowActionHandlerTestSuite {
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
         await actionHandler.validate(url, context, snapshot);
+
+        console.log('-> Send request to a valid URL');
         await actionHandler.execute(url, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
 
-        // expect to reject on non 200 status
-        status = 404;
+        console.log('-> Send request to invalid URL');
+        // expect to reject on invalid url
+        url = 'https://localhost:61888';
         await chai.expect(
             actionHandler.execute(url, context, snapshot)
         ).to.be.rejected;
 
-        // expect to reject on invalid url
-        url = 'https://localhost:61888';
+        console.log('-> Send request to valid URL but server returns 404 status code');
+        // expect to reject on non 200 status
+        url = `http://localhost:${port}`;
+        await this.spawnServer(port, 404, tarballPath);
+
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
+
+        console.log('-> Send request to valid URL but server ignores the response');
+        await this.spawnServer(port, 200, tarballPath, true);
+
+        setTimeout(() => {
+            this.killServer().catch((err) => {
+                throw err;
+            });
+        }, 100);
+
         await chai.expect(
             actionHandler.execute(url, context, snapshot)
         ).to.be.rejected;
