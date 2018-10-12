@@ -32,12 +32,12 @@ export class FunctionActionHandler extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const script = [
-            'return async function(context) {',
+            'return async function(context, require) {',
             options,
             '}'
         ].join('\n');
 
         const fn = (new Function(script))();
-        await fn(context);
+        await fn(context, require);
     }
 }
