@@ -220,7 +220,7 @@ class ExecActionHandlerTestSuite {
 
         await actionHandler.execute({
             command: 'bash',
-            args: [resolve(__dirname, '../../../../../test/unit/assets/echo_to_stderr.sh'), 'test'],
+            args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
             options: {
                 stdout: true,
                 stderr: true,
@@ -271,7 +271,7 @@ class ExecActionHandlerTestSuite {
 
         await actionHandler.execute({
             command: 'bash',
-            args: [resolve(__dirname, '../../../../../test/unit/assets/echo_to_stderr.sh'), 'test'],
+            args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
             options: {
                 stderr: true
             },
@@ -326,7 +326,7 @@ class ExecActionHandlerTestSuite {
         await chai.expect(
             actionHandler.execute({
                 command: 'bash',
-                args: [resolve(__dirname, '../../../../../test/unit/assets/echo_to_stderr.sh'), 'test'],
+                args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
                 options: {
                     stdout: true
                 }
