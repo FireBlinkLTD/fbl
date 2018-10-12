@@ -110,23 +110,23 @@ export class FlowService {
      * @return {Promise<string>} temp tarball location
      */
     private static async downloadTarball(url: string, redirectCount = 0): Promise<string> {
-        console.log(' -> Downloading flow from remote URL: '.green + url);
 
-        const stream = got.stream(url, {
-            timeout: 120 * 1000
-        });
+        console.log(' -> Downloading flow from remote URL: '.green + url);
 
         const tarballFile = await tmp.file({
             postfix: '.tar.gz'
         });
 
         const ws = createWriteStream(tarballFile.path);
-
         let error = false;
         try {
-            stream.pipe(ws);
-
             await new Promise((resolve, reject) => {
+                const stream = got.stream(url, {
+                    timeout: 120 * 1000
+                });
+
+                stream.pipe(ws);
+
                 stream.on('end', resolve);
                 stream.on('error', reject);
             });
