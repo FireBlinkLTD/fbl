@@ -4,7 +4,7 @@ import {writeFile} from 'fs';
 import {Container} from 'typedi';
 import {FlowService} from '../../../src/services';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../src/utils';
 
 const tmp = require('tmp-promise');
 
