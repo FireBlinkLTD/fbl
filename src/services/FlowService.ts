@@ -11,8 +11,9 @@ import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {dirname, join} from 'path';
 import {x} from 'tar';
 import {createWriteStream, unlink} from 'fs';
-import * as http from 'http';
-import * as https from 'https';
+import {promisify} from 'util';
+import {ServerResponse} from 'http';
+import * as got from 'got';
 
 const ejsLint = require('ejs-lint');
 const tmp = require('tmp-promise');
@@ -43,7 +44,7 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {IIteration} [iteration] - child execution iteration
-     * @param {{[key: string}: any}} additionalTemplateParameters
+     * @param [additionalTemplateParameters]
      * @returns {Promise<void>}
      */
     async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): Promise<ActionSnapshot> {
@@ -105,51 +106,41 @@ export class FlowService {
     /**
      * Download tarball into temp location
      * @param {string} url
+     * @param {number} [redirectCount]
      * @return {Promise<string>} temp tarball location
      */
-    private static async downloadTarball(url: string): Promise<string> {
-        const path = await tmp.file({
+    private static async downloadTarball(url: string, redirectCount = 0): Promise<string> {
+        console.log(' -> Downloading flow from remote URL: '.green + url);
+
+        const stream = got.stream(url, {
+            timeout: 120 * 1000
+        });
+
+        const tarballFile = await tmp.file({
             postfix: '.tar.gz'
         });
 
-        await new Promise((resolve, reject) => {
-            const ws = createWriteStream(path.path);
-            const get = (url.startsWith('http://') ? http.get : https.get);
+        const ws = createWriteStream(tarballFile.path);
 
-            const request = get(url, response => {
-                if (response.statusCode === 200) {
-                    response.pipe(ws);
-                } else {
-                    ws.close();
-                    unlink(path.path, () => {
-                        reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
-                    });
+        let error = false;
+        try {
+            stream.pipe(ws);
 
-                }
+            await new Promise((resolve, reject) => {
+                stream.on('end', resolve);
+                stream.on('error', reject);
             });
+        } catch (e) {
+            error = true;
+            throw e;
+        } finally {
+            ws.close();
+            if (error) {
+                await promisify(unlink)(tarballFile.path);
+            }
+        }
 
-            request.on('error', err => {
-                ws.close();
-                unlink(path.path, () => {
-                    reject(err);
-                });
-            });
-
-            ws.on('finish', () => {
-                resolve();
-            });
-
-            /* istanbul ignore next */
-            ws.on('error', err => {
-                ws.close();
-
-                unlink(path.path, () => {
-                    reject(err);
-                });
-            });
-        });
-
-        return path.path;
+        return tarballFile.path;
     }
 
     /**
@@ -324,7 +315,7 @@ export class FlowService {
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IIteration} [iteration] execution iteration
-     * @param {{[key: string]: any}} additionalTemplateParameters
+     * @param [additionalTemplateParameters]
      * @returns {Promise<any>}
      */
     resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): any {

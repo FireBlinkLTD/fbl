@@ -308,6 +308,10 @@ Allows to define custom JS script (ES6) to modify context state.
 ```yaml
 # Action handler expects valid JS function content string.
 # Context is available via "context" variable. 
+# You can also "require" node modules inside the script.
+#
+# Note: script is wrapped into async function, so you can "await" promises inside it 
+# if you need to do some long running operations. 
 fn: |-
-  context.ctx.test = 1;
+  context.ctx.isWindows = require('os').platform() === 'win32';
 ```
