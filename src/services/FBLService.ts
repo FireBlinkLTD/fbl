@@ -52,13 +52,13 @@ export class FBLService {
 
     private static validationSchema = Joi.object({
         version: Joi.string()
-            .regex(/\d+\.\d+\.\d+/gi)
+            .regex(/\d+\.\d+\.\d+/i)
             .required(),
 
         requires: Joi.object({
             fbl: Joi.string().min(1),
             plugins: Joi.array().items(
-                Joi.string().regex(/[^@]+@[^@]+/gi).min(1)
+                Joi.string().regex(/[^@]+@[^@]+/i).min(1)
             ).min(1),
             applications: Joi.array().items(Joi.string().min(1)).min(1)
         }),
