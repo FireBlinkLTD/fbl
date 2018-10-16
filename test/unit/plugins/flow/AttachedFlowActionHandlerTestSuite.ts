@@ -43,12 +43,15 @@ class DummyActionHandler extends ActionHandler {
 interface IDummyServerWrapperConfig {
     port: number;
     status?: number;
+    delay?: number;
     file?: string;
     ignoreRequest?: boolean;
     redirectTo?: string;
 }
 
 class DummyServerWrapper {
+    public requestCount = 0;
+
     private server: ChildProcess | null = null;
     private onServerClose: Function | null = null;
 
@@ -64,6 +67,10 @@ class DummyServerWrapper {
             '-s', this.config.status.toString(),
             '-t', '1'
         ];
+
+        if (this.config.delay) {
+            options.push('-d', this.config.delay.toString());
+        }
 
         if (this.config.ignoreRequest) {
             options.push('--ignore-request');
@@ -114,6 +121,10 @@ class DummyServerWrapper {
 
         await new Promise((resolve, reject) => {
             this.server.on('message', (msg) => {
+                if (msg === 'onRequest') {
+                    this.requestCount++;
+                }
+
                 if (msg === 'started') {
                     return resolve();
                 }
@@ -383,6 +394,63 @@ class AttachedFlowActionHandlerTestSuite {
         await chai.expect(
             actionHandler.execute(url, context, snapshot)
         ).to.be.rejected;
+    }
+
+    @test()
+    async singleRequestForParallelActionsOnUrlAsPath(): Promise<void> {
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest();
+
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            file: tarballPath,
+            delay: 100
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+
+        const url = `http://localhost:${port}`;
+        await actionHandler.validate(url, context, snapshot);
+
+        await Promise.all([
+            actionHandler.execute(url, context, snapshot),
+            actionHandler.execute(url, context, snapshot)
+        ]);
+
+        assert.strictEqual(server.requestCount, 1);
+    }
+
+    @test()
+    async singleRequestForSequentialActionsOnUrlAsPath(): Promise<void> {
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest();
+
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+
+        const url = `http://localhost:${port}`;
+        await actionHandler.validate(url, context, snapshot);
+
+        await actionHandler.execute(url, context, snapshot);
+        await actionHandler.execute(url, context, snapshot);
+
+        assert.strictEqual(server.requestCount, 1);
     }
 
     @test()

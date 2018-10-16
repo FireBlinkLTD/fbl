@@ -12,7 +12,6 @@ import {dirname, join} from 'path';
 import {x} from 'tar';
 import {createWriteStream, unlink} from 'fs';
 import {promisify} from 'util';
-import {ServerResponse} from 'http';
 import * as got from 'got';
 
 const ejsLint = require('ejs-lint');
@@ -23,6 +22,14 @@ export class FlowService {
     private index = 0;
 
     public static MASKED = '{MASKED}';
+
+    private flowPathCache: {[key: string]: string};
+    private flowResolvers: {[key: string]: Promise<string>};
+
+    constructor() {
+        this.flowPathCache = {};
+        this.flowResolvers = {};
+    }
 
     /**
      * Turn to true to capture snapshots
@@ -160,20 +167,13 @@ export class FlowService {
         return result;
     }
 
-    /**
-     * Read flow from file
-     * @param {string} fileOrURL
-     * @param {IContext} context
-     * @param {string} wd working directory
-     * @returns {Promise<IFlow>}
-     */
-    async readFlowFromFile(fileOrURL: string, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
+    async resolveFlowSkipChecks(path: string, wd: string): Promise<string> {
         let absolutePath;
 
-        if (fileOrURL.startsWith('http://') || fileOrURL.startsWith('https://')) {
-            absolutePath = await FlowService.downloadTarball(fileOrURL);
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            absolutePath = await FlowService.downloadTarball(path);
         } else {
-            absolutePath = FSUtil.getAbsolutePath(fileOrURL, wd);
+            absolutePath = FSUtil.getAbsolutePath(path, wd);
         }
 
         // if path leads to tarball - extract it to temp dir
@@ -185,7 +185,46 @@ export class FlowService {
         const directory = await FSUtil.isDirectory(absolutePath);
         if (directory) {
             absolutePath = join(absolutePath, 'index.yml');
+            this.flowPathCache[path] = absolutePath;
         }
+
+        return absolutePath;
+    }
+
+    /**
+     * Resolve flow based on path
+     * @param {string} path
+     * @param {string} wd
+     * @return {Promise<string>}
+     */
+    async resolveFlow(path: string, wd: string): Promise<string> {
+        if (this.flowPathCache[path]) {
+            return this.flowPathCache[path];
+        }
+
+        let resolver: Promise<string> = this.flowResolvers[path];
+
+        if (resolver) {
+            return await resolver;
+        }
+
+        resolver = this.resolveFlowSkipChecks(path, wd);
+        this.flowResolvers[path] = resolver;
+        const result = await resolver;
+        delete this.flowResolvers[path];
+
+        return result;
+    }
+
+    /**
+     * Read flow from file
+     * @param {string} path
+     * @param {IContext} context
+     * @param {string} wd working directory
+     * @returns {Promise<IFlow>}
+     */
+    async readFlowFromFile(path: string, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
+        const absolutePath = await this.resolveFlow(path, wd);
 
         console.log(` -> Reading flow file:`.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);

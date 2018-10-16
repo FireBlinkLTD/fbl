@@ -9,6 +9,7 @@ commander
     .option('-p --port <port>')
     .option('-s --status <status>')
     .option('-t --timeout <seconds>')
+    .option('-d --delay <milliseconds>')
     .option('-h --headers <string>')
     .option('--ignore-request')
     .action((file, opts) => {
@@ -19,7 +20,13 @@ commander
 commander.parse(process.argv);
 
 console.log('Starting server with options: ' + JSON.stringify(commander.opts()));
-createServer((request, response) => {
+createServer(async (request, response) => {
+    process.send('onRequest');
+
+    if (commander.delay) {
+        await new Promise(resolve => setTimeout(resolve, commander.delay));
+    }
+
     let headers: OutgoingHttpHeaders = {};
 
     if (commander.headers) {
