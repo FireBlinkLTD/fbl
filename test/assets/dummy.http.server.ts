@@ -1,4 +1,4 @@
-import {createServer} from 'http';
+import {createServer, OutgoingHttpHeaders} from 'http';
 
 import * as commander from 'commander';
 import {createReadStream} from 'fs';
@@ -9,6 +9,7 @@ commander
     .option('-p --port <port>')
     .option('-s --status <status>')
     .option('-t --timeout <seconds>')
+    .option('-h --headers <string>')
     .option('--ignore-request')
     .action((file, opts) => {
         opts.file = file;
@@ -19,7 +20,13 @@ commander.parse(process.argv);
 
 console.log('Starting server with options: ' + JSON.stringify(commander.opts()));
 createServer((request, response) => {
-    response.writeHead(commander.status);
+    let headers: OutgoingHttpHeaders = {};
+
+    if (commander.headers) {
+        headers = JSON.parse(commander.headers);
+    }
+
+    response.writeHead(commander.status, headers);
     response.setTimeout(commander.timeout * 1000, () => {
         response.end();
     });

@@ -40,41 +40,54 @@ class DummyActionHandler extends ActionHandler {
     }
 }
 
-@suite()
-export class AttachedFlowActionHandlerTestSuite {
+interface IDummyServerWrapperConfig {
+    port: number;
+    status?: number;
+    file?: string;
+    ignoreRequest?: boolean;
+    redirectTo?: string;
+}
 
+class DummyServerWrapper {
     private server: ChildProcess | null = null;
     private onServerClose: Function | null = null;
 
-    async after(): Promise<void> {
-        Container.reset();
-        await this.killServer();
+    constructor(public config: IDummyServerWrapperConfig) {
+        if (this.config.redirectTo) {
+            this.config.status = 302;
+        }
     }
 
-    /**
-     * Spawn server
-     * @param {number} port
-     * @param {number} status
-     * @param {string} file
-     * @param {boolean} ignoreRequest
-     * @return {"child_process".ChildProcess}
-     */
-    private async spawnServer(port: number, status: number, file: string, ignoreRequest = false): Promise<void> {
-        await this.killServer();
-
-        console.log('-> Starting server on port: ' + port + ' that returns status: ' + status + ' and ignores request: ' + ignoreRequest);
-
+    private prepareOptions(): string[] {
         const options = [
-            '-p', port.toString(),
-            '-s', status.toString(),
-            '-t', '1',
+            '-p', this.config.port.toString(),
+            '-s', this.config.status.toString(),
+            '-t', '1'
         ];
 
-        if (ignoreRequest) {
+        if (this.config.ignoreRequest) {
             options.push('--ignore-request');
         }
 
-        options.push(file);
+        if (this.config.redirectTo) {
+            options.push('-h', JSON.stringify({
+                Location: this.config.redirectTo
+            }));
+        }
+
+        options.push(this.config.file || 'missing_file.txt');
+
+        return options;
+    }
+
+    /**
+     * Start server
+     * @return {Promise<void>}
+     */
+    async start(): Promise<void> {
+        await this.stop();
+
+        const options = this.prepareOptions();
 
         this.server = fork('dummy.http.server', options, {
             cwd: join(__dirname, '../../../assets'),
@@ -89,8 +102,8 @@ export class AttachedFlowActionHandlerTestSuite {
             console.error(`-> Server.stderr: ${data.toString().trim()}`);
         });
 
-        this.server.on('close', (code) => {
-            console.log('-> Server is stopped. Code: ' + code);
+        this.server.on('close', (code, signal) => {
+            console.log('-> Server is stopped. Code: ' + code + '. Signal: ' + signal);
             this.server = null;
 
             if (this.onServerClose) {
@@ -112,10 +125,7 @@ export class AttachedFlowActionHandlerTestSuite {
         });
     }
 
-    /**
-     * Kill http server if running
-     */
-    private async killServer(): Promise<void> {
+    async stop(): Promise<void> {
         if (this.server) {
             console.log('-> Killing server...');
 
@@ -125,6 +135,22 @@ export class AttachedFlowActionHandlerTestSuite {
                 this.server.kill('SIGINT');
             });
         }
+    }
+}
+
+@suite()
+class AttachedFlowActionHandlerTestSuite {
+
+    private dummyServerWrappers: DummyServerWrapper[] = [];
+
+    async after(): Promise<void> {
+        Container.reset();
+
+        for (const dummyServerWrapper of this.dummyServerWrappers) {
+            await dummyServerWrapper.stop();
+        }
+
+        this.dummyServerWrappers = [];
     }
 
     @test()
@@ -235,38 +261,13 @@ export class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async tarballAsPath(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
-
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest((opts: any, ctx: any) => {
             actionHandlerOptions = opts;
             actionHandlerContext = ctx;
         });
-
-        actionHandlersRegistry.register(dummyActionHandler);
-
-        const subFlow = {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: true
-            }
-        };
-
-        const tmpDir = await tmp.dir();
-
-        const indexYmlPath = join(tmpDir.path, 'index.yml');
-        const tarballPath = join(tmpDir.path, 'test.tar.gz');
-
-        await promisify(writeFile)(indexYmlPath, dump(subFlow), 'utf8');
-
-        await c({
-            gzip: true,
-            cwd: dirname(tarballPath),
-            file: tarballPath
-        }, [
-            'index.yml'
-        ]);
 
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
@@ -281,14 +282,158 @@ export class AttachedFlowActionHandlerTestSuite {
     }
 
     @test()
-    async httpUrlAsPath(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
-
+    async validUrlAsPath(): Promise<void> {
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest((opts: any, ctx: any) => {
             actionHandlerOptions = opts;
             actionHandlerContext = ctx;
+        });
+
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const url = `http://localhost:${port}`;
+        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.execute(url, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    @test()
+    async invalidUrlAsPath(): Promise<void> {
+        const actionHandler = new AttachedFlowActionHandler();
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        console.log('-> Send request to invalid URL');
+        // expect to reject on invalid url
+        const url = 'https://localhost:61888';
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async notFoundUrlAsPath(): Promise<void> {
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest();
+
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 404,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+
+        const url = `http://localhost:${port}`;
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async validUrlAsPathWithNetworkError(): Promise<void> {
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest();
+
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            ignoreRequest: true,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+
+        setTimeout(() => {
+            server.stop().catch((err) => {
+                throw err;
+            });
+        }, 100);
+
+        const url = `http://localhost:${port}`;
+        await actionHandler.validate(url, context, snapshot);
+
+        await chai.expect(
+            actionHandler.execute(url, context, snapshot)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async httpRedirectUrlAsPath(): Promise<void> {
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest((opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        // file server
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        // redirect server
+        const redirectServer = new DummyServerWrapper({
+            port: port + 1,
+            redirectTo: `http://localhost:${port}`
+        });
+        this.dummyServerWrappers.push(redirectServer);
+        await redirectServer.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const url = `http://localhost:${port + 1}`;
+
+        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.execute(url, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    private static async prepareForTarballTest(dummyActionHandlerFn?: Function): Promise<string> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const dummyActionHandler = new DummyActionHandler((opts: any, ctx: any) => {
+            if (dummyActionHandlerFn) {
+                dummyActionHandlerFn(opts, ctx);
+            }
         });
 
         actionHandlersRegistry.register(dummyActionHandler);
@@ -315,50 +460,6 @@ export class AttachedFlowActionHandlerTestSuite {
             'index.yml'
         ]);
 
-        const port = 61222;
-        await this.spawnServer(port, 200, tarballPath);
-        let url = `http://localhost:${port}`;
-
-        const actionHandler = new AttachedFlowActionHandler();
-        const context = ContextUtil.generateEmptyContext();
-        context.ctx.tst = 123;
-
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(url, context, snapshot);
-
-        console.log('-> Send request to a valid URL');
-        await actionHandler.execute(url, context, snapshot);
-
-        assert.strictEqual(actionHandlerOptions, true);
-        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
-
-        console.log('-> Send request to invalid URL');
-        // expect to reject on invalid url
-        url = 'https://localhost:61888';
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot)
-        ).to.be.rejected;
-
-        console.log('-> Send request to valid URL but server returns 404 status code');
-        // expect to reject on non 200 status
-        url = `http://localhost:${port}`;
-        await this.spawnServer(port, 404, tarballPath);
-
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot)
-        ).to.be.rejected;
-
-        console.log('-> Send request to valid URL but server ignores the response');
-        await this.spawnServer(port, 200, tarballPath, true);
-
-        setTimeout(() => {
-            this.killServer().catch((err) => {
-                throw err;
-            });
-        }, 100);
-
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot)
-        ).to.be.rejected;
+        return tarballPath;
     }
 }

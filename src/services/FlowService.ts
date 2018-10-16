@@ -110,8 +110,7 @@ export class FlowService {
      * @return {Promise<string>} temp tarball location
      */
     private static async downloadTarball(url: string, redirectCount = 0): Promise<string> {
-
-        console.log(' -> Downloading flow from remote URL: '.green + url);
+        console.log(' -> Downloading tarball from remote URL: '.green + url);
 
         const tarballFile = await tmp.file({
             postfix: '.tar.gz'
@@ -149,6 +148,7 @@ export class FlowService {
      * @return {Promise<string>} path to temp dir
      */
     private static async extractTarball(path: string): Promise<string> {
+        console.log(' -> Extracting tarball at path: '.green + path);
         const tarball = path;
         const result = (await tmp.dir()).path;
 
