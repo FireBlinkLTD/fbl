@@ -124,7 +124,6 @@ export class FlowService {
         });
 
         const ws = createWriteStream(tarballFile.path);
-        let error = false;
         try {
             await new Promise((resolve, reject) => {
                 const stream = got.stream(url, {
@@ -133,17 +132,12 @@ export class FlowService {
 
                 stream.pipe(ws);
 
-                stream.on('end', resolve);
+                ws.on('finish', resolve);
                 stream.on('error', reject);
             });
         } catch (e) {
-            error = true;
+            await promisify(unlink)(tarballFile.path);
             throw e;
-        } finally {
-            ws.close();
-            if (error) {
-                await promisify(unlink)(tarballFile.path);
-            }
         }
 
         return tarballFile.path;

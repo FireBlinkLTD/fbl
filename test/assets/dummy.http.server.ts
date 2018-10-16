@@ -44,9 +44,7 @@ createServer(async (request, response) => {
 
     if (Number(commander.status) === 200) {
         const fileStream = createReadStream(commander.file);
-        fileStream.on('data', function (data) {
-            response.write(data);
-        });
+        fileStream.pipe(response);
 
         fileStream.on('end', function () {
             response.end();
