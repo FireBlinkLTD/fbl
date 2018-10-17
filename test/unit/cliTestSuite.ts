@@ -141,9 +141,22 @@ class CliTestSuite {
 
         assert.strictEqual(result.code, 0);
 
-        const report = await promisify(readFile)(reportFile.path, 'utf8');
-        assert(report.length > 0);
-        // TODO: validate options inside the report
+        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        assert(reportJson.length > 0);
+
+        const report = JSON.parse(reportJson);
+        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
+            ct: 'yes',
+            custom_ct: 'file1',
+            test: {
+                ct: 'yes',
+                st: 'yes',
+                custom_ct: 'file1',
+                custom_st: 'file2'
+            }
+        });
     }
 
     @test()
@@ -343,9 +356,22 @@ class CliTestSuite {
 
         assert.strictEqual(result.code, 0);
 
-        const report = await promisify(readFile)(reportFile.path, 'utf8');
-        assert(report.length > 0);
-        // TODO: validate options inside the report
+        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        assert(reportJson.length > 0);
+
+        const report = JSON.parse(reportJson);
+        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
+            ct: 'yes',
+            custom_ct: 'file1',
+            test: {
+                ct: 'yes',
+                st: 'yes',
+                custom_ct: 'file1',
+                custom_st: 'file2'
+            }
+        });
     }
 
     @test()
@@ -902,5 +928,124 @@ class CliTestSuite {
 
         assert.strictEqual(result.code, 0);
         assert.strictEqual(result.stdout.split('\n')[0], 'Usage: fbl [options] <file or url>');
+    }
+
+    static async indexFileLookupInsideDirectoryTree(extention: 'yml' | 'yaml'): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    '$': {
+                        inline: {
+                            test: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const reportFile = await tmp.file();
+        const rootDir = await tmp.dir();
+        await FSUtil.mkdirp(join(rootDir.path, 'l1/index.yml/l3'));
+        const indexPath = join(rootDir.path, `l1/index.yml/l3/index.${extention}`);
+
+        await promisify(writeFile)(indexPath, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-o', reportFile.path,
+                '-r', 'json',
+                rootDir.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+
+        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        assert(reportJson.length > 0);
+
+        const report = JSON.parse(reportJson);
+        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
+            test: true
+        });
+    }
+
+    @test()
+    async indexYmlLookupInsideDirectoryTree(): Promise<void> {
+        await CliTestSuite.indexFileLookupInsideDirectoryTree('yml');
+    }
+
+    @test()
+    async indexYamlLookupInsideDirectoryTree(): Promise<void> {
+        await CliTestSuite.indexFileLookupInsideDirectoryTree('yaml');
+    }
+
+    @test()
+    async indexFileLookupFailure(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    '$': {
+                        inline: {
+                            test: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const rootDir = await tmp.dir();
+        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l3'));
+        const flowPath = join(rootDir.path, `l1/l2/l3/test.yml`);
+
+        await promisify(writeFile)(flowPath, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                rootDir.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 1);
+    }
+
+    @test()
+    async indexFileLookupFailureDueToMultipleParentDirs(): Promise<void> {
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    '$': {
+                        inline: {
+                            test: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const rootDir = await tmp.dir();
+        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l3'));
+        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l4'));
+        const flowPath = join(rootDir.path, `l1/l2/l3/index.yml`);
+
+        await promisify(writeFile)(flowPath, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                rootDir.path
+            ]
+        );
+
+        assert.strictEqual(result.code, 1);
     }
 }
