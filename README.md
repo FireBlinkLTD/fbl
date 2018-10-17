@@ -123,3 +123,7 @@ local-template-delimiter: %
 You can also optionally package your flow (in a tarball) and reference it via file or url if it stored remotelly.
 
 Read more about it [here](docs/tarball.md).
+
+## Plugin Development
+
+Follow [this link](https://github.com/FireBlinkLTD/fbl-plugin-template) to read more about plugin development. 
