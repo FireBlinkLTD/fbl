@@ -10,7 +10,7 @@ import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {dirname, join} from 'path';
 import {x} from 'tar';
-import {createWriteStream, unlink} from 'fs';
+import {createWriteStream, readdir, unlink} from 'fs';
 import {promisify} from 'util';
 import * as got from 'got';
 
@@ -124,7 +124,6 @@ export class FlowService {
         });
 
         const ws = createWriteStream(tarballFile.path);
-        let error = false;
         try {
             await new Promise((resolve, reject) => {
                 const stream = got.stream(url, {
@@ -133,17 +132,12 @@ export class FlowService {
 
                 stream.pipe(ws);
 
-                stream.on('end', resolve);
+                ws.on('finish', resolve);
                 stream.on('error', reject);
             });
         } catch (e) {
-            error = true;
+            await promisify(unlink)(tarballFile.path);
             throw e;
-        } finally {
-            ws.close();
-            if (error) {
-                await promisify(unlink)(tarballFile.path);
-            }
         }
 
         return tarballFile.path;
@@ -167,6 +161,41 @@ export class FlowService {
         return result;
     }
 
+    /**
+     * Recursively find index.yml in directory structure
+     * @param {string} path
+     * @return {Promise<string>}
+     */
+    async recursivelyFindIndexFileInDir(path: string): Promise<string> {
+        let contents = await promisify(readdir)(path);
+
+        // filter all files and folders that start with "."
+        contents = contents.filter(fileOrDir => !fileOrDir.startsWith('.'));
+
+        const match = contents.find(dirOrFile => {
+            return dirOrFile === 'index.yml' || dirOrFile === 'index.yaml';
+        });
+
+        if (match) {
+            const dirOrFile = join(path, match);
+            const isDir = await FSUtil.isDirectory(dirOrFile);
+            if (!isDir) {
+                return dirOrFile;
+            }
+        }
+
+        if (contents.length === 1) {
+            const dirOrFile = join(path, contents[0]);
+            const isDir = await FSUtil.isDirectory(dirOrFile);
+
+            if (isDir) {
+                return await this.recursivelyFindIndexFileInDir(dirOrFile);
+            }
+        }
+
+        throw new Error('Unable to locate index file inside the directory.');
+    }
+
     async resolveFlowSkipChecks(path: string, wd: string): Promise<string> {
         let absolutePath;
 
@@ -184,7 +213,7 @@ export class FlowService {
         // if path lead to directory - use index.yml inside it as a starting point
         const directory = await FSUtil.isDirectory(absolutePath);
         if (directory) {
-            absolutePath = join(absolutePath, 'index.yml');
+            absolutePath = await this.recursivelyFindIndexFileInDir(absolutePath);
             this.flowPathCache[path] = absolutePath;
         }
 
