@@ -95,6 +95,5 @@ class FlowServiceTestSuite {
             '       l_1:',
             '         inline: new'
         ].join('\n'));
-
     }
 }

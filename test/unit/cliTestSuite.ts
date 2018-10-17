@@ -534,9 +534,9 @@ class CliTestSuite {
         const flow: any = {
             version: '1.0.0',
             requires: {
-                plugins: [
-                    `${plugin.name}@0.0.0`
-                ]
+                plugins: {
+                    [plugin.name]: '0.0.0'
+                }
             },
             pipeline: {
                 ctx: {
@@ -582,9 +582,9 @@ class CliTestSuite {
         const flow: any = {
             version: '1.0.0',
             requires: {
-                plugins: [
-                    'test@0.0.1'
-                ]
+                plugins: {
+                    test: '0.0.1'
+                }
             },
             pipeline: {
                 ctx: {
@@ -681,9 +681,9 @@ class CliTestSuite {
             version: '1.0.0',
             requires: {
                 fbl: `>=${fblVersion}`,
-                plugins: [
-                    `${plugin.name}@~${plugin.version}`
-                ],
+                plugins: {
+                    [plugin.name]: `~${plugin.version}`
+                },
                 applications: [
                     'echo'
                 ]

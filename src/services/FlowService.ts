@@ -196,6 +196,12 @@ export class FlowService {
         throw new Error('Unable to locate index file inside the directory.');
     }
 
+    /**
+     * Resolve flow, skipping checks if similar resolve action is already running
+     * @param {string} path
+     * @param {string} wd
+     * @return {Promise<string>}
+     */
     async resolveFlowSkipChecks(path: string, wd: string): Promise<string> {
         let absolutePath;
 

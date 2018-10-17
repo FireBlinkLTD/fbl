@@ -47,9 +47,9 @@ requires:
   # [optional] fbl version requirements, value should conform with semantic versioning 
   fbl: >0.2.0
   
-  # [optional] fbl plugins and their semantic versioning
+  # [optional] fbl plugins and their required versions (semver)
   plugins: 
-    - fbl.plugin.ftpo@^0.1.0
+    fbl.plugin.ftpo: >=0.1.0
   
   # [optional] native application/commands presented in the PATH environment variable
   applications:

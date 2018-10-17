@@ -2,7 +2,7 @@ export interface IFlow {
     version?: string;
     requires?: {
         fbl?: string;
-        plugins?: string[];
+        plugins?: {[name: string]: string};
         applications?: string[];
     };
     description?: string;
