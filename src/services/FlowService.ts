@@ -179,9 +179,7 @@ export class FlowService {
         if (match) {
             const dirOrFile = join(path, match);
             const isDir = await FSUtil.isDirectory(dirOrFile);
-            if (isDir) {
-                throw new Error(`Located ${dirOrFile} is a directory. Expecting file.`);
-            } else {
+            if (!isDir) {
                 return dirOrFile;
             }
         }
