@@ -5,16 +5,21 @@ import {exists, mkdir, writeFile} from 'fs';
 import * as assert from 'assert';
 import {RemovePathActionHandler} from '../../../../src/plugins/fs/RemovePathActionHandler';
 import {promisify} from 'util';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite
 class MakeDirActionHandlerTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
@@ -51,37 +56,41 @@ class MakeDirActionHandlerTestSuite {
 
     @test()
     async removePath(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
-        const tmpdir = await tmp.dir();
+        const tmpdir = await tempPathsRegistry.createTempDir();
 
-        const path_l1 = resolve(tmpdir.path, 'l1');
-        const path_l2 = resolve(tmpdir.path, 'l1', 'l2');
+        const path_l1 = resolve(tmpdir, 'l1');
+        const path_l2 = resolve(tmpdir, 'l1', 'l2');
 
         await promisify(mkdir)(path_l1);
         await promisify(mkdir)(path_l2);
 
-        await promisify(writeFile)(resolve(tmpdir.path, 'test.txt'), '', 'utf8');
+        await promisify(writeFile)(resolve(tmpdir, 'test.txt'), '', 'utf8');
         await promisify(writeFile)(resolve(path_l1, 'test.txt'), '', 'utf8');
         await promisify(writeFile)(resolve(path_l2, 'test.txt'), '', 'utf8');
 
-        await actionHandler.execute(tmpdir.path, context, snapshot);
+        await actionHandler.execute(tmpdir, context, snapshot);
 
-        const exist = await promisify(exists)(tmpdir.path);
+        const exist = await promisify(exists)(tmpdir);
         assert(!exist);
     }
 
     @test()
     async removeNonExistingPath(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
-        const tmpdir = await tmp.dir();
+        const tmpdir = await tempPathsRegistry.createTempDir();
 
-        const path_l1 = resolve(tmpdir.path, 'l1');
+        const path_l1 = resolve(tmpdir, 'l1');
 
         await chai.expect(
             actionHandler.execute(path_l1, context, snapshot)

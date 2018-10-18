@@ -3,11 +3,11 @@ import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {Validator} from 'jsonschema';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
+import {BasePromptActionHandler} from './BasePromptActionHandler';
 
 const version = require('../../../../package.json').version;
-const prompts = require('prompts');
 
-export class PromptActionHandler extends ActionHandler {
+export class PromptActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.prompt',
         version: version,
@@ -92,12 +92,11 @@ export class PromptActionHandler extends ActionHandler {
 
         const validator = new Validator();
 
-        let value = (await prompts({
+        let value = await this.prompt({
             type: type,
             float: float,
             min: min,
             max: max,
-            name: 'value',
             initial: options.default,
             style: options.password ? 'password' : 'default',
             message: options.message,
@@ -117,7 +116,7 @@ export class PromptActionHandler extends ActionHandler {
 
                 return true;
             }
-        })).value;
+        });
 
         if (options.schema && options.schema.type !== 'string' && !isNaN(value)) {
             value = Number(value);

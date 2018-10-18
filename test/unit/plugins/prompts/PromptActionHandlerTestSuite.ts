@@ -12,11 +12,12 @@ chai.use(chaiAsPromised);
  * Simulate chart printing
  * @param {string} char
  * @param {string} name
+ * @param {boolean} [ctrl]
  */
-const printChar = (char: string, name: string): void => {
+const printChar = (char: string, name: string, ctrl = false): void => {
     process.stdin.emit('keypress', char, {
-        ctrl: false,
-        name: name
+        ctrl,
+        name
     });
 };
 
@@ -252,5 +253,30 @@ class PromptActionHandlerTestSuite {
         ]);
 
         assert.strictEqual(context.secrets.test, correct);
+    }
+
+    @test()
+    async cancelled(): Promise<void> {
+        const actionHandler = new PromptActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        await Promise.all([
+            chai.expect(
+                actionHandler.execute({
+                    message: 'test',
+                    assignResponseTo: {
+                        ctx: '$.test'
+                    }
+                }, context, snapshot),
+                'Prompt canceled by user'
+            ).to.be.rejected,
+            new Promise<void>(resolve => {
+                setTimeout(() => {
+                    printChar('c', 'c', true);
+                    resolve();
+                }, 50);
+            })
+        ]);
     }
 }

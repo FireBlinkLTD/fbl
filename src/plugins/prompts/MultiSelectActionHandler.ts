@@ -2,11 +2,11 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
+import {BasePromptActionHandler} from './BasePromptActionHandler';
 
 const version = require('../../../../package.json').version;
-const prompts = require('prompts');
 
-export class MultiSelectActionHandler extends ActionHandler {
+export class MultiSelectActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.multiselect',
         version: version,
@@ -54,9 +54,8 @@ export class MultiSelectActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const value = (await prompts({
+        const value = await this.prompt({
             type: 'multiselect',
-            name: 'value',
             choices: options.options.map((o: string | number) => {
                 return {
                     title: o.toString,
@@ -67,7 +66,7 @@ export class MultiSelectActionHandler extends ActionHandler {
             message: options.message,
             max: options.max,
             hint: options.hint || '- Space to select. Return to submit'
-        })).value;
+        });
 
         /* istanbul ignore else */
         if (options.assignResponseTo.ctx) {

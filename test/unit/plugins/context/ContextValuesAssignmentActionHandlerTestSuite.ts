@@ -6,7 +6,7 @@ import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
-import {FlowService} from '../../../../src/services';
+import {FlowService, TempPathsRegistry} from '../../../../src/services';
 import {Container} from 'typedi';
 import {ContextUtil} from '../../../../src/utils/ContextUtil';
 
@@ -14,11 +14,10 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite()
 export class ContextValuesAssignmentActionHandlerTestSuite {
-    after() {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
     }
 
@@ -99,6 +98,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async priorityCheck(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
@@ -110,15 +110,15 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             content: 'inline'
         };
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await tempPathsRegistry.createTempFile();
 
         // write to temp file
-        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
 
         const options = {
             '$': <{[key: string]: any}>{
                 inline: inlineContent,
-                files: [tmpFile.path]
+                files: [tmpFile]
             }
         };
 
@@ -147,6 +147,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const flowService = Container.get(FlowService);
         flowService.debug = true;
 
@@ -161,10 +162,10 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             file_content: 'ftpo'
         };
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await tempPathsRegistry.createTempFile();
 
         // write to temp file
-        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
 
         const options = {
             '$': {
@@ -179,7 +180,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
                 override: true
             },
             '$.fromFile': {
-                files: [tmpFile.path]
+                files: [tmpFile]
             }
         };
 
@@ -194,8 +195,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
 
         // do the same with relative path
-        options['$.fromFile'].files = [basename(tmpFile.path)];
-        snapshot.wd = dirname(tmpFile.path);
+        options['$.fromFile'].files = [basename(tmpFile)];
+        snapshot.wd = dirname(tmpFile);
 
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
@@ -208,6 +209,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignRootValues(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
@@ -224,12 +226,12 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
 
-        const tmpFile1 = await tmp.file();
-        const tmpFile2 = await tmp.file();
+        const tmpFile1 = await tempPathsRegistry.createTempFile();
+        const tmpFile2 = await tempPathsRegistry.createTempFile();
 
         // write to temp files
-        await promisify(writeFile)(tmpFile1.path, dump(file1Content), 'utf8');
-        await promisify(writeFile)(tmpFile2.path, dump(file2Content), 'utf8');
+        await promisify(writeFile)(tmpFile1, dump(file1Content), 'utf8');
+        await promisify(writeFile)(tmpFile2, dump(file2Content), 'utf8');
 
         const options = {
             '$': {
@@ -239,8 +241,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
             '$.fromFile': {
                 files: [
-                    tmpFile1.path,
-                    tmpFile2.path
+                    tmpFile1,
+                    tmpFile2
                 ]
             }
         };
@@ -257,10 +259,10 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
         // do the same with relative path
         options['$.fromFile'].files = [
-            basename(tmpFile1.path),
-            tmpFile2.path
+            basename(tmpFile1),
+            tmpFile2
         ];
-        snapshot.wd = dirname(tmpFile1.path);
+        snapshot.wd = dirname(tmpFile1);
 
         await actionHandler.validate(options, context, snapshot);
         await actionHandler.execute(options, context, snapshot);
@@ -297,6 +299,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async failToAssignDueToWrongFileStructure(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
@@ -304,13 +307,13 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             file_content: 'ftpo2'
         }];
 
-        const tmpFile = await tmp.file();
-        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+        const tmpFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
 
         const options = {
             '$.fromFile': {
                 files: [
-                    tmpFile.path
+                    tmpFile
                 ]
             }
         };

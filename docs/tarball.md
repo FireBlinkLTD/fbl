@@ -4,7 +4,9 @@ Packaging of flows is possible inside tarball.
 
 Requirements:
 - File name should end with `.tar.gz`
-- In root of the tarball `index.yml` should exist that represents the enty point of it.
+- `index.yml` file should be located in root of the tarball or in any child directory if each parent dir has only one child.
+
+E.g.: 
 
 ## Reference tarball
 

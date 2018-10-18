@@ -9,6 +9,8 @@ import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
 
+const requireg = require('requireg');
+
 const fblVersion: string = require('../../../package.json').version;
 
 const joiStepSchemaExt = Joi.extend({
@@ -57,9 +59,10 @@ export class FBLService {
 
         requires: Joi.object({
             fbl: Joi.string().min(1),
-            plugins: Joi.array().items(
-                Joi.string().regex(/[^@]+@[^@]+/i).min(1)
-            ).min(1),
+            plugins: Joi.object().min(1).pattern(
+                /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/,
+                        Joi.string().min(1)
+            ),
             applications: Joi.array().items(Joi.string().min(1)).min(1)
         }),
 
@@ -131,64 +134,78 @@ export class FBLService {
     }
 
     /**
+     * Find plugin by its name
+     * @param {string} name
+     * @return {IPlugin | undefined}
+     */
+    getPlugin(name: string): IPlugin | undefined {
+        return this.plugins[name];
+    }
+
+    /**
+     * Register single plugin
+     * @param {IPlugin} plugin
+     */
+    registerPlugin(plugin: IPlugin): void {
+        this.plugins[plugin.name] = plugin;
+
+        if (plugin.actionHandlers) {
+            plugin.actionHandlers.forEach(actionHander => {
+                this.actionHandlersRegistry.register(actionHander);
+            });
+        }
+
+        if (plugin.reporters) {
+            plugin.reporters.forEach(reporter => {
+                this.reporters[reporter.getName()] = reporter;
+            });
+        }
+
+        if (plugin.templateUtils) {
+            this.templateUtilityRegistry.register(...plugin.templateUtils);
+        }
+    }
+
+    /**
      * Register plugins
      * @param {IPlugin[]} plugins
      */
     registerPlugins(plugins: IPlugin[]): void {
         plugins.forEach(plugin => {
-            this.plugins[plugin.name] = plugin;
-
-            if (plugin.actionHandlers) {
-                plugin.actionHandlers.forEach(actionHander => {
-                    this.actionHandlersRegistry.register(actionHander);
-                });
-            }
-
-            if (plugin.reporters) {
-                plugin.reporters.forEach(reporter => {
-                    this.reporters[reporter.getName()] = reporter;
-                });
-            }
-
-            if (plugin.templateUtils) {
-                this.templateUtilityRegistry.register(...plugin.templateUtils);
-            }
+           this.registerPlugin(plugin);
         });
     }
 
     /**
-     * Validate plugins to be compatible
+     * Validate plugin
+     * @param {IPlugin} plugin
      */
-    validatePlugins(): void {
-        for (const name of Object.keys(this.plugins)) {
-            const plugin = this.plugins[name];
-
-            if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
-                if (this.allowUnsafePlugins) {
-                    console.error(`${plugin.name}`.red + ' plugin is not compatible with current fbl version (' + `${fblVersion}`.red + ')');
-                } else {
-                    throw new Error(`${plugin.name} plugin is not compatible with current fbl version (${fblVersion})`);
-                }
+    validatePlugin(plugin: IPlugin): void {
+        if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
+            if (this.allowUnsafePlugins) {
+                console.error(`${plugin.name}`.red + ' plugin is not compatible with current fbl version (' + `${fblVersion}`.red + ')');
+            } else {
+                throw new Error(`${plugin.name} plugin is not compatible with current fbl version (${fblVersion})`);
             }
+        }
 
-            if (plugin.requires.plugins) {
-                for (const dependencyPluginName of Object.keys(plugin.requires.plugins)) {
-                    const dependencyPluginRequiredVersion = plugin.requires.plugins[dependencyPluginName];
-                    const dependencyPlugin = this.plugins[dependencyPluginName];
+        if (plugin.requires.plugins) {
+            for (const dependencyPluginName of Object.keys(plugin.requires.plugins)) {
+                const dependencyPluginRequiredVersion = plugin.requires.plugins[dependencyPluginName];
+                const dependencyPlugin = this.plugins[dependencyPluginName];
 
-                    if (!dependencyPlugin) {
-                        if (this.allowUnsafePlugins) {
-                            console.error(`${plugin.name}`.red + ' plugin requires missing plugin ' + `${dependencyPluginName}@${dependencyPluginRequiredVersion}`.red);
-                        } else {
-                            throw new Error(`${plugin.name} plugin requires missing plugin ${dependencyPluginName}@${dependencyPluginRequiredVersion}`);
-                        }
+                if (!dependencyPlugin) {
+                    if (this.allowUnsafePlugins) {
+                        console.error(`${plugin.name}`.red + ' plugin requires missing plugin ' + `${dependencyPluginName}@${dependencyPluginRequiredVersion}`.red);
                     } else {
-                        if (!semver.satisfies(dependencyPlugin.version, dependencyPluginRequiredVersion)) {
-                            if (this.allowUnsafePlugins) {
-                                console.error(`${plugin.name}`.red + ' plugin is not compatible with plugin ' + `${dependencyPluginName}@${dependencyPlugin.version}`.red);
-                            } else {
-                                throw new Error(`${plugin.name} plugin is not compatible with plugin ${dependencyPluginName}@${dependencyPlugin.version}`);
-                            }
+                        throw new Error(`${plugin.name} plugin requires missing plugin ${dependencyPluginName}@${dependencyPluginRequiredVersion}`);
+                    }
+                } else {
+                    if (!semver.satisfies(dependencyPlugin.version, dependencyPluginRequiredVersion)) {
+                        if (this.allowUnsafePlugins) {
+                            console.error(`${plugin.name}`.red + ' plugin is not compatible with plugin ' + `${dependencyPluginName}@${dependencyPlugin.version}`.red);
+                        } else {
+                            throw new Error(`${plugin.name} plugin is not compatible with plugin ${dependencyPluginName}@${dependencyPlugin.version}`);
                         }
                     }
                 }
@@ -196,6 +213,20 @@ export class FBLService {
         }
     }
 
+    /**
+     * Validate plugins to be compatible
+     */
+    validatePlugins(): void {
+        for (const name of Object.keys(this.plugins)) {
+            this.validatePlugin(this.plugins[name]);
+        }
+    }
+
+    /**
+     * Validate flow requirements
+     * @param {IFlow} flow
+     * @return {Promise<void>}
+     */
     async validateFlowRequirements(flow: IFlow): Promise<void> {
         const errors: string[] = [];
         if (flow.requires) {
@@ -206,16 +237,24 @@ export class FBLService {
             }
 
             if (flow.requires.plugins) {
-                for (const pluginNameVersion of flow.requires.plugins) {
-                    const chunks = pluginNameVersion.split('@');
+                for (const pluginName of Object.keys(flow.requires.plugins)) {
+                    const pluginExpectedVersion = flow.requires.plugins[pluginName];
 
-                    const plugin = this.plugins[chunks[0]];
+                    let plugin = this.plugins[pluginName];
+
                     if (!plugin) {
-                        errors.push(`required plugin ${chunks[0].green} is not registered`);
-                    } else {
-                        if (!semver.satisfies(plugin.version, chunks[1])) {
-                            errors.push(`actual plugin ${chunks[0].green} version ${plugin.version.green} doesn't satisfy required ${chunks[1].green}`);
+                        try {
+                            plugin = requireg(pluginName);
+                            this.validatePlugin(plugin);
+                            this.registerPlugin(plugin);
+                        } catch (e) {
+                            errors.push(`required plugin ${pluginName.green} is not registered`);
+                            plugin = null;
                         }
+                    }
+
+                    if (plugin && !semver.satisfies(plugin.version, pluginExpectedVersion)) {
+                        errors.push(`actual plugin ${pluginName.green} version ${plugin.version.green} doesn't satisfy required ${pluginExpectedVersion.green}`);
                     }
                 }
             }
@@ -246,12 +285,12 @@ export class FBLService {
      * @returns {Promise<ActionSnapshot>}
      */
     async execute(wd: string, flow: IFlow, context: IContext): Promise<ActionSnapshot> {
-        await this.validateFlowRequirements(flow);
-
         const result = Joi.validate(flow, FBLService.validationSchema);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
         }
+
+        await this.validateFlowRequirements(flow);
 
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         let metadata = FBLService.extractMetadata(flow.pipeline);

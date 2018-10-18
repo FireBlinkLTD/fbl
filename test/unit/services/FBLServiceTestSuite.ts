@@ -4,11 +4,14 @@ import {IActionHandlerMetadata, IFlow, IPlugin} from '../../../src/interfaces';
 import {ActionHandler, ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';
 import {FBLService} from '../../../src/services';
-import {ContextUtil} from '../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../src/utils';
+import {join} from 'path';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const version = require('../../../../package.json').version;
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
@@ -69,6 +72,25 @@ class InvalidAliasActionHandler extends ActionHandler {
 export class FBLServiceTestSuite {
     after() {
         Container.reset();
+    }
+
+    @test()
+    async pluginAutoInclude(): Promise<void> {
+        const fbl = Container.get<FBLService>(FBLService);
+        await fbl.validateFlowRequirements(<IFlow> {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: 'tst'
+            },
+            requires: {
+                plugins: {
+                    [join(__dirname, '../../../src/plugins/context')]: version
+                }
+            }
+        });
+
+        const plugin = fbl.getPlugin('flb.core.context');
+        assert(plugin);
     }
 
     @test()
@@ -237,7 +259,7 @@ export class FBLServiceTestSuite {
                     name: 'invalid_alias',
                     version: '1.0.0',
                     requires: {
-                        fbl: require('../../../../package.json').version
+                        fbl: version
                     },
                     actionHandlers: [
                         new InvalidAliasActionHandler()

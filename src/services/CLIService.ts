@@ -9,6 +9,7 @@ import {homedir} from 'os';
 import {IContext} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
+import {TempPathsRegistry} from './TempPathsRegistry';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -44,6 +45,9 @@ export class CLIService {
 
     @Inject(() => FlowService)
     flowService: FlowService;
+
+    @Inject(() => TempPathsRegistry)
+    tempPathsRegistry: TempPathsRegistry;
 
     async run(): Promise<void> {
         await this.readGlobalConfig();
@@ -97,6 +101,9 @@ export class CLIService {
             await this.convertKVPairs(this.reportKVPairs, options);
             await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, snapshot);
         }
+
+        // remove all temp files and folders
+        await this.tempPathsRegistry.cleanup();
 
         if (!snapshot.successful) {
             throw new Error('Execution failed.');

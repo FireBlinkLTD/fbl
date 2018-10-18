@@ -2,16 +2,21 @@ import {suite, test} from 'mocha-typescript';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {Container} from 'typedi';
-import {FlowService} from '../../../src/services';
+import {FlowService, TempPathsRegistry} from '../../../src/services';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../src/utils';
 
-const tmp = require('tmp-promise');
-
 @suite()
 class FlowServiceTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async resolveTemplate(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const tpl = [
             'version: 1.0.0',
             'pipeline:',
@@ -27,9 +32,9 @@ class FlowServiceTestSuite {
         ].join('\n');
 
         // create temp file
-        const file = await tmp.file();
+        const file = await tempPathsRegistry.createTempFile();
         // write template to file
-        await promisify(writeFile)(file.path, tpl, 'utf8');
+        await promisify(writeFile)(file, tpl, 'utf8');
 
         // generate context
         const context = ContextUtil.generateEmptyContext();
@@ -95,6 +100,5 @@ class FlowServiceTestSuite {
             '       l_1:',
             '         inline: new'
         ].join('\n'));
-
     }
 }

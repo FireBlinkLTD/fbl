@@ -4,8 +4,8 @@ import * as Joi from 'joi';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {BaseExecutableActionHandler} from './BaseExecutableActionHandler';
-
-const tmp = require('tmp-promise');
+import {Container} from 'typedi';
+import {TempPathsRegistry} from '../../services';
 
 const version = require('../../../../package.json').version;
 
@@ -48,14 +48,14 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const file = await tmp.file();
-        await promisify(writeFile)(file.path, options.script, 'utf8');
+        const file = await Container.get(TempPathsRegistry).createTempFile();
+        await promisify(writeFile)(file, options.script, 'utf8');
 
         const result: any = await this.exec(
             snapshot,
             options.executable,
             [
-                file.path
+                file
             ],
             options.options
         );

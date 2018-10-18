@@ -2,11 +2,11 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
+import {BasePromptActionHandler} from './BasePromptActionHandler';
 
 const version = require('../../../../package.json').version;
-const prompts = require('prompts');
 
-export class SelectActionHandler extends ActionHandler {
+export class SelectActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.select',
         version: version,
@@ -50,9 +50,8 @@ export class SelectActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const value = (await prompts({
+        const value = await this.prompt({
             type: 'select',
-            name: 'value',
             initial: options.default ? options.options.indexOf(options.default) : undefined,
             choices: options.options.map((o: string | number) => {
                 return {
@@ -61,7 +60,7 @@ export class SelectActionHandler extends ActionHandler {
                 };
             }),
             message: options.message,
-        })).value;
+        });
 
         /* istanbul ignore else */
         if (options.assignResponseTo.ctx) {

@@ -3,11 +3,16 @@ import {FSTemplateUtility} from '../../../../src/plugins/templateUtilities/FSTem
 import * as assert from 'assert';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
-
-const tmp = require('tmp-promise');
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 @suite()
 class FSTemplateUtilityTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async getAbsolutePath(): Promise<void> {
         const fs = new FSTemplateUtility().getUtilities('/tmp').fs;
@@ -24,22 +29,26 @@ class FSTemplateUtilityTestSuite {
 
     @test()
     async readText(): Promise<void> {
-        const file = await tmp.file();
-        await promisify(writeFile)(file.path, 'test', 'utf8');
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const file = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(file, 'test', 'utf8');
 
         const readText = new FSTemplateUtility().getUtilities('/tmp').fs.read.text;
-        const txt = readText(file.path);
+        const txt = readText(file);
 
         assert.strictEqual(txt, 'test');
     }
 
     @test()
     async readBase64(): Promise<void> {
-        const file = await tmp.file();
-        await promisify(writeFile)(file.path, 'test', 'utf8');
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const file = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(file, 'test', 'utf8');
 
         const readBase64 = new FSTemplateUtility().getUtilities('/tmp').fs.read.base64;
-        const base64 = readBase64(file.path);
+        const base64 = readBase64(file);
 
         assert.strictEqual(base64, 'dGVzdA==');
     }

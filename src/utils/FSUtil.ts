@@ -95,10 +95,15 @@ export class FSUtil {
     /**
      * Remove files and folders at given path recursively
      * @param {string} path
+     * @param {boolean} skipNotFound do not rise exception if file no longer exists
      * @return {Promise<void>}
      */
-    static async remove(path: string): Promise<void> {
+    static async remove(path: string, skipNotFound = false): Promise<void> {
         if (!await existsAsync(path)) {
+            if (skipNotFound) {
+                return;
+            }
+
             throw new Error(`Unable to find file or folder at path: ${path}`);
         }
 

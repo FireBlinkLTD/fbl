@@ -7,19 +7,18 @@ import * as assert from 'assert';
 import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite()
 export class SecretValuesAssignmentActionHandlerTestSuite {
 
-    after() {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
     }
 
@@ -100,6 +99,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
         const actionHandler = new SecretValuesAssignmentActionHandler();
@@ -117,10 +117,10 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             file_content: 'ftpo'
         };
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await tempPathsRegistry.createTempFile();
 
         // write to temp file
-        await promisify(writeFile)(tmpFile.path, dump(fileContent), 'utf8');
+        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
 
         const options = {
             '$': {
@@ -134,7 +134,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                 }
             },
             '$.fromFile': {
-                files: [tmpFile.path]
+                files: [tmpFile]
             }
         };
 
@@ -147,9 +147,9 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
-        options['$.fromFile'].files = [basename(tmpFile.path)];
+        options['$.fromFile'].files = [basename(tmpFile)];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile.path), actionHandler.getMetadata().id, {}, options, context);
+        snapshot = await flowService.executeAction(dirname(tmpFile), actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -160,6 +160,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignRootValues(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
         const actionHandler = new SecretValuesAssignmentActionHandler();
@@ -180,12 +181,12 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         const file2Content = {
             file2_content: 'ftpo2'
         };
-        const tmpFile1 = await tmp.file();
-        const tmpFile2 = await tmp.file();
+        const tmpFile1 = await tempPathsRegistry.createTempFile();
+        const tmpFile2 = await tempPathsRegistry.createTempFile();
 
         // write to temp files
-        await promisify(writeFile)(tmpFile1.path, dump(file1Content), 'utf8');
-        await promisify(writeFile)(tmpFile2.path, dump(file2Content), 'utf8');
+        await promisify(writeFile)(tmpFile1, dump(file1Content), 'utf8');
+        await promisify(writeFile)(tmpFile2, dump(file2Content), 'utf8');
 
         const options = {
             '$': {
@@ -195,8 +196,8 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             },
             '$.fromFile': {
                 files: [
-                    tmpFile1.path,
-                    tmpFile2.path
+                    tmpFile1,
+                    tmpFile2
                 ]
             }
         };
@@ -211,11 +212,11 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         // do the same with relative path
         options['$.fromFile'].files = [
-            basename(tmpFile1.path),
-            tmpFile2.path
+            basename(tmpFile1),
+            tmpFile2
         ];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile1.path), actionHandler.getMetadata().id, {}, options, context);
+        snapshot = await flowService.executeAction(dirname(tmpFile1), actionHandler.getMetadata().id, {}, options, context);
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');

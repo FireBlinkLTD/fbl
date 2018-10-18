@@ -2,11 +2,11 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
+import {BasePromptActionHandler} from './BasePromptActionHandler';
 
 const version = require('../../../../package.json').version;
-const prompts = require('prompts');
 
-export class ConfirmActionHandler extends ActionHandler {
+export class ConfirmActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.confirm',
         version: version,
@@ -42,12 +42,11 @@ export class ConfirmActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const value = (await prompts({
+        const value = await this.prompt({
             type: 'confirm',
-            name: 'value',
             initial: options.default,
             message: options.message,
-        })).value;
+        });
 
         /* istanbul ignore else */
         if (options.assignResponseTo.ctx) {

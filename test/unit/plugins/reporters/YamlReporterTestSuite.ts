@@ -5,18 +5,25 @@ import {promisify} from 'util';
 import {readFile} from 'fs';
 import * as assert from 'assert';
 import {safeLoad} from 'js-yaml';
-
-const tmp = require('tmp-promise');
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 @suite()
 class YamlReporterTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async generate(): Promise<void> {
-        const reporter = new YamlReporter();
-        const file = await tmp.file();
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
 
-        await reporter.generate(file.path, {}, new ActionSnapshot('test', {}, '.', 0));
-        const strReport = await promisify(readFile)(file.path, 'utf8');
+        const reporter = new YamlReporter();
+        const file = await tempPathsRegistry.createTempFile();
+
+        await reporter.generate(file, {}, new ActionSnapshot('test', {}, '.', 0));
+        const strReport = await promisify(readFile)(file, 'utf8');
 
         const report = safeLoad(strReport);
 

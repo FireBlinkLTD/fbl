@@ -47,9 +47,9 @@ requires:
   # [optional] fbl version requirements, value should conform with semantic versioning 
   fbl: >0.2.0
   
-  # [optional] fbl plugins and their semantic versioning
+  # [optional] fbl plugins and their required versions (semver)
   plugins: 
-    - fbl.plugin.ftpo@^0.1.0
+    fbl.plugin.ftpo: >=0.1.0
   
   # [optional] native application/commands presented in the PATH environment variable
   applications:
@@ -123,3 +123,7 @@ local-template-delimiter: %
 You can also optionally package your flow (in a tarball) and reference it via file or url if it stored remotelly.
 
 Read more about it [here](docs/tarball.md).
+
+## Plugin Development
+
+Follow [this link](https://github.com/FireBlinkLTD/fbl-plugin-template) to read more about plugin development. 
