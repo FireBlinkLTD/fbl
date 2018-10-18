@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFlowActionHandler';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, TempPathsRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
@@ -16,8 +16,6 @@ import {ChildProcess, fork} from 'child_process';
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-
-const tmp = require('tmp-promise');
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
@@ -155,6 +153,7 @@ class AttachedFlowActionHandlerTestSuite {
     private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
 
         for (const dummyServerWrapper of this.dummyServerWrappers) {
@@ -200,6 +199,7 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async processAttachedFlow(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let actionHandlerOptions: any = null;
@@ -218,17 +218,17 @@ class AttachedFlowActionHandlerTestSuite {
             }
         };
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(tmpFile.path, dump(subFlow), 'utf8');
+        await promisify(writeFile)(tmpFile, dump(subFlow), 'utf8');
 
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(tmpFile.path, context, snapshot);
-        await actionHandler.execute(tmpFile.path, context, snapshot);
+        await actionHandler.validate(tmpFile, context, snapshot);
+        await actionHandler.execute(tmpFile, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -236,6 +236,7 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async directoryAsPath(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let actionHandlerOptions: any = null;
@@ -254,17 +255,17 @@ class AttachedFlowActionHandlerTestSuite {
             }
         };
 
-        const tmpDir = await tmp.dir();
+        const tmpDir = await tempPathsRegistry.createTempDir();
 
-        await promisify(writeFile)(join(tmpDir.path, 'index.yml'), dump(subFlow), 'utf8');
+        await promisify(writeFile)(join(tmpDir, 'index.yml'), dump(subFlow), 'utf8');
 
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(tmpDir.path, context, snapshot);
-        await actionHandler.execute(tmpDir.path, context, snapshot);
+        await actionHandler.validate(tmpDir, context, snapshot);
+        await actionHandler.execute(tmpDir, context, snapshot);
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -496,6 +497,7 @@ class AttachedFlowActionHandlerTestSuite {
     }
 
     private static async prepareForTarballTest(dummyActionHandlerFn?: Function): Promise<string> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const dummyActionHandler = new DummyActionHandler((opts: any, ctx: any) => {
@@ -513,10 +515,10 @@ class AttachedFlowActionHandlerTestSuite {
             }
         };
 
-        const tmpDir = await tmp.dir();
+        const tmpDir = await tempPathsRegistry.createTempDir();
 
-        const indexYmlPath = join(tmpDir.path, 'index.yml');
-        const tarballPath = join(tmpDir.path, 'test.tar.gz');
+        const indexYmlPath = join(tmpDir, 'index.yml');
+        const tarballPath = join(tmpDir, 'test.tar.gz');
 
         await promisify(writeFile)(indexYmlPath, dump(subFlow), 'utf8');
 

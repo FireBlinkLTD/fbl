@@ -6,15 +6,19 @@ import * as assert from 'assert';
 import {ActionSnapshot} from '../../../../src/models';
 import {resolve} from 'path';
 import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite()
 export class WriteToFileTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
 
     @test()
     async failValidation(): Promise<void> {
@@ -114,9 +118,11 @@ export class WriteToFileTestSuite {
 
     @test()
     async saveToFile(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new WriteToFileActionHandler();
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
@@ -124,7 +130,7 @@ export class WriteToFileTestSuite {
         const content = 'test';
         await chai.expect(
             actionHandler.execute({
-                path: tmpFile.path,
+                path: tmpFile,
                 assignPathTo: {
                     ctx: '$.ct',
                     secrets: '$.st'
@@ -133,34 +139,36 @@ export class WriteToFileTestSuite {
             }, context, snapshot)
         ).to.be.not.rejected;
 
-        const result = await promisify(readFile)(tmpFile.path, 'utf8');
+        const result = await promisify(readFile)(tmpFile, 'utf8');
         assert.strictEqual(result, content);
-        assert.strictEqual(context.ctx.ct, tmpFile.path);
-        assert.strictEqual(context.secrets.st, tmpFile.path);
+        assert.strictEqual(context.ctx.ct, tmpFile);
+        assert.strictEqual(context.secrets.st, tmpFile);
     }
 
     @test()
     async saveToFileBasedOnTemplate(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new WriteToFileActionHandler();
 
-        const templateFile = await tmp.file();
-        const destinationFile = await tmp.file();
+        const templateFile = await tempPathsRegistry.createTempFile();
+        const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
         const content = '<$- ctx.global $>-<%- ctx.local %>';
-        await promisify(writeFile)(templateFile.path, content, 'utf8');
+        await promisify(writeFile)(templateFile, content, 'utf8');
 
         context.ctx.global = 'g';
         context.ctx.local = 'l';
 
         await actionHandler.execute({
-            path: destinationFile.path,
-            contentFromFile: templateFile.path,
+            path: destinationFile,
+            contentFromFile: templateFile,
         }, context, snapshot);
 
-        const result = await promisify(readFile)(destinationFile.path, 'utf8');
+        const result = await promisify(readFile)(destinationFile, 'utf8');
         assert.strictEqual(result, 'g-l');
     }
 
@@ -192,11 +200,13 @@ export class WriteToFileTestSuite {
 
     @test()
     async mkdirp(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const tmpdir = await tmp.dir();
-        const path = resolve(tmpdir.path, 'l1', 'l2', 'l3', 'test.txt');
+        const tmpdir = await tempPathsRegistry.createTempDir();
+        const path = resolve(tmpdir, 'l1', 'l2', 'l3', 'test.txt');
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
@@ -212,14 +222,16 @@ export class WriteToFileTestSuite {
 
     @test()
     async fileInsteadOfFolderInParentPath(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const tmpdir = await tmp.dir();
-        let path = resolve(tmpdir.path, 'l1', 'test.txt');
+        const tmpdir = await tempPathsRegistry.createTempDir();
+        let path = resolve(tmpdir, 'l1', 'test.txt');
 
         // write file on the folder level
-        writeFileSync(resolve(tmpdir.path, 'l1'), '', 'utf8');
+        writeFileSync(resolve(tmpdir, 'l1'), '', 'utf8');
 
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
@@ -231,10 +243,10 @@ export class WriteToFileTestSuite {
             }, context, snapshot)
         ).to.be.rejected;
 
-        path = resolve(tmpdir.path, 't1', 't2', 'test.txt');
+        path = resolve(tmpdir, 't1', 't2', 'test.txt');
         // write file on the folder level
-        await promisify(mkdir)(resolve(tmpdir.path, 't1'));
-        writeFileSync(resolve(tmpdir.path, 't1', 't2'), '', 'utf8');
+        await promisify(mkdir)(resolve(tmpdir, 't1'));
+        writeFileSync(resolve(tmpdir, 't1', 't2'), '', 'utf8');
 
         await chai.expect(
             actionHandler.execute({

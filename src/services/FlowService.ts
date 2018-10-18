@@ -13,9 +13,9 @@ import {x} from 'tar';
 import {createWriteStream, readdir, unlink} from 'fs';
 import {promisify} from 'util';
 import * as got from 'got';
+import {TempPathsRegistry} from './TempPathsRegistry';
 
 const ejsLint = require('ejs-lint');
-const tmp = require('tmp-promise');
 
 @Service()
 export class FlowService {
@@ -42,6 +42,9 @@ export class FlowService {
 
     @Inject(() => TemplateUtilitiesRegistry)
     templateUtilityRegistry: TemplateUtilitiesRegistry;
+
+    @Inject(() => TempPathsRegistry)
+    tempPathsRegistry: TempPathsRegistry;
 
     /**
      * Execute action
@@ -116,14 +119,12 @@ export class FlowService {
      * @param {number} [redirectCount]
      * @return {Promise<string>} temp tarball location
      */
-    private static async downloadTarball(url: string, redirectCount = 0): Promise<string> {
+    private async downloadTarball(url: string, redirectCount = 0): Promise<string> {
         console.log(' -> Downloading tarball from remote URL: '.green + url);
 
-        const tarballFile = await tmp.file({
-            postfix: '.tar.gz'
-        });
+        const tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
 
-        const ws = createWriteStream(tarballFile.path);
+        const ws = createWriteStream(tarballFile);
         try {
             await new Promise((resolve, reject) => {
                 const stream = got.stream(url, {
@@ -136,11 +137,11 @@ export class FlowService {
                 stream.on('error', reject);
             });
         } catch (e) {
-            await promisify(unlink)(tarballFile.path);
+            await promisify(unlink)(tarballFile);
             throw e;
         }
 
-        return tarballFile.path;
+        return tarballFile;
     }
 
     /**
@@ -148,10 +149,10 @@ export class FlowService {
      * @param {string} path
      * @return {Promise<string>} path to temp dir
      */
-    private static async extractTarball(path: string): Promise<string> {
+    private async extractTarball(path: string): Promise<string> {
         console.log(' -> Extracting tarball at path: '.green + path);
         const tarball = path;
-        const result = (await tmp.dir()).path;
+        const result = await this.tempPathsRegistry.createTempDir();
 
         await x({
             file: tarball,
@@ -206,14 +207,14 @@ export class FlowService {
         let absolutePath;
 
         if (path.startsWith('http://') || path.startsWith('https://')) {
-            absolutePath = await FlowService.downloadTarball(path);
+            absolutePath = await this.downloadTarball(path);
         } else {
             absolutePath = FSUtil.getAbsolutePath(path, wd);
         }
 
         // if path leads to tarball - extract it to temp dir
         if (absolutePath.endsWith('.tar.gz')) {
-            absolutePath = await FlowService.extractTarball(absolutePath);
+            absolutePath = await this.extractTarball(absolutePath);
         }
 
         // if path lead to directory - use index.yml inside it as a starting point

@@ -6,10 +6,9 @@ import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import {ContextUtil, FSUtil} from '../../utils';
 import {dirname} from 'path';
 import {Container} from 'typedi';
-import {FlowService} from '../../services';
+import {FlowService, TempPathsRegistry} from '../../services';
 
 const version = require('../../../../package.json').version;
-const tmp = require('tmp-promise');
 
 export class WriteToFileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -57,10 +56,7 @@ export class WriteToFileActionHandler extends ActionHandler {
         if (options.path) {
             file = FSUtil.getAbsolutePath(options.path, snapshot.wd);
         } else {
-            const tmpFile = await tmp.file({
-                keep: true
-            });
-            file = tmpFile.path;
+            file = await Container.get(TempPathsRegistry).createTempFile(true);
         }
 
         // create folders structure if needed

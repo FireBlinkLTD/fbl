@@ -1,15 +1,20 @@
 import {suite, test} from 'mocha-typescript';
 import * as assert from 'assert';
 import {homedir} from 'os';
-import {FSUtil} from '../../../src/utils/FSUtil';
+import {FSUtil} from '../../../src/utils';
 import {join} from 'path';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
-
-const tmp = require('tmp-promise');
+import {TempPathsRegistry} from '../../../src/services';
+import {Container} from 'typedi';
 
 @suite()
 class FSUtilTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async getAbsolutePath(): Promise<void> {
         assert.strictEqual(FSUtil.getAbsolutePath('~/test.tst', '/tmp'), homedir() + '/test.tst');
@@ -19,23 +24,25 @@ class FSUtilTestSuite {
 
     @test()
     async findFilesByMask(): Promise<void> {
-        const tmpDir = await tmp.dir();
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const tmpDir = await tempPathsRegistry.createTempDir();
         const writeFileAsync = promisify(writeFile);
 
         const files = [
-            join(tmpDir.path, 'a.txt'),
-            join(tmpDir.path, 'b.txt'),
-            join(tmpDir.path, 'c.ign'),
+            join(tmpDir, 'a.txt'),
+            join(tmpDir, 'b.txt'),
+            join(tmpDir, 'c.ign'),
         ];
 
         for (const file of files) {
             await writeFileAsync(file, '', 'utf8');
         }
 
-        let found = await FSUtil.findFilesByMasks(['*.txt', '*.ign'], null, tmpDir.path);
+        let found = await FSUtil.findFilesByMasks(['*.txt', '*.ign'], null, tmpDir);
         assert.deepStrictEqual(found, files);
 
-        found = await FSUtil.findFilesByMasks(['*.txt'], ['*.ign'], tmpDir.path);
+        found = await FSUtil.findFilesByMasks(['*.txt'], ['*.ign'], tmpDir);
         assert.deepStrictEqual(found, [
             files[0], files[1]
         ]);

@@ -6,16 +6,21 @@ import {readFile, writeFile} from 'fs';
 import {join} from 'path';
 import {DecryptActionHandler} from '../../../../src/plugins/fs/DecryptActionHandler';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite()
 class CryptoTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new EncryptActionHandler();
@@ -67,13 +72,13 @@ class CryptoTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
-        actionHandler.validate({
+        await actionHandler.validate({
             password: 'secret',
             include: ['/tmp'],
             exclude: ['/tmp/.gitignore']
         }, context, snapshot);
 
-        actionHandler.validate({
+        await actionHandler.validate({
             password: 'secret',
             include: ['/tmp']
         }, context, snapshot);
@@ -81,20 +86,22 @@ class CryptoTestSuite {
 
     @test()
     async decryptFiles(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const encryptActionHandler = new EncryptActionHandler();
         const decryptActionHandler = new DecryptActionHandler();
 
-        const tmpDir = await tmp.dir();
+        const tmpDir = await tempPathsRegistry.createTempDir();
         const writeFileAsync = promisify(writeFile);
         const readFileAsync = promisify(readFile);
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpDir.path, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpDir, 0);
 
         const files = [
-            join(tmpDir.path, 'a.txt'),
-            join(tmpDir.path, 'b.txt'),
-            join(tmpDir.path, 'c.ign'),
+            join(tmpDir, 'a.txt'),
+            join(tmpDir, 'b.txt'),
+            join(tmpDir, 'c.ign'),
         ];
 
         const fileContent = 'test@'.repeat(100);

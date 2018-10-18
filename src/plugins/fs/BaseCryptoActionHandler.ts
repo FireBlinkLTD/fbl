@@ -1,9 +1,10 @@
 import {ActionHandler} from '../../models';
 import * as Joi from 'joi';
 import {createCipheriv, createDecipheriv, pbkdf2, randomBytes} from 'crypto';
-import * as tmp from 'tmp-promise';
 import {createReadStream, createWriteStream, ReadStream, rename} from 'fs';
 import {promisify} from 'util';
+import {Container} from 'typedi';
+import {TempPathsRegistry} from '../../services';
 
 export abstract class BaseCryptoActionHandler extends ActionHandler {
     private static encryptionAlgorithm = 'aes-256-cbc';
@@ -44,9 +45,9 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         const iv = randomBytes(BaseCryptoActionHandler.ivSize);
         const cipher = createCipheriv(BaseCryptoActionHandler.encryptionAlgorithm, passwordHash.hash, iv);
 
-        const tmpFile = await tmp.file();
+        const tmpFile = await Container.get(TempPathsRegistry).createTempFile(true);
         const rs = createReadStream(file);
-        const ws = createWriteStream(tmpFile.path);
+        const ws = createWriteStream(tmpFile);
 
         const writeAsync = (chunk: Buffer): Promise<void> => {
             return new Promise<void>(resolve => {
@@ -66,7 +67,7 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
             });
         });
 
-        await promisify(rename)(tmpFile.path, file);
+        await promisify(rename)(tmpFile, file);
     }
 
     private static streamToBuffer(stream: ReadStream): Promise<Buffer> {
@@ -97,8 +98,8 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         const passwordHash = await BaseCryptoActionHandler.getPasswordHash(password, salt);
         const decipher = createDecipheriv(BaseCryptoActionHandler.encryptionAlgorithm, passwordHash.hash, iv);
 
-        const tmpFile = await tmp.file();
-        const ws = createWriteStream(tmpFile.path);
+        const tmpFile = await Container.get(TempPathsRegistry).createTempFile(true);
+        const ws = createWriteStream(tmpFile);
 
         await new Promise<void>(resolve => {
             rs.pipe(decipher).pipe(ws);
@@ -108,6 +109,6 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
             });
         });
 
-        await promisify(rename)(tmpFile.path, file);
+        await promisify(rename)(tmpFile, file);
     }
 }

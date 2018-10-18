@@ -5,18 +5,22 @@ import {existsSync, writeFile} from 'fs';
 import * as assert from 'assert';
 import {MovePathActionHandler} from '../../../../src/plugins/fs/MovePathActionHandler';
 import {promisify} from 'util';
-import {FSUtil} from '../../../../src/utils/FSUtil';
+import {FSUtil, ContextUtil} from '../../../../src/utils';
 import {homedir} from 'os';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {TempPathsRegistry} from '../../../../src/services';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
-
 @suite
 class MovePathActionHandlerTestSuite {
+    async after(): Promise<void> {
+        await Container.get(TempPathsRegistry).cleanup();
+        Container.reset();
+    }
+
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
@@ -68,21 +72,23 @@ class MovePathActionHandlerTestSuite {
 
     @test()
     async move(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0);
 
-        const tmpdir = await tmp.dir();
-        await FSUtil.mkdirp(resolve(tmpdir.path, 'l1', 'l2'));
+        const tmpdir = await tempPathsRegistry.createTempDir();
+        await FSUtil.mkdirp(resolve(tmpdir, 'l1', 'l2'));
 
-        let tmpfile = resolve(tmpdir.path, 'l1', 'l2', '1.txt');
+        let tmpfile = resolve(tmpdir, 'l1', 'l2', '1.txt');
         await promisify(writeFile)(tmpfile, '', 'utf8');
-        tmpfile = resolve(tmpdir.path, 'l1', 'l2', '2.txt');
+        tmpfile = resolve(tmpdir, 'l1', 'l2', '2.txt');
         await promisify(writeFile)(tmpfile, '', 'utf8');
 
         // move file to folder without specifying a new name
         let source = tmpfile;
-        let target = tmpdir.path + sep + 'l1' + sep;
+        let target = tmpdir + sep + 'l1' + sep;
 
         await actionHandler.execute({
             from: source,
@@ -92,8 +98,8 @@ class MovePathActionHandlerTestSuite {
         assert(existsSync(target + '2.txt'));
 
         // move file to folder with file name overriding
-        source = resolve(tmpdir.path, 'l1', 'l2', '1.txt');
-        target = resolve(tmpdir.path, 'l1', 'l2', 'm1.txt');
+        source = resolve(tmpdir, 'l1', 'l2', '1.txt');
+        target = resolve(tmpdir, 'l1', 'l2', 'm1.txt');
 
         await actionHandler.execute({
             from: source,
@@ -103,28 +109,28 @@ class MovePathActionHandlerTestSuite {
         assert(existsSync(target));
 
         // move folder with name overriding
-        source = resolve(tmpdir.path, 'l1');
-        target = resolve(tmpdir.path, 'test2');
+        source = resolve(tmpdir, 'l1');
+        target = resolve(tmpdir, 'test2');
 
         await actionHandler.execute({
             from: source,
             to: target
         }, context, snapshot);
 
-        assert(existsSync(resolve(tmpdir.path, 'test2', '2.txt')));
-        assert(existsSync(resolve(tmpdir.path, 'test2', 'l2', 'm1.txt')));
+        assert(existsSync(resolve(tmpdir, 'test2', '2.txt')));
+        assert(existsSync(resolve(tmpdir, 'test2', 'l2', 'm1.txt')));
 
         // move folder contents into different folder;
         source = target + sep;
-        target = resolve(tmpdir.path, 'test3');
+        target = resolve(tmpdir, 'test3');
 
         await actionHandler.execute({
             from: source,
             to: target
         }, context, snapshot);
 
-        assert(existsSync(resolve(tmpdir.path, 'test3', '2.txt')));
-        assert(existsSync(resolve(tmpdir.path, 'test3', 'l2', 'm1.txt')));
+        assert(existsSync(resolve(tmpdir, 'test3', '2.txt')));
+        assert(existsSync(resolve(tmpdir, 'test3', 'l2', 'm1.txt')));
     }
 
     @test()

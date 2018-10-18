@@ -4,7 +4,7 @@ import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
 import {spawn} from 'child_process';
 import * as assert from 'assert';
-import {CLIService} from '../../src/services';
+import {CLIService, TempPathsRegistry} from '../../src/services';
 import {basename, dirname, join, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
@@ -14,7 +14,6 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const tmp = require('tmp-promise');
 const fblVersion = require('../../../package.json').version;
 
 const execCmd = async (cmd: string, args: string[], answer?: string, cwd?: string): Promise<{code: number, stdout: string, stderr: string}> => {
@@ -63,7 +62,6 @@ class CliTestSuite {
                 await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
             }
         }
-
     }
 
     async after(): Promise<void> {
@@ -76,11 +74,14 @@ class CliTestSuite {
             await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, CliTestSuite.existingGlobalConfig, 'utf8');
         }
 
+        await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
     }
 
     @test()
     async successfulExecution(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -105,21 +106,21 @@ class CliTestSuite {
             custom_st: 'file2'
         };
 
-        const flowDir = await tmp.dir();
-        const reportFile = await tmp.file();
-        const contextFile = await tmp.file();
-        const secretsFile = await tmp.file();
-        const flowFile = `${flowDir.path}/flow.yml`;
+        const flowDir = await tempPathsRegistry.createTempDir();
+        const reportFile = await tempPathsRegistry.createTempFile();
+        const contextFile = await tempPathsRegistry.createTempFile();
+        const secretsFile = await tempPathsRegistry.createTempFile();
+        const flowFile = `${flowDir}/flow.yml`;
 
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
-        await promisify(writeFile)(contextFile.path, dump(customContextValues), 'utf8');
-        await promisify(writeFile)(secretsFile.path, dump(customSecretValues), 'utf8');
+        await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
+        await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
 
-        const cwdPath = flowDir.path.split(sep);
+        const cwdPath = flowDir.split(sep);
         cwdPath.pop();
 
         const cwd = cwdPath.join(sep);
-        const flowPath = `${basename(flowDir.path)}/flow.yml`;
+        const flowPath = `${basename(flowDir)}/flow.yml`;
 
         const result = await execCmd(
             'node',
@@ -127,11 +128,11 @@ class CliTestSuite {
                 `${__dirname}/../../src/cli.js`,
                 '--no-colors',
                 '-c', '$.ct=yes',
-                '-c', `$=@${contextFile.path}`,
+                '-c', `$=@${contextFile}`,
                 '-s', '$.st=yes',
                 '-p', `${__dirname}/../../src/plugins/flow`,
-                '-s', `$=@${secretsFile.path}`,
-                '-o', reportFile.path,
+                '-s', `$=@${secretsFile}`,
+                '-o', reportFile,
                 '-r', 'json',
                 flowPath
             ],
@@ -141,7 +142,7 @@ class CliTestSuite {
 
         assert.strictEqual(result.code, 0);
 
-        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        const reportJson = await promisify(readFile)(reportFile, 'utf8');
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
@@ -161,6 +162,8 @@ class CliTestSuite {
 
     @test()
     async invalidReportParameters(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -174,15 +177,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '-r', 'json',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -193,7 +196,7 @@ class CliTestSuite {
             [
                 'dist/src/cli.js',
                 '-o', '/tmp/report.json',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -205,7 +208,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-o', '/tmp/report.json',
                 '-r', 'unknown',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -218,7 +221,7 @@ class CliTestSuite {
                 '-o', '/tmp/report.json',
                 '-r', 'json',
                 '--report-option', 'test=@missing.file',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -227,6 +230,8 @@ class CliTestSuite {
 
     @test()
     async readContextParametersFromPrompt(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -241,8 +246,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
@@ -250,7 +255,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-c', '$.ct.yes',
                 '-s', '$.st=yes',
-                flowFile.path
+                flowFile
             ],
             'prompt_value'
         );
@@ -259,6 +264,8 @@ class CliTestSuite {
 
     @test()
     async readSecretsParametersFromPrompt(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -273,9 +280,9 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
+        const flowFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
@@ -283,7 +290,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-c', '$.ct=yes',
                 '-s', '$.st.yes',
-                flowFile.path
+                flowFile
             ],
             'prompt_value'
         );
@@ -292,6 +299,8 @@ class CliTestSuite {
 
     @test()
     async globalConfiguration(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -316,14 +325,14 @@ class CliTestSuite {
             custom_st: 'file2'
         };
 
-        const flowFile = await tmp.file();
-        const reportFile = await tmp.file();
-        const contextFile = await tmp.file();
-        const secretsFile = await tmp.file();
+        const flowFile = await tempPathsRegistry.createTempFile();
+        const reportFile = await tempPathsRegistry.createTempFile();
+        const contextFile = await tempPathsRegistry.createTempFile();
+        const secretsFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
-        await promisify(writeFile)(contextFile.path, dump(customContextValues), 'utf8');
-        await promisify(writeFile)(secretsFile.path, dump(customSecretValues), 'utf8');
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+        await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
+        await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
 
         const globalConfig = {
             plugins: [
@@ -331,11 +340,11 @@ class CliTestSuite {
             ],
             context: [
                 '$.ct=yes',
-                `$=@${contextFile.path}`
+                `$=@${contextFile}`
             ],
             secrets: [
                 '$.st=yes',
-                `$=@${secretsFile.path}`
+                `$=@${secretsFile}`
             ],
             'no-colors': true,
             'global-template-delimiter': '$',
@@ -348,15 +357,15 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                '-o', reportFile.path,
+                '-o', reportFile,
                 '-r', 'json',
-                flowFile.path
+                flowFile
             ]
         );
 
         assert.strictEqual(result.code, 0);
 
-        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        const reportJson = await promisify(readFile)(reportFile, 'utf8');
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
@@ -376,6 +385,8 @@ class CliTestSuite {
 
     @test()
     async failedExecution(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -387,15 +398,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -409,6 +420,8 @@ class CliTestSuite {
 
     @test()
     async nonObjectContextRootAssignment(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -422,8 +435,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
@@ -431,7 +444,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-c', '$=test',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -439,6 +452,8 @@ class CliTestSuite {
 
     @test()
     async incompatiblePluginWithFBL(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -452,8 +467,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
@@ -461,7 +476,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -474,7 +489,7 @@ class CliTestSuite {
                 '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
                 '--no-colors',
                 '--unsafe-plugins',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 0);
@@ -483,6 +498,8 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithFBL(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             requires: {
@@ -499,15 +516,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -519,7 +536,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '--no-colors',
                 '--unsafe-flows',
-                flowFile.path
+                flowFile
             ]
         );
 
@@ -529,6 +546,8 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithPluginByVersion(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const plugin = require('../../src/plugins/flow');
 
         const flow: any = {
@@ -549,15 +568,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -569,7 +588,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '--no-colors',
                 '--unsafe-flows',
-                flowFile.path
+                flowFile
             ]
         );
 
@@ -579,6 +598,8 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithMissingPlugin(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             requires: {
@@ -597,15 +618,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -617,7 +638,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '--no-colors',
                 '--unsafe-flows',
-                flowFile.path
+                flowFile
             ]
         );
 
@@ -627,6 +648,8 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithMissingApplication(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             requires: {
@@ -645,15 +668,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -665,7 +688,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '--no-colors',
                 '--unsafe-flows',
-                flowFile.path
+                flowFile
             ]
         );
 
@@ -675,6 +698,8 @@ class CliTestSuite {
 
     @test()
     async compatibleFlow(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const plugin = require('../../src/plugins/flow');
 
         const flow: any = {
@@ -699,15 +724,15 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
 
@@ -716,6 +741,8 @@ class CliTestSuite {
 
     @test()
     async incompatiblePluginWithOtherPlugin(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -729,8 +756,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
@@ -738,7 +765,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -751,7 +778,7 @@ class CliTestSuite {
                 '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
                 '--no-colors',
                 '--unsafe-plugins',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 0);
@@ -760,6 +787,8 @@ class CliTestSuite {
 
     @test()
     async missingPluginDependency(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -773,8 +802,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await execCmd(
             'node',
@@ -782,7 +811,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 1);
@@ -795,7 +824,7 @@ class CliTestSuite {
                 '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
                 '--no-colors',
                 '--unsafe-plugins',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 0);
@@ -804,6 +833,8 @@ class CliTestSuite {
 
     @test()
     async satisfiedPluginDependencies(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -817,8 +848,8 @@ class CliTestSuite {
             }
         };
 
-        const flowFile = await tmp.file();
-        await promisify(writeFile)(flowFile.path, dump(flow), 'utf8');
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await execCmd(
             'node',
@@ -826,7 +857,7 @@ class CliTestSuite {
                 'dist/src/cli.js',
                 '-p', join(__dirname, 'fakePlugins/satisfiesDependencies'),
                 '--no-colors',
-                flowFile.path
+                flowFile
             ]
         );
         assert.strictEqual(result.code, 0);
@@ -834,6 +865,8 @@ class CliTestSuite {
 
     @test()
     async testCustomTemplateDelimiters(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: string = [
             'version: 1.0.0',
             'pipeline:',
@@ -851,27 +884,27 @@ class CliTestSuite {
         ].join('\n');
 
 
-        const flowFile = await tmp.file();
-        const reportFile = await tmp.file();
+        const flowFile = await tempPathsRegistry.createTempFile();
+        const reportFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(flowFile.path, flow, 'utf8');
+        await promisify(writeFile)(flowFile, flow, 'utf8');
 
         const result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
-                '-o', reportFile.path,
+                '-o', reportFile,
                 '-r', 'json',
                 '--global-template-delimiter', '@',
                 '--local-template-delimiter', '&',
-                flowFile.path
+                flowFile
             ],
             'prompt_value'
         );
 
         assert.strictEqual(result.code, 0);
 
-        const report = JSON.parse(await promisify(readFile)(reportFile.path, 'utf8'));
+        const report = JSON.parse(await promisify(readFile)(reportFile, 'utf8'));
         const children = report.steps.filter((v: IActionStep) => v.type === 'child');
         const contextSteps = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
 
@@ -889,6 +922,8 @@ class CliTestSuite {
 
     @test()
     async testBrokenFlowFile(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: string = [
             'version: 1.0.0',
             'pipeline:',
@@ -899,15 +934,15 @@ class CliTestSuite {
         ].join('\n');
 
 
-        const flowFile = await tmp.file();
+        const flowFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(flowFile.path, flow, 'utf8');
+        await promisify(writeFile)(flowFile, flow, 'utf8');
 
         const result = await execCmd(
             'node',
             [
                 'dist/src/cli.js',
-                flowFile.path
+                flowFile
             ],
             'prompt_value'
         );
@@ -931,6 +966,8 @@ class CliTestSuite {
     }
 
     static async indexFileLookupInsideDirectoryTree(extention: 'yml' | 'yaml'): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -944,10 +981,10 @@ class CliTestSuite {
             }
         };
 
-        const reportFile = await tmp.file();
-        const rootDir = await tmp.dir();
-        await FSUtil.mkdirp(join(rootDir.path, 'l1/index.yml/l3'));
-        const indexPath = join(rootDir.path, `l1/index.yml/l3/index.${extention}`);
+        const reportFile = await tempPathsRegistry.createTempFile();
+        const rootDir = await tempPathsRegistry.createTempDir();
+        await FSUtil.mkdirp(join(rootDir, 'l1/index.yml/l3'));
+        const indexPath = join(rootDir, `l1/index.yml/l3/index.${extention}`);
 
         await promisify(writeFile)(indexPath, dump(flow), 'utf8');
 
@@ -955,15 +992,15 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                '-o', reportFile.path,
+                '-o', reportFile,
                 '-r', 'json',
-                rootDir.path
+                rootDir
             ]
         );
 
         assert.strictEqual(result.code, 0);
 
-        const reportJson = await promisify(readFile)(reportFile.path, 'utf8');
+        const reportJson = await promisify(readFile)(reportFile, 'utf8');
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
@@ -986,6 +1023,8 @@ class CliTestSuite {
 
     @test()
     async indexFileLookupFailure(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -999,9 +1038,9 @@ class CliTestSuite {
             }
         };
 
-        const rootDir = await tmp.dir();
-        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l3'));
-        const flowPath = join(rootDir.path, `l1/l2/l3/test.yml`);
+        const rootDir = await tempPathsRegistry.createTempDir();
+        await FSUtil.mkdirp(join(rootDir, 'l1/l2/l3'));
+        const flowPath = join(rootDir, `l1/l2/l3/test.yml`);
 
         await promisify(writeFile)(flowPath, dump(flow), 'utf8');
 
@@ -1009,7 +1048,7 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                rootDir.path
+                rootDir
             ]
         );
 
@@ -1018,6 +1057,8 @@ class CliTestSuite {
 
     @test()
     async indexFileLookupFailureDueToMultipleParentDirs(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
         const flow: any = {
             version: '1.0.0',
             pipeline: {
@@ -1031,10 +1072,10 @@ class CliTestSuite {
             }
         };
 
-        const rootDir = await tmp.dir();
-        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l3'));
-        await FSUtil.mkdirp(join(rootDir.path, 'l1/l2/l4'));
-        const flowPath = join(rootDir.path, `l1/l2/l3/index.yml`);
+        const rootDir = await tempPathsRegistry.createTempDir();
+        await FSUtil.mkdirp(join(rootDir, 'l1/l2/l3'));
+        await FSUtil.mkdirp(join(rootDir, 'l1/l2/l4'));
+        const flowPath = join(rootDir, `l1/l2/l3/index.yml`);
 
         await promisify(writeFile)(flowPath, dump(flow), 'utf8');
 
@@ -1042,7 +1083,7 @@ class CliTestSuite {
             'node',
             [
                 'dist/src/cli.js',
-                rootDir.path
+                rootDir
             ]
         );
 
