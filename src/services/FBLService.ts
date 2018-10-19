@@ -8,6 +8,7 @@ import * as semver from 'semver';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
+import {boolean} from 'joi';
 
 const requireg = require('requireg');
 
@@ -90,8 +91,8 @@ export class FBLService {
 
     /**
      * Extract idOrAlias from step object
-     * @param {{[key: string]: any}} step
-     * @return {{[key: string]: any}}
+     * @param {object} step
+     * @return {string}
      */
     static extractIdOrAlias(step: {[key: string]: any}): string {
         const keys = Object.keys(step);
@@ -108,7 +109,7 @@ export class FBLService {
 
     /**
      * Extract step metadata
-     * @param {{[key: string]: any}} step
+     * @param {object} step
      * @return {IMetadata}
      */
     static extractMetadata(step: {[key: string]: any}): IMetadata {
@@ -177,38 +178,74 @@ export class FBLService {
     }
 
     /**
+     * Validate plugin to be registered and try to auto load if not
+     * @param {string} pluginName
+     * @param {string} pluginExpectedVersion
+     * @param {string[]} errors
+     * @param {boolean} dryRun if true plugin just be verified, not actually registered
+     */
+    validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], dryRun: boolean) {
+        let plugin = this.plugins[pluginName];
+
+        if (!plugin) {
+            try {
+                plugin = requireg(pluginName);
+                this.validatePlugin(plugin);
+
+                /* istanbul ignore else */
+                if (!dryRun) {
+                    this.registerPlugin(plugin);
+                }
+            } catch (e) {
+                errors.push(`Required plugin ${pluginName.red} is not registered. Error: ${e.message}`);
+            }
+        }
+
+        if (plugin && !semver.satisfies(plugin.version, pluginExpectedVersion)) {
+            errors.push(`Actual plugin ${pluginName.red} version ${plugin.version.red} doesn't satisfy required ${pluginExpectedVersion.red}`);
+        }
+    }
+
+    /**
      * Validate plugin
      * @param {IPlugin} plugin
      */
     validatePlugin(plugin: IPlugin): void {
+        const errors: string[] = [];
+
         if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
-            if (this.allowUnsafePlugins) {
-                console.error(`${plugin.name}`.red + ' plugin is not compatible with current fbl version (' + `${fblVersion}`.red + ')');
-            } else {
-                throw new Error(`${plugin.name} plugin is not compatible with current fbl version (${fblVersion})`);
-            }
+            errors.push(`Plugin ${plugin.name.red} is not compatible with current fbl version (${fblVersion.red})`);
         }
 
         if (plugin.requires.plugins) {
+            const dryRun = !this.allowUnsafePlugins && errors.length > 0;
+
             for (const dependencyPluginName of Object.keys(plugin.requires.plugins)) {
                 const dependencyPluginRequiredVersion = plugin.requires.plugins[dependencyPluginName];
-                const dependencyPlugin = this.plugins[dependencyPluginName];
 
-                if (!dependencyPlugin) {
-                    if (this.allowUnsafePlugins) {
-                        console.error(`${plugin.name}`.red + ' plugin requires missing plugin ' + `${dependencyPluginName}@${dependencyPluginRequiredVersion}`.red);
-                    } else {
-                        throw new Error(`${plugin.name} plugin requires missing plugin ${dependencyPluginName}@${dependencyPluginRequiredVersion}`);
-                    }
-                } else {
-                    if (!semver.satisfies(dependencyPlugin.version, dependencyPluginRequiredVersion)) {
-                        if (this.allowUnsafePlugins) {
-                            console.error(`${plugin.name}`.red + ' plugin is not compatible with plugin ' + `${dependencyPluginName}@${dependencyPlugin.version}`.red);
-                        } else {
-                            throw new Error(`${plugin.name} plugin is not compatible with plugin ${dependencyPluginName}@${dependencyPlugin.version}`);
-                        }
-                    }
+                this.validateRequiredPlugin(
+                    dependencyPluginName,
+                    dependencyPluginRequiredVersion,
+                    errors,
+                    dryRun
+                );
+            }
+        }
+
+        if (plugin.requires.applications) {
+            for (const application of plugin.requires.applications) {
+                /* istanbul ignore else */
+                if (!which(application)) {
+                    errors.push(`Application ${application.red} required by plugin ${plugin.name.red} not found, make sure it is installed and its location presents in the PATH environment variable`);
                 }
+            }
+        }
+
+        if (errors.length) {
+            if (this.allowUnsafePlugins) {
+                errors.forEach(err => console.error(err));
+            } else {
+                throw new Error(errors.join('\n'));
             }
         }
     }
@@ -232,37 +269,29 @@ export class FBLService {
         if (flow.requires) {
             if (flow.requires.fbl) {
                 if (!semver.satisfies(fblVersion, flow.requires.fbl)) {
-                    errors.push(`actual fbl version ${fblVersion.green} doesn't satisfy required ${flow.requires.fbl.green}`);
+                    errors.push(`Flow is not compatible with current fbl version (${fblVersion.red})`);
                 }
             }
 
             if (flow.requires.plugins) {
+                const dryRun = !this.allowUnsafeFlows && errors.length > 0;
+
                 for (const pluginName of Object.keys(flow.requires.plugins)) {
                     const pluginExpectedVersion = flow.requires.plugins[pluginName];
 
-                    let plugin = this.plugins[pluginName];
-
-                    if (!plugin) {
-                        try {
-                            plugin = requireg(pluginName);
-                            this.validatePlugin(plugin);
-                            this.registerPlugin(plugin);
-                        } catch (e) {
-                            errors.push(`required plugin ${pluginName.green} is not registered`);
-                            plugin = null;
-                        }
-                    }
-
-                    if (plugin && !semver.satisfies(plugin.version, pluginExpectedVersion)) {
-                        errors.push(`actual plugin ${pluginName.green} version ${plugin.version.green} doesn't satisfy required ${pluginExpectedVersion.green}`);
-                    }
+                    this.validateRequiredPlugin(
+                        pluginName,
+                        pluginExpectedVersion,
+                        errors,
+                        dryRun
+                    );
                 }
             }
 
             if (flow.requires.applications) {
                 for (const application of flow.requires.applications) {
                     if (!which(application)) {
-                        errors.push(`application ${application.green} not found, make sure it is installed and its location presents in the PATH environment variable`);
+                        errors.push(`Application ${application.red} required by flow not found, make sure it is installed and its location presents in the PATH environment variable`);
                     }
                 }
             }
