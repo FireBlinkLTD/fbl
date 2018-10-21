@@ -82,6 +82,7 @@ export class ContextUtil {
                 updated: [],
                 deleted: []
             },
+            summary: [],
             dynamicActionHandlers: new ActionHandlersRegistry(),
             ejsTemplateDelimiters: {
                 global: '$',

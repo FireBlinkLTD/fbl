@@ -59,13 +59,18 @@ export class FSUtil {
         return resolve(wd, path);
     }
 
+    static async readFile(file: string): Promise<Buffer> {
+        return await readFileAsync(file);
+    }
+
     /**
      * Get text file content
      * @param {string} file
+     * @param {BufferEncoding} [encoding]
      * @return {Promise<string>}
      */
-    static async readTextFile(file: string): Promise<string> {
-        return await readFileAsync(file, 'utf8');
+    static async readTextFile(file: string, encoding: BufferEncoding = 'utf8'): Promise<string> {
+        return (await FSUtil.readFile(file)).toString(encoding);
     }
 
     /**

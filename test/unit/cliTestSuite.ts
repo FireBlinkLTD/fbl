@@ -480,7 +480,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+        assert.strictEqual(result.stderr, `Plugin incompatible.plugin is not compatible with current fbl version (${fblVersion})`);
 
         result = await execCmd(
             'node',
@@ -493,7 +493,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], `incompatible.plugin plugin is not compatible with current fbl version (${fblVersion})`);
+        assert.strictEqual(result.stderr.split('\n')[0], `Plugin incompatible.plugin is not compatible with current fbl version (${fblVersion})`);
     }
 
     @test()
@@ -528,7 +528,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, `actual fbl version ${fblVersion} doesn't satisfy required 0.0.0`);
+        assert.strictEqual(result.stderr, `Flow is not compatible with current fbl version (${fblVersion})`);
 
         result = await execCmd(
             'node',
@@ -541,7 +541,7 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], `actual fbl version ${fblVersion} doesn't satisfy required 0.0.0`);
+        assert.strictEqual(result.stderr.split('\n')[0], `Flow is not compatible with current fbl version (${fblVersion})`);
     }
 
     @test()
@@ -580,7 +580,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, `actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
+        assert.strictEqual(result.stderr, `Actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
 
         result = await execCmd(
             'node',
@@ -593,7 +593,7 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], `actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
+        assert.strictEqual(result.stderr.split('\n')[0], `Actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
     }
 
     @test()
@@ -630,7 +630,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'required plugin test is not registered');
+        assert.strictEqual(result.stderr, 'Required plugin test is not registered. Error: Could not require module \'test\'');
 
         result = await execCmd(
             'node',
@@ -643,7 +643,7 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], 'required plugin test is not registered');
+        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin test is not registered. Error: Could not require module \'test\'');
     }
 
     @test()
@@ -680,7 +680,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'application missing_app_1234 not found, make sure it is installed and its location presents in the PATH environment variable');
+        assert.strictEqual(result.stderr, 'Application missing_app_1234 required by flow not found, make sure it is installed and its location presents in the PATH environment variable');
 
         result = await execCmd(
             'node',
@@ -693,7 +693,7 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], 'application missing_app_1234 not found, make sure it is installed and its location presents in the PATH environment variable');
+        assert.strictEqual(result.stderr.split('\n')[0], 'Application missing_app_1234 required by flow not found, make sure it is installed and its location presents in the PATH environment variable');
     }
 
     @test()
@@ -769,7 +769,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
+        assert.strictEqual(result.stderr, `Actual plugin fbl.core.flow version ${fblVersion} doesn't satisfy required 0.0.0`);
 
         result = await execCmd(
             'node',
@@ -782,7 +782,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], `incompatible.plugin plugin is not compatible with plugin fbl.core.flow@${fblVersion}`);
+        assert.strictEqual(result.stderr.split('\n')[0], `Actual plugin fbl.core.flow version ${fblVersion} doesn't satisfy required 0.0.0`);
     }
 
     @test()
@@ -815,7 +815,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
+        assert.strictEqual(result.stderr, 'Required plugin %some.unkown.plugin% is not registered. Error: Could not require module \'%some.unkown.plugin%\'');
 
         result = await execCmd(
             'node',
@@ -828,7 +828,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 0);
-        assert.strictEqual(result.stderr.split('\n')[0], 'incompatible.plugin plugin requires missing plugin %some.unkown.plugin%@0.0.0');
+        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin %some.unkown.plugin% is not registered. Error: Could not require module \'%some.unkown.plugin%\'');
     }
 
     @test()
@@ -1088,5 +1088,53 @@ class CliTestSuite {
         );
 
         assert.strictEqual(result.code, 1);
+    }
+
+    @test()
+    async testSummary(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                '--': [
+                    {
+                        summary: {
+                            title: 'Test1',
+                            status: 'Success',
+                            duration: '<%- $.duration(1000) %>'
+                        }
+                    },
+                    {
+                        summary: {
+                            title: 'Test2',
+                            status: 'Failure',
+                            duration: '<%- $.duration(0) %>'
+                        }
+                    },
+                    {
+                        summary: {
+                            title: 'Test3',
+                            status: 'Skipped'
+                        }
+                    },
+                ]
+            }
+        };
+
+        const flowPath = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowPath, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowPath
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        console.log(result);
     }
 }

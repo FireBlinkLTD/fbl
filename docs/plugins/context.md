@@ -315,3 +315,34 @@ Allows to define custom JS script (ES6) to modify context state.
 fn: |-
   context.ctx.isWindows = require('os').platform() === 'win32';
 ```
+
+## Action Handler: Summary
+
+Add summary record. All summary records will be printed once the main flow ends.
+
+**ID:** `com.fireblink.fbl.context.summary`
+
+**Aliases:**
+ - `fbl.context.summary`
+ - `context.summary`
+ - `summary`
+ 
+**Example:**
+
+```yaml
+summary:
+  # summary record title
+  title: Step Title
+  # summary record status
+  # statuses (ignoring case): 
+  # - 'created', 'updated', 'passed', 'success', 'ok', 'yes' will be colored in green
+  # - 'deleted', 'failed', 'failure', 'error', 'no' - in red
+  # - 'ignored', 'skipped', 'none' - in yellow
+  # others will have default text color
+  status: Failed
+  # [optional] human readable duration (string)
+  duration: <%- $.duration(1000) %>
+  # [optional] additional data associated with record. Not presented in printed table.
+  payload: anything
+  
+```

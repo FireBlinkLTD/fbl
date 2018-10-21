@@ -18,7 +18,8 @@ export interface IPlugin {
      */
     requires: {
         fbl: string;
-        plugins?: {[id: string]: string}
+        plugins?: {[id: string]: string};
+        applications?: string[];
     };
 
     /**

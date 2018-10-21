@@ -4,4 +4,5 @@ export * from './IFlow';
 export * from './IIteration';
 export * from './IPlugin';
 export * from './IReporter';
+export * from './ISummaryRecord';
 export * from './ITemplateUtility';
