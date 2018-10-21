@@ -6,10 +6,11 @@ import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
 import {homedir} from 'os';
-import {IContext} from '../interfaces';
+import {IContext, ISummaryRecord} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
+import {table} from 'table';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -107,7 +108,55 @@ export class CLIService {
 
         if (!snapshot.successful) {
             throw new Error('Execution failed.');
+        } else {
+            if (context.summary.length) {
+                CLIService.printSummary(context.summary);
+            }
         }
+    }
+
+    /**
+     * Print summary
+     * @param {ISummaryRecord[]} records
+     */
+    private static printSummary(records: ISummaryRecord[]): void {
+        const includeDuration = records.find(r => !!r.duration);
+
+        const head = ['Title'.bold, 'Status'.bold];
+        /* istanbul ignore else */
+        if (includeDuration) {
+            head.push('Duration'.bold);
+        }
+
+        console.log();
+        console.log(table(
+            [
+                head,
+                ...records.map(r => {
+                    let status = r.status.trim();
+
+                    if (['created', 'updated', 'passed', 'success', 'ok', 'yes'].indexOf(status.toLowerCase()) >= 0) {
+                        status = status.green;
+                    }
+
+                    if (['deleted', 'failed', 'failure', 'error', 'no'].indexOf(status.toLowerCase()) >= 0) {
+                        status = status.red;
+                    }
+
+                    if (['ignored', 'skipped', 'none'].indexOf(status.toLowerCase()) >= 0) {
+                        status = status.yellow;
+                    }
+
+                    const row = [r.title, status];
+                    /* istanbul ignore else */
+                    if (includeDuration) {
+                        row.push(r.duration);
+                    }
+
+                    return row;
+                })
+            ]
+        ));
     }
 
     /**

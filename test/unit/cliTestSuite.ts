@@ -1089,4 +1089,52 @@ class CliTestSuite {
 
         assert.strictEqual(result.code, 1);
     }
+
+    @test()
+    async testSummary(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                '--': [
+                    {
+                        summary: {
+                            title: 'Test1',
+                            status: 'Success',
+                            duration: '<%- $.duration(1000) %>'
+                        }
+                    },
+                    {
+                        summary: {
+                            title: 'Test2',
+                            status: 'Failure',
+                            duration: '<%- $.duration(0) %>'
+                        }
+                    },
+                    {
+                        summary: {
+                            title: 'Test3',
+                            status: 'Skipped'
+                        }
+                    },
+                ]
+            }
+        };
+
+        const flowPath = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowPath, dump(flow), 'utf8');
+
+        const result = await execCmd(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                flowPath
+            ]
+        );
+
+        assert.strictEqual(result.code, 0);
+        console.log(result);
+    }
 }

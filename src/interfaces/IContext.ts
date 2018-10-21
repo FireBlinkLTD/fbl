@@ -1,4 +1,5 @@
-import {ActionHandlersRegistry} from '../services/ActionHandlersRegistry';
+import {ActionHandlersRegistry} from '../services';
+import {ISummaryRecord} from './ISummaryRecord';
 
 export interface IContext {
     /**
@@ -17,6 +18,11 @@ export interface IContext {
      * Plugins developers are responsible to not expose it in any way in the report.
      */
     secrets: {[key: string]: any};
+
+    /**
+     * Summary report records
+     */
+    summary: ISummaryRecord[];
 
     /**
      * Entities that were created/updated/removed during the flow execution

@@ -4,6 +4,7 @@ import {FSTemplateUtility} from './FSTemplateUtility';
 import {HashTemplateUtility} from './HashTemplateUtility';
 import {UUIDTemplateUtility} from './UUIDTemplateUtility';
 import {NodeRequireTemplateUtility} from './NodeRequireTemplateUtility';
+import {DurationTemplateUtility} from './DurationTemplateUtility';
 
 const version: string = require('../../../../package.json').version;
 
@@ -16,6 +17,7 @@ module.exports = <IPlugin> {
     },
 
     templateUtils: [
+        new DurationTemplateUtility(),
         new FSTemplateUtility(),
         new HashTemplateUtility(),
         new NodeRequireTemplateUtility(),
