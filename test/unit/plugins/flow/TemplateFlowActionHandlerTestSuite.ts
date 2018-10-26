@@ -6,7 +6,7 @@ import {Container} from 'typedi';
 import * as assert from 'assert';
 import {TemplateFlowActionHandler} from '../../../../src/plugins/flow/TemplateFlowActionHandler';
 import {ToJSONTemplateUtility} from '../../../../src/plugins/templateUtilities/ToJSONTemplateUtility';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

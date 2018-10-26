@@ -4,7 +4,7 @@ import {ActionSnapshot} from '../../../../src/models';
 import {ShellActionHandler} from '../../../../src/plugins/exec/ShellActionHandler';
 import * as assert from 'assert';
 import {Container} from 'typedi';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {PromptActionHandler} from '../../../../src/plugins/prompts/PromptActionHandler';
 import {ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

@@ -1,5 +1,5 @@
 import {suite} from 'mocha-typescript';
-import {ContextUtil} from '../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

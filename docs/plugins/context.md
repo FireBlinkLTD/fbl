@@ -35,7 +35,9 @@ entities:
     
     # only entities that were deleted, same entities should also exist in "unregistered" list
     deleted: []
-    
+
+# Summary records
+summary: []    
 ```
 
 (EJS)[http://ejs.co/] template can be used inside options to pass values from shared context. 

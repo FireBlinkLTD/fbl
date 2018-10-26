@@ -5,7 +5,7 @@ import {ExecActionHandler} from '../../../../src/plugins/exec/ExecActionHandler'
 import * as assert from 'assert';
 import {Container} from 'typedi';
 import {resolve} from 'path';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
