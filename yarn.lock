@@ -120,9 +120,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/joi@13.6.1":
-  version "13.6.1"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.6.1.tgz#325486a397504f8e22c8c551dc8b0e1d41d5d5ae"
+"@types/joi@13.6.2":
+  version "13.6.2"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.6.2.tgz#7eb18c092ac2b16ea387922f8095f981e460ad6e"
 
 "@types/js-yaml@3.11.2":
   version "3.11.2"
@@ -1673,9 +1673,9 @@ istanbul-reports@^1.4.1:
   dependencies:
     handlebars "^4.0.11"
 
-joi@14.0.0:
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-14.0.0.tgz#05a206b259e702f426eb2b2e523d642fb383e6ad"
+joi@14.0.1:
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-14.0.1.tgz#5bc53e8fff6e6da19d6cd8c76e2afe5c0815a2d3"
   dependencies:
     hoek "5.x.x"
     isemail "3.x.x"
