@@ -26,8 +26,8 @@ options:
   stdout: true
   # [optional]  if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
   stderr: true
-  # [optional] if provided - stdout and stderr will not be printed into console
-  silent: true
+  # [optional] if provided - stdout and stderr will be logged in report and printed to console
+  verbose: false
 
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
@@ -62,9 +62,9 @@ options:
   stdout: true
   # [optional] if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
   stderr: true
-  # [optional] if provided - stdout and stderr will not be printed into console
-  silent: true
-
+  # [optional] if provided - stdout and stderr will be logged in report and printed to console
+  verbose: false
+    
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignTo:
   # [optional] "ctx" variable name to assign results to ("test")

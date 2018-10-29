@@ -108,7 +108,8 @@ class ExecActionHandlerTestSuite {
             args: ['test'],
             options: {
                 stdout: true,
-                stderr: true
+                stderr: true,
+                verbose: true
             },
             assignTo: {
                 ctx: '$.tst1',
@@ -140,7 +141,8 @@ class ExecActionHandlerTestSuite {
             args: ['test'],
             options: {
                 stdout: true,
-                stderr: true
+                stderr: true,
+                verbose: true
             },
             assignTo: {
                 ctx: '$.tst1'
@@ -167,7 +169,8 @@ class ExecActionHandlerTestSuite {
             args: ['test'],
             options: {
                 stdout: true,
-                stderr: true
+                stderr: true,
+                verbose: true
             },
             assignTo: {
                 secrets: '$.tst2'
@@ -193,7 +196,7 @@ class ExecActionHandlerTestSuite {
             options: {
                 stdout: true,
                 stderr: true,
-                silent: true
+                verbose: true
             },
             assignTo: {
                 ctx: '$.tst1',
@@ -224,7 +227,7 @@ class ExecActionHandlerTestSuite {
             options: {
                 stdout: true,
                 stderr: true,
-                silent: true
+                verbose: true
             },
             assignTo: {
                 ctx: '$.tst1',
@@ -273,7 +276,8 @@ class ExecActionHandlerTestSuite {
             command: 'bash',
             args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
             options: {
-                stderr: true
+                stderr: true,
+                verbose: true
             },
             assignTo: {
                 ctx: '$.tst1'
