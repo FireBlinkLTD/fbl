@@ -5,7 +5,7 @@ import {mkdir, readFile, unlinkSync, writeFile, writeFileSync} from 'fs';
 import * as assert from 'assert';
 import {ActionSnapshot} from '../../../../src/models';
 import {resolve} from 'path';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 import {TempPathsRegistry} from '../../../../src/services';
 import {Container} from 'typedi';
 

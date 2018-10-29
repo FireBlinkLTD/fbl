@@ -1,5 +1,5 @@
 import {IContext} from '../interfaces';
-import {ActionHandlersRegistry} from '../services/ActionHandlersRegistry';
+import {ActionHandlersRegistry} from '../services/';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
@@ -49,7 +49,7 @@ export class ContextUtil {
 
     /**
      * Assign value to context object's field
-     * @param {{[p: string]: any}} obj
+     * @param {object} obj
      * @param {string} path
      * @param value
      * @return {Promise<void>}

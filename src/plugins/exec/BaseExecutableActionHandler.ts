@@ -1,7 +1,8 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {spawn} from 'child_process';
 import {IContext} from '../../interfaces';
 import {ContextUtil} from '../../utils';
+import {Container} from 'typedi';
+import {ChildProcessService} from '../../services';
 
 export abstract class BaseExecutableActionHandler extends ActionHandler {
     async exec(
@@ -11,7 +12,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         options?: {
             stdout?: boolean,
             stderr?: boolean,
-            silent?: boolean
+            verbose?: boolean
         }
     ): Promise<{code: number, stdout?: string, stderr?: string, error?: any}> {
         const result: any = {
@@ -21,52 +22,52 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         };
 
         try {
-            await new Promise<void>((resolve, reject) => {
-                const process = spawn(executable, args, {
-                    cwd: snapshot.wd,
-                    shell: true
-                });
+            const on: any = {};
 
-                process.stdout.on('data', (data) => {
-                    if (!options || !options.silent) {
-                        snapshot.log(`stdout: ${data}`);
-                    }
-
-                    if (options && options.stdout) {
-                        result.stdout += data.toString();
-                    }
-                });
-
-                process.stderr.on('data', (data) => {
-                    if (!options || !options.silent) {
-                        snapshot.log(`stderr: ${data}`);
-                    }
-
-                    if (options && options.stderr) {
-                        result.stderr += data.toString();
-                    }
-                });
-
-                process.on('error', (e) => {
-                    result.error = e;
-                });
-
-                process.on('close', (code) => {
-                    result.code = code;
-
-                    if (code === 0) {
-                        resolve();
-                    } else {
-                        if (result.error) {
-                            result.code = -1;
-                            reject(result.error);
-                        } else {
-                            reject(new Error(`Command ${executable} returned non-zero code.`));
+            if (options) {
+                /* istanbul ignore else */
+                if (options.verbose || options.stdout) {
+                    on.stdout = (chunk: any) => {
+                        /* istanbul ignore else */
+                        if (options.verbose) {
+                            snapshot.log(`stdout: ${chunk}`);
                         }
-                    }
-                });
-            });
+
+                        /* istanbul ignore else */
+                        if (options.stdout) {
+                            result.stdout += chunk.toString();
+                        }
+                    };
+                }
+
+                /* istanbul ignore else */
+                if (options.verbose || options.stderr) {
+                    on.stderr = (chunk: any) => {
+                        /* istanbul ignore else */
+                        if (options.verbose) {
+                            snapshot.log(`stderr: ${chunk}`);
+                        }
+
+                        /* istanbul ignore else */
+                        if (options.stderr) {
+                            result.stderr += chunk.toString();
+                        }
+                    };
+                }
+            }
+
+            result.code = await Container.get(ChildProcessService).exec(
+                executable,
+                args,
+                snapshot.wd,
+                on
+            );
+
+            if (result.code !== 0) {
+                result.error = new Error(`Command ${executable} exited with non-zero code.`);
+            }
         } catch (e) {
+            result.code = -1;
             result.error = e;
         }
 

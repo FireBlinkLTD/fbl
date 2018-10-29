@@ -25,7 +25,7 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
         options: Joi.object({
             stdout: Joi.boolean(),
             stderr: Joi.boolean(),
-            silent: Joi.boolean()
+            verbose: Joi.boolean()
         }),
         assignTo: Joi.object({
             ctx: Joi.string()

@@ -5,7 +5,7 @@ import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

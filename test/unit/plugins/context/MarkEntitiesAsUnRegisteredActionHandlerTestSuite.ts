@@ -3,7 +3,7 @@ import {ActionSnapshot} from '../../../../src/models';
 import {MarkEntitiesAsUnRegisteredActionHandler} from '../../../../src/plugins/context/MarkEntitiesAsUnRegisteredActionHandler';
 import {IContextEntity} from '../../../../src/interfaces';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

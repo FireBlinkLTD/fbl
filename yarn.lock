@@ -137,10 +137,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/joi@13.6.1":
-  version "13.6.1"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.6.1.tgz#325486a397504f8e22c8c551dc8b0e1d41d5d5ae"
-  integrity sha512-JxZ0NP8NuB0BJOXi1KvAA6rySLTPmhOy4n2gzSFq/IFM3LNFm0h+2Vn/bPPgEYlWqzS2NPeLgKqfm75baX+Hog==
+"@types/joi@13.6.2":
+  version "13.6.2"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-13.6.2.tgz#7eb18c092ac2b16ea387922f8095f981e460ad6e"
+  integrity sha512-kSN/T4PaYvgwOdi05+FomchGj6vTJ1XeBbeVMz/yESZqfem6WZGeG0Ckog9Uz+8nao1jdmqaJlycHU7VmQRD5Q==
 
 "@types/js-yaml@3.11.2":
   version "3.11.2"
@@ -1948,10 +1948,10 @@ istanbul-reports@^1.4.1:
   dependencies:
     handlebars "^4.0.11"
 
-joi@14.0.0:
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-14.0.0.tgz#05a206b259e702f426eb2b2e523d642fb383e6ad"
-  integrity sha512-jEu+bPFcsgdPr85hVyjb5D5grxLEZniT6AB1vjewrRDbuYxe2r5quyxs3E32dF8fCXcaJnlRSy4jehSpDuNMNg==
+joi@14.0.1:
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-14.0.1.tgz#5bc53e8fff6e6da19d6cd8c76e2afe5c0815a2d3"
+  integrity sha512-M8yD7j1G/9UfJ40h97ophm/flC0zDXUn1RrK3GEm2IsyxOOJAnjQiYLLFS5p75gDGtaKwAPMB4JNLLr5yvCadw==
   dependencies:
     hoek "5.x.x"
     isemail "3.x.x"
@@ -2352,10 +2352,10 @@ mochawesome-report-generator@^3.0.1:
     validator "^9.1.2"
     yargs "^10.0.3"
 
-mochawesome@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/mochawesome/-/mochawesome-3.1.0.tgz#4834c31a2ed6d0d4ac9db4ba187f2e1dd33e7d3c"
-  integrity sha512-05pBnlkhbkMa4kjVnE127n5OyTtKMcE4uzdLI35pKpDJZkwlTKXfcrbiem33b+ItmFTOHFRH/6nlomERxQYxMQ==
+mochawesome@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/mochawesome/-/mochawesome-3.1.1.tgz#106db6cb75dc6f626bcc559c8752c99ef135ec53"
+  integrity sha512-UzRr6kRIw9UCsJIMuDZh92VKF+3Iu6KQpKHF0lahzmJMUDUjKA4i/7avEURl4a9vPOZWYQCiPRioAAeIpynPpg==
   dependencies:
     babel-runtime "^6.20.0"
     chalk "^2.3.0"

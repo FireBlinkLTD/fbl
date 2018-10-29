@@ -5,7 +5,7 @@ import {ForEachFlowActionHandler} from '../../../../src/plugins/flow/ForEachFlow
 import {IActionHandlerMetadata, IIteration} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

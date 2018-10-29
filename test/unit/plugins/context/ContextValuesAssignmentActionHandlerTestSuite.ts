@@ -8,7 +8,7 @@ import {basename, dirname} from 'path';
 import {ActionSnapshot} from '../../../../src/models';
 import {FlowService, TempPathsRegistry} from '../../../../src/services';
 import {Container} from 'typedi';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

@@ -6,7 +6,7 @@ import {VirtualFlowActionHandler} from '../../../../src/plugins/flow/VirtualFlow
 import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 import {IActionHandlerMetadata} from '../../../../src/interfaces';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils/ContextUtil';
+import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
