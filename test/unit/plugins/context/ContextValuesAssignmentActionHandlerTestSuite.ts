@@ -159,7 +159,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const fileContent = {
-            file_content: 'ftpo'
+            file_content: '<%- "ft" %><$- "po" $>'
         };
 
         const tmpFile = await tempPathsRegistry.createTempFile();
@@ -192,7 +192,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
         assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.ctx.fromFile.file_content, 'ftpo');
 
         // do the same with relative path
         options['$.fromFile'].files = [basename(tmpFile)];
@@ -204,7 +204,15 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
         assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, fileContent.file_content);
+        assert.strictEqual(context.ctx.fromFile.file_content, 'ftpo');
+
+        const steps = snapshot.getSteps();
+        const contextState = steps[steps.length - 1].payload;
+        assert.deepStrictEqual(contextState, {
+            ctx: context.ctx,
+            entities: context.entities,
+            summary: context.summary
+        });
     }
 
     @test()
