@@ -87,7 +87,26 @@ export class FBLServiceTestSuite {
                     [join(__dirname, '../../../src/plugins/context')]: version
                 }
             }
-        });
+        }, '.');
+
+        const plugin = fbl.getPlugin('flb.core.context');
+        assert(plugin);
+    }
+
+    @test()
+    async pluginAutoIncludeWithWD(): Promise<void> {
+        const fbl = Container.get<FBLService>(FBLService);
+        await fbl.validateFlowRequirements(<IFlow> {
+            version: '1.0.0',
+            pipeline: {
+                [DummyActionHandler.ID]: 'tst'
+            },
+            requires: {
+                plugins: {
+                    ['context']: version
+                }
+            }
+        }, join(__dirname, '../../../src/plugins'));
 
         const plugin = fbl.getPlugin('flb.core.context');
         assert(plugin);
@@ -320,7 +339,7 @@ export class FBLServiceTestSuite {
                         'missing_app_1234'
                     ]
                 }
-            });
+            }, '.');
         }).to.throw('Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable');
     }
 }
