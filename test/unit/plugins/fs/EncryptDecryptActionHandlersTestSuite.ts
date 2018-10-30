@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ActionSnapshot} from '../../../../src/models';
 import {EncryptActionHandler} from '../../../../src/plugins/fs/EncryptActionHandler';
 import {promisify} from 'util';
-import {readFile, writeFile} from 'fs';
+import {mkdir, readFile, writeFile} from 'fs';
 import {join} from 'path';
 import {DecryptActionHandler} from '../../../../src/plugins/fs/DecryptActionHandler';
 import * as assert from 'assert';
@@ -94,14 +94,21 @@ class CryptoTestSuite {
         const tmpDir = await tempPathsRegistry.createTempDir();
         const writeFileAsync = promisify(writeFile);
         const readFileAsync = promisify(readFile);
+        const mkdirAsync = promisify(mkdir);
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, tmpDir, 0);
 
+        const path_l1 = join(tmpDir, 'l1');
+        const path_l2 = join(tmpDir, 'l1', 'l2');
+
+        await mkdirAsync(path_l1);
+        await mkdirAsync(path_l2);
+
         const files = [
             join(tmpDir, 'a.txt'),
-            join(tmpDir, 'b.txt'),
-            join(tmpDir, 'c.ign'),
+            join(path_l1, 'b.ign'),
+            join(path_l2, 'c.txt'),
         ];
 
         const fileContent = 'test@'.repeat(100);
@@ -114,8 +121,8 @@ class CryptoTestSuite {
 
         await encryptActionHandler.execute({
             password: password,
-            include: ['*.txt'],
-            exclude: ['*.ign']
+            include: ['**/*.txt'],
+            exclude: ['**/*.ign']
         }, context, snapshot);
 
         for (const file of files) {
@@ -130,8 +137,8 @@ class CryptoTestSuite {
 
         await decryptActionHandler.execute({
             password: password,
-            include: ['*.txt'],
-            exclude: ['*.ign']
+            include: ['**/*.txt'],
+            exclude: ['**/*.ign']
         }, context, snapshot);
 
         for (const file of files) {

@@ -1,6 +1,6 @@
 import {suite, test} from 'mocha-typescript';
 import {ActionSnapshot} from '../../../../src/models';
-import {resolve} from 'path';
+import {join} from 'path';
 import {exists, mkdir, writeFile} from 'fs';
 import * as assert from 'assert';
 import {RemovePathActionHandler} from '../../../../src/plugins/fs/RemovePathActionHandler';
@@ -64,15 +64,15 @@ class MakeDirActionHandlerTestSuite {
 
         const tmpdir = await tempPathsRegistry.createTempDir();
 
-        const path_l1 = resolve(tmpdir, 'l1');
-        const path_l2 = resolve(tmpdir, 'l1', 'l2');
+        const path_l1 = join(tmpdir, 'l1');
+        const path_l2 = join(tmpdir, 'l1', 'l2');
 
         await promisify(mkdir)(path_l1);
         await promisify(mkdir)(path_l2);
 
-        await promisify(writeFile)(resolve(tmpdir, 'test.txt'), '', 'utf8');
-        await promisify(writeFile)(resolve(path_l1, 'test.txt'), '', 'utf8');
-        await promisify(writeFile)(resolve(path_l2, 'test.txt'), '', 'utf8');
+        await promisify(writeFile)(join(tmpdir, 'test1.txt'), '', 'utf8');
+        await promisify(writeFile)(join(path_l1, 'test2.txt'), '', 'utf8');
+        await promisify(writeFile)(join(path_l2, 'test3.txt'), '', 'utf8');
 
         await actionHandler.execute(tmpdir, context, snapshot);
 
@@ -90,7 +90,7 @@ class MakeDirActionHandlerTestSuite {
 
         const tmpdir = await tempPathsRegistry.createTempDir();
 
-        const path_l1 = resolve(tmpdir, 'l1');
+        const path_l1 = join(tmpdir, 'l1');
 
         await chai.expect(
             actionHandler.execute(path_l1, context, snapshot)

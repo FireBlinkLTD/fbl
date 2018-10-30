@@ -154,7 +154,8 @@ export class FBLServiceTestSuite {
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
         assert.deepStrictEqual(contextOptionsSteps[contextOptionsSteps.length - 1].payload, {
             ctx: context.ctx,
-            entities: context.entities
+            entities: context.entities,
+            summary: context.summary
         });
         assert.strictEqual(result, 'test123');
 

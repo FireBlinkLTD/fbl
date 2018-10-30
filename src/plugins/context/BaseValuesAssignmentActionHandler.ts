@@ -1,7 +1,10 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {IContext} from '../../interfaces';
+import {IContext, IFlow} from '../../interfaces';
 import {ContextUtil, FSUtil} from '../../utils';
+import {Container} from 'typedi';
+import {FlowService} from '../../services';
+import {safeLoad} from 'js-yaml';
 
 export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
     private static validationSchema = Joi.object()
@@ -30,6 +33,8 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const key = this.getAssignmentKey();
 
+        const flowService = Container.get(FlowService);
+
         const names = Object.keys(options);
         const promises = names.map(async (name: string): Promise<void> => {
             let value = undefined;
@@ -45,17 +50,36 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
                 for (const path of files) {
                     snapshot.log(`Reading from file: ${path} for key ${name}`);
-                    const fileContent = await FSUtil.readYamlFromFile(path);
+                    let fileContent: string = await FSUtil.readTextFile(path);
 
-                    const fileContentValidationResult = Joi.validate(fileContent, Joi.object().required());
+                    // resolve global template
+                    fileContent = flowService.resolveTemplate(
+                        context.ejsTemplateDelimiters.global,
+                        snapshot.wd,
+                        fileContent,
+                        context
+                    );
+
+                    let fileContentObject = safeLoad(fileContent);
+
+                    const fileContentValidationResult = Joi.validate(fileContentObject, Joi.object().required());
                     if (fileContentValidationResult.error) {
                         throw new Error(fileContentValidationResult.error.details.map(d => d.message).join('\n'));
                     }
 
+                    // resolve local template
+                    fileContentObject = flowService.resolveOptionsWithNoHandlerCheck(
+                        context.ejsTemplateDelimiters.local,
+                        snapshot.wd,
+                        fileContentObject,
+                        context,
+                        false
+                    );
+
                     if (value) {
-                        Object.assign(value, fileContent);
+                        Object.assign(value, fileContentObject);
                     } else {
-                        value = fileContent;
+                        value = fileContentObject;
                     }
                 }
             }
@@ -70,7 +94,6 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
             await ContextUtil.assign(context[key], name, value, options[name].override);
         });
-        snapshot.setContext(context);
 
         await Promise.all(promises);
     }

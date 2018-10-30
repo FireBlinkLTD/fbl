@@ -63,7 +63,8 @@ export class ActionSnapshot {
             // only "ctx" and "entities" fields should be exposed
             this.registerStep('context', JSON.parse(JSON.stringify({
                 ctx: context.ctx,
-                entities: context.entities
+                entities: context.entities,
+                summary: context.summary
             })));
         }
     }
