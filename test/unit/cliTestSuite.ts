@@ -659,7 +659,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Required plugin test is not registered. Error: Could not require module \'test\'');
+        assert.strictEqual(result.stderr, 'Required plugin test is not registered. Error: Unable to locate plugin test');
 
         result = await CliTestSuite.exec(
             'node',
@@ -675,7 +675,7 @@ class CliTestSuite {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
 
-        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin test is not registered. Error: Could not require module \'test\'');
+        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin test is not registered. Error: Unable to locate plugin test');
     }
 
     @test()
@@ -856,7 +856,7 @@ class CliTestSuite {
             ]
         );
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Required plugin %some.unkown.plugin% is not registered. Error: Could not require module \'%some.unkown.plugin%\'');
+        assert.strictEqual(result.stderr, 'Required plugin %some.unkown.plugin% is not registered. Error: Unable to locate plugin %some.unkown.plugin%');
 
         result = await CliTestSuite.exec(
             'node',
@@ -873,7 +873,7 @@ class CliTestSuite {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
 
-        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin %some.unkown.plugin% is not registered. Error: Could not require module \'%some.unkown.plugin%\'');
+        assert.strictEqual(result.stderr.split('\n')[0], 'Required plugin %some.unkown.plugin% is not registered. Error: Unable to locate plugin %some.unkown.plugin%');
     }
 
     @test()
