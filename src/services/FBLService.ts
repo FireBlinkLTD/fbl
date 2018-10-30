@@ -56,8 +56,7 @@ export class FBLService {
 
     private static validationSchema = Joi.object({
         version: Joi.string()
-            .regex(/\d+\.\d+\.\d+/i)
-            .required(),
+            .regex(/\d+(\.\d+)*/i),
 
         requires: Joi.object({
             fbl: Joi.string().min(1),
