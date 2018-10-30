@@ -9,6 +9,7 @@ import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
 import {boolean} from 'joi';
+import {join} from 'path';
 
 const requireg = require('requireg');
 
@@ -178,19 +179,70 @@ export class FBLService {
     }
 
     /**
+     * Try to require plugin, just return null if not found. Doesn't throw exceptions
+     * @param {string} pluginName
+     * @return {IPlugin | null}
+     */
+    static requirePluginSafe(pluginName: string): IPlugin | null {
+        let plugin: IPlugin | null = null;
+
+        try {
+            plugin = requireg(pluginName);
+        } catch (e) {
+            // ignore this
+        }
+
+        return plugin;
+    }
+
+    /**
+     * Require plugin
+     * @param {string} pluginName
+     * @param {string} wd
+     * @return {IPlugin | null}
+     */
+    static requirePlugin(pluginName: string, wd: string): IPlugin {
+        let plugin = FBLService.requirePluginSafe(pluginName);
+
+        let childDir: string | null = null;
+        if (!plugin) {
+            while (!plugin && (!childDir || childDir !== wd)) {
+                // search in node_modules dir
+                plugin = FBLService.requirePluginSafe(join(wd, 'node_modules', pluginName));
+
+                /* istanbul ignore else */
+                if (!plugin) {
+                    // search in directory with plugin name (useful when referencing sources)
+                    plugin = FBLService.requirePluginSafe(join(wd, pluginName));
+                }
+
+                childDir = wd;
+                wd = join(wd, '..');
+            }
+        }
+
+        if (!plugin) {
+            throw new Error(`Unable to locate plugin ${pluginName}`);
+        }
+
+        return plugin;
+    }
+
+    /**
      * Validate plugin to be registered and try to auto load if not
      * @param {string} pluginName
      * @param {string} pluginExpectedVersion
      * @param {string[]} errors
+     * @param {string} wd working directory
      * @param {boolean} dryRun if true plugin just be verified, not actually registered
      */
-    validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], dryRun: boolean) {
+    validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], wd: string, dryRun: boolean) {
         let plugin = this.plugins[pluginName];
 
         if (!plugin) {
             try {
-                plugin = requireg(pluginName);
-                this.validatePlugin(plugin);
+                plugin = FBLService.requirePlugin(pluginName, wd);
+                this.validatePlugin(plugin, wd);
 
                 /* istanbul ignore else */
                 if (!dryRun) {
@@ -209,8 +261,9 @@ export class FBLService {
     /**
      * Validate plugin
      * @param {IPlugin} plugin
+     * @param {string} wd
      */
-    validatePlugin(plugin: IPlugin): void {
+    validatePlugin(plugin: IPlugin, wd: string): void {
         const errors: string[] = [];
 
         if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
@@ -227,6 +280,7 @@ export class FBLService {
                     dependencyPluginName,
                     dependencyPluginRequiredVersion,
                     errors,
+                    wd,
                     dryRun
                 );
             }
@@ -252,19 +306,21 @@ export class FBLService {
 
     /**
      * Validate plugins to be compatible
+     * @param {string} wd
      */
-    validatePlugins(): void {
+    validatePlugins(wd: string): void {
         for (const name of Object.keys(this.plugins)) {
-            this.validatePlugin(this.plugins[name]);
+            this.validatePlugin(this.plugins[name], wd);
         }
     }
 
     /**
      * Validate flow requirements
      * @param {IFlow} flow
+     * @param {string} wd
      * @return {Promise<void>}
      */
-    async validateFlowRequirements(flow: IFlow): Promise<void> {
+    async validateFlowRequirements(flow: IFlow, wd: string): Promise<void> {
         const errors: string[] = [];
         if (flow.requires) {
             if (flow.requires.fbl) {
@@ -283,6 +339,7 @@ export class FBLService {
                         pluginName,
                         pluginExpectedVersion,
                         errors,
+                        wd,
                         dryRun
                     );
                 }
@@ -319,7 +376,7 @@ export class FBLService {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
         }
 
-        await this.validateFlowRequirements(flow);
+        await this.validateFlowRequirements(flow, wd);
 
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         let metadata = FBLService.extractMetadata(flow.pipeline);
