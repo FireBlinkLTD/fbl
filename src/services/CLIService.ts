@@ -431,7 +431,7 @@ export class CLIService {
     private registerPlugins(): void {
         const plugins = this.plugins.map((path: string) => requireg(path));
         this.fbl.registerPlugins(plugins);
-        this.fbl.validatePlugins();
+        this.fbl.validatePlugins(process.cwd());
     }
 
     /**
