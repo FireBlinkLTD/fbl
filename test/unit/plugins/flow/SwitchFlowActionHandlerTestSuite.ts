@@ -150,10 +150,32 @@ export class SwitchFlowActionHandlerTestSuite {
                 }
             }, context, snapshot)
         ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                value: 0,
+                is: {
+                    0: {
+                        f1: true
+                    }
+                }
+            }, context, snapshot)
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate({
+                value: true,
+                is: {
+                    false: {
+                        f1: true
+                    }
+                }
+            }, context, snapshot)
+        ).to.be.not.rejected;
     }
 
     @test()
-    async triggerActionHandlerDueToMatch(): Promise<void> {
+    async triggerActionHandlerDueToMatchWithString(): Promise<void> {
         Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
@@ -189,6 +211,111 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '{MASKED}st',
             is: options.is
         });
+    }
+
+    @test()
+    async triggerActionHandlerDueToMatchWithTemplateCondition(): Promise<void> {
+        Container.get(FlowService).debug = true;
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+
+        let actionHandlerOptions = false;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            actionHandlerOptions = opts;
+        });
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const actionHandler = new SwitchFlowActionHandler();
+
+        const options = {
+            value: '<%- secrets.value === ctx.value %>',
+            is: {
+                true: {
+                    [DummyActionHandler.ID]: true
+                }
+            }
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.value = 'test';
+        context.secrets.value = 'test';
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        // validate first to process template inside options
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+    }
+
+    @test()
+    async triggerActionHandlerDueToMatchWithNumber(): Promise<void> {
+        Container.get(FlowService).debug = true;
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            actionHandlerOptions = opts;
+        });
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const actionHandler = new SwitchFlowActionHandler();
+
+        const options = {
+            value: 0,
+            is: {
+                0: {
+                    [DummyActionHandler.ID]: true
+                },
+                1: {
+                    [DummyActionHandler.ID]: false
+                }
+            }
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        // validate first to process template inside options
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
+    }
+
+    @test()
+    async triggerActionHandlerDueToMatchWithBoolean(): Promise<void> {
+        Container.get(FlowService).debug = true;
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            actionHandlerOptions = opts;
+        });
+        actionHandlersRegistry.register(dummyActionHandler);
+
+        const actionHandler = new SwitchFlowActionHandler();
+
+        const options = {
+            value: true,
+            is: {
+                true: {
+                    [DummyActionHandler.ID]: true
+                },
+                false: {
+                    [DummyActionHandler.ID]: false
+                }
+            }
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0);
+
+        // validate first to process template inside options
+        await actionHandler.validate(options, context, snapshot);
+        await actionHandler.execute(options, context, snapshot);
+
+        assert.strictEqual(actionHandlerOptions, true);
     }
 
     @test()
