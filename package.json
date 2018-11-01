@@ -9,6 +9,9 @@
     "cli",
     "flows"
   ],
+  "engines": {
+    "node": ">=8.12.0"
+  },
   "main": "dist/cli.js",
   "scripts": {
     "tsc": "tsc",
