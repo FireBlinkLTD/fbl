@@ -9,7 +9,8 @@ import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
 import {boolean} from 'joi';
-import {join} from 'path';
+import {join, resolve} from 'path';
+import {FSUtil} from '../utils';
 
 const requireg = require('requireg');
 
@@ -179,14 +180,22 @@ export class FBLService {
 
     /**
      * Try to require plugin, just return null if not found. Doesn't throw exceptions
-     * @param {string} pluginName
+     * @param {string} pluginNameOrPath
+     * @param {boolean} name
      * @return {IPlugin | null}
      */
-    static requirePluginSafe(pluginName: string): IPlugin | null {
+    static async requirePluginSafe(pluginNameOrPath: string, name: boolean): Promise<IPlugin | null> {
         let plugin: IPlugin | null = null;
 
         try {
-            plugin = requireg(pluginName);
+            if (name) {
+                plugin = requireg(pluginNameOrPath);
+            } else {
+                const exists = await FSUtil.exists(pluginNameOrPath);
+                if (exists) {
+                    plugin = require(pluginNameOrPath);
+                }
+            }
         } catch (e) {
             // ignore this
         }
@@ -200,23 +209,23 @@ export class FBLService {
      * @param {string} wd
      * @return {IPlugin | null}
      */
-    static requirePlugin(pluginName: string, wd: string): IPlugin {
-        let plugin = FBLService.requirePluginSafe(pluginName);
+    static async requirePlugin(pluginName: string, wd: string): Promise<IPlugin> {
+        let plugin = await FBLService.requirePluginSafe(pluginName, true);
 
         let childDir: string | null = null;
         if (!plugin) {
             while (!plugin && (!childDir || childDir !== wd)) {
                 // search in node_modules dir
-                plugin = FBLService.requirePluginSafe(join(wd, 'node_modules', pluginName));
+                plugin = await FBLService.requirePluginSafe(resolve(wd, 'node_modules', pluginName), false);
 
                 /* istanbul ignore else */
                 if (!plugin) {
                     // search in directory with plugin name (useful when referencing sources)
-                    plugin = FBLService.requirePluginSafe(join(wd, pluginName));
+                    plugin = await FBLService.requirePluginSafe(resolve(wd, pluginName), false);
                 }
 
                 childDir = wd;
-                wd = join(wd, '..');
+                wd = resolve(wd, '..');
             }
         }
 
@@ -235,13 +244,13 @@ export class FBLService {
      * @param {string} wd working directory
      * @param {boolean} dryRun if true plugin just be verified, not actually registered
      */
-    validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], wd: string, dryRun: boolean) {
+    async validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], wd: string, dryRun: boolean): Promise<void> {
         let plugin = this.plugins[pluginName];
 
         if (!plugin) {
             try {
-                plugin = FBLService.requirePlugin(pluginName, wd);
-                this.validatePlugin(plugin, wd);
+                plugin = await FBLService.requirePlugin(pluginName, wd);
+                await this.validatePlugin(plugin, wd);
 
                 /* istanbul ignore else */
                 if (!dryRun) {
@@ -262,7 +271,7 @@ export class FBLService {
      * @param {IPlugin} plugin
      * @param {string} wd
      */
-    validatePlugin(plugin: IPlugin, wd: string): void {
+    async validatePlugin(plugin: IPlugin, wd: string): Promise<void> {
         const errors: string[] = [];
 
         if (!semver.satisfies(fblVersion, plugin.requires.fbl)) {
@@ -275,7 +284,7 @@ export class FBLService {
             for (const dependencyPluginName of Object.keys(plugin.requires.plugins)) {
                 const dependencyPluginRequiredVersion = plugin.requires.plugins[dependencyPluginName];
 
-                this.validateRequiredPlugin(
+                await this.validateRequiredPlugin(
                     dependencyPluginName,
                     dependencyPluginRequiredVersion,
                     errors,
@@ -307,9 +316,9 @@ export class FBLService {
      * Validate plugins to be compatible
      * @param {string} wd
      */
-    validatePlugins(wd: string): void {
+    async validatePlugins(wd: string): Promise<void> {
         for (const name of Object.keys(this.plugins)) {
-            this.validatePlugin(this.plugins[name], wd);
+            await this.validatePlugin(this.plugins[name], wd);
         }
     }
 
@@ -334,7 +343,7 @@ export class FBLService {
                 for (const pluginName of Object.keys(flow.requires.plugins)) {
                     const pluginExpectedVersion = flow.requires.plugins[pluginName];
 
-                    this.validateRequiredPlugin(
+                    await this.validateRequiredPlugin(
                         pluginName,
                         pluginExpectedVersion,
                         errors,

@@ -225,7 +225,7 @@ cp:
 **Example 2: Copy file to other folder with different name**
  
 ```yaml
-mv: 
+cp: 
   # copy file.txt
   from: /tmp/source/file.txt
   
@@ -236,7 +236,7 @@ mv:
 **Example 3: Copy folder contents to other folder**
 
 ```yaml
-mv: 
+cp: 
   # copy everything from "source" folder
   # note: slash in the end is required if you want to copy folder contents rather then the folder itself
   from: /tmp/source/

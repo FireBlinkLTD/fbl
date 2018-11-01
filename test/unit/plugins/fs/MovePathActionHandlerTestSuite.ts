@@ -1,6 +1,6 @@
 import {suite, test} from 'mocha-typescript';
 import {ActionSnapshot} from '../../../../src/models';
-import {sep, resolve} from 'path';
+import {join} from 'path';
 import {existsSync, writeFile} from 'fs';
 import * as assert from 'assert';
 import {MovePathActionHandler} from '../../../../src/plugins/fs/MovePathActionHandler';
@@ -70,67 +70,112 @@ class MovePathActionHandlerTestSuite {
         ).to.be.not.rejected;
     }
 
-    @test()
-    async move(): Promise<void> {
+    private static async prepareTmpDir(dirs: string[], files: string[]): Promise<string> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const tmpdir = await tempPathsRegistry.createTempDir();
+        for (const dir of dirs) {
+            await FSUtil.mkdirp(join(tmpdir, dir));
+        }
+
+        for (const file of files) {
+            const tmpfile = join(tmpdir, file);
+            await promisify(writeFile)(tmpfile, '', 'utf8');
+        }
+
+        return tmpdir;
+    }
+
+    @test()
+    async moveFileToFolder(): Promise<void> {
+        const tmpdir = await MovePathActionHandlerTestSuite.prepareTmpDir(
+            [
+                'l1/l2'
+            ],
+            [
+                'l1/l2/1.txt'
+            ]
+        );
 
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-
-        const tmpdir = await tempPathsRegistry.createTempDir();
-        await FSUtil.mkdirp(resolve(tmpdir, 'l1', 'l2'));
-
-        let tmpfile = resolve(tmpdir, 'l1', 'l2', '1.txt');
-        await promisify(writeFile)(tmpfile, '', 'utf8');
-        tmpfile = resolve(tmpdir, 'l1', 'l2', '2.txt');
-        await promisify(writeFile)(tmpfile, '', 'utf8');
-
-        // move file to folder without specifying a new name
-        let source = tmpfile;
-        let target = tmpdir + sep + 'l1' + sep;
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
 
         await actionHandler.execute({
-            from: source,
-            to: target
+            from: 'l1/l2/1.txt',
+            to: 'l1/'
         }, context, snapshot);
 
-        assert(existsSync(target + '2.txt'));
+        assert(existsSync(join(tmpdir, 'l1/1.txt')));
+    }
 
-        // move file to folder with file name overriding
-        source = resolve(tmpdir, 'l1', 'l2', '1.txt');
-        target = resolve(tmpdir, 'l1', 'l2', 'm1.txt');
+    @test()
+    async moveFileToFolderWithDifferentName() {
+        const tmpdir = await MovePathActionHandlerTestSuite.prepareTmpDir(
+            [
+                'l1/l2'
+            ],
+            [
+                'l1/l2/1.txt'
+            ]
+        );
+
+        const actionHandler = new MovePathActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
 
         await actionHandler.execute({
-            from: source,
-            to: target
+            from: 'l1/l2/1.txt',
+            to: 'l1/m1.txt'
         }, context, snapshot);
 
-        assert(existsSync(target));
+        assert(existsSync(join(tmpdir, 'l1/m1.txt')));
+    }
 
-        // move folder with name overriding
-        source = resolve(tmpdir, 'l1');
-        target = resolve(tmpdir, 'test2');
+    @test()
+    async moveFolderWithDifferentName(): Promise<void> {
+        const tmpdir = await MovePathActionHandlerTestSuite.prepareTmpDir(
+            [
+                'l1/l2'
+            ],
+            [
+                'l1/l2/1.txt'
+            ]
+        );
+
+        const actionHandler = new MovePathActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
 
         await actionHandler.execute({
-            from: source,
-            to: target
+            from: 'l1',
+            to: 't1'
         }, context, snapshot);
 
-        assert(existsSync(resolve(tmpdir, 'test2', '2.txt')));
-        assert(existsSync(resolve(tmpdir, 'test2', 'l2', 'm1.txt')));
+        assert(existsSync(join(tmpdir, 't1/l2/1.txt')));
+    }
 
-        // move folder contents into different folder;
-        source = target + sep;
-        target = resolve(tmpdir, 'test3');
+    @test()
+    async moveFolderContents(): Promise<void> {
+        const tmpdir = await MovePathActionHandlerTestSuite.prepareTmpDir(
+            [
+                'l1/l2'
+            ],
+            [
+                'l1/l2/1.txt'
+            ]
+        );
+
+        const actionHandler = new MovePathActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
 
         await actionHandler.execute({
-            from: source,
-            to: target
+            from: 'l1/',
+            to: 't1'
         }, context, snapshot);
 
-        assert(existsSync(resolve(tmpdir, 'test3', '2.txt')));
-        assert(existsSync(resolve(tmpdir, 'test3', 'l2', 'm1.txt')));
+        assert(existsSync(join(tmpdir, 't1/l2/1.txt')));
     }
 
     @test()
@@ -141,8 +186,8 @@ class MovePathActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.execute({
-                from: resolve(homedir(), 'MISSING_FBL_PATH', '1', '2', '3'),
-                to: resolve(homedir(), 'MISSING_FBL_PATH', '3', '2', '1'),
+                from: join(homedir(), 'MISSING_FBL_PATH', '1', '2', '3'),
+                to: join(homedir(), 'MISSING_FBL_PATH', '3', '2', '1'),
             }, context, snapshot)
         ).to.be.rejected;
     }

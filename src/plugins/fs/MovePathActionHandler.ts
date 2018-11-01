@@ -2,6 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext} from '../../interfaces';
 import * as Joi from 'joi';
 import {FSUtil} from '../../utils';
+import {sep} from 'path';
 
 const version = require('../../../../package.json').version;
 
@@ -33,8 +34,16 @@ export class MovePathActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        const from = FSUtil.getAbsolutePath(options.from, snapshot.wd);
-        const to = FSUtil.getAbsolutePath(options.to, snapshot.wd);
+        let from = FSUtil.getAbsolutePath(options.from, snapshot.wd);
+        if (options.from.endsWith(sep)) {
+            from += sep;
+        }
+
+        let to = FSUtil.getAbsolutePath(options.to, snapshot.wd);
+        if (options.to.endsWith(sep)) {
+            to += sep;
+        }
+
         await FSUtil.move(from, to);
     }
 }
