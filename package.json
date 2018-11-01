@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "description": "Command Line tool to automate any kind of work. Originally designed to help with deployments.",
   "keywords": [
     "fireblink",
@@ -57,7 +57,7 @@
     "@types/got": "9.2.0",
     "@types/joi": "14.0.0",
     "@types/js-yaml": "3.11.2",
-    "@types/node": "10.12.1",
+    "@types/node": "10.12.2",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.0",
     "@types/table": "4.0.5",
@@ -78,7 +78,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint"
+      "pre-commit": "yarn lint && yarn outdated"
     }
   },
   "nyc": {

@@ -330,17 +330,18 @@ export class FBLServiceTestSuite {
     async missingApplicationRequirement() {
         const fbl = Container.get<FBLService>(FBLService);
 
-        chai.expect(() => {
+        await chai.expect(
             fbl.validatePlugin(<IPlugin> {
-                name: 'test',
-                version: '0.0.0',
-                requires: {
-                    fbl: version,
-                    applications: [
-                        'missing_app_1234'
-                    ]
-                }
-            }, '.');
-        }).to.throw('Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable');
+                    name: 'test',
+                    version: '0.0.0',
+                    requires: {
+                        fbl: version,
+                        applications: [
+                            'missing_app_1234'
+                        ]
+                    }
+                }, '.'),
+            'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable'
+        ).to.be.rejected;
     }
 }

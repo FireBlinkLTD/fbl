@@ -65,7 +65,7 @@ export class CLIService {
             this.flowService.debug = true;
         }
 
-        this.registerPlugins();
+        await this.registerPlugins();
 
         if (this.reportFormat) {
             if (!this.fbl.getReporter(this.reportFormat)) {
@@ -428,10 +428,10 @@ export class CLIService {
     /**
      * Register plugins
      */
-    private registerPlugins(): void {
+    private async registerPlugins(): Promise<void> {
         const plugins = this.plugins.map((path: string) => requireg(path));
         this.fbl.registerPlugins(plugins);
-        this.fbl.validatePlugins(process.cwd());
+        await this.fbl.validatePlugins(process.cwd());
     }
 
     /**

@@ -16,6 +16,15 @@ const copyFileAsync = promisify(copyFile);
 
 export class FSUtil {
     /**
+     * Check if path exists
+     * @param {string} path
+     * @return {Promise<boolean>}
+     */
+    static async exists(path: string): Promise<boolean> {
+        return await existsAsync(path);
+    }
+
+    /**
      * Find files by mask
      * @param {string[]} masks
      * @param {string[]} ignore
