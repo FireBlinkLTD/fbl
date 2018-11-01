@@ -12,7 +12,7 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
     private static ivSize = 16;
     private static keySize = 32;
     private static saltSize = 24;
-    private static version = new Buffer('0001', 'hex');
+    private static version = Buffer.alloc(2, '0001', 'hex');
 
     private static validationSchema = Joi.object({
             password: Joi.string().required(),
