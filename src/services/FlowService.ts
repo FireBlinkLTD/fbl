@@ -78,8 +78,11 @@ export class FlowService {
 
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
-                // register options twice to see what's actually has been changed
-                snapshot.setOptions(this.resolveOptions(wd, handler, options, context, true, iteration, additionalTemplateParameters));
+                // register options twice to see what's actually has been changed (only when changes applied)
+                const resolvedOptions = this.resolveOptions(wd, handler, options, context, true, iteration, additionalTemplateParameters);
+                if (JSON.stringify(options) !== JSON.stringify(resolvedOptions)) {
+                    snapshot.setOptions(resolvedOptions);
+                }
             } else {
                 snapshot.setOptions(FlowService.MASKED);
             }
