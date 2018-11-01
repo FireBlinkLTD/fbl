@@ -12,6 +12,7 @@ Available steps:
 - [try-catch-finally](#action-handler-try---catch---finally-flow)
 - [template](#action-handler-template)
 - [virtual](#action-handler-virtual)
+- [error](#action-handler-error)
 
 ## Action Handler: Sequential steps execution
 
@@ -305,4 +306,21 @@ Then you can reference your generated handler like any other:
  ```yaml
 handler.id:
   test: some_field_value
+```
+
+## Action Handler: Error
+
+Throw error upon execution with given message.
+
+**ID:** `com.fireblink.fbl.flow.error`
+
+**Aliases:**
+ - `fbl.flow.error`
+ - `flow.error`
+ - `error`
+
+**Example:**
+
+ ```yaml
+error: 'message'
 ```
