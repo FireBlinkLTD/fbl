@@ -8,6 +8,7 @@ import {RepeatFlowActionHandler} from './RepeatFlowActionHandler';
 import {TemplateFlowActionHandler} from './TemplateFlowActionHandler';
 import {TryCatchFinallyFlowActionHandler} from './TryCatchFinallyFlowActionHandler';
 import {VirtualFlowActionHandler} from './VirtualFlowActionHandler';
+import {ErrorActionHandler} from './ErrorActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -21,6 +22,7 @@ module.exports = <IPlugin> {
 
     actionHandlers: [
         new AttachedFlowActionHandler(),
+        new ErrorActionHandler(),
         new ForEachFlowActionHandler(),
         new ParallelFlowActionHandler(),
         new SequenceFlowActionHandler(),

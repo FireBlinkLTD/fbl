@@ -23,7 +23,11 @@ export class SwitchFlowActionHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.object({
-        value: Joi.alternatives(Joi.string(), Joi.number()).required(),
+        value: Joi.alternatives(
+            Joi.string(),
+            Joi.number(),
+            Joi.boolean()
+        ).required(),
         is: Joi.object()
             .pattern(/^/, FBLService.STEP_SCHEMA)
             .min(1)
@@ -60,7 +64,14 @@ export class SwitchFlowActionHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        let action = options.is[options.value];
+        let action;
+        for (const is of Object.keys(options.is)) {
+            if (is.toString() === options.value.toString()) {
+                action = options.is[is];
+                break;
+            }
+        }
+
         if (!action) {
             if (options.else) {
                 action = options.else;

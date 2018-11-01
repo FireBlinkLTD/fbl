@@ -17,18 +17,19 @@ Ask user to confirm something.
 **Example:**
 
 ```yaml
-# [required] confirm message
-message: 'Are you sure you want to proceed?'
-
-# [optional] default response
-default: false
-
-# [required] assign response to given context fields
-assignResponseTo:
-  # [optional] "ctx" field to assign value to "ctx_field"
-  ctx: "$.ctx_field"
-  # [optional] "secrets" field to assign value to "secrets_field"
-  secrets: "$.secrets_field"
+confirm:
+    # [required] confirm message
+    message: 'Are you sure you want to proceed?'
+    
+    # [optional] default response
+    default: false
+    
+    # [required] assign response to given context fields
+    assignResponseTo:
+      # [optional] "ctx" field to assign value to "ctx_field"
+      ctx: "$.ctx_field"
+      # [optional] "secrets" field to assign value to "secrets_field"
+      secrets: "$.secrets_field"
 ```
 
 ##  Action Handler: Prompt
@@ -46,23 +47,27 @@ Ask user to type the response.
 **Example:**
 
 ```yaml
-# [required] confirm message
-message: 'Are you sure you want to proceed?'
-
-# [optional] default response
-default: "not sure"
-
-# [optional] json schema validation schema
-# note: only "string", "integer" and "number" types are supported
-schema:
-    type: string
-
-# [required] assign response to given context fields
-assignResponseTo:
-  # [optional] "ctx" field to assign value to "ctx_field"
-  ctx: "$.ctx_field"
-  # [optional] "secrets" field to assign value to "secrets_field"
-  secrets: "$.secrets_field"  
+prompt:
+    # [required] confirm message
+    message: 'Are you sure you want to proceed?'
+    
+    # [optional] whether answer should be masked
+    password: false
+    
+    # [optional] default response
+    default: "not sure"
+    
+    # [optional] json schema validation schema
+    # note: only "string", "integer" and "number" types are supported
+    schema:
+        type: string
+    
+    # [required] assign response to given context fields
+    assignResponseTo:
+      # [optional] "ctx" field to assign value to "ctx_field"
+      ctx: "$.ctx_field"
+      # [optional] "secrets" field to assign value to "secrets_field"
+      secrets: "$.secrets_field"  
 ```
 
 ##  Action Handler: Select
@@ -80,25 +85,26 @@ Ask user to select one given answer from provided options.
 **Example:**
 
 ```yaml
-# [required] confirm message
-message: 'Pick your age:'
-
-# [optional] default selected option
-default: "I don't want to answer"
-
-# [required] list of options user needs to pick answer from
-options:
- - I don't want to answer
- - under 21
- - 21 - 59
- - 60+
-
-# [required] assign picked value to given context fields
-assignResponseTo:
-  # [optional] "ctx" field to assign value to "ctx_field"
-  ctx: "$.ctx_field"
-  # [optional] "secrets" field to assign value to "secrets_field"
-  secrets: "$.secrets_field"  
+select:
+    # [required] confirm message
+    message: 'Pick your age:'
+    
+    # [optional] default selected option
+    default: "I don't want to answer"
+    
+    # [required] list of options user needs to pick answer from
+    options:
+     - I don't want to answer
+     - under 21
+     - 21 - 59
+     - 60+
+    
+    # [required] assign picked value to given context fields
+    assignResponseTo:
+      # [optional] "ctx" field to assign value to "ctx_field"
+      ctx: "$.ctx_field"
+      # [optional] "secrets" field to assign value to "secrets_field"
+      secrets: "$.secrets_field"  
 ```
 
 ##  Action Handler: Multi Select
@@ -116,21 +122,22 @@ Aks user to pick one or more options.
 **Example:**
 
 ```yaml
-# [required] confirm message
-message: 'Select tags:'
-
-# [optional] default selected option
-default: ["music"]
-
-# [required] list of options user needs to pick answer from
-options:
- - music
- - art
- 
-# [required] assign picked values to given context fields 
-assignResponseTo:
-  # [optional] "ctx" field to assign value to "ctx_field"
-  ctx: "$.ctx_field"
-  # [optional] "secrets" field to assign value to "secrets_field"
-  secrets: "$.secrets_field"  
+multiselect:
+    # [required] confirm message
+    message: 'Select tags:'
+    
+    # [optional] default selected option
+    default: ["music"]
+    
+    # [required] list of options user needs to pick answer from
+    options:
+     - music
+     - art
+     
+    # [required] assign picked values to given context fields 
+    assignResponseTo:
+      # [optional] "ctx" field to assign value to "ctx_field"
+      ctx: "$.ctx_field"
+      # [optional] "secrets" field to assign value to "secrets_field"
+      secrets: "$.secrets_field"  
 ```
