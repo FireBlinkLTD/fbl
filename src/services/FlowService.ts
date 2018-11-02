@@ -1,5 +1,5 @@
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
-import {IContext, IFlow, IIteration} from '../interfaces';
+import {IContext, IFlow, IFlowLocationOptions, IIteration} from '../interfaces';
 import {safeLoad, dump} from 'js-yaml';
 import {render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
@@ -118,20 +118,21 @@ export class FlowService {
 
     /**
      * Download tarball into temp location
-     * @param {string} url
+     * @param {IFlowLocationOptions} location
      * @param {number} [redirectCount]
      * @return {Promise<string>} temp tarball location
      */
-    private async downloadTarball(url: string, redirectCount = 0): Promise<string> {
-        console.log(' -> Downloading tarball from remote URL: '.green + url);
+    private async downloadTarball(location: IFlowLocationOptions, redirectCount = 0): Promise<string> {
+        console.log(' -> Downloading tarball from remote URL: '.green + location.path);
 
         const tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
 
         const ws = createWriteStream(tarballFile);
         try {
             await new Promise((resolve, reject) => {
-                const stream = got.stream(url, {
-                    timeout: 120 * 1000
+                const stream = got.stream(location.path, {
+                    timeout: 120 * 1000,
+                    headers: location.http && location.http.headers
                 });
 
                 stream.pipe(ws);
@@ -202,17 +203,17 @@ export class FlowService {
 
     /**
      * Resolve flow, skipping checks if similar resolve action is already running
-     * @param {string} path
+     * @param {IFlowLocationOptions} location
      * @param {string} wd
      * @return {Promise<string>}
      */
-    async resolveFlowSkipChecks(path: string, wd: string): Promise<string> {
+    async resolveFlowSkipChecks(location: IFlowLocationOptions, wd: string): Promise<string> {
         let absolutePath;
 
-        if (path.startsWith('http://') || path.startsWith('https://')) {
-            absolutePath = await this.downloadTarball(path);
+        if (location.path.startsWith('http://') || location.path.startsWith('https://')) {
+            absolutePath = await this.downloadTarball(location);
         } else {
-            absolutePath = FSUtil.getAbsolutePath(path, wd);
+            absolutePath = FSUtil.getAbsolutePath(location.path, wd);
         }
 
         // if path leads to tarball - extract it to temp dir
@@ -220,50 +221,66 @@ export class FlowService {
             absolutePath = await this.extractTarball(absolutePath);
         }
 
-        // if path lead to directory - use index.yml inside it as a starting point
-        const directory = await FSUtil.isDirectory(absolutePath);
-        if (directory) {
-            absolutePath = await this.recursivelyFindIndexFileInDir(absolutePath);
-            this.flowPathCache[path] = absolutePath;
-        }
+        this.flowPathCache[location.path] = absolutePath;
 
         return absolutePath;
     }
 
+    async resolveFlowTarget(local: string, location: IFlowLocationOptions): Promise<string> {
+        // if path lead to directory - use index.yml inside it as a starting point
+        const directory = await FSUtil.isDirectory(local);
+        if (directory) {
+            if (location.target) {
+                local = join(local, location.target);
+            } else {
+                local = await this.recursivelyFindIndexFileInDir(local);
+            }
+        } else {
+            if (location.target) {
+                throw new Error(`Usage of target is not allowed for flow at path: ${location.path}`);
+            }
+        }
+
+        return local;
+    }
+
     /**
      * Resolve flow based on path
-     * @param {string} path
+     * @param {IFlowLocationOptions} location
      * @param {string} wd
      * @return {Promise<string>}
      */
-    async resolveFlow(path: string, wd: string): Promise<string> {
-        if (this.flowPathCache[path]) {
-            return this.flowPathCache[path];
+    async resolveFlow(location: IFlowLocationOptions, wd: string): Promise<string> {
+        if (this.flowPathCache[location.path]) {
+            const cachedPath = this.flowPathCache[location.path];
+
+            return await this.resolveFlowTarget(cachedPath, location);
         }
 
-        let resolver: Promise<string> = this.flowResolvers[path];
-
+        let resolver: Promise<string> = this.flowResolvers[location.path];
         if (resolver) {
-            return await resolver;
+            const cachedPath = await resolver;
+
+            return await this.resolveFlowTarget(cachedPath, location);
         }
 
-        resolver = this.resolveFlowSkipChecks(path, wd);
-        this.flowResolvers[path] = resolver;
+        resolver = this.resolveFlowSkipChecks(location, wd);
+        this.flowResolvers[location.path] = resolver;
         const result = await resolver;
-        delete this.flowResolvers[path];
+        delete this.flowResolvers[location.path];
 
-        return result;
+        return await this.resolveFlowTarget(result, location);
     }
 
     /**
      * Read flow from file
-     * @param {string} path
+     * @param {IFlowLocationOptions} location
      * @param {IContext} context
      * @param {string} wd working directory
      * @returns {Promise<IFlow>}
      */
-    async readFlowFromFile(path: string, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
-        const absolutePath = await this.resolveFlow(path, wd);
+    async readFlowFromFile(location: IFlowLocationOptions, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
+        const absolutePath = await this.resolveFlow(location, wd);
 
         console.log(` -> Reading flow file:`.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);

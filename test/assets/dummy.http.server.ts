@@ -19,9 +19,15 @@ commander
 // parse environment variables
 commander.parse(process.argv);
 
+const processSend = (name: string, payload?: any) => {
+    process.send({name, payload});
+};
+
 console.log('Starting server with options: ' + JSON.stringify(commander.opts()));
 createServer(async (request, response) => {
-    process.send('onRequest');
+    processSend('onRequest', {
+        headers: request.headers
+    });
 
     if (commander.delay) {
         await new Promise(resolve => setTimeout(resolve, commander.delay));
@@ -54,11 +60,11 @@ createServer(async (request, response) => {
     }
 }).listen(commander.port, (err: any) => {
     if (err) {
-        process.send('failed');
+        processSend('failed');
         console.error(err);
         process.exit(1);
     }
 
     console.log('Server is running on port: ' + commander.port);
-    process.send('started');
+    processSend('started');
 });
