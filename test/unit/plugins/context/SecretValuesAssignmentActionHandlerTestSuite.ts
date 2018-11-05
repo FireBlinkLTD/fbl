@@ -26,38 +26,38 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 '$.test': 'tst'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -65,7 +65,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
@@ -74,7 +74,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                         test: 'test'
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -82,7 +82,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                 '$.test': {
                     files: ['/tmp/test']
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -93,7 +93,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                     },
                     files: ['/tmp/test']
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -138,7 +138,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             }
         };
 
-        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
+        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -149,7 +149,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         // do the same with relative path
         options['$.fromFile'].files = [basename(tmpFile)];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile), actionHandler.getMetadata().id, {}, options, context);
+        snapshot = await flowService.executeAction(dirname(tmpFile), actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -202,7 +202,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             }
         };
 
-        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context);
+        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
@@ -216,7 +216,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             tmpFile2
         ];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile1), actionHandler.getMetadata().id, {}, options, context);
+        snapshot = await flowService.executeAction(dirname(tmpFile1), actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');

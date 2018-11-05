@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext, IFlowLocationOptions} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, IFlowLocationOptions} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -38,7 +38,7 @@ export class AttachedFlowActionHandler extends ActionHandler {
         return AttachedFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         if (typeof options === 'string') {
             options = <IFlowLocationOptions> {
                 path: options
@@ -49,12 +49,13 @@ export class AttachedFlowActionHandler extends ActionHandler {
         const fbl = Container.get(FBLService);
 
         snapshot.log(`Attaching flow: ${options.path}`);
-        const flow = await flowService.readFlowFromFile(options, context, snapshot.wd);
+        const flow = await flowService.readFlowFromFile(options, context, parameters, snapshot.wd);
 
         const childSnapshot = await fbl.execute(
             flow.wd,
             flow.flow,
-            context
+            context,
+            parameters
         );
         snapshot.registerChildActionSnapshot(childSnapshot);
     }

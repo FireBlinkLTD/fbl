@@ -24,41 +24,41 @@ export class WriteToFileTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context, snapshot)
+            actionHandler.validate('test', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '',
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -67,13 +67,13 @@ export class WriteToFileTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp',
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -84,7 +84,7 @@ export class WriteToFileTestSuite {
                     secrets: '$.test'
                 },
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -94,7 +94,7 @@ export class WriteToFileTestSuite {
                     secrets: '$.test'
                 },
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -103,7 +103,7 @@ export class WriteToFileTestSuite {
                     secrets: '$.test'
                 },
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -112,7 +112,7 @@ export class WriteToFileTestSuite {
                     ctx: '$.test'
                 },
                 content: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -125,7 +125,7 @@ export class WriteToFileTestSuite {
         const tmpFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
         await chai.expect(
@@ -136,7 +136,7 @@ export class WriteToFileTestSuite {
                     secrets: '$.st'
                 },
                 content: content
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         const result = await promisify(readFile)(tmpFile, 'utf8');
@@ -155,7 +155,7 @@ export class WriteToFileTestSuite {
         const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = '<$- ctx.global $>-<%- ctx.local %>';
         await promisify(writeFile)(templateFile, content, 'utf8');
@@ -166,7 +166,7 @@ export class WriteToFileTestSuite {
         await actionHandler.execute({
             path: destinationFile,
             contentFromFile: templateFile,
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         const result = await promisify(readFile)(destinationFile, 'utf8');
         assert.strictEqual(result, 'g-l');
@@ -177,7 +177,7 @@ export class WriteToFileTestSuite {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
         await chai.expect(
@@ -187,7 +187,7 @@ export class WriteToFileTestSuite {
                     secrets: '$.st'
                 },
                 content: content
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         const result = await promisify(readFile)(context.ctx.ct, 'utf8');
@@ -208,13 +208,13 @@ export class WriteToFileTestSuite {
         const tmpdir = await tempPathsRegistry.createTempDir();
         const path = resolve(tmpdir, 'l1', 'l2', 'l3', 'test.txt');
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
         await actionHandler.execute({
             path: path,
             content: content
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         const result = await promisify(readFile)(path, 'utf8');
         assert.strictEqual(result, content);
@@ -233,14 +233,14 @@ export class WriteToFileTestSuite {
         // write file on the folder level
         writeFileSync(resolve(tmpdir, 'l1'), '', 'utf8');
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
         await chai.expect(
             actionHandler.execute({
                 path: path,
                 content: content
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         path = resolve(tmpdir, 't1', 't2', 'test.txt');
@@ -252,7 +252,7 @@ export class WriteToFileTestSuite {
             actionHandler.execute({
                 path: path,
                 content: content
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 }

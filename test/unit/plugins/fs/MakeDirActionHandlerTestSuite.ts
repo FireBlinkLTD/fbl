@@ -23,22 +23,22 @@ class MakeDirActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new MakeDirActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(true, context, snapshot)
+            actionHandler.validate(true, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(1234.124124, context, snapshot)
+            actionHandler.validate(1234.124124, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -46,10 +46,10 @@ class MakeDirActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new MakeDirActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate('/tmp/test', context, snapshot)
+            actionHandler.validate('/tmp/test', context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -59,12 +59,12 @@ class MakeDirActionHandlerTestSuite {
 
         const actionHandler = new MakeDirActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const tmpdir = await tempPathsRegistry.createTempDir();
         const path = resolve(tmpdir, 'l1');
 
-        await actionHandler.execute(path, context, snapshot);
+        await actionHandler.execute(path, context, snapshot, {});
 
         assert(existsSync(path));
         assert(statSync(path).isDirectory());

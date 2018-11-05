@@ -1326,4 +1326,145 @@ class CliTestSuite {
         assert.strictEqual(server.lastRequest.headers.test2, 'y2');
         assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
     }
+
+    @test()
+    async propagatedProperties(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const attachmentFlowPath = await tempPathsRegistry.createTempFile();
+        const mainFlowPath = await tempPathsRegistry.createTempFile();
+        const reportPath = await tempPathsRegistry.createTempFile();
+
+        const attachmentFlow: any = {
+            pipeline: {
+                ctx: {
+                    '$.attachment': {
+                        inline: {
+                            '<%- parameters.test %>': 'a'
+                        }
+                    }
+                }
+            }
+        };
+        await promisify(writeFile)(attachmentFlowPath, dump(attachmentFlow), 'utf8');
+
+        const mainFlow: any = {
+            pipeline: {
+                '--': [
+                    {
+                        virtual: {
+                            id: 'virtual.test',
+                            parametersSchema: {
+                                type: 'object',
+                                properties: {
+                                    test: {
+                                        type: 'string'
+                                    }
+                                }
+                            },
+                            action: {
+                                '--': [
+                                    {
+                                        ctx: {
+                                            '$.sequence': {
+                                                inline: {
+                                                    '<%- parameters.test %>': '<%- iteration.index %>'
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        '||': [{
+                                            ctx: {
+                                                '$.parallel': {
+                                                    inline: {
+                                                        '<%- parameters.test %>': '<%- iteration.index %>'
+                                                    }
+                                                }
+                                            }
+                                        }]
+                                    },
+                                    {
+                                        each: {
+                                            of: ['a'],
+                                            action: {
+                                                ctx: {
+                                                    '$.each': {
+                                                        inline: {
+                                                            '<%- parameters.test %>': '<%- iteration.index %>-<%- iteration.value %>'
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        repeat: {
+                                            times: 1,
+                                            action: {
+                                                ctx: {
+                                                    '$.repeat': {
+                                                        inline: {
+                                                            '<%- parameters.test %>': '<%- iteration.index %>'
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    {
+                                        '@': attachmentFlowPath
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        'virtual.test': {
+                            test: 'yes'
+                        }
+                    }
+                ]
+            }
+        };
+        await promisify(writeFile)(mainFlowPath, dump(mainFlow), 'utf8');
+
+        const result = await CliTestSuite.exec(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '-r', 'yaml',
+                '-o', reportPath,
+                mainFlowPath
+            ]
+        );
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        const report = await FSUtil.readYamlFromFile(reportPath);
+
+        const expectedContext = ContextUtil.toBase(ContextUtil.generateEmptyContext());
+        expectedContext.ctx = {
+            sequence: {
+                yes: 0
+            },
+            parallel: {
+                yes: 0
+            },
+            each: {
+                yes: '0-a'
+            },
+            repeat: {
+                yes: 0
+            },
+            attachment: {
+                yes: 'a'
+            }
+        };
+
+        assert.deepStrictEqual(report.context.final, expectedContext);
+    }
 }

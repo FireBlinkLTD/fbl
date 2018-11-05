@@ -14,6 +14,7 @@ import {createWriteStream, readdir, unlink} from 'fs';
 import {promisify} from 'util';
 import * as got from 'got';
 import {TempPathsRegistry} from './TempPathsRegistry';
+import {IDelegatedParameters} from '../interfaces/IDelegatedParameters';
 
 const ejsLint = require('ejs-lint');
 
@@ -54,13 +55,13 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {IIteration} [iteration] - child execution iteration
-     * @param [additionalTemplateParameters]
+     * @param [parameters]
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): Promise<ActionSnapshot> {
+    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
-        const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, iteration);
+        const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
 
         try {
             snapshot.setInitialContextState(context);
@@ -79,7 +80,7 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed (only when changes applied)
-                const resolvedOptions = this.resolveOptions(wd, handler, options, context, true, iteration, additionalTemplateParameters);
+                const resolvedOptions = this.resolveOptions(wd, handler, options, context, true, parameters);
                 if (JSON.stringify(options) !== JSON.stringify(resolvedOptions)) {
                     snapshot.setOptions(resolvedOptions);
                 }
@@ -88,15 +89,15 @@ export class FlowService {
             }
 
             // resolve without masking
-            options = this.resolveOptions(wd, handler, options, context, false, iteration, additionalTemplateParameters);
+            options = this.resolveOptions(wd, handler, options, context, false, parameters);
 
-            await handler.validate(options, context, snapshot);
+            await handler.validate(options, context, snapshot, parameters);
             snapshot.validated();
 
-            const shouldExecute = await handler.isShouldExecute(options, context, snapshot);
+            const shouldExecute = await handler.isShouldExecute(options, context, snapshot, parameters);
             if (shouldExecute) {
                 snapshot.start();
-                await handler.execute(options, context, snapshot);
+                await handler.execute(options, context, snapshot, parameters);
                 snapshot.success();
 
                 if (snapshot.successful) {
@@ -276,10 +277,11 @@ export class FlowService {
      * Read flow from file
      * @param {IFlowLocationOptions} location
      * @param {IContext} context
+     * @param {IDelegatedParameters} parameters
      * @param {string} wd working directory
      * @returns {Promise<IFlow>}
      */
-    async readFlowFromFile(location: IFlowLocationOptions, context: IContext, wd: string): Promise<{flow: IFlow, wd: string}> {
+    async readFlowFromFile(location: IFlowLocationOptions, context: IContext, parameters: IDelegatedParameters, wd: string): Promise<{flow: IFlow, wd: string}> {
         const absolutePath = await this.resolveFlow(location, wd);
 
         console.log(` -> Reading flow file:`.green + absolutePath);
@@ -289,7 +291,8 @@ export class FlowService {
             context.ejsTemplateDelimiters.global,
             wd,
             content,
-            context
+            context,
+            parameters
         );
 
         let flow;
@@ -310,8 +313,7 @@ export class FlowService {
      * @param {string} wd - working directory
      * @param {string} tpl - template to resolve
      * @param {IContext} context
-     * @param {IIteration} [iteration]
-     * @param [additionalTemplateParameters]
+     * @param {IDelegatedParameters} parameters
      * @return {string}
      */
     resolveTemplate(
@@ -319,8 +321,7 @@ export class FlowService {
         wd: string,
         tpl: string,
         context: IContext,
-        iteration?: IIteration,
-        additionalTemplateParameters?: {[key: string]: any}
+        parameters: IDelegatedParameters
     ): string {
         // validate template
         ejsLint(tpl, { delimiter });
@@ -330,16 +331,8 @@ export class FlowService {
             env: process.env
         };
 
-        if (additionalTemplateParameters) {
-            Object.assign(data, additionalTemplateParameters);
-        }
-
+        Object.assign(data, parameters);
         Object.assign(data, context);
-        if (iteration) {
-            Object.assign(data, {
-                iteration
-            });
-        }
 
         return render(tpl, data, { delimiter });
     }
@@ -351,8 +344,7 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
-     * @param {IIteration} [iteration] execution iteration
-     * @param [additionalTemplateParameters]
+     * @param {IDelegatedParameters} parameters delegated parameters
      * @return {any}
      */
     resolveOptionsWithNoHandlerCheck(
@@ -361,8 +353,7 @@ export class FlowService {
         options: any,
         context: IContext,
         maskSecrets: boolean,
-        iteration?: IIteration,
-        additionalTemplateParameters?: {[key: string]: any}
+        parameters: IDelegatedParameters
     ): any {
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the options object first
@@ -395,7 +386,7 @@ export class FlowService {
             });
 
             tpl = lines.join('\n');
-            const yaml = this.resolveTemplate(delimiter, wd, tpl, context, iteration, additionalTemplateParameters);
+            const yaml = this.resolveTemplate(delimiter, wd, tpl, context, parameters);
             options = safeLoad(yaml);
         }
 
@@ -409,15 +400,14 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {boolean} [maskSecrets] if true - all secrets will be masked
-     * @param {IIteration} [iteration] execution iteration
-     * @param [additionalTemplateParameters]
+     * @param {IDelegatedParameters} parameters delegated parameters
      * @returns {Promise<any>}
      */
-    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, iteration?: IIteration, additionalTemplateParameters?: {[key: string]: any}): any {
+    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, parameters: IDelegatedParameters): any {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, iteration, additionalTemplateParameters);
+        return this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, parameters);
     }
 }

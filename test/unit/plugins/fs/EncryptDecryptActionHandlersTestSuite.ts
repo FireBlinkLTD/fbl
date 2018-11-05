@@ -25,36 +25,36 @@ class CryptoTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new EncryptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context, snapshot)
+            actionHandler.validate('test', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 password: false,
                 include: ['/tmp']
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 password: 'secret',
                 include: []
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -62,7 +62,7 @@ class CryptoTestSuite {
                 password: 'secret',
                 include: ['/tmp'],
                 exclude: []
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -70,18 +70,18 @@ class CryptoTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new EncryptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.validate({
             password: 'secret',
             include: ['/tmp'],
             exclude: ['/tmp/.gitignore']
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         await actionHandler.validate({
             password: 'secret',
             include: ['/tmp']
-        }, context, snapshot);
+        }, context, snapshot, {});
     }
 
     @test()
@@ -97,7 +97,7 @@ class CryptoTestSuite {
         const mkdirAsync = promisify(mkdir);
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpDir, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpDir, 0, {});
 
         const path_l1 = join(tmpDir, 'l1');
         const path_l2 = join(tmpDir, 'l1', 'l2');
@@ -123,7 +123,7 @@ class CryptoTestSuite {
             password: password,
             include: ['**/*.txt'],
             exclude: ['**/*.ign']
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         for (const file of files) {
             const content = await readFileAsync(file, 'utf8');
@@ -139,7 +139,7 @@ class CryptoTestSuite {
             password: password,
             include: ['**/*.txt'],
             exclude: ['**/*.ign']
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         for (const file of files) {
             const content = await readFileAsync(file, 'utf8');

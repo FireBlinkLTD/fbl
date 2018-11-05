@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {ContextUtil, FSUtil} from '../../utils';
 import {dirname} from 'path';
 import {Container} from 'typedi';
@@ -51,7 +51,7 @@ export class WriteToFileActionHandler extends ActionHandler {
         return WriteToFileActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let file;
         if (options.path) {
             file = FSUtil.getAbsolutePath(options.path, snapshot.wd);
@@ -73,7 +73,8 @@ export class WriteToFileActionHandler extends ActionHandler {
                 context.ejsTemplateDelimiters.global,
                 snapshot.wd,
                 content,
-                context
+                context,
+                parameters
             );
 
             // resolve local template delimiter
@@ -81,7 +82,8 @@ export class WriteToFileActionHandler extends ActionHandler {
                 context.ejsTemplateDelimiters.local,
                 snapshot.wd,
                 content,
-                context
+                context,
+                parameters
             );
         }
 

@@ -15,22 +15,22 @@ class FunctionActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot)
+            actionHandler.validate('', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -38,10 +38,10 @@ class FunctionActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate('console.log(1);', context, snapshot)
+            actionHandler.validate('console.log(1);', context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -49,9 +49,9 @@ class FunctionActionHandlerTestSuite {
     async exec(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute('context.ctx.test = 1;', context, snapshot);
+        await actionHandler.execute('context.ctx.test = 1;', context, snapshot, {});
 
         assert.deepStrictEqual(context.ctx, { test: 1 });
     }

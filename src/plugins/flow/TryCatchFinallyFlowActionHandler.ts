@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 const version = require('../../../../package.json').version;
 
 export class TryCatchFinallyFlowActionHandler extends ActionHandler {
@@ -33,15 +33,15 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
         return TryCatchFinallyFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         // run try
         let idOrAlias = FBLService.extractIdOrAlias(options.action);
         let metadata = FBLService.extractMetadata(options.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
-        let childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context);
+        let childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, parameters);
         snapshot.ignoreChildFailure = true;
         snapshot.registerChildActionSnapshot(childSnapshot);
 
@@ -49,9 +49,9 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
         if (snapshot.childFailure && options.catch) {
             idOrAlias = FBLService.extractIdOrAlias(options.catch);
             metadata = FBLService.extractMetadata(options.catch);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
-            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.catch[idOrAlias], context);
+            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.catch[idOrAlias], context, parameters);
             snapshot.ignoreChildFailure = childSnapshot.successful;
             snapshot.registerChildActionSnapshot(childSnapshot);
         }
@@ -60,9 +60,9 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
         if (snapshot.childFailure && options.finally) {
             idOrAlias = FBLService.extractIdOrAlias(options.finally);
             metadata = FBLService.extractMetadata(options.finally);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
-            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.finally[idOrAlias], context);
+            childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.finally[idOrAlias], context, parameters);
             if (snapshot.ignoreChildFailure) {
                 snapshot.ignoreChildFailure = childSnapshot.successful;
             }

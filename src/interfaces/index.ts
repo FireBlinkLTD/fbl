@@ -1,5 +1,6 @@
 export * from './IActionHandlerMetadata';
 export * from './IContext';
+export * from './IDelegatedParameters';
 export * from './IFlow';
 export * from './IFlowLocationOptions';
 export * from './IIteration';

@@ -97,6 +97,7 @@ export class CLIService {
                 target: this.flowTarget
             },
             context,
+            {},
             '.'
         );
 
@@ -107,7 +108,8 @@ export class CLIService {
         const snapshot = await this.fbl.execute(
             flow.wd,
             flow.flow,
-            context
+            context,
+            {}
         );
 
         const finalContextState = this.reportFilePath ?

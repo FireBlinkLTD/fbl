@@ -34,7 +34,7 @@ class DummyActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot);
+        await this.fn(options, context, snapshot, {});
     }
 }
 
@@ -58,29 +58,29 @@ class AttachedFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot)
+            actionHandler.validate('', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp',
                 target: []
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -88,16 +88,16 @@ class AttachedFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate('/tmp/test.tst', context, snapshot)
+            actionHandler.validate('/tmp/test.tst', context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -108,14 +108,14 @@ class AttachedFlowActionHandlerTestSuite {
                         test: 'yes'
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 path: '/tmp',
                 target: 'yes'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -148,9 +148,9 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(tmpFile, context, snapshot);
-        await actionHandler.execute(tmpFile, context, snapshot);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await actionHandler.validate(tmpFile, context, snapshot, {});
+        await actionHandler.execute(tmpFile, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -190,11 +190,11 @@ class AttachedFlowActionHandlerTestSuite {
             target: tmpFile
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(options, context, snapshot);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await actionHandler.validate(options, context, snapshot, {});
 
         await chai.expect(
-            actionHandler.execute(options, context, snapshot),
+            actionHandler.execute(options, context, snapshot, {}),
             `Usage of target is not allowed for flow at path: ${tmpFile}`
         ).to.be.rejected;
     }
@@ -228,9 +228,9 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(tmpDir, context, snapshot);
-        await actionHandler.execute(tmpDir, context, snapshot);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await actionHandler.validate(tmpDir, context, snapshot, {});
+        await actionHandler.execute(tmpDir, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -250,9 +250,9 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
-        await actionHandler.validate(tarballPath, context, snapshot);
-        await actionHandler.execute(tarballPath, context, snapshot);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await actionHandler.validate(tarballPath, context, snapshot, {});
+        await actionHandler.execute(tarballPath, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -279,13 +279,13 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot);
-        await actionHandler.execute(url, context, snapshot);
+        await actionHandler.validate(url, context, snapshot, {});
+        await actionHandler.execute(url, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -296,13 +296,13 @@ class AttachedFlowActionHandlerTestSuite {
         const actionHandler = new AttachedFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         console.log('-> Send request to invalid URL');
         // expect to reject on invalid url
         const url = 'https://localhost:61888';
         await chai.expect(
-            actionHandler.execute(url, context, snapshot)
+            actionHandler.execute(url, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -321,12 +321,12 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
         await chai.expect(
-            actionHandler.execute(url, context, snapshot)
+            actionHandler.execute(url, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -345,7 +345,7 @@ class AttachedFlowActionHandlerTestSuite {
         await server.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         setTimeout(() => {
@@ -355,10 +355,10 @@ class AttachedFlowActionHandlerTestSuite {
         }, 100);
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.validate(url, context, snapshot, {});
 
         await chai.expect(
-            actionHandler.execute(url, context, snapshot)
+            actionHandler.execute(url, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -378,16 +378,16 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.validate(url, context, snapshot, {});
 
         await Promise.all([
-            actionHandler.execute(url, context, snapshot),
-            actionHandler.execute(url, context, snapshot),
-            actionHandler.execute(url, context, snapshot)
+            actionHandler.execute(url, context, snapshot, {}),
+            actionHandler.execute(url, context, snapshot, {}),
+            actionHandler.execute(url, context, snapshot, {})
         ]);
 
         assert.strictEqual(server.requestCount, 1);
@@ -408,15 +408,15 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot);
+        await actionHandler.validate(url, context, snapshot, {});
 
-        await actionHandler.execute(url, context, snapshot);
-        await actionHandler.execute(url, context, snapshot);
-        await actionHandler.execute(url, context, snapshot);
+        await actionHandler.execute(url, context, snapshot, {});
+        await actionHandler.execute(url, context, snapshot, {});
+        await actionHandler.execute(url, context, snapshot, {});
 
         assert.strictEqual(server.requestCount, 1);
     }
@@ -442,7 +442,7 @@ class AttachedFlowActionHandlerTestSuite {
         await server.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -456,8 +456,8 @@ class AttachedFlowActionHandlerTestSuite {
             }
         };
 
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -476,7 +476,7 @@ class AttachedFlowActionHandlerTestSuite {
         }, 'flow.yml');
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -485,8 +485,8 @@ class AttachedFlowActionHandlerTestSuite {
             target: 'flow.yml'
         };
 
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -521,14 +521,14 @@ class AttachedFlowActionHandlerTestSuite {
         await redirectServer.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
         const url = `http://localhost:${port + 1}`;
 
-        await actionHandler.validate(url, context, snapshot);
-        await actionHandler.execute(url, context, snapshot);
+        await actionHandler.validate(url, context, snapshot, {});
+        await actionHandler.execute(url, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);

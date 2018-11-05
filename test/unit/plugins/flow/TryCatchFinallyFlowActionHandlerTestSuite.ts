@@ -29,7 +29,7 @@ class DummyActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot);
+        await this.fn(options, context, snapshot, {});
     }
 }
 
@@ -43,22 +43,22 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot)
+            actionHandler.validate('', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -68,7 +68,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -83,7 +83,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -93,7 +93,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -101,7 +101,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
@@ -110,7 +110,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -125,7 +125,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -145,7 +145,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -160,7 +160,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                         inline: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -186,7 +186,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
+        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(snapshot.childFailure, true);
@@ -232,7 +232,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
+        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(snapshot.childFailure, true);
@@ -280,7 +280,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
+        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
@@ -327,7 +327,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context);
+        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);

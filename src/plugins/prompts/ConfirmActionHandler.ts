@@ -1,5 +1,5 @@
-import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {ActionSnapshot} from '../../models';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
@@ -41,7 +41,7 @@ export class ConfirmActionHandler extends BasePromptActionHandler {
         return ConfirmActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const value = await this.prompt({
             type: 'confirm',
             initial: options.default,

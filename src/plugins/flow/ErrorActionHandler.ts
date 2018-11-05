@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 
 const version = require('../../../../package.json').version;
@@ -26,7 +26,7 @@ export class ErrorActionHandler extends ActionHandler {
         return ErrorActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         throw new Error(options);
     }
 }
