@@ -21,29 +21,29 @@ class ExecActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot)
+            actionHandler.validate('', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 command: 'test',
                 args: '-t no'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -51,19 +51,19 @@ class ExecActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
                 command: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 command: 'test',
                 args: ['-t', 'no']
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -73,7 +73,7 @@ class ExecActionHandlerTestSuite {
                 options: {
                     stderr: true
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -82,7 +82,7 @@ class ExecActionHandlerTestSuite {
                 assignTo: {
                     ctx: '$.something'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -91,7 +91,7 @@ class ExecActionHandlerTestSuite {
                 assignTo: {
                     secrets: '$.something'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -101,7 +101,7 @@ class ExecActionHandlerTestSuite {
 
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'echo',
@@ -115,7 +115,7 @@ class ExecActionHandlerTestSuite {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
@@ -134,7 +134,7 @@ class ExecActionHandlerTestSuite {
 
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'echo',
@@ -147,7 +147,7 @@ class ExecActionHandlerTestSuite {
             assignTo: {
                 ctx: '$.tst1'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
@@ -162,7 +162,7 @@ class ExecActionHandlerTestSuite {
 
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'echo',
@@ -175,7 +175,7 @@ class ExecActionHandlerTestSuite {
             assignTo: {
                 secrets: '$.tst2'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.secrets.tst2.code, 0);
         assert.strictEqual(context.secrets.tst2.stdout, 'test\n');
@@ -188,7 +188,7 @@ class ExecActionHandlerTestSuite {
     async checkSilentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'echo',
@@ -202,7 +202,7 @@ class ExecActionHandlerTestSuite {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
@@ -219,7 +219,7 @@ class ExecActionHandlerTestSuite {
     async checkSilentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'bash',
@@ -233,7 +233,7 @@ class ExecActionHandlerTestSuite {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -251,7 +251,7 @@ class ExecActionHandlerTestSuite {
     async checkFailure(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.execute({
@@ -260,7 +260,7 @@ class ExecActionHandlerTestSuite {
                 assignTo: {
                     ctx: '$.tst1'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, 1);
@@ -270,7 +270,7 @@ class ExecActionHandlerTestSuite {
     async stderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await actionHandler.execute({
             command: 'bash',
@@ -282,7 +282,7 @@ class ExecActionHandlerTestSuite {
             assignTo: {
                 ctx: '$.tst1'
             }
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -293,7 +293,7 @@ class ExecActionHandlerTestSuite {
     async missingExecutable(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.execute({
@@ -301,7 +301,7 @@ class ExecActionHandlerTestSuite {
                 assignTo: {
                     ctx: '$.tst1'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, -1);
@@ -311,13 +311,13 @@ class ExecActionHandlerTestSuite {
     async noAssignmentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.execute({
                 command: 'echo',
                 args: ['test']
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -325,7 +325,7 @@ class ExecActionHandlerTestSuite {
     async noAssignmentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.execute({
@@ -334,7 +334,7 @@ class ExecActionHandlerTestSuite {
                 options: {
                     stdout: true
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 }

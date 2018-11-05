@@ -25,34 +25,34 @@ class MovePathActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(true, context, snapshot)
+            actionHandler.validate(true, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(1234, context, snapshot)
+            actionHandler.validate(1234, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 from: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 to: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -60,13 +60,13 @@ class MovePathActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
                 from: '/tmp/',
                 to: '/tmp/'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -99,12 +99,12 @@ class MovePathActionHandlerTestSuite {
 
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
 
         await actionHandler.execute({
             from: 'l1/l2/1.txt',
             to: 'l1/'
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert(existsSync(join(tmpdir, 'l1/1.txt')));
     }
@@ -122,12 +122,12 @@ class MovePathActionHandlerTestSuite {
 
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
 
         await actionHandler.execute({
             from: 'l1/l2/1.txt',
             to: 'l1/m1.txt'
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert(existsSync(join(tmpdir, 'l1/m1.txt')));
     }
@@ -145,12 +145,12 @@ class MovePathActionHandlerTestSuite {
 
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
 
         await actionHandler.execute({
             from: 'l1',
             to: 't1'
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert(existsSync(join(tmpdir, 't1/l2/1.txt')));
     }
@@ -168,12 +168,12 @@ class MovePathActionHandlerTestSuite {
 
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0);
+        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
 
         await actionHandler.execute({
             from: 'l1/',
             to: 't1'
-        }, context, snapshot);
+        }, context, snapshot, {});
 
         assert(existsSync(join(tmpdir, 't1/l2/1.txt')));
     }
@@ -182,13 +182,13 @@ class MovePathActionHandlerTestSuite {
     async moveMissingPath(): Promise<void> {
         const actionHandler = new MovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.execute({
                 from: join(homedir(), 'MISSING_FBL_PATH', '1', '2', '3'),
                 to: join(homedir(), 'MISSING_FBL_PATH', '3', '2', '1'),
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 }

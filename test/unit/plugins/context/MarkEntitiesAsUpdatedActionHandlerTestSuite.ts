@@ -16,60 +16,60 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(1, context, snapshot)
+            actionHandler.validate(1, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context, snapshot)
+            actionHandler.validate('test', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(true, context, snapshot)
+            actionHandler.validate(true, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{}], context, snapshot)
+            actionHandler.validate([{}], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 type: 'test'
-            }], context, snapshot)
+            }], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 id: 'test'
-            }], context, snapshot)
+            }], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 type: false,
                 id: 'test'
-            }], context, snapshot)
+            }], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate([{
                 type: 'test',
                 id: true
-            }], context, snapshot)
+            }], context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -77,13 +77,13 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate([{
                 type: 'test',
                 id: 1
-            }], context, snapshot)
+            }], context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -91,7 +91,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
     async execution(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUpdatedActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const options = [
             <IContextEntity> {
@@ -107,7 +107,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
             }
         ];
 
-        actionHandler.execute(options, context, snapshot);
+        actionHandler.execute(options, context, snapshot, {});
         assert.deepStrictEqual(context.entities.registered, options);
         assert.deepStrictEqual(context.entities.updated, options);
     }

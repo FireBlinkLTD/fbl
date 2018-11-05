@@ -2,7 +2,7 @@ import * as Joi from 'joi';
 import {ActionHandler, ActionSnapshot} from '../../models';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -36,27 +36,30 @@ export class RepeatFlowActionHandler extends ActionHandler {
         return RepeatFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
-        let metadata = FBLService.extractMetadata(options.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
         for (let i = 0; i < options.times; i++) {
-            const iteration = <IIteration> {
+            const iterationParams = JSON.parse(JSON.stringify(parameters));
+            iterationParams.iteration = <IIteration> {
                 index: i
             };
 
+            let metadata = FBLService.extractMetadata(options.action);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+
             if (options.async) {
-                promises.push((async (iter): Promise<void> => {
-                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iter);
-                })(iteration));
+                promises.push((async (p, m): Promise<void> => {
+                    snapshots[p.iteration.index] = await flowService.executeAction(snapshot.wd, idOrAlias, m, options.action[idOrAlias], context, p);
+                })(iterationParams, metadata));
             } else {
-                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iteration);
+
+                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iterationParams);
             }
         }
 

@@ -1,5 +1,5 @@
-import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {ActionSnapshot} from '../../models';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
@@ -49,7 +49,7 @@ export class SelectActionHandler extends BasePromptActionHandler {
         return SelectActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const value = await this.prompt({
             type: 'select',
             initial: options.default ? options.options.indexOf(options.default) : undefined,

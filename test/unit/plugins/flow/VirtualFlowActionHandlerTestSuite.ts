@@ -29,7 +29,7 @@ class DummyActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot);
+        await this.fn(options, context, snapshot, {});
     }
 }
 
@@ -44,42 +44,42 @@ class VirtualFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot)
+            actionHandler.validate(123, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot)
+            actionHandler.validate('', context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 id: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 id: 'test',
                 action: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 id: 'test',
                 action: 'test'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -93,7 +93,7 @@ class VirtualFlowActionHandlerTestSuite {
                 action: {
                     'ctx': 'yes'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -101,7 +101,7 @@ class VirtualFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
@@ -112,7 +112,7 @@ class VirtualFlowActionHandlerTestSuite {
                 action: {
                     'ctx': 'yes'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -153,7 +153,56 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, '_value_');
+    }
+
+    @test()
+    async testDefaults(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+
+        let opts;
+        flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
+            opts = options;
+        }));
+
+        const actionOptions = [
+            {
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    parametersSchema: {
+                        type: 'object',
+                        properties: {
+                            tst: {
+                                type: 'string'
+                            }
+                        }
+                    },
+                    defaults: {
+                        values: {
+                            tst: 'ue_'
+                        },
+                        mergeFunction: 'return { tst: options.tst + defaults.tst };'
+                    },
+                    action: {
+                        [DummyActionHandler.ID]: '<%- parameters.tst %>'
+                    }
+                }
+            },
+            {
+                'virtual.test': {
+                    'tst': '_val'
+                }
+            }
+        ];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_value_');
@@ -205,7 +254,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
 
         assert(!snapshot.successful);
         const virtualChildSnapshot: ActionSnapshot = snapshot.getSteps().find(s => s.type === 'child' && s.payload.idOrAlias === 'virtual.test').payload;
@@ -245,7 +294,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context);
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 123);

@@ -1,5 +1,5 @@
 import {ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {promisify} from 'util';
 import {writeFile} from 'fs';
@@ -47,7 +47,7 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
         return ShellActionHandler.metadata;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const file = await Container.get(TempPathsRegistry).createTempFile();
         await promisify(writeFile)(file, options.script, 'utf8');
 

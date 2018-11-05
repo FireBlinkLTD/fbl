@@ -147,7 +147,7 @@ export class FBLServiceTestSuite {
                 $title: 'Dummy Action Handler',
                 [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>'
             }
-        }, context);
+        }, context, {});
 
         const snapshotOptionsSteps = snapshot.getSteps().filter(s => s.type === 'options');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
@@ -159,7 +159,8 @@ export class FBLServiceTestSuite {
                 version: '1.0.0',
                 pipeline: {}
             },
-            ContextUtil.generateEmptyContext())
+            ContextUtil.generateEmptyContext(),
+            {})
         ).to.be.rejected;
     }
 
@@ -182,7 +183,8 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: 'tst'
                 }
             },
-            ContextUtil.generateEmptyContext()
+            ContextUtil.generateEmptyContext(),
+            {}
         );
 
         assert.strictEqual(result, null);
@@ -206,7 +208,8 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: 'tst'
                 }
             },
-            ContextUtil.generateEmptyContext()
+            ContextUtil.generateEmptyContext(),
+            {}
         );
 
         assert.strictEqual(snapshot.successful, false);
@@ -231,7 +234,8 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: `<%- ctx.t1`
                 }
             },
-            ContextUtil.generateEmptyContext()
+            ContextUtil.generateEmptyContext(),
+            {}
         );
 
         assert.strictEqual(snapshot.successful, false);
@@ -313,7 +317,8 @@ export class FBLServiceTestSuite {
                     [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`
                 }
             },
-            context
+            context,
+            {}
         );
 
         assert.strictEqual(snapshot.successful, true);

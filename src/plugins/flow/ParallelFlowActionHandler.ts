@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -35,18 +35,22 @@ export class ParallelFlowActionHandler extends ActionHandler {
         return ParallelFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const snapshots: ActionSnapshot[] = [];
         const promises = options.map(async (action: any, index: number): Promise<void> => {
             const idOrAlias = FBLService.extractIdOrAlias(action);
             let metadata = FBLService.extractMetadata(action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
-            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, <IIteration> {
+            const iterationParams = JSON.parse(JSON.stringify(parameters));
+            iterationParams.iteration = <IIteration> {
                 index
-            });
+            };
+
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+
+            snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, iterationParams);
         });
 
         await Promise.all(promises);

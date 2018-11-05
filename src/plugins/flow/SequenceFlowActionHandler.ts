@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
 import {Container} from 'typedi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -35,18 +35,22 @@ export class SequenceFlowActionHandler extends ActionHandler {
         return SequenceFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let index = 0;
         for (const action of options) {
             const idOrAlias = FBLService.extractIdOrAlias(action);
             let metadata = FBLService.extractMetadata(action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, <IIteration> {
+            const actionParameters = JSON.parse(JSON.stringify(parameters));
+            actionParameters.iteration = <IIteration> {
                 index
-            });
+            };
+
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
+
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
 
             index++;

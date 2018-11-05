@@ -165,7 +165,7 @@ Allows to execute action for every item in the array or key of an object.
  - `foreach`
  - `each`
  
-**Example:**
+**Example: Array**
 
 ```yaml
 each:  
@@ -173,8 +173,22 @@ each:
   action:
     ctx: 
       test_<%- iteration.index %>: 
+        # assign 1,2,3 to test_0, test_1, test_3
         inline: <%- iteration.value %>
 ```
+
+**Example: Object**
+
+```yaml
+each:  
+  of: 
+    a: 1
+    b: 2
+  action:
+    ctx: 
+      test_<%- iteration.index %>: 
+        # assign 1a to test_0 and b2 to test_1 values        
+        inline: <%- iteration.value %><%- iteration.name %>
 
 ## Action Handler: Switch flow
 
@@ -323,6 +337,15 @@ Allows to create virtual action handler for another action (that can be represen
     properties:
       test: 
         type: string
+  
+  # [optional] default parameters and merge function      
+  defaults:
+    # [required] default values
+    values: 
+      test: yes
+    # [required] merge function
+    mergeFunction: |-
+      return options.test + defaults.test      
   
   # action to invoke
   action:

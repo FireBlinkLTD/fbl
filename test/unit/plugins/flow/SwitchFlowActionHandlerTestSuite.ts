@@ -28,7 +28,7 @@ class DummyActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot);
+        await this.fn(options, context, snapshot, {});
     }
 }
 
@@ -43,64 +43,64 @@ export class SwitchFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: {}
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: []
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 123
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 test: 'tst'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 is: 'tst'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: 'tst'
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
             actionHandler.validate({
                 value: 'tst',
                 is: {}
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -109,7 +109,7 @@ export class SwitchFlowActionHandlerTestSuite {
                 is: {
                     tst: []
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -118,7 +118,7 @@ export class SwitchFlowActionHandlerTestSuite {
                 is: {
                     tst: 123
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -130,7 +130,7 @@ export class SwitchFlowActionHandlerTestSuite {
                         f2: false
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -138,7 +138,7 @@ export class SwitchFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
@@ -148,7 +148,7 @@ export class SwitchFlowActionHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -159,7 +159,7 @@ export class SwitchFlowActionHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -170,7 +170,7 @@ export class SwitchFlowActionHandlerTestSuite {
                         f1: true
                     }
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -200,11 +200,11 @@ export class SwitchFlowActionHandlerTestSuite {
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
@@ -239,11 +239,11 @@ export class SwitchFlowActionHandlerTestSuite {
         context.ctx.value = 'test';
         context.secrets.value = 'test';
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
     }
@@ -274,11 +274,11 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
     }
@@ -309,11 +309,11 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, true);
     }
@@ -340,14 +340,14 @@ export class SwitchFlowActionHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.strictEqual(actionHandlerOptions, false);
 
@@ -382,14 +382,14 @@ export class SwitchFlowActionHandlerTestSuite {
             }
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
         // validate first to process template inside options
-        await actionHandler.validate(options, context, snapshot);
-        await actionHandler.execute(options, context, snapshot);
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
 
         assert.deepStrictEqual(actionHandlerOptions, [2]);
 

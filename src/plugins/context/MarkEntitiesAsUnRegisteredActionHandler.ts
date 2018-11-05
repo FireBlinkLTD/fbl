@@ -1,5 +1,5 @@
 import {ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {BaseMarkEntityAsActionHandler} from './BaseMarkEntityAsActionHandler';
 
 const version = require('../../../../package.json').version;
@@ -19,7 +19,7 @@ export class MarkEntitiesAsUnRegisteredActionHandler extends BaseMarkEntityAsAct
         return MarkEntitiesAsUnRegisteredActionHandler.metadata;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         context.entities.unregistered.push(...options);
         snapshot.setContext(context);
     }

@@ -1,5 +1,5 @@
-import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {ActionSnapshot} from '../../models';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {Validator} from 'jsonschema';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
@@ -64,7 +64,7 @@ export class PromptActionHandler extends BasePromptActionHandler {
         return PromptActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let type = 'text';
         let float: boolean | undefined;
         let min: number | undefined;

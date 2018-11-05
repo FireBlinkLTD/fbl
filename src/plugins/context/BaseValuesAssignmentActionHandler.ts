@@ -1,6 +1,6 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {IContext, IFlow} from '../../interfaces';
+import {IContext, IDelegatedParameters} from '../../interfaces';
 import {ContextUtil, FSUtil} from '../../utils';
 import {Container} from 'typedi';
 import {FlowService} from '../../services';
@@ -30,7 +30,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
     abstract getAssignmentKey(): 'ctx' | 'secrets';
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const key = this.getAssignmentKey();
 
         const flowService = Container.get(FlowService);
@@ -57,7 +57,8 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                         context.ejsTemplateDelimiters.global,
                         snapshot.wd,
                         fileContent,
-                        context
+                        context,
+                        parameters
                     );
 
                     let fileContentObject = safeLoad(fileContent);
@@ -73,7 +74,8 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                         snapshot.wd,
                         fileContentObject,
                         context,
-                        false
+                        false,
+                        parameters
                     );
 
                     if (value) {
