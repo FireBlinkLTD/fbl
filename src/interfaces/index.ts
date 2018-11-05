@@ -4,6 +4,7 @@ export * from './IFlow';
 export * from './IFlowLocationOptions';
 export * from './IIteration';
 export * from './IPlugin';
+export * from './IReport';
 export * from './IReporter';
 export * from './ISummaryRecord';
 export * from './ITemplateUtility';

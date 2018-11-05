@@ -6,11 +6,12 @@ import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
 import {homedir} from 'os';
-import {IContext, IFlowLocationOptions, ISummaryRecord} from '../interfaces';
+import {IContext, IFlowLocationOptions, IReport, ISummaryRecord} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
+import {ActionSnapshot} from '../models';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -99,16 +100,35 @@ export class CLIService {
             '.'
         );
 
+        const initialContextState = this.reportFilePath ?
+            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
+            null;
+
         const snapshot = await this.fbl.execute(
             flow.wd,
             flow.flow,
             context
         );
 
+        const finalContextState = this.reportFilePath ?
+            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
+            null;
+
         if (this.reportFilePath) {
+            const report = <IReport> {
+                context: {
+                    initial: initialContextState,
+                    final: finalContextState
+                },
+                snapshot: snapshot
+            };
+
             const options = {};
             await this.convertKVPairs(this.reportKVPairs, options);
-            await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, snapshot);
+
+            // generate report
+            await this.fbl.getReporter(this.reportFormat)
+                .generate(this.reportFilePath, options, report);
         }
 
         // remove all temp files and folders

@@ -1,4 +1,4 @@
-import {IContext} from '../interfaces';
+import {IContext, IContextBase} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
 
 export class ContextUtil {
@@ -64,6 +64,19 @@ export class ContextUtil {
         const parentPath = path.substring(0, path.length - (fieldName.length + 1));
 
         await ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
+    }
+
+    /**
+     * Sanitize context from sensitive and unnecessary fields
+     * @param {IContext} context
+     * @return {IContextBase}
+     */
+    public static toBase(context: IContext): IContextBase {
+        return {
+            ctx: context.ctx,
+            summary: context.summary,
+            entities: context.entities
+        };
     }
 
     /**

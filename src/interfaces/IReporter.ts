@@ -1,4 +1,5 @@
 import {ActionSnapshot} from '../models';
+import {IReport} from './index';
 
 export interface IReporter {
     /**
@@ -11,8 +12,8 @@ export interface IReporter {
      * Generate execution report
      * @param {string} output
      * @param {string} options
-     * @param {ActionSnapshot} snapshot
+     * @param {IReport} report
      * @return {Promise<void>}
      */
-    generate(output: string, options: {[key: string]: any}, snapshot: ActionSnapshot): Promise<void>;
+    generate(output: string, options: {[key: string]: any}, report: IReport): Promise<void>;
 }

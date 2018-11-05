@@ -63,7 +63,7 @@ export class FlowService {
         const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, iteration);
 
         try {
-            snapshot.setContext(context);
+            snapshot.setInitialContextState(context);
 
             let handler = this.actionHandlersRegistry.find(idOrAlias);
             if (!handler) {

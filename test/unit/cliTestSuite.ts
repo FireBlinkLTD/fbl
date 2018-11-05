@@ -7,9 +7,11 @@ import {ChildProcessService, CLIService, TempPathsRegistry} from '../../src/serv
 import {basename, dirname, join, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
-import {FSUtil} from '../../src/utils';
+import {ContextUtil, FSUtil} from '../../src/utils';
 import {DummyServerWrapper, IDummyServerWrapperConfig} from '../assets/dummy.http.server.wrapper';
 import {c} from 'tar';
+import {IContextBase} from '../../src/interfaces';
+import {ISummaryRecord} from '../../src/interfaces/ISummaryRecord';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -167,17 +169,51 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            ct: 'yes',
-            custom_ct: 'file1',
-            test: {
-                ct: 'yes',
-                st: 'yes',
-                custom_ct: 'file1',
-                custom_st: 'file2'
+        assert.deepStrictEqual(
+            report.context.initial,
+            <IContextBase> {
+                ctx: {
+                    ct: 'yes',
+                    custom_ct: 'file1'
+                },
+                summary: <ISummaryRecord[]> [],
+                entities: ContextUtil.generateEmptyContext().entities
             }
+        );
+
+        assert.deepStrictEqual(
+            report.context.final,
+            <IContextBase> {
+                ctx: {
+                    ct: 'yes',
+                    custom_ct: 'file1',
+                    test: {
+                        ct: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2',
+                        st: 'yes'
+                    }
+                },
+                summary: <ISummaryRecord[]> [],
+                entities: ContextUtil.generateEmptyContext().entities
+            }
+        );
+
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: {
+                        ct: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2',
+                        st: 'yes'
+                    }
+                }
+            },
+            deleted: {},
+            updated: {},
         });
     }
 
@@ -398,17 +434,21 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            ct: 'yes',
-            custom_ct: 'file1',
-            test: {
-                ct: 'yes',
-                st: 'yes',
-                custom_ct: 'file1',
-                custom_st: 'file2'
-            }
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: {
+                        ct: 'yes',
+                        st: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2'
+                    }
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
@@ -964,18 +1004,39 @@ class CliTestSuite {
         }
 
         const report = JSON.parse(await promisify(readFile)(reportFile, 'utf8'));
-        const children = report.steps.filter((v: IActionStep) => v.type === 'child');
-        const contextSteps = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const children = report.snapshot.steps.filter((v: IActionStep) => v.type === 'child');
+        const contextSteps1 = children[children.length - 3].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const contextSteps2 = children[children.length - 2].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const contextSteps3 = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[0].payload.ctx, {
-            test_1: 1,
-            test_2: 2
+        assert.deepStrictEqual(contextSteps1[0].payload, {
+            added: {
+                ctx: {
+                    test_1: 1
+                }
+            },
+            deleted: {},
+            updated: {}
         });
 
-        assert.deepStrictEqual(contextSteps[1].payload.ctx, {
-            test_1: 1,
-            test_2: 2,
-            local: 1
+        assert.deepStrictEqual(contextSteps2[0].payload, {
+            added: {
+                ctx: {
+                    test_2: 2
+                }
+            },
+            deleted: {},
+            updated: {}
+        });
+
+        assert.deepStrictEqual(contextSteps3[0].payload, {
+            added: {
+                ctx: {
+                    local: 1
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
@@ -1068,10 +1129,16 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            test: true
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: true
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
