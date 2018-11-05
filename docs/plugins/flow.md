@@ -338,6 +338,15 @@ Allows to create virtual action handler for another action (that can be represen
       test: 
         type: string
   
+  # [optional] default parameters and merge function      
+  defaults:
+    # [required] default values
+    values: 
+      test: yes
+    # [required] merge function
+    mergeFunction: |-
+      return options.test + defaults.test      
+  
   # action to invoke
   action:
     ctx:
