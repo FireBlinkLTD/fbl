@@ -8,6 +8,8 @@ import {basename, dirname, join, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
 import {FSUtil} from '../../src/utils';
+import {DummyServerWrapper, IDummyServerWrapperConfig} from '../assets/dummy.http.server.wrapper';
+import {c} from 'tar';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,6 +21,8 @@ const fblVersion = require('../../../package.json').version;
 class CliTestSuite {
     private static existingGlobalConfig?: string;
     private static globalConfigExists?: boolean;
+
+    private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async before(): Promise<void> {
         if (CliTestSuite.globalConfigExists === undefined) {
@@ -43,6 +47,12 @@ class CliTestSuite {
 
         await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
+
+        for (const dummyServerWrapper of this.dummyServerWrappers) {
+            await dummyServerWrapper.stop();
+        }
+
+        this.dummyServerWrappers = [];
     }
 
     /**
@@ -1191,5 +1201,62 @@ class CliTestSuite {
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
+    }
+
+    @test()
+    async testHttpHeaders(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const flow: any = {
+            pipeline: {
+                ctx: {
+                    '$.test': {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tempPathsRegistry.createTempFile();
+        const tarballFile = await tempPathsRegistry.createTempFile(false, '.tar.gz');
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        await c({
+            gzip: true,
+            cwd: dirname(flowFile),
+            file: tarballFile
+        }, [
+            basename(flowFile)
+        ]);
+
+        const port = 62999;
+        const server = new DummyServerWrapper(<IDummyServerWrapperConfig> {
+            port: port,
+            file: tarballFile
+        });
+        await server.start();
+        this.dummyServerWrappers.push(server);
+
+        const result = await CliTestSuite.exec(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--http-header', '"test1: y1"',
+                '--http-header', '"test2:y2"',
+                '--http-header', '"test3:    y3 "',
+                '-t', basename(flowFile),
+                `http://localhost:${port}`
+            ]
+        );
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        assert.strictEqual(server.lastRequest.headers.test1, 'y1');
+        assert.strictEqual(server.lastRequest.headers.test2, 'y2');
+        assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
     }
 }
