@@ -208,7 +208,7 @@ class ForEachFlowActionHandlerTestSuite {
             action: {
                 [DummyActionHandler.ID]: {
                     index: '<%- iteration.index %>',
-                    name: '<%- iteration.name %>',
+                    key: '<%- iteration.key %>',
                     value: '<%- iteration.value %>'
                 }
             }
@@ -218,9 +218,9 @@ class ForEachFlowActionHandlerTestSuite {
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
-        assert.deepStrictEqual(results[0], {index: 0, value: 1, name: 'a'});
-        assert.deepStrictEqual(results[1], {index: 1, value: 2, name: 'b'});
-        assert.deepStrictEqual(results[2], {index: 2, value: 3, name: 'c'});
+        assert.deepStrictEqual(results[0], {index: 0, value: 1, key: 'a'});
+        assert.deepStrictEqual(results[1], {index: 1, value: 2, key: 'b'});
+        assert.deepStrictEqual(results[2], {index: 2, value: 3, key: 'c'});
     }
 
     @test()
@@ -250,7 +250,7 @@ class ForEachFlowActionHandlerTestSuite {
             action: {
                 [DummyActionHandler.ID]: {
                     index: '<%- iteration.index %>',
-                    name: '<%- iteration.name %>',
+                    key: '<%- iteration.key %>',
                     value: '<%- iteration.value %>'
                 }
             },
@@ -261,8 +261,8 @@ class ForEachFlowActionHandlerTestSuite {
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
-        assert.deepStrictEqual(results[0], {index: 0, value: 1, name: 'a'});
-        assert.deepStrictEqual(results[1], {index: 2, value: 3, name: 'c'});
-        assert.deepStrictEqual(results[2], {index: 1, value: 2, name: 'b'});
+        assert.deepStrictEqual(results[0], {index: 0, value: 1, key: 'a'});
+        assert.deepStrictEqual(results[1], {index: 2, value: 3, key: 'c'});
+        assert.deepStrictEqual(results[2], {index: 1, value: 2, key: 'b'});
     }
 }

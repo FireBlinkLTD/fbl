@@ -58,14 +58,20 @@ export class ForEachFlowActionHandler extends ActionHandler {
         const snapshots: ActionSnapshot[] = [];
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
+        const isArray = Array.isArray(options.of);
+        const iterable = isArray ? options.of : Object.keys(options.of);
 
-        const iterable = Array.isArray(options.of) ? options.of : Object.keys(options.of);
         for (let i = 0; i < iterable.length; i++) {
             const iteration = <IIteration> {
-                index: i,
-                name: Array.isArray(options.of) ? undefined : iterable[i],
-                value: Array.isArray(options.of) ? options.of[i] : options.of[iterable[i]]
+                index: i
             };
+
+            if (isArray) {
+                iteration.value = iterable[i];
+            } else {
+                iteration.value = options.of[iterable[i]];
+                iteration.key = iterable[i];
+            }
 
             const iterationParams = JSON.parse(JSON.stringify(parameters));
             iterationParams.iteration = iteration;

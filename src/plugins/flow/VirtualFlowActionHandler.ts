@@ -152,6 +152,7 @@ class DynamicFlowHandler extends ActionHandler {
         parameters = JSON.parse(JSON.stringify(parameters));
         parameters.parameters = options;
 
-        await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
+        const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
+        snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }
