@@ -45,7 +45,8 @@ class FlowServiceTestSuite {
             context.ejsTemplateDelimiters.global,
             '.',
             tpl,
-            context
+            context,
+            {}
         );
 
         assert.strictEqual(resolved, [
@@ -76,7 +77,8 @@ class FlowServiceTestSuite {
             context.ejsTemplateDelimiters.local,
             '.',
             resolved,
-            context
+            context,
+            {}
         );
 
         assert.strictEqual(resolved, [

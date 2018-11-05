@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
@@ -30,8 +30,8 @@ export class TemplateFlowActionHandler extends ActionHandler {
         return TemplateFlowActionHandler.validationSchema;
     }
 
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        await super.validate(options, context, snapshot);
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        await super.validate(options, context, snapshot, parameters);
 
         const action = safeLoad(options);
         const result = Joi.validate(action, FBLService.STEP_SCHEMA);
@@ -40,15 +40,15 @@ export class TemplateFlowActionHandler extends ActionHandler {
         }
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const action = safeLoad(options);
         const idOrAlias = FBLService.extractIdOrAlias(action);
         let metadata = FBLService.extractMetadata(action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
-        const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context);
+        const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, parameters);
         snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

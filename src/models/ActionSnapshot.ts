@@ -1,8 +1,9 @@
 import {Container} from 'typedi';
 import {FlowService} from '../services';
-import {IContext, IIteration} from '../interfaces';
+import {IContext} from '../interfaces';
 import {IMetadata} from '../interfaces/IMetadata';
 import {ContextUtil} from '../utils';
+import {IDelegatedParameters} from '../interfaces/IDelegatedParameters';
 
 const humanizeDuration = require('humanize-duration');
 const deepObjectDiff = require('deep-object-diff');
@@ -24,7 +25,7 @@ export class ActionSnapshot {
         public metadata: IMetadata,
         public wd: string,
         public idx: number,
-        public iteration?: IIteration
+        public parameters: IDelegatedParameters
     ) {
         this.createdAt = new Date();
         this.steps = [];

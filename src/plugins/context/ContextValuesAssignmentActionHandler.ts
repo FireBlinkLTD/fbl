@@ -1,4 +1,4 @@
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {BaseValuesAssignmentActionHandler} from './BaseValuesAssignmentActionHandler';
 import {ActionSnapshot} from '../../models';
 
@@ -23,8 +23,8 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
         return 'ctx';
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        await super.execute(options, context, snapshot);
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        await super.execute(options, context, snapshot, parameters);
         snapshot.setContext(context);
     }
 }

@@ -1,5 +1,5 @@
 import {ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {FSUtil} from '../../utils';
 import {BaseCryptoActionHandler} from './BaseCryptoActionHandler';
 
@@ -20,7 +20,7 @@ export class DecryptActionHandler extends BaseCryptoActionHandler {
         return DecryptActionHandler.metadata;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const files = await FSUtil.findFilesByMasks(options.include, options.exclude, snapshot.wd);
         for (const file of files) {
             snapshot.log(`Decrypting ${file}`);

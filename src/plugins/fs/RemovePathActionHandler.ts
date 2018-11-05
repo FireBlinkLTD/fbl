@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {FSUtil} from '../../utils';
 
@@ -32,7 +32,7 @@ export class RemovePathActionHandler extends ActionHandler {
         return RemovePathActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const path = FSUtil.getAbsolutePath(options, snapshot.wd);
         await FSUtil.remove(path);
     }

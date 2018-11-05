@@ -2,7 +2,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 
 const version = require('../../../../package.json').version;
 
@@ -41,27 +41,27 @@ export class SwitchFlowActionHandler extends ActionHandler {
         return SwitchFlowActionHandler.metadata;
     }
 
-    async validate(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+    async validate(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         // register masked options in the snapshot
-        const masked = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, true, snapshot.iteration);
+        const masked = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, true, parameters);
         snapshot.setOptions({
             value: masked,
             is: options.is
         });
 
         // resolve value, as it is mostly likely a template and we're not processing options as a template
-        options.value = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, snapshot.iteration);
+        options.value = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
 
-        await super.validate(options, context, snapshot);
+        await super.validate(options, context, snapshot, parameters);
     }
 
     getValidationSchema(): Joi.SchemaLike | null {
         return SwitchFlowActionHandler.validationSchema;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let action;
@@ -81,10 +81,10 @@ export class SwitchFlowActionHandler extends ActionHandler {
         if (action) {
             const idOrAlias = FBLService.extractIdOrAlias(action);
             let metadata = FBLService.extractMetadata(action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
             snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, parameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
         } else {
             snapshot.log(`Unable to find handler for value: ${options.value}`);

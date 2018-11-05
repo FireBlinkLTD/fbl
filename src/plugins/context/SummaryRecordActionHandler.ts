@@ -1,9 +1,8 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, ISummaryRecord} from '../../interfaces';
+import * as Joi from 'joi';
 
 const version = require('../../../../package.json').version;
-
-import * as Joi from 'joi';
-import {IActionHandlerMetadata, IContext, ISummaryRecord} from '../../interfaces';
 
 export class SummaryRecordActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -33,7 +32,7 @@ export class SummaryRecordActionHandler extends ActionHandler {
         return SummaryRecordActionHandler.metadata;
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         context.summary.push(<ISummaryRecord> options);
         snapshot.setContext(context);
     }

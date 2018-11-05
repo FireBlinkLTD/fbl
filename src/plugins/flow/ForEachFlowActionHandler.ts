@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext, IIteration} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
@@ -40,26 +40,24 @@ export class ForEachFlowActionHandler extends ActionHandler {
         return ForEachFlowActionHandler.validationSchema;
     }
 
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
-        options.of = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.of, context, false, snapshot.iteration);
+        options.of = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.of, context, false, parameters);
 
         if (options.async) {
-            options.async = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.async, context, false, snapshot.iteration);
+            options.async = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.async, context, false, parameters);
         }
 
-        await super.validate(options, context, snapshot);
+        await super.validate(options, context, snapshot, parameters);
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
-        let metadata = FBLService.extractMetadata(options.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
 
         const iterable = Array.isArray(options.of) ? options.of : Object.keys(options.of);
         for (let i = 0; i < iterable.length; i++) {
@@ -69,12 +67,18 @@ export class ForEachFlowActionHandler extends ActionHandler {
                 value: Array.isArray(options.of) ? options.of[i] : options.of[iterable[i]]
             };
 
+            const iterationParams = JSON.parse(JSON.stringify(parameters));
+            iterationParams.iteration = iteration;
+
+            let metadata = FBLService.extractMetadata(options.action);
+            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+
             if (options.async) {
-                promises.push((async (iter): Promise<void> => {
-                    snapshots[iter.index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iter);
-                })(iteration));
+                promises.push((async (p, m): Promise<void> => {
+                    snapshots[p.iteration.index] = await flowService.executeAction(snapshot.wd, idOrAlias, m, options.action[idOrAlias], context, p);
+                })(iterationParams, metadata));
             } else {
-                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iteration);
+                snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iterationParams);
             }
         }
 

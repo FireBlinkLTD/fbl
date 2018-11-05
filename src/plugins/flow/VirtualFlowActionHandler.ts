@@ -1,6 +1,6 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
 import * as Joi from 'joi';
-import {IActionHandlerMetadata, IContext} from '../../interfaces';
+import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {Validator} from 'jsonschema';
@@ -88,11 +88,7 @@ export class VirtualFlowActionHandler extends ActionHandler {
         return VirtualFlowActionHandler.validationSchema;
     }
 
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
-        await super.validate(options, context, snapshot);
-    }
-
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const dynamicFlowHandler = new DynamicFlowHandler(
             options.id,
             options.aliases || [],
@@ -125,7 +121,7 @@ class DynamicFlowHandler extends ActionHandler {
         };
     }
 
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         if (this.validationSchema) {
             const result = new Validator().validate(options, this.validationSchema);
             if (!result.valid) {
@@ -146,15 +142,16 @@ class DynamicFlowHandler extends ActionHandler {
         }
     }
 
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const idOrAlias = FBLService.extractIdOrAlias(this.action);
         let metadata = FBLService.extractMetadata(this.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
-        await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, null, {
-            parameters: options
-        });
+        parameters = JSON.parse(JSON.stringify(parameters));
+        parameters.parameters = options;
+
+        await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
     }
 }

@@ -1,5 +1,5 @@
 import {Inject, Service} from 'typedi';
-import {IContext, IFlow, IPlugin, IReporter} from '../interfaces';
+import {IContext, IDelegatedParameters, IFlow, IPlugin, IReporter} from '../interfaces';
 import * as Joi from 'joi';
 import {FlowService} from './index';
 import {ActionSnapshot} from '../models';
@@ -376,9 +376,10 @@ export class FBLService {
      * @param {string} wd Working Directory
      * @param {IFlow} flow,
      * @param {IContext} context
+     * @param {IDelegatedParameters} parameters
      * @returns {Promise<ActionSnapshot>}
      */
-    async execute(wd: string, flow: IFlow, context: IContext): Promise<ActionSnapshot> {
+    async execute(wd: string, flow: IFlow, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
         const result = Joi.validate(flow, FBLService.validationSchema);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
@@ -388,10 +389,10 @@ export class FBLService {
 
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         let metadata = FBLService.extractMetadata(flow.pipeline);
-        metadata = this.flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, metadata, context, false);
+        metadata = this.flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, metadata, context, false, parameters);
 
         const options = flow.pipeline[idOrAlias];
 
-        return await this.flowService.executeAction(wd, idOrAlias, metadata, options, context);
+        return await this.flowService.executeAction(wd, idOrAlias, metadata, options, context, parameters);
     }
 }

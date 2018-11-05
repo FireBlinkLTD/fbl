@@ -43,22 +43,22 @@ class PromptActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot)
+            actionHandler.validate([], context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot)
+            actionHandler.validate({}, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(true, context, snapshot)
+            actionHandler.validate(true, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(1234.124124, context, snapshot)
+            actionHandler.validate(1234.124124, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -68,7 +68,7 @@ class PromptActionHandlerTestSuite {
                     ctx: '$.test'
                 },
                 schema: {}
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
 
         await chai.expect(
@@ -80,7 +80,7 @@ class PromptActionHandlerTestSuite {
                 schema: {
                     type: 'object' // not valid type
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.rejected;
     }
 
@@ -88,7 +88,7 @@ class PromptActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler.validate({
@@ -96,7 +96,7 @@ class PromptActionHandlerTestSuite {
                 assignResponseTo: {
                     ctx: '$.test'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -108,7 +108,7 @@ class PromptActionHandlerTestSuite {
                 schema: {
                     type: 'number'
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
 
         await chai.expect(
@@ -121,7 +121,7 @@ class PromptActionHandlerTestSuite {
                     type: 'string',
                     minLength: 10
                 }
-            }, context, snapshot)
+            }, context, snapshot, {})
         ).to.be.not.rejected;
     }
 
@@ -129,7 +129,7 @@ class PromptActionHandlerTestSuite {
     async testDefaults(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const line = 'l1n3';
 
@@ -139,7 +139,7 @@ class PromptActionHandlerTestSuite {
                 assignResponseTo: {
                     ctx: '$.test'
                 }
-            }, context, snapshot),
+            }, context, snapshot, {}),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printLine(line);
@@ -155,7 +155,7 @@ class PromptActionHandlerTestSuite {
     async testNumber(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const line = '344.53';
 
@@ -172,7 +172,7 @@ class PromptActionHandlerTestSuite {
                 assignResponseTo: {
                     secrets: '$.test'
                 }
-            }, context, snapshot),
+            }, context, snapshot, {}),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printLine(line);
@@ -188,7 +188,7 @@ class PromptActionHandlerTestSuite {
     async testInteger(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const line = '344';
 
@@ -205,7 +205,7 @@ class PromptActionHandlerTestSuite {
                 assignResponseTo: {
                     secrets: '$.test'
                 }
-            }, context, snapshot),
+            }, context, snapshot, {}),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printLine(line);
@@ -221,7 +221,7 @@ class PromptActionHandlerTestSuite {
     async testStringWithValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const invalid = 'test';
         const correct = 'tst';
@@ -240,7 +240,7 @@ class PromptActionHandlerTestSuite {
                 assignResponseTo: {
                     secrets: '$.test'
                 }
-            }, context, snapshot),
+            }, context, snapshot, {}),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printLine(invalid);
@@ -259,7 +259,7 @@ class PromptActionHandlerTestSuite {
     async cancelled(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0);
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await Promise.all([
             chai.expect(
@@ -268,7 +268,7 @@ class PromptActionHandlerTestSuite {
                     assignResponseTo: {
                         ctx: '$.test'
                     }
-                }, context, snapshot),
+                }, context, snapshot, {}),
                 'Prompt canceled by user'
             ).to.be.rejected,
             new Promise<void>(resolve => {

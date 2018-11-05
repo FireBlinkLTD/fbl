@@ -25,12 +25,21 @@ class JsonReporterTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
 
+        const parameters = {
+            parameters: {
+                test: true
+            },
+            iteration: {
+                index: 1
+            }
+        };
+
         const reportSrc = <IReport> {
             context: {
                 initial: ContextUtil.toBase(context),
                 final: ContextUtil.toBase(context)
             },
-            snapshot: new ActionSnapshot('test', {}, '.', 0)
+            snapshot: new ActionSnapshot('test', {}, '.', 0, parameters)
         };
 
         await reporter.generate(file, {}, reportSrc);
@@ -57,6 +66,7 @@ class JsonReporterTestSuite {
             snapshot: {
                 idOrAlias: 'test',
                 metadata: {},
+                parameters: parameters,
                 wd: '.',
                 idx: 0,
                 ignoreChildFailure: false,
