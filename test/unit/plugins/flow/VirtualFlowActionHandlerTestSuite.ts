@@ -160,6 +160,55 @@ class VirtualFlowActionHandlerTestSuite {
     }
 
     @test()
+    async testDefaults(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+
+        let opts;
+        flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
+            opts = options;
+        }));
+
+        const actionOptions = [
+            {
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    parametersSchema: {
+                        type: 'object',
+                        properties: {
+                            tst: {
+                                type: 'string'
+                            }
+                        }
+                    },
+                    defaults: {
+                        values: {
+                            tst: 'ue_'
+                        },
+                        mergeFunction: 'return { tst: options.tst + defaults.tst };'
+                    },
+                    action: {
+                        [DummyActionHandler.ID]: '<%- parameters.tst %>'
+                    }
+                }
+            },
+            {
+                'virtual.test': {
+                    'tst': '_val'
+                }
+            }
+        ];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, '_value_');
+    }
+
+    @test()
     async failVirtualValidation(): Promise<void> {
         const flowService = Container.get(FlowService);
         flowService.debug = true;
