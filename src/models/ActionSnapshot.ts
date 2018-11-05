@@ -2,10 +2,14 @@ import {Container} from 'typedi';
 import {FlowService} from '../services';
 import {IContext, IIteration} from '../interfaces';
 import {IMetadata} from '../interfaces/IMetadata';
+import {ContextUtil} from '../utils';
 
 const humanizeDuration = require('humanize-duration');
+const deepObjectDiff = require('deep-object-diff');
 
 export class ActionSnapshot {
+    private previousContextState: IContext;
+
     private createdAt: Date;
     private completedAt: Date;
     private steps: IActionStep[];
@@ -55,17 +59,36 @@ export class ActionSnapshot {
     }
 
     /**
+     * Set initial context state before applying any actions
+     * @param {IContext} context
+     */
+    setInitialContextState(context: IContext) {
+        if (Container.get(FlowService).debug) {
+            this.previousContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+        }
+    }
+
+    /**
      * Register context
      * @param context
      */
     setContext(context: IContext) {
         if (Container.get(FlowService).debug) {
-            // only "ctx" and "entities" fields should be exposed
-            this.registerStep('context', JSON.parse(JSON.stringify({
-                ctx: context.ctx,
-                entities: context.entities,
-                summary: context.summary
-            })));
+            // only selected fields should be exposed
+            const newState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+
+            // extract diff
+            const diff = deepObjectDiff.detailedDiff(this.previousContextState, newState);
+            this.previousContextState = newState;
+
+            const changes = Object.keys(diff.added).length +
+                Object.keys(diff.deleted).length +
+                Object.keys(diff.updated).length;
+
+            // store diff
+            if (changes > 0) {
+                this.registerStep('context', diff);
+            }
         }
     }
 

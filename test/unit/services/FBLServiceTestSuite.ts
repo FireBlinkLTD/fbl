@@ -150,13 +150,7 @@ export class FBLServiceTestSuite {
         }, context);
 
         const snapshotOptionsSteps = snapshot.getSteps().filter(s => s.type === 'options');
-        const contextOptionsSteps = snapshot.getSteps().filter(s => s.type === 'context');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
-        assert.deepStrictEqual(contextOptionsSteps[contextOptionsSteps.length - 1].payload, {
-            ctx: context.ctx,
-            entities: context.entities,
-            summary: context.summary
-        });
         assert.strictEqual(result, 'test123');
 
         await chai.expect(fbl.execute(

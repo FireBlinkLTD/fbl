@@ -6,11 +6,12 @@ import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
 import {homedir} from 'os';
-import {IContext, ISummaryRecord} from '../interfaces';
+import {IContext, IFlowLocationOptions, IReport, ISummaryRecord} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
+import {ActionSnapshot} from '../models';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -22,6 +23,7 @@ export class CLIService {
 
     private colors = false;
     private flowFilePath: string;
+    private flowTarget: string;
     private reportFilePath?: string;
     private reportFormat?: string;
     private globalEJSDelimiter?: string;
@@ -40,6 +42,7 @@ export class CLIService {
     private configKVPairs: string[] = [];
     private secretKVPairs: string[] = [];
     private reportKVPairs: string[] = [];
+    private httpHeaders: {[key: string]: string} = {};
 
     @Inject(() => FBLService)
     fbl: FBLService;
@@ -86,10 +89,20 @@ export class CLIService {
         }
 
         const flow = await this.flowService.readFlowFromFile(
-            this.flowFilePath,
+            <IFlowLocationOptions> {
+                path: this.flowFilePath,
+                http: {
+                    headers: this.httpHeaders
+                },
+                target: this.flowTarget
+            },
             context,
             '.'
         );
+
+        const initialContextState = this.reportFilePath ?
+            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
+            null;
 
         const snapshot = await this.fbl.execute(
             flow.wd,
@@ -97,10 +110,25 @@ export class CLIService {
             context
         );
 
+        const finalContextState = this.reportFilePath ?
+            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
+            null;
+
         if (this.reportFilePath) {
+            const report = <IReport> {
+                context: {
+                    initial: initialContextState,
+                    final: finalContextState
+                },
+                snapshot: snapshot
+            };
+
             const options = {};
             await this.convertKVPairs(this.reportKVPairs, options);
-            await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, snapshot);
+
+            // generate report
+            await this.fbl.getReporter(this.reportFormat)
+                .generate(this.reportFilePath, options, report);
         }
 
         // remove all temp files and folders
@@ -256,6 +284,13 @@ export class CLIService {
             },
 
             {
+                flags: '-t --target <path>',
+                description: [
+                    'Custom relative path inside the packaged flow (tarball).'
+                ]
+            },
+
+            {
                 flags: '--report-option <key=value>',
                 description: [
                     'Key value pair of report option',
@@ -301,6 +336,17 @@ export class CLIService {
                 description: [
                     'Local EJS template delimiter. Default: %'
                 ]
+            },
+
+            {
+                flags: '--http-header <header>',
+                description: [
+                    'Custom HTTP headers to send with GET request to fetch flow from remote location.'
+                ],
+                fn: (val: string) => {
+                    const name = val.split(':')[0];
+                    this.httpHeaders[name] = val.substring(name.length + 1).trimLeft();
+                }
             },
 
             {
@@ -357,6 +403,7 @@ export class CLIService {
 
         this.flowFilePath = commander.file;
         this.colors = commander.colors;
+        this.flowTarget = commander.target;
 
         if (commander.unsafePlugins) {
             this.fbl.allowUnsafePlugins = true;

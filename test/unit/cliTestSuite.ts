@@ -7,7 +7,11 @@ import {ChildProcessService, CLIService, TempPathsRegistry} from '../../src/serv
 import {basename, dirname, join, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
-import {FSUtil} from '../../src/utils';
+import {ContextUtil, FSUtil} from '../../src/utils';
+import {DummyServerWrapper, IDummyServerWrapperConfig} from '../assets/dummy.http.server.wrapper';
+import {c} from 'tar';
+import {IContextBase} from '../../src/interfaces';
+import {ISummaryRecord} from '../../src/interfaces/ISummaryRecord';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,6 +23,8 @@ const fblVersion = require('../../../package.json').version;
 class CliTestSuite {
     private static existingGlobalConfig?: string;
     private static globalConfigExists?: boolean;
+
+    private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async before(): Promise<void> {
         if (CliTestSuite.globalConfigExists === undefined) {
@@ -43,6 +49,12 @@ class CliTestSuite {
 
         await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
+
+        for (const dummyServerWrapper of this.dummyServerWrappers) {
+            await dummyServerWrapper.stop();
+        }
+
+        this.dummyServerWrappers = [];
     }
 
     /**
@@ -157,17 +169,51 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            ct: 'yes',
-            custom_ct: 'file1',
-            test: {
-                ct: 'yes',
-                st: 'yes',
-                custom_ct: 'file1',
-                custom_st: 'file2'
+        assert.deepStrictEqual(
+            report.context.initial,
+            <IContextBase> {
+                ctx: {
+                    ct: 'yes',
+                    custom_ct: 'file1'
+                },
+                summary: <ISummaryRecord[]> [],
+                entities: ContextUtil.generateEmptyContext().entities
             }
+        );
+
+        assert.deepStrictEqual(
+            report.context.final,
+            <IContextBase> {
+                ctx: {
+                    ct: 'yes',
+                    custom_ct: 'file1',
+                    test: {
+                        ct: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2',
+                        st: 'yes'
+                    }
+                },
+                summary: <ISummaryRecord[]> [],
+                entities: ContextUtil.generateEmptyContext().entities
+            }
+        );
+
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: {
+                        ct: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2',
+                        st: 'yes'
+                    }
+                }
+            },
+            deleted: {},
+            updated: {},
         });
     }
 
@@ -388,17 +434,21 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            ct: 'yes',
-            custom_ct: 'file1',
-            test: {
-                ct: 'yes',
-                st: 'yes',
-                custom_ct: 'file1',
-                custom_st: 'file2'
-            }
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: {
+                        ct: 'yes',
+                        st: 'yes',
+                        custom_ct: 'file1',
+                        custom_st: 'file2'
+                    }
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
@@ -954,18 +1004,39 @@ class CliTestSuite {
         }
 
         const report = JSON.parse(await promisify(readFile)(reportFile, 'utf8'));
-        const children = report.steps.filter((v: IActionStep) => v.type === 'child');
-        const contextSteps = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const children = report.snapshot.steps.filter((v: IActionStep) => v.type === 'child');
+        const contextSteps1 = children[children.length - 3].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const contextSteps2 = children[children.length - 2].payload.steps.filter((v: IActionStep) => v.type === 'context');
+        const contextSteps3 = children[children.length - 1].payload.steps.filter((v: IActionStep) => v.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[0].payload.ctx, {
-            test_1: 1,
-            test_2: 2
+        assert.deepStrictEqual(contextSteps1[0].payload, {
+            added: {
+                ctx: {
+                    test_1: 1
+                }
+            },
+            deleted: {},
+            updated: {}
         });
 
-        assert.deepStrictEqual(contextSteps[1].payload.ctx, {
-            test_1: 1,
-            test_2: 2,
-            local: 1
+        assert.deepStrictEqual(contextSteps2[0].payload, {
+            added: {
+                ctx: {
+                    test_2: 2
+                }
+            },
+            deleted: {},
+            updated: {}
+        });
+
+        assert.deepStrictEqual(contextSteps3[0].payload, {
+            added: {
+                ctx: {
+                    local: 1
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
@@ -1058,10 +1129,16 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-        const contextSteps = report.steps.filter((s: IActionStep) => s.type === 'context');
+        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
 
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload.ctx, {
-            test: true
+        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
+            added: {
+                ctx: {
+                    test: true
+                }
+            },
+            deleted: {},
+            updated: {}
         });
     }
 
@@ -1191,5 +1268,62 @@ class CliTestSuite {
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
+    }
+
+    @test()
+    async testHttpHeaders(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const flow: any = {
+            pipeline: {
+                ctx: {
+                    '$.test': {
+                        inline: {
+                            tst: true
+                        }
+                    }
+                }
+            }
+        };
+
+        const flowFile = await tempPathsRegistry.createTempFile();
+        const tarballFile = await tempPathsRegistry.createTempFile(false, '.tar.gz');
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        await c({
+            gzip: true,
+            cwd: dirname(flowFile),
+            file: tarballFile
+        }, [
+            basename(flowFile)
+        ]);
+
+        const port = 62999;
+        const server = new DummyServerWrapper(<IDummyServerWrapperConfig> {
+            port: port,
+            file: tarballFile
+        });
+        await server.start();
+        this.dummyServerWrappers.push(server);
+
+        const result = await CliTestSuite.exec(
+            'node',
+            [
+                'dist/src/cli.js',
+                '--no-colors',
+                '--http-header', '"test1: y1"',
+                '--http-header', '"test2:y2"',
+                '--http-header', '"test3:    y3 "',
+                '-t', basename(flowFile),
+                `http://localhost:${port}`
+            ]
+        );
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        assert.strictEqual(server.lastRequest.headers.test1, 'y1');
+        assert.strictEqual(server.lastRequest.headers.test2, 'y2');
+        assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
     }
 }
