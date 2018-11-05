@@ -85,8 +85,8 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 **Example 1: Specify flow file**
 
 ```yaml
-# Run steps from external flow file
-@: flow.yml 
+# Run steps from external flow file or package (*.tar.gz)
+'@': flow.yml 
 ```
 
 **Example 2: Specify directory**
@@ -94,7 +94,38 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 ```yaml
 # Run steps from external flow file (index.yml) inside "flow" directory
 # Note: slash in the end of path is not required
-@: flow/ 
+'@': flow/ 
+```
+
+**Example 3: Specify url to download a package**
+```yaml
+# Run steps from external flow file (index.yml) inside "flow" directory
+# Note: slash in the end of path is not required
+'@': http://some.host/flow.tar.gz 
+```
+
+**Example 4: Specify target inside the package**
+```yaml
+'@':
+  # path or url to download the package
+  path: flow.tar.gz
+  # [optional] specify custom flow entry file name inside the package
+  target: custom.yml
+```
+
+**Example 5: Custom HTTP headers**
+
+```yaml
+'@':
+  # path or url to download the package
+  path: http://some.host/flow.tar.gz
+  # [optional] specify custom flow entry file name inside the package
+  target: custom.yml
+  # [optional] http parameters
+  http: 
+    # [optional] custom http headers
+    headers: 
+      Authorization: Basic YWRtaW46YWRtaW4=
 ```
 
 ## Action Handler: Repeat flow
@@ -287,7 +318,7 @@ Allows to create virtual action handler for another action (that can be represen
     - handler.alias
   
   # [optional] JSON Schema of options that can/should be passed to the generated handler     
-  validationSchema:
+  parametersSchema:
     type: object
     properties:
       test: 
