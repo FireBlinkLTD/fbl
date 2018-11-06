@@ -4,12 +4,9 @@ import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 
-const version = require('../../../../package.json').version;
-
 export class RepeatFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.repeat',
-        version: version,
         aliases: [
             'fbl.flow.repeat',
             'flow.repeat',

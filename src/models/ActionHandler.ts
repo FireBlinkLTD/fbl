@@ -22,7 +22,7 @@ export abstract class ActionHandler {
      * @param parameters
      * @returns {Promise<void>}
      */
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: {[key: string]: any}): Promise<void> {
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const schema = this.getValidationSchema();
         if (schema) {
             const result = Joi.validate(options, schema);

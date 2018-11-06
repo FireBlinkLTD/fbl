@@ -8,8 +8,10 @@ Available steps:
 - [attachment](#action-handler-attached-flow)
 - [repeat](#action-handler-repeat-flow)
 - [for each of](#action-handler-for-each)
+- [while](#action-handler-while)
 - [switch (conditional)](#action-handler-switch-flow)
 - [try-catch-finally](#action-handler-try---catch---finally-flow)
+- [sleep](#action-handler-sleep)
 - [template](#action-handler-template)
 - [virtual](#action-handler-virtual)
 - [error](#action-handler-error)
@@ -189,6 +191,7 @@ each:
       test_<%- iteration.index %>: 
         # assign 1a to test_0 and b2 to test_1 values        
         inline: <%- iteration.value %><%- iteration.name %>
+```
 
 ## Action Handler: Switch flow
 
@@ -223,6 +226,60 @@ Allows to run action based on some condition
     @: else.yml
 ```
 
+## Action Handler: While
+
+Runs action till condition is successful or not (based on configuration).
+
+**ID:** `com.fireblink.fbl.flow.while`
+
+**Aliases:**
+ - `fbl.flow.while`
+ - `flow.while`
+ - `while`
+
+**Example: Positive condition check** 
+```yaml
+while:
+    # [required] value to check
+    value: <%- ctx.something %>
+    # [required] if value IS equal to provided one - action will get executed
+    is: true
+    # [required] action to run
+    action:
+      '@': something.yml
+```
+
+**Example: Negative condition check** 
+```yaml
+while:
+    # [required] value to check
+    value: <%- ctx.something %>
+    # [required] if value IS NOT equal to provided one - action will get executed
+    not: true
+    # [required] action to run
+    action:
+      '@': something.yml
+```
+ 
+## Action Handler: Sleep
+
+Sleep for a given amount of seconds.
+
+**ID:** `com.fireblink.fbl.flow.sleep`
+
+**Aliases:**
+ - `fbl.flow.sleep`
+ - `flow.sleep`
+ - `sleep`
+ 
+**Example:**
+
+```yaml
+# sleep for a minute
+sleep: 60
+```
+ 
+ 
 ## Action Handler: Try - Catch - Finally Flow
 
 Allows to run sub-step in isolation causing its failure to be ignored by parent step.

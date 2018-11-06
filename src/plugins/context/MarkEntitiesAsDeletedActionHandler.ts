@@ -2,12 +2,9 @@ import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {BaseMarkEntityAsActionHandler} from './BaseMarkEntityAsActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class MarkEntitiesAsDeletedActionHandler extends BaseMarkEntityAsActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.context.entities.deleted',
-        version: version,
         aliases: [
             'fbl.context.entities.deleted',
             'context.entities.deleted',

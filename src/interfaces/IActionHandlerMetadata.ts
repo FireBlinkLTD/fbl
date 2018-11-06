@@ -10,11 +10,6 @@ export interface IActionHandlerMetadata {
     aliases?: string[];
 
     /**
-     * Version of action handler
-     */
-    version: string;
-
-    /**
      * If provided options will not be treated as EJS template and as a result won't be resolved
      */
     skipTemplateProcessing?: boolean;

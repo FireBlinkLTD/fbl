@@ -5,12 +5,9 @@ import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class PromptActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.prompt',
-        version: version,
         aliases: [
             'fbl.cli.prompts.prompt',
             'cli.prompts.prompt',

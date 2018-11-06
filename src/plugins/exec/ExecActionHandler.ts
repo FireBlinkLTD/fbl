@@ -3,12 +3,9 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import * as Joi from 'joi';
 import {BaseExecutableActionHandler} from './BaseExecutableActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class ExecActionHandler extends BaseExecutableActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.exec',
-        version: version,
         aliases: [
             'fbl.exec',
             'exec'

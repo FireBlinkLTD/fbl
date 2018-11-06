@@ -2,12 +2,9 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import {BaseValuesAssignmentActionHandler} from './BaseValuesAssignmentActionHandler';
 import {ActionSnapshot} from '../../models';
 
-const version = require('../../../../package.json').version;
-
 export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.context.ctx',
-        version: version,
         aliases: [
             'fbl.context.ctx',
             'context.ctx',
