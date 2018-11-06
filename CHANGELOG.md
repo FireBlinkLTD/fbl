@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.0) - 2018-11-06
+
+### Added
+
+- [#178](https://github.com/FireBlinkLTD/fbl/issues/178) - New action handler "while" that allow to repeat some 
+action over and over again till it matches something or still not (configurable).
+- [#179](https://github.com/FireBlinkLTD/fbl/issues/179) - New action handler "sleep" that allows to wait for given amount of seconds.
+
 ## [0.5.1](https://github.com/FireBlinkLTD/fbl/releases/tag/0.5.1) - 2018-11-05
 
 Contains JS/TS API breaking changes for ActionHandler.ts.
