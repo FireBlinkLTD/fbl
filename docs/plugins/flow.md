@@ -11,6 +11,7 @@ Available steps:
 - [while](#action-handler-while)
 - [switch (conditional)](#action-handler-switch-flow)
 - [try-catch-finally](#action-handler-try---catch---finally-flow)
+- [sleep](#action-handler-sleep)
 - [template](#action-handler-template)
 - [virtual](#action-handler-virtual)
 - [error](#action-handler-error)
@@ -259,6 +260,25 @@ while:
     action:
       '@': something.yml
 ```
+ 
+## Action Handler: Sleep
+
+Sleep for a given amount of seconds.
+
+**ID:** `com.fireblink.fbl.flow.sleep`
+
+**Aliases:**
+ - `fbl.flow.sleep`
+ - `flow.sleep`
+ - `sleep`
+ 
+**Example:**
+
+```yaml
+# sleep for a minute
+sleep: 60
+```
+ 
  
 ## Action Handler: Try - Catch - Finally Flow
 

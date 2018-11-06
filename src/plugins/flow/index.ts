@@ -10,6 +10,7 @@ import {TryCatchFinallyFlowActionHandler} from './TryCatchFinallyFlowActionHandl
 import {VirtualFlowActionHandler} from './VirtualFlowActionHandler';
 import {ErrorActionHandler} from './ErrorActionHandler';
 import {WhileActionHandler} from './WhileActionHandler';
+import {SleepFlowActionHandler} from './SleepFlowActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -27,6 +28,7 @@ module.exports = <IPlugin> {
         new ForEachFlowActionHandler(),
         new ParallelFlowActionHandler(),
         new SequenceFlowActionHandler(),
+        new SleepFlowActionHandler(),
         new SwitchFlowActionHandler(),
         new RepeatFlowActionHandler(),
         new TemplateFlowActionHandler(),
