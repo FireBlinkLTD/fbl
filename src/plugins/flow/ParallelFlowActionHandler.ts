@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 
-const version = require('../../../../package.json').version;
-
 export class ParallelFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.parallel',
-        version: version,
         aliases: [
             'fbl.flow.parallel',
             'flow.parallel',

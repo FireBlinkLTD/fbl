@@ -3,12 +3,9 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import {FSUtil} from '../../utils';
 import {BaseCryptoActionHandler} from './BaseCryptoActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class EncryptActionHandler extends BaseCryptoActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.encrypt',
-        version: version,
         aliases: [
             'fbl.fs.encrypt',
             'fs.encrypt',

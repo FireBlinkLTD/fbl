@@ -7,12 +7,9 @@ import {BaseExecutableActionHandler} from './BaseExecutableActionHandler';
 import {Container} from 'typedi';
 import {TempPathsRegistry} from '../../services';
 
-const version = require('../../../../package.json').version;
-
 export class ShellActionHandler extends BaseExecutableActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.shell',
-        version: version,
         aliases: [
             'fbl.shell',
             'shell'

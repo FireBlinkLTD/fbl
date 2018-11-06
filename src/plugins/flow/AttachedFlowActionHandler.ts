@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IFlowLocationOptions} from '../../interfaces';
 
-const version = require('../../../../package.json').version;
-
 export class AttachedFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.attachment',
-        version: version,
         aliases: [
             'fbl.flow.attachment',
             'flow.attachment',

@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class MultiSelectActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.multiselect',
-        version: version,
         aliases: [
             'fbl.cli.prompts.multiselect',
             'cli.prompts.multiselect',

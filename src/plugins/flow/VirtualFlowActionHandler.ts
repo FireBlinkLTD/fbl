@@ -4,9 +4,7 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {Validator} from 'jsonschema';
-import {AnySchema, defaults} from 'joi';
-
-const version = require('../../../../package.json').version;
+import {AnySchema} from 'joi';
 
 const createJsonSchema = (): AnySchema => {
     return Joi.object({
@@ -69,7 +67,6 @@ interface IVirtualDefaults {
 export class VirtualFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.virtual',
-        version: version,
         aliases: [
             'fbl.flow.virtual',
             'flow.virtual',
@@ -148,7 +145,6 @@ class DynamicFlowHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
         return <IActionHandlerMetadata> {
             id: this.id,
-            version: version,
             aliases: this.aliases
         };
     }

@@ -8,12 +8,9 @@ import {dirname} from 'path';
 import {Container} from 'typedi';
 import {FlowService, TempPathsRegistry} from '../../services';
 
-const version = require('../../../../package.json').version;
-
 export class WriteToFileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.file.write',
-        version: version,
         aliases: [
             'fbl.fs.file.write',
             'fs.file.write',

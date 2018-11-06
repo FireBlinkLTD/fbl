@@ -28,8 +28,7 @@ class DummyActionHandler extends ActionHandler {
 
     getMetadata(): IActionHandlerMetadata {
         return  <IActionHandlerMetadata> {
-            id: DummyActionHandler.ID,
-            version: '1.0.0'
+            id: DummyActionHandler.ID
         };
     }
 

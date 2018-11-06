@@ -9,6 +9,7 @@ import {TemplateFlowActionHandler} from './TemplateFlowActionHandler';
 import {TryCatchFinallyFlowActionHandler} from './TryCatchFinallyFlowActionHandler';
 import {VirtualFlowActionHandler} from './VirtualFlowActionHandler';
 import {ErrorActionHandler} from './ErrorActionHandler';
+import {WhileActionHandler} from './WhileActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -30,6 +31,7 @@ module.exports = <IPlugin> {
         new RepeatFlowActionHandler(),
         new TemplateFlowActionHandler(),
         new TryCatchFinallyFlowActionHandler(),
-        new VirtualFlowActionHandler()
+        new VirtualFlowActionHandler(),
+        new WhileActionHandler()
     ]
 };

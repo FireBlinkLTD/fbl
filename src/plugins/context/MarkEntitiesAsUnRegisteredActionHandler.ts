@@ -2,12 +2,9 @@ import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {BaseMarkEntityAsActionHandler} from './BaseMarkEntityAsActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class MarkEntitiesAsUnRegisteredActionHandler extends BaseMarkEntityAsActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.context.entities.unregistered',
-        version: version,
         aliases: [
             'fbl.context.entities.unregistered',
             'context.entities.unregistered',

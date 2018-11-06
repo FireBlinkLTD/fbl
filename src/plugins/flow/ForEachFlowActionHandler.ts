@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 
-const version = require('../../../../package.json').version;
-
 export class ForEachFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.foreach',
-        version: version,
         aliases: [
             'fbl.flow.foreach',
             'flow.foreach',

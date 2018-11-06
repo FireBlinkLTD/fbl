@@ -14,7 +14,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 @suite()
-export class WriteToFileTestSuite {
+class WriteToFileTestSuite {
     async after(): Promise<void> {
         await Container.get(TempPathsRegistry).cleanup();
         Container.reset();

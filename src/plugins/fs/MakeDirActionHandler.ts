@@ -3,12 +3,9 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import * as Joi from 'joi';
 import {FSUtil} from '../../utils';
 
-const version = require('../../../../package.json').version;
-
 export class MakeDirActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.dir.create',
-        version: version,
         aliases: [
             'fbl.fs.dir.create',
             'fs.dir.create',

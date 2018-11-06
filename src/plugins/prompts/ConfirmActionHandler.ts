@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
 
-const version = require('../../../../package.json').version;
-
 export class ConfirmActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.cli.prompts.confirm',
-        version: version,
         aliases: [
             'fbl.cli.prompts.confirm',
             'cli.prompts.confirm',

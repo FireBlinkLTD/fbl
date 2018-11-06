@@ -2,12 +2,9 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, ISummaryRecord} from '../../interfaces';
 import * as Joi from 'joi';
 
-const version = require('../../../../package.json').version;
-
 export class SummaryRecordActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.context.summary',
-        version: version,
         aliases: [
             'fbl.context.summary',
             'context.summary',

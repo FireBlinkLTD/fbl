@@ -3,12 +3,10 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
-const version = require('../../../../package.json').version;
 
 export class TryCatchFinallyFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.try',
-        version: version,
         aliases: [
             'fbl.flow.try',
             'flow.try',

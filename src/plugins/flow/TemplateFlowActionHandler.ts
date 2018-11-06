@@ -5,12 +5,9 @@ import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {safeLoad} from 'js-yaml';
 
-const version = require('../../../../package.json').version;
-
 export class TemplateFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.flow.template',
-        version: version,
         aliases: [
             'fbl.flow.template',
             'flow.template',

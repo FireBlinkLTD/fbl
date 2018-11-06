@@ -4,12 +4,9 @@ import * as Joi from 'joi';
 import {FSUtil} from '../../utils';
 import {sep} from 'path';
 
-const version = require('../../../../package.json').version;
-
 export class MovePathActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
         id: 'com.fireblink.fbl.fs.move',
-        version: version,
         aliases: [
             'fbl.fs.move',
             'fbl.fs.mv',
