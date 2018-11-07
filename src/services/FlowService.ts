@@ -1,5 +1,5 @@
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
-import {IContext, IFlow, IFlowLocationOptions, IIteration} from '../interfaces';
+import {IContext, IDelegatedParameters, IFlow, IFlowLocationOptions} from '../interfaces';
 import {safeLoad, dump} from 'js-yaml';
 import {render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
@@ -14,7 +14,6 @@ import {createWriteStream, readdir, unlink} from 'fs';
 import {promisify} from 'util';
 import * as got from 'got';
 import {TempPathsRegistry} from './TempPathsRegistry';
-import {IDelegatedParameters} from '../interfaces/IDelegatedParameters';
 
 const ejsLint = require('ejs-lint');
 
@@ -54,7 +53,7 @@ export class FlowService {
      * @param {IMetadata} metadata
      * @param options
      * @param {IContext} context
-     * @param {IIteration} [iteration] - child execution iteration
+     * @param {IDelegatedParameters} parameters
      * @param [parameters]
      * @returns {Promise<void>}
      */

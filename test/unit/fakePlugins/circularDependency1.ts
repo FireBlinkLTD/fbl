@@ -13,8 +13,7 @@ module.exports = <IPlugin> {
     requires: {
         fbl: `>=${version}`,
         plugins: {
-            'fbl.core.flow': `~${version}`,
-            [join(__dirname, 'circularDependency1')]: '>=0.0.0'
+            [join(__dirname, 'circularDependency2')]: '>=0.0.0'
         }
     }
 };

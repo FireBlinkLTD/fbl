@@ -9,7 +9,7 @@ import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
 import {boolean} from 'joi';
-import {join, resolve} from 'path';
+import {resolve} from 'path';
 import {FSUtil} from '../utils';
 
 const requireg = require('requireg');
@@ -48,6 +48,7 @@ const joiStepSchemaExt = Joi.extend({
 @Service()
 export class FBLService {
     private plugins: {[name: string]: IPlugin} = {};
+    private processedPlugins: {[name: string]: string} = {};
 
     public static METADATA_PREFIX = '$';
 
@@ -62,7 +63,7 @@ export class FBLService {
         requires: Joi.object({
             fbl: Joi.string().min(1),
             plugins: Joi.object().min(1).pattern(
-                /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/,
+                /^.*$/,
                         Joi.string().min(1)
             ),
             applications: Joi.array().items(Joi.string().min(1)).min(1)
@@ -150,6 +151,7 @@ export class FBLService {
      */
     registerPlugin(plugin: IPlugin): void {
         this.plugins[plugin.name] = plugin;
+        this.processedPlugins[plugin.name] = plugin.version;
 
         if (plugin.actionHandlers) {
             plugin.actionHandlers.forEach(actionHander => {
@@ -245,11 +247,16 @@ export class FBLService {
      * @param {boolean} dryRun if true plugin just be verified, not actually registered
      */
     async validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], wd: string, dryRun: boolean): Promise<void> {
-        let plugin = this.plugins[pluginName];
+        let version = this.processedPlugins[pluginName];
 
-        if (!plugin) {
+        if (!version) {
             try {
-                plugin = await FBLService.requirePlugin(pluginName, wd);
+                const plugin = await FBLService.requirePlugin(pluginName, wd);
+
+                version = plugin.version;
+                this.processedPlugins[plugin.name] = plugin.version;
+                this.processedPlugins[pluginName] = plugin.version;
+
                 await this.validatePlugin(plugin, wd);
 
                 /* istanbul ignore else */
@@ -261,8 +268,8 @@ export class FBLService {
             }
         }
 
-        if (plugin && !semver.satisfies(plugin.version, pluginExpectedVersion)) {
-            errors.push(`Actual plugin ${pluginName.red} version ${plugin.version.red} doesn't satisfy required ${pluginExpectedVersion.red}`);
+        if (version && !semver.satisfies(version, pluginExpectedVersion)) {
+            errors.push(`Actual plugin ${pluginName.red} version ${version.red} doesn't satisfy required ${pluginExpectedVersion.red}`);
         }
     }
 
