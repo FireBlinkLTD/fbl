@@ -792,7 +792,8 @@ class CliTestSuite {
             requires: {
                 fbl: `>=${fblVersion}`,
                 plugins: {
-                    [plugin.name]: `~${plugin.version}`
+                    [plugin.name]: `~${plugin.version}`,
+                    [join(__dirname, '../../src/plugins/flow')]: `~${plugin.version}`
                 },
                 applications: [
                     'echo'
