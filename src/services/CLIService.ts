@@ -11,7 +11,6 @@ import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
-import {ActionSnapshot} from '../models';
 
 const prompts = require('prompts');
 const requireg = require('requireg');

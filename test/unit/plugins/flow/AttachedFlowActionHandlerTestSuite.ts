@@ -533,6 +533,14 @@ class AttachedFlowActionHandlerTestSuite {
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
     }
 
+    @test()
+    async correctCacheMatch(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const wd = await tempPathsRegistry.createTempDir();
+
+
+    }
+
     private static async prepareForTarballTest(dummyActionHandlerFn?: Function, fileName = 'index.yml'): Promise<string> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
