@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.0) - 2018-11-08
+
+## Fixed
+
+- [#186](https://github.com/FireBlinkLTD/fbl/issues/186) - Fixed issue when cached resolved flow was not counting full 
+path, but just relative and when 2 separate subflows were referencing different files with same relative path but 
+different absolute - first cached was returned for both.
+
+## Changes
+
+- [#184](https://github.com/FireBlinkLTD/fbl/issues/184) - "ctx" and "secrets" now allowing assignment any value to non-root path, not just object.
+
 ## [1.0.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.0) - 2018-11-07
 
 ## Fixed
