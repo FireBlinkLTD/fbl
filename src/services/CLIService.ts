@@ -89,7 +89,7 @@ export class CLIService {
 
         const flow = await this.flowService.readFlowFromFile(
             <IFlowLocationOptions> {
-                path: this.flowFilePath,
+                path: FSUtil.getAbsolutePath(this.flowFilePath, process.cwd()),
                 http: {
                     headers: this.httpHeaders
                 },
@@ -97,7 +97,7 @@ export class CLIService {
             },
             context,
             {},
-            '.'
+            process.cwd()
         );
 
         const initialContextState = this.reportFilePath ?
