@@ -11,7 +11,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         .pattern(
             /^\$(\.[^.]+)*$/,
             Joi.object({
-                inline: Joi.object(),
+                inline: Joi.any(),
                 files: Joi.array().items(Joi.string()).min(1),
                 priority: Joi.string().valid(['inline', 'files']),
                 override: Joi.boolean()
@@ -30,6 +30,17 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
     abstract getAssignmentKey(): 'ctx' | 'secrets';
 
+    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        await super.validate(options, context, snapshot, parameters);
+
+        if (options.$ && options.$.inline) {
+            const validationResult = Joi.validate(options.$.inline, Joi.object().required());
+            if (validationResult.error) {
+                throw new Error(validationResult.error.details.map(d => d.message).join('\n'));
+            }
+        }
+    }
+
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const key = this.getAssignmentKey();
 
@@ -37,15 +48,13 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
         const names = Object.keys(options);
         const promises = names.map(async (name: string): Promise<void> => {
-            let value = undefined;
-
-            const priority = options[name].priority || 'inline';
-
-            if (options[name].inline && priority === 'files') {
-                value = options[name].inline;
-            }
+            const priorityOnFiles = options[name].priority === 'files';
 
             if (options[name].files) {
+                if ((options[name].inline || options[name].inline === null) && priorityOnFiles) {
+                    await ContextUtil.assign(context[key], name, options[name].inline, options[name].override);
+                }
+
                 const files = await FSUtil.findFilesByMasks(options[name].files, [], snapshot.wd);
 
                 for (const path of files) {
@@ -63,11 +72,6 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
                     let fileContentObject = safeLoad(fileContent);
 
-                    const fileContentValidationResult = Joi.validate(fileContentObject, Joi.object().required());
-                    if (fileContentValidationResult.error) {
-                        throw new Error(fileContentValidationResult.error.details.map(d => d.message).join('\n'));
-                    }
-
                     // resolve local template
                     fileContentObject = flowService.resolveOptionsWithNoHandlerCheck(
                         context.ejsTemplateDelimiters.local,
@@ -78,23 +82,13 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                         parameters
                     );
 
-                    if (value) {
-                        Object.assign(value, fileContentObject);
-                    } else {
-                        value = fileContentObject;
-                    }
+                    await ContextUtil.assign(context[key], name, fileContentObject, options[name].override);
                 }
             }
 
-            if (options[name].inline && priority === 'inline') {
-                if (value) {
-                    Object.assign(value, options[name].inline);
-                } else {
-                    value = options[name].inline;
-                }
+            if ((options[name].inline || options[name].inline === null) && !priorityOnFiles) {
+                await ContextUtil.assign(context[key], name, options[name].inline, options[name].override);
             }
-
-            await ContextUtil.assign(context[key], name, value, options[name].override);
         });
 
         await Promise.all(promises);

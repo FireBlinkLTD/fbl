@@ -158,29 +158,54 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             value: 'value'
         };
 
-        const fileContent = {
+        context.ctx.toRemove = 'field';
+
+        const fileContent1 = {
             file_content: '<%- "ft" %><$- "po" $>'
         };
 
-        const tmpFile = await tempPathsRegistry.createTempFile();
+        const fileContent2 = [1, 2, 3];
+
+        const tmpFile1 = await tempPathsRegistry.createTempFile();
+        const tmpFile2 = await tempPathsRegistry.createTempFile();
 
         // write to temp file
-        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
+        await promisify(writeFile)(tmpFile1, dump(fileContent1), 'utf8');
+        await promisify(writeFile)(tmpFile2, dump(fileContent2), 'utf8');
 
-        const options = {
+        const options: any = {
             '$': {
                 inline: {
                     test: 123
                 }
             },
+            '$.toRemove': {
+                inline: null,
+                override: true
+            },
+            '$.inlineArray': {
+                inline: [1, 2, 3]
+            },
+            '$.inlineNumber': {
+                inline: 1
+            },
+            '$.inlineBoolean': {
+                inline: true
+            },
+            '$.inlineString': {
+                inline: 'test'
+            },
             '$.existing': {
                 inline: {
-                    other: 'other'
+                    other: 'other',
                 },
                 override: true
             },
-            '$.fromFile': {
-                files: [tmpFile]
+            '$.fromFile1': {
+                files: [tmpFile1]
+            },
+            '$.fromFile2': {
+                files: [tmpFile2]
             }
         };
 
@@ -192,11 +217,17 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
         assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, 'ftpo');
+        assert.strictEqual(context.ctx.inlineArray, options['$.inlineArray'].inline);
+        assert.strictEqual(context.ctx.inlineNumber, options['$.inlineNumber'].inline);
+        assert.strictEqual(context.ctx.inlineString, options['$.inlineString'].inline);
+        assert.strictEqual(context.ctx.inlineBoolean, options['$.inlineBoolean'].inline);
+        assert.deepStrictEqual(context.ctx.fromFile1.file_content, 'ftpo');
+        assert.deepStrictEqual(context.ctx.fromFile2, fileContent2);
+        assert.strictEqual(context.ctx.toRemove, null);
 
         // do the same with relative path
-        options['$.fromFile'].files = [basename(tmpFile)];
-        snapshot.wd = dirname(tmpFile);
+        options['$.fromFile1'].files = [basename(tmpFile1)];
+        snapshot.wd = dirname(tmpFile1);
 
         await actionHandler.validate(options, context, snapshot, {});
         await actionHandler.execute(options, context, snapshot, {});
@@ -204,7 +235,12 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
         assert.strictEqual(context.ctx.existing.other, 'other');
-        assert.strictEqual(context.ctx.fromFile.file_content, 'ftpo');
+        assert.strictEqual(context.ctx.inlineArray, options['$.inlineArray'].inline);
+        assert.strictEqual(context.ctx.inlineNumber, options['$.inlineNumber'].inline);
+        assert.strictEqual(context.ctx.inlineString, options['$.inlineString'].inline);
+        assert.strictEqual(context.ctx.inlineBoolean, options['$.inlineBoolean'].inline);
+        assert.deepStrictEqual(context.ctx.fromFile1.file_content, 'ftpo');
+        assert.deepStrictEqual(context.ctx.fromFile2, fileContent2);
     }
 
     @test()
@@ -298,32 +334,21 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     }
 
     @test()
-    async failToAssignDueToWrongFileStructure(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+    async failToAssignToRootBasicValue(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
+
         const context = ContextUtil.generateEmptyContext();
 
-        const fileContent = [{
-            file_content: 'ftpo2'
-        }];
-
-        const tmpFile = await tempPathsRegistry.createTempFile();
-        await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
-
         const options = {
-            '$.fromFile': {
-                files: [
-                    tmpFile
-                ]
+            '$': {
+                inline: 123
             }
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.validate(options, context, snapshot, {});
-
         await chai.expect(
-            actionHandler.execute(options, context, snapshot, {})
+            actionHandler.validate(options, context, snapshot, {})
         ).to.be.rejected;
     }
 }

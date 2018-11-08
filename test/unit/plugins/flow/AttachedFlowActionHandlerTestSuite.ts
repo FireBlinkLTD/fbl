@@ -1,17 +1,18 @@
 import {suite, test} from 'mocha-typescript';
 import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFlowActionHandler';
 import {Container} from 'typedi';
-import {ActionHandlersRegistry, TempPathsRegistry} from '../../../../src/services';
+import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
 import {IActionHandlerMetadata, IFlowLocationOptions} from '../../../../src/interfaces';
-import {ContextUtil} from '../../../../src/utils';
+import {ContextUtil, FSUtil} from '../../../../src/utils';
 import {dirname, join} from 'path';
 import {c} from 'tar';
 import {DummyServerWrapper} from '../../../assets/dummy.http.server.wrapper';
+import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -531,6 +532,67 @@ class AttachedFlowActionHandlerTestSuite {
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+    }
+
+    @test()
+    async correctCacheMatch(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const flowService = Container.get(FlowService);
+
+        const tracked: any[] = [];
+        const dummyActionHandler = new DummyActionHandler((opts: any) => {
+            tracked.push(opts);
+        });
+
+        const sequenceActionHandler = new SequenceFlowActionHandler();
+
+        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(new AttachedFlowActionHandler());
+        actionHandlersRegistry.register(sequenceActionHandler);
+
+        const wd = await tempPathsRegistry.createTempDir();
+        const dirA = join(wd, 'a');
+        const dirB = join(wd, 'b');
+        await FSUtil.mkdirp(dirA);
+        await FSUtil.mkdirp(dirB);
+
+        const indexFileContent = {
+            pipeline: {
+                '@': 'test.yml'
+            }
+        };
+
+        const testAContent = {
+            pipeline: {
+                [DummyActionHandler.ID]: 'a'
+            }
+        };
+
+        const testBContent = {
+            pipeline: {
+                [DummyActionHandler.ID]: 'b'
+            }
+        };
+
+        await promisify(writeFile)(join(dirA, 'index.yml'), dump(indexFileContent));
+        await promisify(writeFile)(join(dirA, 'test.yml'), dump(testAContent));
+
+        await promisify(writeFile)(join(dirB, 'index.yml'), dump(indexFileContent));
+        await promisify(writeFile)(join(dirB, 'test.yml'), dump(testBContent));
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction(wd, sequenceActionHandler.getMetadata().id, {}, [
+            {
+                '@': 'a/'
+            },
+            {
+                '@': 'b/'
+            }
+        ], context, {});
+
+        assert(snapshot.successful);
+        assert.deepStrictEqual(tracked, ['a', 'b']);
     }
 
     private static async prepareForTarballTest(dummyActionHandlerFn?: Function, fileName = 'index.yml'): Promise<string> {

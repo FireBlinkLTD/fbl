@@ -20,4 +20,11 @@ class ContextUtilTestSuite {
             ContextUtil.assign({}, 'field', { test: true })
         ).to.be.rejected;
     }
+
+    @test()
+    async failOnBaseValueForRootPath(): Promise<void> {
+        await chai.expect(
+            ContextUtil.assign({}, '$', 1)
+        ).to.be.rejected;
+    }
 }

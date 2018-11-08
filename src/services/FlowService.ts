@@ -204,16 +204,13 @@ export class FlowService {
     /**
      * Resolve flow, skipping checks if similar resolve action is already running
      * @param {IFlowLocationOptions} location
-     * @param {string} wd
      * @return {Promise<string>}
      */
-    async resolveFlowSkipChecks(location: IFlowLocationOptions, wd: string): Promise<string> {
-        let absolutePath;
+    async resolveFlowSkipChecks(location: IFlowLocationOptions): Promise<string> {
+        let absolutePath = location.path;
 
         if (location.path.startsWith('http://') || location.path.startsWith('https://')) {
             absolutePath = await this.downloadTarball(location);
-        } else {
-            absolutePath = FSUtil.getAbsolutePath(location.path, wd);
         }
 
         // if path leads to tarball - extract it to temp dir
@@ -247,10 +244,13 @@ export class FlowService {
     /**
      * Resolve flow based on path
      * @param {IFlowLocationOptions} location
-     * @param {string} wd
      * @return {Promise<string>}
      */
-    async resolveFlow(location: IFlowLocationOptions, wd: string): Promise<string> {
+    async resolveFlow(location: IFlowLocationOptions): Promise<string> {
+        if (!FSUtil.isAbsolute(location.path)) {
+            throw new Error(`Provided path ${location.path} is not absolute.`);
+        }
+
         if (this.flowPathCache[location.path]) {
             const cachedPath = this.flowPathCache[location.path];
 
@@ -264,7 +264,7 @@ export class FlowService {
             return await this.resolveFlowTarget(cachedPath, location);
         }
 
-        resolver = this.resolveFlowSkipChecks(location, wd);
+        resolver = this.resolveFlowSkipChecks(location);
         this.flowResolvers[location.path] = resolver;
         const result = await resolver;
         delete this.flowResolvers[location.path];
@@ -281,7 +281,7 @@ export class FlowService {
      * @returns {Promise<IFlow>}
      */
     async readFlowFromFile(location: IFlowLocationOptions, context: IContext, parameters: IDelegatedParameters, wd: string): Promise<{flow: IFlow, wd: string}> {
-        const absolutePath = await this.resolveFlow(location, wd);
+        const absolutePath = await this.resolveFlow(location);
 
         console.log(` -> Reading flow file:`.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);

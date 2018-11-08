@@ -1,9 +1,30 @@
 import {IContext, IContextBase} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
+import {t} from 'tar';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
+
+    static isBasicType(value: any): boolean {
+        if (typeof value === 'number') {
+            return true;
+        }
+
+        if (typeof value === 'string') {
+            return true;
+        }
+
+        if (typeof value === 'boolean') {
+            return true;
+        }
+
+        return false;
+    }
+
+    static isMissing(value: any): boolean {
+        return value === null || value === undefined;
+    }
 
     /**
      * Assign value to context's object
@@ -12,24 +33,33 @@ export class ContextUtil {
      * @param value
      * @param {boolean} [override]
      */
-    static async assign(obj: {[key: string]: any}, path: string, value: {[key: string]: any}, override = false): Promise<void> {
+    static async assign(obj: {[key: string]: any}, path: string, value: any, override = false): Promise<void> {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
         }
 
+        const isAssignable = !ContextUtil.isBasicType(value) && !Array.isArray(value) && !ContextUtil.isMissing(value);
+
         const chunks = path.split('.');
 
         let target: any = obj;
+        let parent = null;
+        let key = null;
 
         let childPath = chunks[0];
         for (let i = 1; i < chunks.length; i++) {
+            const isLast = i === chunks.length - 1;
+
+            parent = target;
+            key = chunks[i];
+
             childPath += '.' + chunks[i];
             const candidate = target[chunks[i]];
-            if (candidate === undefined || candidate === null) {
+            if (ContextUtil.isMissing(candidate)) {
                 target[chunks[i]] = {};
                 target = target[chunks[i]];
             } else {
-                if (typeof candidate !== 'object') {
+                if (!isLast || (isAssignable && typeof candidate !== 'object')) {
                     throw new Error(`Unable to assign path: ${path}. Sub-path ${childPath} leads to non-object value.`);
                 }
 
@@ -37,14 +67,22 @@ export class ContextUtil {
             }
         }
 
-        if (override) {
-            // cleanup object first
-            for (const prop of Object.keys(target)) {
-                delete target[prop];
+        if (isAssignable) {
+            if (override) {
+                // cleanup object first
+                for (const prop of Object.keys(target)) {
+                    delete target[prop];
+                }
             }
-        }
 
-        Object.assign(target, value);
+            Object.assign(target, value);
+        } else {
+            if (!parent) {
+                throw new Error('Unable to assign non-object value to root path');
+            }
+
+            parent[key] = value;
+        }
     }
 
     /**

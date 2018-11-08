@@ -25,6 +25,20 @@ export class FSUtil {
     }
 
     /**
+     * Check if path is absolute
+     * @param {string} path
+     * @return {boolean}
+     */
+    static isAbsolute(path: string): boolean {
+        // if path is a url - return it back
+        if (path.indexOf('http://') === 0 || path.indexOf('https://') === 0) {
+            return true;
+        }
+
+        return isAbsolute(path);
+    }
+
+    /**
      * Find files by mask
      * @param {string[]} masks
      * @param {string[]} ignore
@@ -56,15 +70,17 @@ export class FSUtil {
      * @return {string}
      */
     static getAbsolutePath(path: string, wd: string): string {
-        if (path.indexOf('~') === 0) {
+        // resolve path based on user home dir
+        if (path.indexOf('~' + sep) === 0) {
             return resolve(homedir(), path.substring(2));
         }
 
-
-        if (isAbsolute(path)) {
+        // if path is already absolute - return it back
+        if (FSUtil.isAbsolute(path)) {
             return path;
         }
 
+        // in any other case - resolve it as usual
         return resolve(wd, path);
     }
 

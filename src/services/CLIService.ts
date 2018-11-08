@@ -11,7 +11,6 @@ import {ContextUtil, FSUtil} from '../utils';
 import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
-import {ActionSnapshot} from '../models';
 
 const prompts = require('prompts');
 const requireg = require('requireg');
@@ -90,7 +89,7 @@ export class CLIService {
 
         const flow = await this.flowService.readFlowFromFile(
             <IFlowLocationOptions> {
-                path: this.flowFilePath,
+                path: FSUtil.getAbsolutePath(this.flowFilePath, process.cwd()),
                 http: {
                     headers: this.httpHeaders
                 },
@@ -98,7 +97,7 @@ export class CLIService {
             },
             context,
             {},
-            '.'
+            process.cwd()
         );
 
         const initialContextState = this.reportFilePath ?

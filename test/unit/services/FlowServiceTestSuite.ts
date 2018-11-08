@@ -5,12 +5,29 @@ import {Container} from 'typedi';
 import {FlowService, TempPathsRegistry} from '../../../src/services';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../src/utils';
+import {IFlowLocationOptions} from '../../../src/interfaces';
+
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
 
 @suite()
 class FlowServiceTestSuite {
     async after(): Promise<void> {
         await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
+    }
+
+    @test()
+    async failOnResolvingFlowWithJustRelativePath(): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        await chai.expect(
+            flowService.resolveFlow(<IFlowLocationOptions> {
+                path: 'a/b'
+            }),
+            'Provided path a/b is not absolute.'
+        ).to.be.rejected;
     }
 
     @test()
