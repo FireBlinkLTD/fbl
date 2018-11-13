@@ -14,7 +14,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                 inline: Joi.any(),
                 files: Joi.array().items(Joi.string()).min(1),
                 priority: Joi.string().valid(['inline', 'files']),
-                override: Joi.boolean()
+                override: Joi.boolean(),
+                push: Joi.boolean(),
+                children: Joi.boolean()
             })
                 .required()
                 .or('inline', 'files')
@@ -48,11 +50,18 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
         const names = Object.keys(options);
         const promises = names.map(async (name: string): Promise<void> => {
+            let override = options[name].override;
+            const children = options[name].children;
             const priorityOnFiles = options[name].priority === 'files';
 
             if (options[name].files) {
                 if ((options[name].inline || options[name].inline === null) && priorityOnFiles) {
-                    await ContextUtil.assign(context[key], name, options[name].inline, options[name].override);
+                    if (options[name].push) {
+                        await ContextUtil.push(context[key], name, options[name].inline, children, override);
+                    }  else {
+                        await ContextUtil.assign(context[key], name, options[name].inline, override);
+                    }
+                    override = false;
                 }
 
                 const files = await FSUtil.findFilesByMasks(options[name].files, [], snapshot.wd);
@@ -82,12 +91,22 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                         parameters
                     );
 
-                    await ContextUtil.assign(context[key], name, fileContentObject, options[name].override);
+
+                    if (options[name].push) {
+                        await ContextUtil.push(context[key], name, fileContentObject, children, override);
+                    }  else {
+                        await ContextUtil.assign(context[key], name, fileContentObject, override);
+                    }
+                    override = false;
                 }
             }
 
             if ((options[name].inline || options[name].inline === null) && !priorityOnFiles) {
-                await ContextUtil.assign(context[key], name, options[name].inline, options[name].override);
+                if (options[name].push) {
+                    await ContextUtil.push(context[key], name, options[name].inline, children, override);
+                }  else {
+                    await ContextUtil.assign(context[key], name, options[name].inline, override);
+                }
             }
         });
 

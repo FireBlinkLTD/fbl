@@ -112,6 +112,20 @@ ctx:
     override: true       
 ```
 
+**Example 5: Push to array**
+```yaml
+ctx:
+  '$.test':
+    inline: 1      
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true
+    # [required] if you want to push inline or value(s) from file(s) to array
+    push: true 
+    # [optional] if enambled and value is array its child items will be pushed instead of array itself
+    children: false    
+```
+
 ## Action Handler: Secret Values Assignment
 
 Same as above, but for secrets. All the options will me masked in report to prevent any security leakage. 
@@ -166,6 +180,20 @@ Same as above, but for secrets. All the options will me masked in report to prev
      # [optional] override everything tha tis inside "test" object with { test: true }
      # use with caution
      override: true       
+ ```
+ 
+**Example 5: Push to array**
+ ```yaml
+ secrets:
+   '$.test':
+     inline: 1      
+     # [optional] override everything tha tis inside "test" object with { test: true }
+     # use with caution
+     override: true
+     # [required] if you want to push inline or value(s) from file(s) to array
+     push: true 
+     # [optional] if enambled and value is array its child items will be pushed instead of array itself
+     children: false    
  ```
 
 ## Action Handler: Mark entities as registered

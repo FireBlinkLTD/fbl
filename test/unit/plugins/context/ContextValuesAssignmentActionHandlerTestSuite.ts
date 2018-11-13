@@ -351,4 +351,100 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             actionHandler.validate(options, context, snapshot, {})
         ).to.be.rejected;
     }
+
+    @test()
+    async pushToArray(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const actionHandler = new ContextValuesAssignmentActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.existing1 = [1, 2];
+        context.ctx.existing2 = [1, 2];
+        context.ctx.existing3 = [1, 2];
+
+        const file = await tempPathsRegistry.createTempFile();
+        const content = [
+            5, 6
+        ];
+
+        await promisify(writeFile)(file, dump(content), 'utf8');
+
+        const options = {
+            '$.new': {
+                inline: 123,
+                push: true
+            },
+
+            '$.children': {
+                inline: [1, 2],
+                push: true,
+                children: true
+            },
+
+            '$.existing1': {
+                inline: [3, 4],
+                push: true
+            },
+
+            '$.existing2': {
+                inline: [3, 4],
+                push: true,
+                override: true
+            },
+
+            '$.existing3': {
+                inline: [3, 4],
+                push: true,
+                children: true
+            },
+
+            '$.fromFile1': {
+                files: [file],
+                push: true
+            },
+
+            '$.fromFile2': {
+                files: [file],
+                push: true,
+                children: true
+            },
+
+            '$.combined1': {
+                inline: [1, 2],
+                files: [file],
+                push: true
+            },
+
+            '$.combined2': {
+                inline: [1, 2],
+                files: [file],
+                push: true,
+                children: true,
+                priority: 'files'
+            },
+
+            '$.combined3': {
+                inline: [1, 2],
+                files: [file],
+                push: true,
+                children: true,
+                priority: 'inline'
+            }
+        };
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
+
+        assert.deepStrictEqual(context.ctx.children, [1, 2]);
+        assert.deepStrictEqual(context.ctx.existing1, [1, 2, [3, 4]]);
+        assert.deepStrictEqual(context.ctx.existing2, [[3, 4]]);
+        assert.deepStrictEqual(context.ctx.existing3, [1, 2, 3, 4]);
+        assert.deepStrictEqual(context.ctx.new, [123]);
+        assert.deepStrictEqual(context.ctx.fromFile1, [[5, 6]]);
+        assert.deepStrictEqual(context.ctx.fromFile2, [5, 6]);
+        assert.deepStrictEqual(context.ctx.combined1, [[5, 6], [1, 2]]);
+        assert.deepStrictEqual(context.ctx.combined2, [1, 2, 5, 6]);
+        assert.deepStrictEqual(context.ctx.combined3, [5, 6, 1, 2]);
+    }
 }

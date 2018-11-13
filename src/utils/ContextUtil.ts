@@ -2,6 +2,8 @@ import {IContext, IContextBase, IDelegatedParameters} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
 import {t} from 'tar';
 import {ActionSnapshot} from '../models';
+import * as Joi from 'joi';
+import {isObject} from 'util';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
@@ -38,18 +40,15 @@ export class ContextUtil {
      * @return {Promise<void>}
      */
     static async assignTo(context: IContext, parameters: IDelegatedParameters, snapshot: ActionSnapshot, paths: {ctx?: string, secrets?: string, parameters?: string}, value: any): Promise<void> {
-        let contextChanged = false;
-
         /* istanbul ignore else */
         if (paths.ctx) {
             await ContextUtil.assignToField(context.ctx, paths.ctx, value);
-            contextChanged = true;
+            snapshot.setContext(context);
         }
 
         /* istanbul ignore else */
         if (paths.secrets) {
             await ContextUtil.assignToField(context.secrets, paths.secrets, value);
-            contextChanged = true;
         }
 
         /* istanbul ignore else */
@@ -61,11 +60,85 @@ export class ContextUtil {
 
             await ContextUtil.assignToField(parameters.parameters, paths.parameters, value);
         }
+    }
 
-        /* istanbul ignore else */
-        if (contextChanged) {
-            snapshot.setContext(context);
+    /**
+     * Push value or its child objects to obj by given path
+     * @param {{[p: string]: any}} obj
+     * @param {string} path
+     * @param value
+     * @param {boolean} children
+     * @param {boolean} override
+     * @return {Promise<void>}
+     */
+    static async push(obj: {[key: string]: any}, path: string, value: any, children: boolean, override = false): Promise<void> {
+        if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
+            throw new Error(`Unable to push value to path ${path}. Path has invalid format.`);
         }
+
+        const isArray = Array.isArray(value);
+        if (!isArray && children) {
+            throw new Error(`Unable to push child records of value to path ${path}. Value is not an array.`);
+        }
+
+        const searchResult = ContextUtil.findTargetByPath(obj, path, []);
+
+        if (!Array.isArray(searchResult.target)) {
+            throw new Error(`Unable to assign path: ${path}. Target is not array.`);
+        }
+
+        if (override) {
+            searchResult.target = searchResult.parent[searchResult.key] = [];
+        }
+
+        if (children) {
+            searchResult.target.push(...value);
+        } else {
+            searchResult.target.push(value);
+        }
+    }
+
+    /**
+     * Find target by given path
+     * @param {{[p: string]: any}} obj
+     * @param {string} path
+     * @return {{target: any; parent: {[p: string]: any}; key: string; subPath: string}}
+     */
+    private static findTargetByPath(obj: {[key: string]: any}, path: string, leaf: any): {target: any, parent: {[key: string]: any}, key: string} {
+        const chunks = path.split('.');
+
+        let target: any = obj;
+        let parent: {[key: string]: any} = null;
+        let key: string = null;
+
+        let subPath = chunks[0];
+        for (let i = 1; i < chunks.length; i++) {
+            parent = target;
+            key = chunks[i];
+            subPath += '.' + key;
+
+            const candidate = target[chunks[i]];
+            const isLast = i === chunks.length - 1;
+            if (ContextUtil.isMissing(candidate)) {
+                target[chunks[i]] = isLast ? leaf : {};
+                target = target[chunks[i]];
+            } else {
+                if (!isLast) {
+                    const fileContentValidationResult = Joi.validate(candidate, Joi.object().required());
+                    if (fileContentValidationResult.error) {
+                        throw new Error(`Unable to assign path: ${path}. Sub-path ${subPath} leads to non-object value.`);
+                    }
+                }
+
+                target = candidate;
+            }
+        }
+
+        return {
+            target,
+            parent,
+            key
+        };
     }
 
     /**
@@ -82,34 +155,13 @@ export class ContextUtil {
 
         const isAssignable = !ContextUtil.isBasicType(value) && !Array.isArray(value) && !ContextUtil.isMissing(value);
 
-        const chunks = path.split('.');
-
-        let target: any = obj;
-        let parent = null;
-        let key = null;
-
-        let childPath = chunks[0];
-        for (let i = 1; i < chunks.length; i++) {
-            const isLast = i === chunks.length - 1;
-
-            parent = target;
-            key = chunks[i];
-
-            childPath += '.' + chunks[i];
-            const candidate = target[chunks[i]];
-            if (ContextUtil.isMissing(candidate)) {
-                target[chunks[i]] = {};
-                target = target[chunks[i]];
-            } else {
-                if (!isLast || (isAssignable && typeof candidate !== 'object')) {
-                    throw new Error(`Unable to assign path: ${path}. Sub-path ${childPath} leads to non-object value.`);
-                }
-
-                target = candidate;
-            }
-        }
+        const {target, parent, key} = ContextUtil.findTargetByPath(obj, path, {});
 
         if (isAssignable) {
+            if (typeof target !== 'object') {
+                throw new Error(`Unable to assign path: ${path}. Target is not an object.`);
+            }
+
             if (override) {
                 // cleanup object first
                 for (const prop of Object.keys(target)) {

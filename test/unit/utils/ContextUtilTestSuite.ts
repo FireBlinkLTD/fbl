@@ -10,24 +10,87 @@ chai.use(chaiAsPromised);
 @suite()
 class ContextUtilTestSuite {
     @test()
-    async failOnInvalidFieldPath(): Promise<void> {
+    async failAssignmentOnInvalidFieldPath(): Promise<void> {
         await chai.expect(
             ContextUtil.assignToField({}, 'field', 'test')
         ).to.be.rejected;
     }
 
     @test()
-    async failOnInvalidObjectPath(): Promise<void> {
+    async failAssignmentOnInvalidObjectPath(): Promise<void> {
         await chai.expect(
             ContextUtil.assign({}, 'field', { test: true })
         ).to.be.rejected;
     }
 
     @test()
-    async failOnBaseValueForRootPath(): Promise<void> {
+    async failAssignmentForRootPath(): Promise<void> {
         await chai.expect(
             ContextUtil.assign({}, '$', 1)
         ).to.be.rejected;
+    }
+
+    @test()
+    async failPushOnInvalidFieldPath(): Promise<void> {
+        await chai.expect(
+            ContextUtil.push({}, 'field', 'test', false)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async failPushForRootPath(): Promise<void> {
+        await chai.expect(
+            ContextUtil.push({}, '$', 1, false),
+            'Unable to push value to path $. Path has invalid format.'
+        ).to.be.rejected;
+    }
+
+    @test()
+    async failPushForNonArrayTarget(): Promise<void> {
+        await chai.expect(
+            ContextUtil.push({
+                test: {}
+            }, '$.test', 1, false),
+            'Unable to push child records of value to path $.test Value is not an array.'
+        ).to.be.rejected;
+    }
+
+    @test()
+    async failForWrongTarget(): Promise<void> {
+        await chai.expect(
+            ContextUtil.push({
+                l1: []
+            }, '$.l1.l2', 1, false)
+        ).to.be.rejected;
+
+        await chai.expect(
+            ContextUtil.push({
+                l1: {
+                    l2: {}
+                }
+            }, '$.l1.l2', 1, false)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async failPushOfChildrenOnNonArrayValue(): Promise<void> {
+        await chai.expect(
+            ContextUtil.push({
+                l1: []
+            }, '$.l1', 1, true)
+        ).to.be.rejected;
+    }
+
+    @test()
+    async push(): Promise<void> {
+        const obj = {};
+
+        await ContextUtil.push(obj, '$.l1.l2', 1, false);
+        assert.deepStrictEqual(obj, {
+            l1: {
+                l2: [1]
+            }
+        });
     }
 
     @test()
