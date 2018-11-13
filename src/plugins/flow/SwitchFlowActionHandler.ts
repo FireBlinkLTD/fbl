@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class SwitchFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -26,10 +27,10 @@ export class SwitchFlowActionHandler extends ActionHandler {
             Joi.boolean()
         ).required(),
         is: Joi.object()
-            .pattern(/^/, FBLService.STEP_SCHEMA)
+            .pattern(/^/, FBL_ACTION_SCHEMA)
             .min(1)
             .required(),
-        else: FBLService.STEP_SCHEMA.optional()
+        else: FBL_ACTION_SCHEMA.optional()
     })
         .required()
         .options({ abortEarly: true });
