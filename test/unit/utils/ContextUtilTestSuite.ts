@@ -1,5 +1,7 @@
 import {suite} from 'mocha-typescript';
 import {ContextUtil} from '../../../src/utils';
+import {ActionSnapshot} from '../../../src/models';
+import * as assert from 'assert';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,5 +28,32 @@ class ContextUtilTestSuite {
         await chai.expect(
             ContextUtil.assign({}, '$', 1)
         ).to.be.rejected;
+    }
+
+    @test()
+    async assignTo(): Promise<void> {
+        const context = ContextUtil.generateEmptyContext();
+        const parameters = {};
+        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+
+        await ContextUtil.assignTo(context, parameters, snapshot, {
+            ctx: '$.ctx_test',
+            secrets: '$.secrets_test',
+            parameters: '$.parameters_test'
+        }, 'test');
+
+        assert.deepStrictEqual(context.ctx, {
+            ctx_test: 'test'
+        });
+
+        assert.deepStrictEqual(context.secrets, {
+            secrets_test: 'test'
+        });
+
+        assert.deepStrictEqual(parameters, {
+            parameters: {
+                parameters_test: 'test'
+            }
+        });
     }
 }

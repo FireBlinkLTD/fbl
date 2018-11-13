@@ -4,6 +4,7 @@ import {Validator} from 'jsonschema';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
+import {FBL_ASSIGN_TO_SCHEMA} from '../../schemas';
 
 export class PromptActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -43,14 +44,7 @@ export class PromptActionHandler extends BasePromptActionHandler {
                 exclusiveMaximum: Joi.boolean()
             }),
 
-            assignResponseTo: Joi.object({
-                ctx: Joi.string()
-                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                    .min(1),
-                secrets: Joi.string()
-                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                    .min(1)
-            }).required(),
+            assignResponseTo: FBL_ASSIGN_TO_SCHEMA.required(),
         }).required();
 
     getMetadata(): IActionHandlerMetadata {
@@ -119,16 +113,6 @@ export class PromptActionHandler extends BasePromptActionHandler {
             value = Number(value);
         }
 
-        /* istanbul ignore else */
-        if (options.assignResponseTo.ctx) {
-            await ContextUtil.assignToField(context.ctx, options.assignResponseTo.ctx, value);
-        }
-
-        /* istanbul ignore else */
-        if (options.assignResponseTo.secrets) {
-            await ContextUtil.assignToField(context.secrets, options.assignResponseTo.secrets, value);
-        }
-
-        snapshot.setContext(context);
+        await ContextUtil.assignTo(context, parameters, snapshot, options.assignResponseTo, value);
     }
 }

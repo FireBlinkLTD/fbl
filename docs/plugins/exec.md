@@ -35,6 +35,8 @@ assignTo:
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")
   secrets: '$.test'
+  # [optional] "parameters" variable name to assign results to ("test")
+  parameters: '$.test'
 ```
 
 ## Action Handler: Shell
@@ -71,4 +73,6 @@ assignTo:
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")
   secrets: '$.test'
+  # [optional] "parameters" variable name to assign results to ("test")
+  parameters: '$.test'
 ```

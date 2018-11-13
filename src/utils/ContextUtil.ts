@@ -1,6 +1,7 @@
-import {IContext, IContextBase} from '../interfaces';
+import {IContext, IContextBase, IDelegatedParameters} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
 import {t} from 'tar';
+import {ActionSnapshot} from '../models';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
@@ -24,6 +25,47 @@ export class ContextUtil {
 
     static isMissing(value: any): boolean {
         return value === null || value === undefined;
+    }
+
+    /**
+     * Assign value to paths
+     * @param {IContext} context
+     * @param {IDelegatedParameters} parameters
+     * @param {ActionSnapshot} snapshot
+     * @param {{ctx?: string; secrets?: string; parameters?: string}} paths
+     * @param value
+     * @return {Promise<void>}
+     * @return {Promise<void>}
+     */
+    static async assignTo(context: IContext, parameters: IDelegatedParameters, snapshot: ActionSnapshot, paths: {ctx?: string, secrets?: string, parameters?: string}, value: any): Promise<void> {
+        let contextChanged = false;
+
+        /* istanbul ignore else */
+        if (paths.ctx) {
+            await ContextUtil.assignToField(context.ctx, paths.ctx, value);
+            contextChanged = true;
+        }
+
+        /* istanbul ignore else */
+        if (paths.secrets) {
+            await ContextUtil.assignToField(context.secrets, paths.secrets, value);
+            contextChanged = true;
+        }
+
+        /* istanbul ignore else */
+        if (paths.parameters) {
+            /* istanbul ignore else */
+            if (!parameters.parameters) {
+                parameters.parameters = {};
+            }
+
+            await ContextUtil.assignToField(parameters.parameters, paths.parameters, value);
+        }
+
+        /* istanbul ignore else */
+        if (contextChanged) {
+            snapshot.setContext(context);
+        }
     }
 
     /**

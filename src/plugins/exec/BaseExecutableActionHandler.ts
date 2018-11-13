@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IContext} from '../../interfaces';
+import {IContext, IDelegatedParameters} from '../../interfaces';
 import {ContextUtil} from '../../utils';
 import {Container} from 'typedi';
 import {ChildProcessService} from '../../services';
@@ -77,6 +77,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
     async assignTo(
         snapshot: ActionSnapshot,
         context: IContext,
+        parameters: IDelegatedParameters,
         assignTo: {ctx?: string, secrets?: string},
         result: {code: number, stdout?: string, stderr?: string, error?: any}
     ) {
@@ -88,15 +89,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
                 stderr: result.stderr
             };
 
-            if (assignTo.ctx) {
-                await ContextUtil.assignToField(context.ctx, assignTo.ctx, value);
-            }
-
-            if (assignTo.secrets) {
-                await ContextUtil.assignToField(context.secrets, assignTo.secrets, value);
-            }
-
-            snapshot.setContext(context);
+            await ContextUtil.assignTo(context, parameters, snapshot, assignTo, value);
         }
 
         if (result.error) {

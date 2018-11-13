@@ -7,6 +7,7 @@ import {ContextUtil, FSUtil} from '../../utils';
 import {dirname} from 'path';
 import {Container} from 'typedi';
 import {FlowService, TempPathsRegistry} from '../../services';
+import {FBL_ASSIGN_TO_SCHEMA} from '../../schemas';
 
 export class WriteToFileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -23,14 +24,7 @@ export class WriteToFileActionHandler extends ActionHandler {
         path: Joi.string()
             .min(1),
 
-        assignPathTo: Joi.object({
-            ctx: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1),
-            secrets: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1)
-        }),
+        assignPathTo: FBL_ASSIGN_TO_SCHEMA,
 
         contentFromFile: Joi.string().min(1),
         content: Joi.alternatives(Joi.number(), Joi.string())
@@ -89,17 +83,7 @@ export class WriteToFileActionHandler extends ActionHandler {
 
         /* istanbul ignore else */
         if (options.assignPathTo) {
-            /* istanbul ignore else */
-            if (options.assignPathTo.ctx) {
-                await ContextUtil.assignToField(context.ctx, options.assignPathTo.ctx, file);
-            }
-
-            /* istanbul ignore else */
-            if (options.assignPathTo.secrets) {
-                await ContextUtil.assignToField(context.secrets, options.assignPathTo.secrets, file);
-            }
-
-            snapshot.setContext(context);
+            await ContextUtil.assignTo(context, parameters, snapshot, options.assignPathTo, file);
         }
     }
 }

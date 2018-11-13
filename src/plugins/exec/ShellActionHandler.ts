@@ -60,6 +60,7 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
         await this.assignTo(
             snapshot,
             context,
+            parameters,
             options.assignTo,
             result
         );

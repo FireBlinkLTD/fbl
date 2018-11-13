@@ -20,11 +20,15 @@ File System plugin.
   # Note: all missing parent directories will be automatically created
   path: /tmp/test.txt
   
-  # [optional] but required if "path" above is not provided.
-  # Assign file path to "ctx" and or "secrets" context objects
+  # [optional] 
+  # Note: required if "path" above is not provided.
   assignPathTo:
-    ctx: name
-    secrets: name
+    # [optional] "ctx" variable name to assign file path to ("test")
+    ctx: '$.test'
+    # [optional] "secrets" variable name to assign file path to ("test")
+    secrets: '$.test'
+    # [optional] "parameters" variable name to assign file path to ("test")
+    parameters: '$.test'
   
   # [required] content of the file
   content: |-
@@ -39,11 +43,15 @@ File System plugin.
   # Note: all missing parent directories will be automatically created
   path: /tmp/test.txt
   
-  # [optional] but required if "path" above is not provided.
-  # Assign file path to "ctx" and or "secrets" context objects as "name" field
+  # [optional] 
+  # Note: required if "path" above is not provided.
   assignPathTo:
-    ctx: $.name
-    secrets: $.name
+    # [optional] "ctx" variable name to assign file path to ("test")
+    ctx: '$.test'
+    # [optional] "secrets" variable name to assign file path to ("test")
+    secrets: '$.test'
+    # [optional] "parameters" variable name to assign file path to ("test")
+    parameters: '$.test'
   
   # [required] template file
   # Note: global and then local EJS template processing will be applied to the template before writing
