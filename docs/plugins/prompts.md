@@ -24,8 +24,17 @@ confirm:
     # [optional] default response value
     default: false
     
-    # [required]
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
       # [optional] "ctx" variable name to assign response to ("test")
       ctx: '$.test'
       # [optional] "secrets" variable name to assign response to ("test")
@@ -64,8 +73,17 @@ prompt:
     schema:
         type: string
     
-    # [required]
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
       # [optional] "ctx" variable name to assign response to ("test")
       ctx: '$.test'
       # [optional] "secrets" variable name to assign response to ("test")
@@ -103,14 +121,23 @@ select:
      - 21 - 59
      - 60+
     
-    # [required]
-    assignResponseTo:
-      # [optional] "ctx" variable name to assign response to ("test")
-      ctx: '$.test'
-      # [optional] "secrets" variable name to assign response to ("test")
-      secrets: '$.test'
-      # [optional] "parameters" variable name to assign response to ("test")
-      parameters: '$.test'  
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   assignResponseTo:
+     # [optional] "ctx" variable name to assign response to ("test")
+     ctx: '$.test'
+     # [optional] "secrets" variable name to assign response to ("test")
+     secrets: '$.test'
+     # [optional] "parameters" variable name to assign response to ("test")
+     parameters: '$.test'
+     
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   pushResponseTo:
+     # [optional] "ctx" variable name to assign response to ("test")
+     ctx: '$.test'
+     # [optional] "secrets" variable name to assign response to ("test")
+     secrets: '$.test'
+     # [optional] "parameters" variable name to assign response to ("test")
+     parameters: '$.test'
 ```
 
 ##  Action Handler: Multi Select
@@ -140,8 +167,17 @@ multiselect:
      - music
      - art
      
-    # [required] 
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
       # [optional] "ctx" variable name to assign response to ("test")
       ctx: '$.test'
       # [optional] "secrets" variable name to assign response to ("test")

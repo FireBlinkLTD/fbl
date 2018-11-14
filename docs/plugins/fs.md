@@ -21,8 +21,18 @@ File System plugin.
   path: /tmp/test.txt
   
   # [optional] 
-  # Note: required if "path" above is not provided.
+  # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
   assignPathTo:
+    # [optional] "ctx" variable name to assign file path to ("test")
+    ctx: '$.test'
+    # [optional] "secrets" variable name to assign file path to ("test")
+    secrets: '$.test'
+    # [optional] "parameters" variable name to assign file path to ("test")
+    parameters: '$.test'
+    
+  # [optional] 
+  # Note: required if "path" and "assignPathTo" (above) is not provided
+  pushPathTo:
     # [optional] "ctx" variable name to assign file path to ("test")
     ctx: '$.test'
     # [optional] "secrets" variable name to assign file path to ("test")
@@ -44,8 +54,18 @@ File System plugin.
   path: /tmp/test.txt
   
   # [optional] 
-  # Note: required if "path" above is not provided.
+  # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
   assignPathTo:
+    # [optional] "ctx" variable name to assign file path to ("test")
+    ctx: '$.test'
+    # [optional] "secrets" variable name to assign file path to ("test")
+    secrets: '$.test'
+    # [optional] "parameters" variable name to assign file path to ("test")
+    parameters: '$.test'
+      
+  # [optional] 
+  # Note: required if "path" and "assignPathTo" (above) is not provided
+  pushPathTo:
     # [optional] "ctx" variable name to assign file path to ("test")
     ctx: '$.test'
     # [optional] "secrets" variable name to assign file path to ("test")
