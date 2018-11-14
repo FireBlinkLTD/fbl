@@ -30,25 +30,33 @@ export class ContextUtil {
     }
 
     /**
-     * Assign value to paths
+     * Assign value based on paths
      * @param {IContext} context
      * @param {IDelegatedParameters} parameters
      * @param {ActionSnapshot} snapshot
      * @param {{ctx?: string; secrets?: string; parameters?: string}} paths
      * @param value
+     * @param {boolean} override
      * @return {Promise<void>}
      * @return {Promise<void>}
      */
-    static async assignTo(context: IContext, parameters: IDelegatedParameters, snapshot: ActionSnapshot, paths: {ctx?: string, secrets?: string, parameters?: string}, value: any): Promise<void> {
+    static async assignTo(
+        context: IContext,
+        parameters: IDelegatedParameters,
+        snapshot: ActionSnapshot,
+        paths: {ctx?: string, secrets?: string, parameters?: string},
+        value: any,
+        override: boolean
+    ): Promise<void> {
         /* istanbul ignore else */
         if (paths.ctx) {
-            await ContextUtil.assignToField(context.ctx, paths.ctx, value);
+            await ContextUtil.assignToField(context.ctx, paths.ctx, value, override);
             snapshot.setContext(context);
         }
 
         /* istanbul ignore else */
         if (paths.secrets) {
-            await ContextUtil.assignToField(context.secrets, paths.secrets, value);
+            await ContextUtil.assignToField(context.secrets, paths.secrets, value, override);
         }
 
         /* istanbul ignore else */
@@ -58,7 +66,50 @@ export class ContextUtil {
                 parameters.parameters = {};
             }
 
-            await ContextUtil.assignToField(parameters.parameters, paths.parameters, value);
+            await ContextUtil.assignToField(parameters.parameters, paths.parameters, value, override);
+        }
+    }
+
+    /**
+     * Push value based on paths
+     * @param {IContext} context
+     * @param {IDelegatedParameters} parameters
+     * @param {ActionSnapshot} snapshot
+     * @param {{ctx?: string; secrets?: string; parameters?: string}} paths
+     * @param value
+     * @param {boolean} children
+     * @param {boolean} override
+     * @return {Promise<void>}
+     * @return {Promise<void>}
+     */
+    static async pushTo(
+        context: IContext,
+        parameters: IDelegatedParameters,
+        snapshot: ActionSnapshot,
+        paths: {ctx?: string, secrets?: string, parameters?: string},
+        value: any,
+        children: boolean,
+        override: boolean
+    ): Promise<void> {
+        /* istanbul ignore else */
+        if (paths.ctx) {
+            await ContextUtil.push(context.ctx, paths.ctx, value, children, override);
+            snapshot.setContext(context);
+        }
+
+        /* istanbul ignore else */
+        if (paths.secrets) {
+            await ContextUtil.push(context.secrets, paths.secrets, value, children, override);
+        }
+
+        /* istanbul ignore else */
+        if (paths.parameters) {
+            /* istanbul ignore else */
+            if (!parameters.parameters) {
+                parameters.parameters = {};
+            }
+
+            await ContextUtil.push(parameters.parameters, paths.parameters, value, override);
         }
     }
 
@@ -71,7 +122,12 @@ export class ContextUtil {
      * @param {boolean} override
      * @return {Promise<void>}
      */
-    static async push(obj: {[key: string]: any}, path: string, value: any, children: boolean, override = false): Promise<void> {
+    static async push(
+        obj: {[key: string]: any},
+        path: string, value: any,
+        children: boolean,
+        override = false
+    ): Promise<void> {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to push value to path ${path}. Path has invalid format.`);
         }
@@ -104,7 +160,10 @@ export class ContextUtil {
      * @param {string} path
      * @return {{target: any; parent: {[p: string]: any}; key: string; subPath: string}}
      */
-    private static findTargetByPath(obj: {[key: string]: any}, path: string, leaf: any): {target: any, parent: {[key: string]: any}, key: string} {
+    private static findTargetByPath(
+        obj: {[key: string]: any}, path: string,
+        leaf: any
+    ): {target: any, parent: {[key: string]: any}, key: string} {
         const chunks = path.split('.');
 
         let target: any = obj;
@@ -148,7 +207,7 @@ export class ContextUtil {
      * @param value
      * @param {boolean} [override]
      */
-    static async assign(obj: {[key: string]: any}, path: string, value: any, override = false): Promise<void> {
+    static async assign(obj: {[key: string]: any}, path: string, value: any, override: boolean): Promise<void> {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
         }
@@ -186,7 +245,7 @@ export class ContextUtil {
      * @param value
      * @return {Promise<void>}
      */
-    static async assignToField(obj: {[key: string]: any}, path: string, value: any): Promise<void> {
+    static async assignToField(obj: {[key: string]: any}, path: string, value: any, override: boolean): Promise<void> {
         if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }

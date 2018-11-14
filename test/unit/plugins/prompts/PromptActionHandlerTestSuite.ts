@@ -239,6 +239,9 @@ class PromptActionHandlerTestSuite {
                 },
                 assignResponseTo: {
                     secrets: '$.test'
+                },
+                pushResponseTo: {
+                    ctx: '$.psh'
                 }
             }, context, snapshot, {}),
             new Promise<void>(resolve => {
@@ -253,6 +256,7 @@ class PromptActionHandlerTestSuite {
         ]);
 
         assert.strictEqual(context.secrets.test, correct);
+        assert.deepStrictEqual(context.ctx.psh, [correct]);
     }
 
     @test()

@@ -74,22 +74,26 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         return result;
     }
 
-    async assignTo(
+    async storeResult(
         snapshot: ActionSnapshot,
         context: IContext,
         parameters: IDelegatedParameters,
-        assignTo: {ctx?: string, secrets?: string},
+        assignTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean},
+        pushTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean, children?: boolean},
         result: {code: number, stdout?: string, stderr?: string, error?: any}
     ) {
-        const shouldBeAssigned = assignTo && (assignTo.ctx || assignTo.secrets);
-        if (shouldBeAssigned) {
-            const value = {
-                code: result.code,
-                stdout: result.stdout,
-                stderr: result.stderr
-            };
+        const value = {
+            code: result.code,
+            stdout: result.stdout,
+            stderr: result.stderr
+        };
 
-            await ContextUtil.assignTo(context, parameters, snapshot, assignTo, value);
+        if (assignTo) {
+            await ContextUtil.assignTo(context, parameters, snapshot, assignTo, value, assignTo.override);
+        }
+
+        if (pushTo) {
+            await ContextUtil.pushTo(context, parameters, snapshot, pushTo, value, pushTo.children, pushTo.override);
         }
 
         if (result.error) {

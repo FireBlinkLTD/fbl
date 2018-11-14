@@ -180,19 +180,22 @@ class WriteToFileTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
-        await chai.expect(
-            actionHandler.execute({
-                assignPathTo: {
-                    ctx: '$.ct',
-                    secrets: '$.st'
-                },
-                content: content
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+
+        await actionHandler.execute({
+            assignPathTo: {
+                ctx: '$.ct',
+                secrets: '$.st'
+            },
+            pushPathTo: {
+                ctx: '$.psh'
+            },
+            content: content
+        }, context, snapshot, {});
 
         const result = await promisify(readFile)(context.ctx.ct, 'utf8');
         assert.strictEqual(result, content);
         assert.strictEqual(context.ctx.ct, context.secrets.st);
+        assert.deepStrictEqual(context.ctx.psh, [context.secrets.st]);
 
         // cleanup
         unlinkSync(context.ctx.ct);

@@ -10,6 +10,7 @@ const FBL_ASSIGN_TO_SCHEMA = Joi.object({
     parameters: Joi.string()
         .regex(/^\$\.[^.]+(\.[^.]+)*$/)
         .min(1),
+    override: Joi.boolean()
 }).or('ctx', 'secrets', 'parameters');
 
 export {FBL_ASSIGN_TO_SCHEMA};

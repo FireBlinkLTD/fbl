@@ -527,12 +527,12 @@ export class CLIService {
 
             if (chunks[0] === '$') {
                 if (isObject) {
-                    await ContextUtil.assign(target, chunks[0], value);
+                    await ContextUtil.assign(target, chunks[0], value, false);
                 } else {
                     throw new Error('Unable to assign non-object value to root path "$"');
                 }
             } else {
-                await ContextUtil.assignToField(target, chunks[0], value);
+                await ContextUtil.assignToField(target, chunks[0], value, false);
             }
         }));
     }

@@ -6,6 +6,7 @@ import {writeFile} from 'fs';
 import {BaseExecutableActionHandler} from './BaseExecutableActionHandler';
 import {Container} from 'typedi';
 import {TempPathsRegistry} from '../../services';
+import {FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA} from '../../schemas';
 
 export class ShellActionHandler extends BaseExecutableActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -24,14 +25,8 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
             stderr: Joi.boolean(),
             verbose: Joi.boolean()
         }),
-        assignTo: Joi.object({
-            ctx: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1),
-            secrets: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1)
-        })
+        assignResultTo: FBL_ASSIGN_TO_SCHEMA,
+        pushResultTo: FBL_PUSH_TO_SCHEMA
     })
         .required()
         .options({ abortEarly: true });
@@ -57,11 +52,12 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
             options.options
         );
 
-        await this.assignTo(
+        await this.storeResult(
             snapshot,
             context,
             parameters,
-            options.assignTo,
+            options.assignResultTo,
+            options.pushResultTo,
             result
         );
     }

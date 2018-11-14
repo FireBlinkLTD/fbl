@@ -30,7 +30,7 @@ options:
   verbose: false
 
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
-assignTo:
+assignResultTo:
   # [optional] "ctx" variable name to assign results to ("test")
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")
@@ -68,7 +68,7 @@ options:
   verbose: false
     
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
-assignTo:
+assignResultTo:
   # [optional] "ctx" variable name to assign results to ("test")
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")

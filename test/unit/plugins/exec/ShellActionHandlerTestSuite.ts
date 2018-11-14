@@ -73,7 +73,7 @@ class ShellActionHandlerTestSuite {
             actionHandler.validate({
                 executable: 'test',
                 script: 'echo "hello!"',
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.something'
                 }
             }, context, snapshot, {})
@@ -83,7 +83,7 @@ class ShellActionHandlerTestSuite {
             actionHandler.validate({
                 executable: 'test',
                 script: 'echo "hello!"',
-                assignTo: {
+                assignResultTo: {
                     secrets: '$.something'
                 }
             }, context, snapshot, {})
@@ -91,7 +91,7 @@ class ShellActionHandlerTestSuite {
     }
 
     @test()
-    async assignToBoth(): Promise<void> {
+    async assignResultToBoth(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ShellActionHandler();
@@ -106,7 +106,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -124,7 +124,7 @@ class ShellActionHandlerTestSuite {
     }
 
     @test()
-    async assignToCtx(): Promise<void> {
+    async assignResultToCtx(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ShellActionHandler();
@@ -139,7 +139,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1'
             }
         }, context, snapshot, {});
@@ -152,7 +152,7 @@ class ShellActionHandlerTestSuite {
     }
 
     @test()
-    async assignToSecrets(): Promise<void> {
+    async assignResultToSecrets(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ShellActionHandler();
@@ -167,7 +167,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 secrets: '$.tst2'
             }
         }, context, snapshot, {});
@@ -193,7 +193,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -224,7 +224,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -252,7 +252,7 @@ class ShellActionHandlerTestSuite {
             actionHandler.execute({
                 executable: '/bin/bash',
                 script: 'return 1',
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.tst1'
                 }
             }, context, snapshot, {})
@@ -274,7 +274,7 @@ class ShellActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1'
             }
         }, context, snapshot, {});
@@ -294,7 +294,7 @@ class ShellActionHandlerTestSuite {
             actionHandler.execute({
                 executable: 'missing_executable',
                 script: 'echo "hello!"',
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.tst1'
                 }
             }, context, snapshot, {})

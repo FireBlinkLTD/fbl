@@ -4,7 +4,7 @@ import {Validator} from 'jsonschema';
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
-import {FBL_ASSIGN_TO_SCHEMA} from '../../schemas';
+import {FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA} from '../../schemas';
 
 export class PromptActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -44,8 +44,11 @@ export class PromptActionHandler extends BasePromptActionHandler {
                 exclusiveMaximum: Joi.boolean()
             }),
 
-            assignResponseTo: FBL_ASSIGN_TO_SCHEMA.required(),
-        }).required();
+            assignResponseTo: FBL_ASSIGN_TO_SCHEMA,
+            pushResponseTo: FBL_PUSH_TO_SCHEMA,
+        })
+        .or('assignResponseTo', 'pushResponseTo')
+        .required();
 
     getMetadata(): IActionHandlerMetadata {
         return PromptActionHandler.metadata;
@@ -113,6 +116,29 @@ export class PromptActionHandler extends BasePromptActionHandler {
             value = Number(value);
         }
 
-        await ContextUtil.assignTo(context, parameters, snapshot, options.assignResponseTo, value);
+        /* istanbul ignore else */
+        if (options.assignResponseTo) {
+            await ContextUtil.assignTo(
+                context,
+                parameters,
+                snapshot,
+                options.assignResponseTo,
+                value,
+                options.assignResponseTo.override
+            );
+        }
+
+        /* istanbul ignore else */
+        if (options.pushResponseTo) {
+            await ContextUtil.pushTo(
+                context,
+                parameters,
+                snapshot,
+                options.pushResponseTo,
+                value,
+                options.pushResponseTo.children,
+                options.pushResponseTo.override
+            );
+        }
     }
 }

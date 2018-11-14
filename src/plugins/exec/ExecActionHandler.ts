@@ -26,7 +26,8 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
                 stderr: Joi.boolean(),
                 verbose: Joi.boolean()
             }),
-            assignTo: FBL_ASSIGN_TO_SCHEMA
+            assignResultTo: FBL_ASSIGN_TO_SCHEMA,
+            pushResultTo: FBL_ASSIGN_TO_SCHEMA,
         })
         .required()
         .options({ abortEarly: true });
@@ -47,11 +48,12 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
             options.options
         );
 
-        await this.assignTo(
+        await this.storeResult(
             snapshot,
             context,
             parameters,
-            options.assignTo,
+            options.assignResultTo,
+            options.pushResultTo,
             result
         );
     }

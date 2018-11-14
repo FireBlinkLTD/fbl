@@ -7,7 +7,7 @@ import {ContextUtil, FSUtil} from '../../utils';
 import {dirname} from 'path';
 import {Container} from 'typedi';
 import {FlowService, TempPathsRegistry} from '../../services';
-import {FBL_ASSIGN_TO_SCHEMA} from '../../schemas';
+import {FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA} from '../../schemas';
 
 export class WriteToFileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -25,6 +25,7 @@ export class WriteToFileActionHandler extends ActionHandler {
             .min(1),
 
         assignPathTo: FBL_ASSIGN_TO_SCHEMA,
+        pushPathTo: FBL_PUSH_TO_SCHEMA,
 
         contentFromFile: Joi.string().min(1),
         content: Joi.alternatives(Joi.number(), Joi.string())
@@ -83,7 +84,27 @@ export class WriteToFileActionHandler extends ActionHandler {
 
         /* istanbul ignore else */
         if (options.assignPathTo) {
-            await ContextUtil.assignTo(context, parameters, snapshot, options.assignPathTo, file);
+            await ContextUtil.assignTo(
+                context,
+                parameters,
+                snapshot,
+                options.assignPathTo,
+                file,
+                options.assignPathTo.override
+            );
+        }
+
+        /* istanbul ignore else */
+        if (options.pushPathTo) {
+            await ContextUtil.pushTo(
+                context,
+                parameters,
+                snapshot,
+                options.pushPathTo,
+                file,
+                options.pushPathTo.children,
+                options.pushPathTo.override
+            );
         }
     }
 }

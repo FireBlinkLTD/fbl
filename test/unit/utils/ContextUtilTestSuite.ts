@@ -12,21 +12,21 @@ class ContextUtilTestSuite {
     @test()
     async failAssignmentOnInvalidFieldPath(): Promise<void> {
         await chai.expect(
-            ContextUtil.assignToField({}, 'field', 'test')
+            ContextUtil.assignToField({}, 'field', 'test', false)
         ).to.be.rejected;
     }
 
     @test()
     async failAssignmentOnInvalidObjectPath(): Promise<void> {
         await chai.expect(
-            ContextUtil.assign({}, 'field', { test: true })
+            ContextUtil.assign({}, 'field', { test: true }, false)
         ).to.be.rejected;
     }
 
     @test()
     async failAssignmentForRootPath(): Promise<void> {
         await chai.expect(
-            ContextUtil.assign({}, '$', 1)
+            ContextUtil.assign({}, '$', 1, false)
         ).to.be.rejected;
     }
 
@@ -103,7 +103,7 @@ class ContextUtilTestSuite {
             ctx: '$.ctx_test',
             secrets: '$.secrets_test',
             parameters: '$.parameters_test'
-        }, 'test');
+        }, 'test', false);
 
         assert.deepStrictEqual(context.ctx, {
             ctx_test: 'test'
@@ -116,6 +116,33 @@ class ContextUtilTestSuite {
         assert.deepStrictEqual(parameters, {
             parameters: {
                 parameters_test: 'test'
+            }
+        });
+    }
+
+    @test()
+    async pushTo(): Promise<void> {
+        const context = ContextUtil.generateEmptyContext();
+        const parameters = {};
+        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+
+        await ContextUtil.pushTo(context, parameters, snapshot, {
+            ctx: '$.ctx_test',
+            secrets: '$.secrets_test',
+            parameters: '$.parameters_test'
+        }, 'test', false, false);
+
+        assert.deepStrictEqual(context.ctx, {
+            ctx_test: ['test']
+        });
+
+        assert.deepStrictEqual(context.secrets, {
+            secrets_test: ['test']
+        });
+
+        assert.deepStrictEqual(parameters, {
+            parameters: {
+                parameters_test: ['test']
             }
         });
     }
