@@ -3,6 +3,7 @@ import {FBLService, FlowService} from '../../services';
 import * as Joi from 'joi';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {Container} from 'typedi';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class WhileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -33,7 +34,7 @@ export class WhileActionHandler extends ActionHandler {
                 Joi.number(),
                 Joi.boolean()
             ),
-        action: FBLService.STEP_SCHEMA
+        action: FBL_ACTION_SCHEMA
     })
         .xor('not', 'is')
         .required()

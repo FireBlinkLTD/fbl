@@ -2,6 +2,7 @@ import {ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import {BaseExecutableActionHandler} from './BaseExecutableActionHandler';
+import {FBL_ASSIGN_TO_SCHEMA} from '../../schemas';
 
 export class ExecActionHandler extends BaseExecutableActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -25,14 +26,8 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
                 stderr: Joi.boolean(),
                 verbose: Joi.boolean()
             }),
-            assignTo: Joi.object({
-                ctx: Joi.string()
-                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                    .min(1),
-                secrets: Joi.string()
-                    .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                    .min(1)
-            })
+            assignResultTo: FBL_ASSIGN_TO_SCHEMA,
+            pushResultTo: FBL_ASSIGN_TO_SCHEMA,
         })
         .required()
         .options({ abortEarly: true });
@@ -53,10 +48,12 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
             options.options
         );
 
-        await this.assignTo(
+        await this.storeResult(
             snapshot,
             context,
-            options.assignTo,
+            parameters,
+            options.assignResultTo,
+            options.pushResultTo,
             result
         );
     }

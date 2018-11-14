@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class ParallelFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -19,7 +20,7 @@ export class ParallelFlowActionHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.array()
-        .items(FBLService.STEP_SCHEMA)
+        .items(FBL_ACTION_SCHEMA)
         .min(1)
         .required()
         .options({ abortEarly: true });

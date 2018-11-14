@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {safeLoad} from 'js-yaml';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class TemplateFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -31,7 +32,7 @@ export class TemplateFlowActionHandler extends ActionHandler {
         await super.validate(options, context, snapshot, parameters);
 
         const action = safeLoad(options);
-        const result = Joi.validate(action, FBLService.STEP_SCHEMA);
+        const result = Joi.validate(action, FBL_ACTION_SCHEMA);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
         }

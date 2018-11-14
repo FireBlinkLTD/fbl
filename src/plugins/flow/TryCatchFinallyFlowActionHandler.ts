@@ -3,6 +3,7 @@ import {Container} from 'typedi';
 import * as Joi from 'joi';
 import {FBLService, FlowService} from '../../services';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class TryCatchFinallyFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -16,9 +17,9 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.object({
-        action: FBLService.STEP_SCHEMA,
-        catch: FBLService.STEP_SCHEMA.optional(),
-        finally: FBLService.STEP_SCHEMA.optional(),
+        action: FBL_ACTION_SCHEMA,
+        catch: FBL_ACTION_SCHEMA.optional(),
+        finally: FBL_ACTION_SCHEMA.optional(),
     })
         .required()
         .options({ abortEarly: true });

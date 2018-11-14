@@ -30,11 +30,22 @@ options:
   verbose: false
 
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
-assignTo:
+assignResultTo:
   # [optional] "ctx" variable name to assign results to ("test")
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")
   secrets: '$.test'
+  # [optional] "parameters" variable name to assign results to ("test")
+  parameters: '$.test'
+  
+# [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
+pushResultTo:
+  # [optional] "ctx" variable name to push result to ("test")
+  ctx: '$.test'
+  # [optional] "secrets" variable name to push result to ("test")
+  secrets: '$.test'
+  # [optional] "parameters" variable name to push result to ("test")
+  parameters: '$.test'
 ```
 
 ## Action Handler: Shell
@@ -66,9 +77,20 @@ options:
   verbose: false
     
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
-assignTo:
+assignResultTo:
   # [optional] "ctx" variable name to assign results to ("test")
   ctx: '$.test'
   # [optional] "secrets" variable name to assign results to ("test")
   secrets: '$.test'
+  # [optional] "parameters" variable name to assign results to ("test")
+  parameters: '$.test'
+  
+# [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
+pushResultTo:
+  # [optional] "ctx" variable name to push result to ("test")
+  ctx: '$.test'
+  # [optional] "secrets" variable name to push result to ("test")
+  secrets: '$.test'
+  # [optional] "parameters" variable name to push result to ("test")
+  parameters: '$.test'
 ```

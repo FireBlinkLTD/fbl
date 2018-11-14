@@ -3,6 +3,7 @@ import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../inte
 import * as Joi from 'joi';
 import {ContextUtil} from '../../utils';
 import {BasePromptActionHandler} from './BasePromptActionHandler';
+import {FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA} from '../../schemas';
 
 export class ConfirmActionHandler extends BasePromptActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -20,15 +21,11 @@ export class ConfirmActionHandler extends BasePromptActionHandler {
 
         default: Joi.boolean(),
 
-        assignResponseTo: Joi.object({
-            ctx: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1),
-            secrets: Joi.string()
-                .regex(/^\$\.[^.]+(\.[^.]+)*$/)
-                .min(1)
-        }).required(),
-    }).required();
+        assignResponseTo: FBL_ASSIGN_TO_SCHEMA,
+        pushResponseTo: FBL_PUSH_TO_SCHEMA,
+    })
+        .or('assignResponseTo', 'pushResponseTo')
+        .required();
 
     getMetadata(): IActionHandlerMetadata {
         return ConfirmActionHandler.metadata;
@@ -46,15 +43,28 @@ export class ConfirmActionHandler extends BasePromptActionHandler {
         });
 
         /* istanbul ignore else */
-        if (options.assignResponseTo.ctx) {
-            await ContextUtil.assignToField(context.ctx, options.assignResponseTo.ctx, value);
+        if (options.assignResponseTo) {
+            await ContextUtil.assignTo(
+                context,
+                parameters,
+                snapshot,
+                options.assignResponseTo,
+                value,
+                options.assignResponseTo.override
+            );
         }
 
         /* istanbul ignore else */
-        if (options.assignResponseTo.secrets) {
-            await ContextUtil.assignToField(context.secrets, options.assignResponseTo.secrets, value);
+        if (options.pushResponseTo) {
+            await ContextUtil.pushTo(
+                context,
+                parameters,
+                snapshot,
+                options.pushResponseTo,
+                value,
+                options.pushResponseTo.children,
+                options.pushResponseTo.override
+            );
         }
-
-        snapshot.setContext(context);
     }
 }

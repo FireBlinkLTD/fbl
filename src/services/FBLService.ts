@@ -11,39 +11,11 @@ import {which} from 'shelljs';
 import {boolean} from 'joi';
 import {resolve} from 'path';
 import {FSUtil} from '../utils';
+import {FBL_FLOW_SCHEMA} from '../schemas';
 
 const requireg = require('requireg');
 
 const fblVersion: string = require('../../../package.json').version;
-
-const joiStepSchemaExt = Joi.extend({
-    name: 'FBLStep',
-    base: Joi.object().min(1).required(),
-    language: {
-        fields: ''
-    },
-    rules: [
-        {
-            name: 'fields',
-            validate (params, value, state, options) {
-                const keys = Object.keys(value);
-
-                let nonAnnotationKeys = 0;
-                for (const key of keys) {
-                    if (!key.startsWith(FBLService.METADATA_PREFIX)) {
-                        nonAnnotationKeys++;
-                    }
-                }
-
-                if (nonAnnotationKeys !== 1) {
-                    return this.createError(`Found ${nonAnnotationKeys} non-annotation fields, but only one is required.`, {}, state, options);
-                }
-
-                return value;
-            }
-        }
-    ]
-});
 
 @Service()
 export class FBLService {
@@ -51,28 +23,6 @@ export class FBLService {
     private processedPlugins: {[name: string]: string} = {};
 
     public static METADATA_PREFIX = '$';
-
-    public static get STEP_SCHEMA() {
-        return joiStepSchemaExt.FBLStep().fields();
-    }
-
-    private static validationSchema = Joi.object({
-        version: Joi.string()
-            .regex(/\d+(\.\d+)*/i),
-
-        requires: Joi.object({
-            fbl: Joi.string().min(1),
-            plugins: Joi.object().min(1).pattern(
-                /^.*$/,
-                        Joi.string().min(1)
-            ),
-            applications: Joi.array().items(Joi.string().min(1)).min(1)
-        }),
-
-        description: Joi.string(),
-
-        pipeline: FBLService.STEP_SCHEMA
-    }).options({ abortEarly: true });
 
     private reporters: {[name: string]: IReporter} = {};
 
@@ -387,7 +337,7 @@ export class FBLService {
      * @returns {Promise<ActionSnapshot>}
      */
     async execute(wd: string, flow: IFlow, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
-        const result = Joi.validate(flow, FBLService.validationSchema);
+        const result = Joi.validate(flow, FBL_FLOW_SCHEMA);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
         }

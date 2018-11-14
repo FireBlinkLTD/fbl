@@ -116,6 +116,9 @@ class SelectActionHandlerTestSuite {
                     ctx: '$.test',
                     secrets: '$.tst'
                 },
+                pushResponseTo: {
+                    ctx: '$.psh'
+                },
                 default: 'Test2'
             }, context, snapshot, {}),
             new Promise<void>(resolve => {
@@ -128,5 +131,6 @@ class SelectActionHandlerTestSuite {
 
         assert.strictEqual(context.ctx.test, 'Test2');
         assert.strictEqual(context.secrets.tst, 'Test2');
+        assert.deepStrictEqual(context.ctx.psh, ['Test2']);
     }
 }

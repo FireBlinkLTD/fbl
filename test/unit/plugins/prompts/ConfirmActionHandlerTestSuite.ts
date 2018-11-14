@@ -109,6 +109,9 @@ class ConfirmActionHandlerTestSuite {
                 assignResponseTo: {
                     ctx: '$.test',
                     secrets: '$.tst'
+                },
+                pushResponseTo: {
+                    ctx: '$.psh'
                 }
             }, context, snapshot, {}),
             new Promise<void>(resolve => {
@@ -121,5 +124,6 @@ class ConfirmActionHandlerTestSuite {
 
         assert.strictEqual(context.ctx.test, true);
         assert.strictEqual(context.secrets.tst, true);
+        assert.deepStrictEqual(context.ctx.psh, [true]);
     }
 }

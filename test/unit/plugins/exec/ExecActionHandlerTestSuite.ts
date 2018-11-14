@@ -79,7 +79,7 @@ class ExecActionHandlerTestSuite {
         await chai.expect(
             actionHandler.validate({
                 command: 'test',
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.something'
                 }
             }, context, snapshot, {})
@@ -88,7 +88,7 @@ class ExecActionHandlerTestSuite {
         await chai.expect(
             actionHandler.validate({
                 command: 'test',
-                assignTo: {
+                assignResultTo: {
                     secrets: '$.something'
                 }
             }, context, snapshot, {})
@@ -96,7 +96,7 @@ class ExecActionHandlerTestSuite {
     }
 
     @test()
-    async assignToBoth(): Promise<void> {
+    async assignResultToBoth(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
@@ -111,7 +111,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -129,7 +129,7 @@ class ExecActionHandlerTestSuite {
     }
 
     @test()
-    async assignToCtx(): Promise<void> {
+    async assignResultToCtx(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
@@ -144,20 +144,28 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1'
+            },
+            pushResultTo: {
+                ctx: '$.tst2'
             }
         }, context, snapshot, {});
 
-        assert.strictEqual(context.ctx.tst1.code, 0);
-        assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
-        assert.strictEqual(context.ctx.tst1.stderr, '');
+        const expectedResult = {
+            code: 0,
+            stdout: 'test\n',
+            stderr: ''
+        };
+
+        assert.deepStrictEqual(context.ctx.tst1, expectedResult);
+        assert.deepStrictEqual(context.ctx.tst2, [expectedResult]);
 
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log').payload, 'stdout: test\n');
     }
 
     @test()
-    async assignToSecrets(): Promise<void> {
+    async assignResultToSecrets(): Promise<void> {
         Container.get(FlowService).debug = true;
 
         const actionHandler = new ExecActionHandler();
@@ -172,7 +180,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 secrets: '$.tst2'
             }
         }, context, snapshot, {});
@@ -198,7 +206,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -229,7 +237,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1',
                 secrets: '$.tst2'
             }
@@ -257,7 +265,7 @@ class ExecActionHandlerTestSuite {
             actionHandler.execute({
                 command: 'return',
                 args: ['1'],
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.tst1'
                 }
             }, context, snapshot, {})
@@ -279,7 +287,7 @@ class ExecActionHandlerTestSuite {
                 stderr: true,
                 verbose: true
             },
-            assignTo: {
+            assignResultTo: {
                 ctx: '$.tst1'
             }
         }, context, snapshot, {});
@@ -298,7 +306,7 @@ class ExecActionHandlerTestSuite {
         await chai.expect(
             actionHandler.execute({
                 command: 'missing_executable',
-                assignTo: {
+                assignResultTo: {
                     ctx: '$.tst1'
                 }
             }, context, snapshot, {})

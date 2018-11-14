@@ -3,6 +3,7 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 export class RepeatFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -19,7 +20,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
     private static validationSchema =
         Joi.object({
             times: Joi.number().min(1).required(),
-            action: FBLService.STEP_SCHEMA,
+            action: FBL_ACTION_SCHEMA,
             async: Joi.boolean()
         })
         .required()

@@ -1,5 +1,5 @@
 import {ActionHandler, ActionSnapshot} from '../../models';
-import {IContext} from '../../interfaces';
+import {IContext, IDelegatedParameters} from '../../interfaces';
 import {ContextUtil} from '../../utils';
 import {Container} from 'typedi';
 import {ChildProcessService} from '../../services';
@@ -74,29 +74,26 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         return result;
     }
 
-    async assignTo(
+    async storeResult(
         snapshot: ActionSnapshot,
         context: IContext,
-        assignTo: {ctx?: string, secrets?: string},
+        parameters: IDelegatedParameters,
+        assignTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean},
+        pushTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean, children?: boolean},
         result: {code: number, stdout?: string, stderr?: string, error?: any}
     ) {
-        const shouldBeAssigned = assignTo && (assignTo.ctx || assignTo.secrets);
-        if (shouldBeAssigned) {
-            const value = {
-                code: result.code,
-                stdout: result.stdout,
-                stderr: result.stderr
-            };
+        const value = {
+            code: result.code,
+            stdout: result.stdout,
+            stderr: result.stderr
+        };
 
-            if (assignTo.ctx) {
-                await ContextUtil.assignToField(context.ctx, assignTo.ctx, value);
-            }
+        if (assignTo) {
+            await ContextUtil.assignTo(context, parameters, snapshot, assignTo, value, assignTo.override);
+        }
 
-            if (assignTo.secrets) {
-                await ContextUtil.assignToField(context.secrets, assignTo.secrets, value);
-            }
-
-            snapshot.setContext(context);
+        if (pushTo) {
+            await ContextUtil.pushTo(context, parameters, snapshot, pushTo, value, pushTo.children, pushTo.override);
         }
 
         if (result.error) {

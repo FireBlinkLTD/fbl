@@ -21,15 +21,26 @@ confirm:
     # [required] confirm message
     message: 'Are you sure you want to proceed?'
     
-    # [optional] default response
+    # [optional] default response value
     default: false
     
-    # [required] assign response to given context fields
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
-      # [optional] "ctx" field to assign value to "ctx_field"
-      ctx: "$.ctx_field"
-      # [optional] "secrets" field to assign value to "secrets_field"
-      secrets: "$.secrets_field"
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
 ```
 
 ##  Action Handler: Prompt
@@ -62,12 +73,23 @@ prompt:
     schema:
         type: string
     
-    # [required] assign response to given context fields
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
-      # [optional] "ctx" field to assign value to "ctx_field"
-      ctx: "$.ctx_field"
-      # [optional] "secrets" field to assign value to "secrets_field"
-      secrets: "$.secrets_field"  
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
 ```
 
 ##  Action Handler: Select
@@ -99,12 +121,23 @@ select:
      - 21 - 59
      - 60+
     
-    # [required] assign picked value to given context fields
-    assignResponseTo:
-      # [optional] "ctx" field to assign value to "ctx_field"
-      ctx: "$.ctx_field"
-      # [optional] "secrets" field to assign value to "secrets_field"
-      secrets: "$.secrets_field"  
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   assignResponseTo:
+     # [optional] "ctx" variable name to assign response to ("test")
+     ctx: '$.test'
+     # [optional] "secrets" variable name to assign response to ("test")
+     secrets: '$.test'
+     # [optional] "parameters" variable name to assign response to ("test")
+     parameters: '$.test'
+     
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   pushResponseTo:
+     # [optional] "ctx" variable name to assign response to ("test")
+     ctx: '$.test'
+     # [optional] "secrets" variable name to assign response to ("test")
+     secrets: '$.test'
+     # [optional] "parameters" variable name to assign response to ("test")
+     parameters: '$.test'
 ```
 
 ##  Action Handler: Multi Select
@@ -134,10 +167,21 @@ multiselect:
      - music
      - art
      
-    # [required] assign picked values to given context fields 
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
     assignResponseTo:
-      # [optional] "ctx" field to assign value to "ctx_field"
-      ctx: "$.ctx_field"
-      # [optional] "secrets" field to assign value to "secrets_field"
-      secrets: "$.secrets_field"  
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
+      
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo:
+      # [optional] "ctx" variable name to assign response to ("test")
+      ctx: '$.test'
+      # [optional] "secrets" variable name to assign response to ("test")
+      secrets: '$.test'
+      # [optional] "parameters" variable name to assign response to ("test")
+      parameters: '$.test'
 ```

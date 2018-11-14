@@ -5,6 +5,7 @@ import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {Validator} from 'jsonschema';
 import {AnySchema} from 'joi';
+import {FBL_ACTION_SCHEMA} from '../../schemas';
 
 const createJsonSchema = (): AnySchema => {
     return Joi.object({
@@ -83,7 +84,7 @@ export class VirtualFlowActionHandler extends ActionHandler {
            mergeFunction: Joi.string().min(1).required()
         }),
         parametersSchema: createJsonSchema(),
-        action: FBLService.STEP_SCHEMA
+        action: FBL_ACTION_SCHEMA
     }).required();
 
     getMetadata(): IActionHandlerMetadata {
