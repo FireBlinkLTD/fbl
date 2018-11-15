@@ -19,6 +19,7 @@ class FSUtilTestSuite {
     async getAbsolutePath(): Promise<void> {
         assert.strictEqual(FSUtil.getAbsolutePath('~/test.tst', '/tmp'), homedir() + '/test.tst');
         assert.strictEqual(FSUtil.getAbsolutePath('/tmp/test.tst', '/var'), '/tmp/test.tst');
+        assert.strictEqual(FSUtil.getAbsolutePath('/tmp/test.tst/', '/var'), '/tmp/test.tst');
         assert.strictEqual(FSUtil.getAbsolutePath('./test.tst', '/var'), '/var/test.tst');
     }
 

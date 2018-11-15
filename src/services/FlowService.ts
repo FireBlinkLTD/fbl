@@ -247,7 +247,7 @@ export class FlowService {
      * @return {Promise<string>}
      */
     async resolveFlow(location: IFlowLocationOptions): Promise<string> {
-        if (!FSUtil.isAbsolute(location.path)) {
+        if (!FSUtil.isAbsolute(location.path) && !FSUtil.isURL(location.path)) {
             throw new Error(`Provided path ${location.path} is not absolute.`);
         }
 
