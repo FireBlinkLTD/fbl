@@ -319,33 +319,6 @@ entities.deleted:
       username: foobar        
 ```
 
-## Action Handler: Function
-
-Allows to define custom JS script (ES6) to modify context state.
-
-**ID:** `com.fireblink.fbl.context.function`
-
-**Aliases:**
- - `fbl.context.function`
- - `context.function`
- - `function`
- - `function()`
- - `fn`
- - `fn()`
- 
-**Example:**
-
-```yaml
-# Action handler expects valid JS function content string.
-# Context is available via "context" variable. 
-# You can also "require" node modules inside the script.
-#
-# Note: script is wrapped into async function, so you can "await" promises inside it 
-# if you need to do some long running operations. 
-fn: |-
-  context.ctx.isWindows = require('os').platform() === 'win32';
-```
-
 ## Action Handler: Summary
 
 Add summary record. All summary records will be printed once the main flow ends.

@@ -102,3 +102,29 @@ pushResultTo:
   # [optional] "parameters" variable name to push result to ("test")
   parameters: '$.test'
 ```
+
+## Action Handler: Function
+
+Allows to define custom JS script (ES6) to modify context state.
+
+**ID:** `com.fireblink.fbl.function`
+
+**Aliases:**
+ - `fbl.function`
+ - `function`
+ - `function()`
+ - `fn`
+ - `fn()`
+ 
+**Example:**
+
+```yaml
+# Action handler expects valid JS function content string.
+# Context is available via "context" variable. 
+# You can also "require" node modules inside the script.
+#
+# Note: script is wrapped into async function, so you can "await" promises inside it 
+# if you need to do some long running operations. 
+fn: |-
+  context.ctx.isWindows = require('os').platform() === 'win32';
+```

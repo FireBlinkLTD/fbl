@@ -132,7 +132,7 @@ class CliTestSuite {
         const contextFile = await tempPathsRegistry.createTempFile();
         const secretsFile = await tempPathsRegistry.createTempFile();
         const flowFile = `${flowDir}/flow.yml`;
-
+        
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
         await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
         await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');

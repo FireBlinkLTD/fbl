@@ -4,10 +4,9 @@ import * as Joi from 'joi';
 
 export class FunctionActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.context.function',
+        id: 'com.fireblink.fbl.function',
         aliases: [
-            'fbl.context.function',
-            'context.function',
+            'fbl.function',
             'function',
             'function()',
             'fn',

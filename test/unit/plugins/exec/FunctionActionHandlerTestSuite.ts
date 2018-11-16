@@ -1,5 +1,5 @@
 import {suite, test} from 'mocha-typescript';
-import {FunctionActionHandler} from '../../../../src/plugins/context/FunctionActionHandler';
+import {FunctionActionHandler} from '../../../../src/plugins/exec/FunctionActionHandler';
 import {ContextUtil} from '../../../../src/utils';
 import {ActionSnapshot} from '../../../../src/models';
 import * as assert from 'assert';
