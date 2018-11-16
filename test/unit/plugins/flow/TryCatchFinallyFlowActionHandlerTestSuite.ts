@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {TryCatchFinallyFlowActionHandler} from '../../../../src/plugins/flow/TryCatchFinallyFlowActionHandler';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../../src/utils';
@@ -10,6 +10,14 @@ import {ContextUtil} from '../../../../src/utils';
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'try.handler';
@@ -174,10 +182,10 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             throw new Error('Test');
         });
 
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
-        actionHandlersRegistry.register(tryFlowActionHandler);
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
 
         const options = {
             action: {
@@ -202,22 +210,22 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler('action', async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         let catchCalled = false;
         const dummyCatchHandler = new DummyActionHandler('catch', async () => {
             catchCalled = true;
         });
-        actionHandlersRegistry.register(dummyCatchHandler);
+        actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         let finallyCalled = false;
         const finallyCatchHandler = new DummyActionHandler('finally', async () => {
             finallyCalled = true;
         });
-        actionHandlersRegistry.register(finallyCatchHandler);
+        actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
-        actionHandlersRegistry.register(tryFlowActionHandler);
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
 
         const options = {
             action: {
@@ -251,21 +259,21 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler('action', async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const dummyCatchHandler = new DummyActionHandler('catch', async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyCatchHandler);
+        actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         let finallyCalled = false;
         const finallyCatchHandler = new DummyActionHandler('finally', async () => {
             finallyCalled = true;
         });
-        actionHandlersRegistry.register(finallyCatchHandler);
+        actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
-        actionHandlersRegistry.register(tryFlowActionHandler);
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
 
         const options = {
             action: {
@@ -298,21 +306,21 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler('action', async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         let catchCalled = false;
         const dummyCatchHandler = new DummyActionHandler('catch', async () => {
             catchCalled = true;
         });
-        actionHandlersRegistry.register(dummyCatchHandler);
+        actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         const finallyCatchHandler = new DummyActionHandler('finally', async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(finallyCatchHandler);
+        actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
-        actionHandlersRegistry.register(tryFlowActionHandler);
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
 
         const options = {
             action: {

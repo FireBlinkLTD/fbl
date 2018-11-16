@@ -4,12 +4,20 @@ import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'sequence.handler';
@@ -103,15 +111,15 @@ export class SequenceFlowActionHandlerTestSuite {
         const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new SequenceFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -135,15 +143,15 @@ export class SequenceFlowActionHandlerTestSuite {
         const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new SequenceFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -163,18 +171,18 @@ export class SequenceFlowActionHandlerTestSuite {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new SequenceFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const options = [
             {

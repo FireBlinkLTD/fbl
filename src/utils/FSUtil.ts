@@ -25,16 +25,19 @@ export class FSUtil {
     }
 
     /**
+     * Check if path is actually a URL
+     * @param path
+     */
+    static isURL(path: string): boolean {
+        return path.indexOf('http://') === 0 || path.indexOf('https://') === 0;
+    }
+
+    /**
      * Check if path is absolute
      * @param {string} path
      * @return {boolean}
      */
     static isAbsolute(path: string): boolean {
-        // if path is a url - return it back
-        if (path.indexOf('http://') === 0 || path.indexOf('https://') === 0) {
-            return true;
-        }
-
         return isAbsolute(path);
     }
 
@@ -75,9 +78,14 @@ export class FSUtil {
             return resolve(homedir(), path.substring(2));
         }
 
+        // if path is URL - return it back
+        if (FSUtil.isURL(path)) {
+            return path;
+        }
+
         // if path is already absolute - return it back
         if (FSUtil.isAbsolute(path)) {
-            return path;
+            return resolve(path);
         }
 
         // in any other case - resolve it as usual

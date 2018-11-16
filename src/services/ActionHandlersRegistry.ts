@@ -1,6 +1,7 @@
-import {ActionHandler} from '../models';
+import {ActionHandler, ActionSnapshot} from '../models';
 import {Service} from 'typedi';
 import {FBLService} from './FBLService';
+import {IPlugin} from '../interfaces';
 
 @Service()
 export class ActionHandlersRegistry {
@@ -14,9 +15,11 @@ export class ActionHandlersRegistry {
     /**
      * Register new entity
      * @param {ActionHandler} handler
+     * @param {IPlugin} plugin
+     * @param {ActionSnapshot} [snapshot]
      * @return self instance
      */
-    public register(handler: ActionHandler): ActionHandlersRegistry {
+    public register(handler: ActionHandler, plugin: IPlugin, snapshot?: ActionSnapshot): ActionHandlersRegistry {
         if (handler.getMetadata().aliases) {
             for (const alias of handler.getMetadata().aliases) {
                 if (alias.startsWith(FBLService.METADATA_PREFIX)) {
@@ -31,9 +34,26 @@ export class ActionHandlersRegistry {
 
         const metadata = handler.getMetadata();
 
+        if (this.registry[metadata.id]) {
+            console.log(' -> Warning'.red + ' action handler with id: ' + metadata.id.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
+
+            /* istanbul ignore else */
+            if (snapshot) {
+                snapshot.log(`Action handler with id ${metadata.id} was overridden by plugin ${plugin.name}@${plugin.version}`);
+            }
+        }
+
         this.registry[metadata.id] = handler;
         if (metadata.aliases) {
             metadata.aliases.forEach(alias => {
+                if (this.aliases[alias]) {
+                    console.log(' -> Warning'.red + ' action handler with alias: ' + alias.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
+
+                    /* istanbul ignore else */
+                    if (snapshot) {
+                        snapshot.log(`Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${plugin.version}`);
+                    }
+                }
                 this.aliases[alias] = metadata.id;
             });
         }

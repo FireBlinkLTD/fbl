@@ -4,12 +4,20 @@ import * as assert from 'assert';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {ParallelFlowActionHandler} from '../../../../src/plugins/flow/ParallelFlowActionHandler';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'parallel.handler';
@@ -101,15 +109,15 @@ export class ParallelFlowActionHandlerTestSuite {
         const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new ParallelFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = [
             {[DummyActionHandler.ID + '.1']: 1},
@@ -133,20 +141,20 @@ export class ParallelFlowActionHandlerTestSuite {
         const dummyActionHandler0 = new DummyActionHandler(0, 0, async (opts: any) => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler0);
+        actionHandlersRegistry.register(dummyActionHandler0, plugin);
 
         const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new ParallelFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = [
             {[DummyActionHandler.ID + '.0']: 0},
@@ -170,23 +178,23 @@ export class ParallelFlowActionHandlerTestSuite {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new ParallelFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler(0, 20, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler1);
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler(1, 5, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler2);
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const dummyActionHandler3 = new DummyActionHandler(2, 10, async (opts: any) => {
             results.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler3);
+        actionHandlersRegistry.register(dummyActionHandler3, plugin);
 
         const options = [
             {

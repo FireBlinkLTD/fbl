@@ -125,7 +125,7 @@ export class VirtualFlowActionHandler extends ActionHandler {
             virtualDefaults
         );
 
-        context.dynamicActionHandlers.register(dynamicFlowHandler);
+        context.dynamicActionHandlers.register(dynamicFlowHandler, require('./index'), snapshot);
     }
 }
 

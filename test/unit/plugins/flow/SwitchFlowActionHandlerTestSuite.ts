@@ -4,7 +4,7 @@ import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
@@ -30,6 +30,14 @@ class DummyActionHandler extends ActionHandler {
         await this.fn(options, context, snapshot, {});
     }
 }
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 @suite()
 export class SwitchFlowActionHandlerTestSuite {
@@ -182,7 +190,8 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 
@@ -221,7 +230,7 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 
@@ -256,7 +265,7 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 
@@ -291,7 +300,7 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 
@@ -326,7 +335,7 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 
@@ -365,7 +374,7 @@ export class SwitchFlowActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions.push(opts);
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
 

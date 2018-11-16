@@ -5,11 +5,19 @@ import {ContextUtil} from '../../../../src/utils';
 import {WhileActionHandler} from '../../../../src/plugins/flow/WhileActionHandler';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IContext} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IContext, IPlugin} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'while.handler';
@@ -113,10 +121,10 @@ class WhileActionHandlerTestSuite {
             count++;
             context.ctx.test = false;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = {
             value: '<%- ctx.test %>',
@@ -145,10 +153,10 @@ class WhileActionHandlerTestSuite {
             count++;
             _context.ctx.test = true;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = {
             value: '<%- ctx.test %>',
@@ -178,10 +186,10 @@ class WhileActionHandlerTestSuite {
             count++;
             _context.ctx.test = false;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = {
             value: '<%- ctx.test %>',
@@ -209,10 +217,10 @@ class WhileActionHandlerTestSuite {
         const dummyActionHandler = new DummyActionHandler(async () => {
             throw new Error('Test');
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = {
             value: '<%- ctx.test %>',

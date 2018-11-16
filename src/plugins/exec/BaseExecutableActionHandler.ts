@@ -9,6 +9,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         snapshot: ActionSnapshot,
         executable: string,
         args: any[],
+        wd: string,
         options?: {
             stdout?: boolean,
             stderr?: boolean,
@@ -59,7 +60,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
             result.code = await Container.get(ChildProcessService).exec(
                 executable,
                 args,
-                snapshot.wd,
+                wd,
                 on
             );
 

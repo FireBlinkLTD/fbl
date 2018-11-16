@@ -9,10 +9,19 @@ import {ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
 import {ContextUtil} from '../../../../src/utils';
+import {IPlugin} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 @suite()
 export class SecretValuesAssignmentActionHandlerTestSuite {
@@ -106,7 +115,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         flowService.debug = true;
 
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {
@@ -167,7 +176,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         flowService.debug = true;
 
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {

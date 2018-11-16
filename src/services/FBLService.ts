@@ -104,8 +104,8 @@ export class FBLService {
         this.processedPlugins[plugin.name] = plugin.version;
 
         if (plugin.actionHandlers) {
-            plugin.actionHandlers.forEach(actionHander => {
-                this.actionHandlersRegistry.register(actionHander);
+            plugin.actionHandlers.forEach(actionHandler => {
+                this.actionHandlersRegistry.register(actionHandler, plugin);
             });
         }
 
