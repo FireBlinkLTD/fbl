@@ -28,6 +28,7 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
             }),
             assignResultTo: FBL_ASSIGN_TO_SCHEMA,
             pushResultTo: FBL_ASSIGN_TO_SCHEMA,
+            wd: Joi.string().min(1)
         })
         .required()
         .options({ abortEarly: true });
@@ -45,6 +46,7 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
             snapshot,
             options.command,
             options.args,
+            options.wd || snapshot.wd,
             options.options
         );
 

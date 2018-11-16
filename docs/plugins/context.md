@@ -37,7 +37,7 @@ entities:
     deleted: []
 
 # Summary records
-summary: []    
+summary: []  
 ```
 
 (EJS)[http://ejs.co/] template can be used inside options to pass values from shared context. 

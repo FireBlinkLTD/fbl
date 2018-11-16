@@ -26,7 +26,8 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
             verbose: Joi.boolean()
         }),
         assignResultTo: FBL_ASSIGN_TO_SCHEMA,
-        pushResultTo: FBL_PUSH_TO_SCHEMA
+        pushResultTo: FBL_PUSH_TO_SCHEMA,
+        wd: Joi.string().min(1)
     })
         .required()
         .options({ abortEarly: true });
@@ -49,6 +50,7 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
             [
                 file
             ],
+            options.wd || snapshot.wd,
             options.options
         );
 

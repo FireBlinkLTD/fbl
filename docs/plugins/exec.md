@@ -20,6 +20,10 @@ command: 'echo'
 args: 
   - 'test'
 
+# [optional] working directory to run command from.
+# Default value: flow's folder
+wd: <%- cwd %>
+
 # [optional] options
 options:
   # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
@@ -66,6 +70,10 @@ executable: '/bin/bash'
 script: |- 
   cd /tmp
   touch test.txt
+  
+# [optional] working directory to run script from.
+# Default value: flow's folder
+wd: <%- cwd %>
   
 # [optional] options
 options:

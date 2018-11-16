@@ -161,10 +161,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.2.tgz#d77f9faa027cadad9c912cd47f4f8b07b0fb0864"
   integrity sha512-53ElVDSnZeFUUFIYzI8WLQ25IhWzb6vbddNp8UHlXQyU0ET2RhV5zg0NfubzU7iNMh5bBXb0htCzfvrSVNgzaQ==
 
-"@types/node@10.12.8":
-  version "10.12.8"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.8.tgz#d0a3ab5a6e61458c492304e2776ac136b81db927"
-  integrity sha512-INamyRZG4rW3lDCUmwVd5Xho/bXvQm/v1yP8V0UN1RuInU7RoWoaO570b+yLX4Ia/0szsx1wa8VzcsVlsvbWLA==
+"@types/node@10.12.9":
+  version "10.12.9"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.9.tgz#a07bfa74331471e1dc22a47eb72026843f7b95c8"
+  integrity sha512-eajkMXG812/w3w4a1OcBlaTwsFPO5F7fJ/amy+tieQxEMWBlbV1JGSjkFM+zkHNf81Cad+dfIRA+IBkvmvdAeA==
 
 "@types/semver@5.5.0":
   version "5.5.0"
@@ -1626,10 +1626,10 @@ keyv@^3.0.0:
   dependencies:
     json-buffer "3.0.0"
 
-kleur@^2.0.1:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/kleur/-/kleur-2.0.2.tgz#b704f4944d95e255d038f0cb05fb8a602c55a300"
-  integrity sha512-77XF9iTllATmG9lSlIv0qdQ2BQ/h9t0bJllHlbvsQ0zUWfU7Yi0S8L5JXzPZgkefIiajLmBJJ4BsMJmqcf7oxQ==
+kleur@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.0.tgz#ae185c2e0641ffb2f8e3d182df13239df9d8d3b2"
+  integrity sha512-acHc4xKlqTNuAGmbvtd3KuNi1bnlHsdPg6Os1P5s/Ii/6g8MY3caVPDp4md04/twbh4wwPvdpnol1bc9zFsI3w==
 
 latest-version@^3.0.0:
   version "3.1.0"
@@ -2284,12 +2284,12 @@ prepend-http@^2.0.0:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
   integrity sha1-6SQ0v6XqjBn0HN/UAddBo8gZ2Jc=
 
-prompts@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/prompts/-/prompts-1.2.0.tgz#598f7722032fb6c399beb24533129d00604c7007"
-  integrity sha512-g+I6Cer6EefDTawQhGHpdX98nhD7KQrRqyRgKCb+Sc+GG4P64EWRe5DZE402ZNkwrItf97Asf0L1z0g3waOgAA==
+prompts@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/prompts/-/prompts-1.2.1.tgz#7fd4116a458d6a62761e3ccb1432d7bbd8b2cb29"
+  integrity sha512-GE33SMMVO1ISfnq3i6cE+WYK/tLxRWtZiRkl5vdg0KR0owOCPFOsq8BuFajFbW7b2bMHb8krXaQHOpZyUEuvmA==
   dependencies:
-    kleur "^2.0.1"
+    kleur "^3.0.0"
     sisteransi "^1.0.0"
 
 prop-types@^15.5.8, prop-types@^15.6.2:
