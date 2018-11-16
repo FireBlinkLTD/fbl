@@ -2,13 +2,28 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.4) - 2018-11-16
+
+## Fixed
+
+- [#200](https://github.com/FireBlinkLTD/fbl/issues/200) FSUtil.getAbsolutePath now removes trailing slash if path is already absolute.
+
+## Added
+
+- [#198](https://github.com/FireBlinkLTD/fbl/issues/198) Added notification to user about action handler overrides.
+- [#201](https://github.com/FireBlinkLTD/fbl/issues/201) Added "wd" option for "shell" and "exec" action handlers that allow to run commands from given directory.
+
+## Changes
+
+- [#199](https://github.com/FireBlinkLTD/fbl/issues/199) "fn" action handler moved from "context" core plugin to "exec" one.
+
 ## [1.0.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.3) - 2018-11-14
 
 ## Changes
 
-- [#192] Updated "assignXXXTo" options across all action handlers to have an option to assign result(s) to parameters.
-- [#194] Similar to "assignTo" property added another one "pushTo" that allows to push record(s) into array instead of overriding the field value.
-- [#195] "ctx" and "secrets" action handlers now allow array concatenation not just assignment.
+- [#192](https://github.com/FireBlinkLTD/fbl/issues/192) Updated "assignXXXTo" options across all action handlers to have an option to assign result(s) to parameters.
+- [#194](https://github.com/FireBlinkLTD/fbl/issues/194) Similar to "assignTo" property added another one "pushTo" that allows to push record(s) into array instead of overriding the field value.
+- [#195](https://github.com/FireBlinkLTD/fbl/issues/195) "ctx" and "secrets" action handlers now allow array concatenation not just assignment.
 - "cmd" and "shell" assignTo field renamed to "assignResultTo" to conform with naming convention across other action handlers.
 
 ## [1.0.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.2) - 2018-11-08
