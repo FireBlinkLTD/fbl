@@ -133,9 +133,18 @@ export class FBLServiceTestSuite {
         fbl.flowService.debug = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
-            result = opt;
-        }, false));
+        fbl.flowService.actionHandlersRegistry.register(
+            new DummyActionHandler(async (opt: any) => {
+                result = opt;
+            }, false),
+            {
+                name: 'test',
+                version: '1.0.0',
+                requires: {
+                    fbl: '>=0.0.0'
+                }
+            }
+        );
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.var = 'test';
@@ -171,9 +180,18 @@ export class FBLServiceTestSuite {
         fbl.flowService.debug = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
-            result = opt;
-        }, true));
+        fbl.flowService.actionHandlersRegistry.register(
+            new DummyActionHandler(async (opt: any) => {
+                result = opt;
+            }, true),
+            {
+                name: 'test',
+                version: '1.0.0',
+                requires: {
+                    fbl: '>=0.0.0'
+                }
+            }
+        );
 
         await fbl.execute(
             '.',
@@ -196,9 +214,18 @@ export class FBLServiceTestSuite {
 
         fbl.flowService.debug = true;
 
-        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
-            throw new Error('test');
-        }, false));
+        fbl.flowService.actionHandlersRegistry.register(
+            new DummyActionHandler(async (opt: any) => {
+                throw new Error('test');
+            }, false),
+            {
+                name: 'test',
+                version: '1.0.0',
+                requires: {
+                    fbl: '>=0.0.0'
+                }
+            }
+        );
 
         const snapshot = await fbl.execute(
             '.',
@@ -222,9 +249,18 @@ export class FBLServiceTestSuite {
         fbl.flowService.debug = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
-            result = opt;
-        }, false));
+        fbl.flowService.actionHandlersRegistry.register(
+            new DummyActionHandler(async (opt: any) => {
+                result = opt;
+            }, false),
+            {
+                name: 'test',
+                version: '1.0.0',
+                requires: {
+                    fbl: '>=0.0.0'
+                }
+            }
+        );
 
         const snapshot = await fbl.execute(
             '.',
@@ -298,9 +334,18 @@ export class FBLServiceTestSuite {
         fbl.flowService.debug = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(new DummyActionHandler(async (opt: any) => {
-            result = opt;
-        }, false));
+        fbl.flowService.actionHandlersRegistry.register(
+            new DummyActionHandler(async (opt: any) => {
+                result = opt;
+            }, false),
+            {
+                name: 'test',
+                version: '1.0.0',
+                requires: {
+                    fbl: '>=0.0.0'
+                }
+            }
+        );
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.t1 = {

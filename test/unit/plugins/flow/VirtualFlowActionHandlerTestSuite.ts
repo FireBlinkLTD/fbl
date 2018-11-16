@@ -4,13 +4,21 @@ import {Container} from 'typedi';
 import {FlowService} from '../../../../src/services';
 import {VirtualFlowActionHandler} from '../../../../src/plugins/flow/VirtualFlowActionHandler';
 import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFlowActionHandler';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'virtual.dummy.handler';
@@ -119,13 +127,13 @@ class VirtualFlowActionHandlerTestSuite {
     async successfulExecution(): Promise<void> {
         const flowService = Container.get(FlowService);
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
             opts = options;
-        }));
+        }), plugin);
 
         const actionOptions = [
             {
@@ -162,13 +170,13 @@ class VirtualFlowActionHandlerTestSuite {
     async testDefaults(): Promise<void> {
         const flowService = Container.get(FlowService);
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
             opts = options;
-        }));
+        }), plugin);
 
         const actionOptions = [
             {
@@ -213,13 +221,13 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.debug = true;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
             opts = options;
-        }));
+        }), plugin);
 
         const actionOptions = [
             {
@@ -266,13 +274,13 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.debug = true;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler());
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
             opts = options;
-        }));
+        }), plugin);
 
         const actionOptions = [
             {

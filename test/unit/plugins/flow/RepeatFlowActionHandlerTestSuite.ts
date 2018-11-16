@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {RepeatFlowActionHandler} from '../../../../src/plugins/flow/RepeatFlowActionHandler';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../../src/utils';
@@ -10,6 +10,14 @@ import {ContextUtil} from '../../../../src/utils';
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'repeat.iteration.handler';
@@ -114,7 +122,7 @@ class RepeatFlowActionHandlerTestSuite {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new RepeatFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const delays = [5, 20, 10];
         const results: number[] = [];
@@ -125,7 +133,7 @@ class RepeatFlowActionHandlerTestSuite {
 
             results.push(opts.index);
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 3,
@@ -150,7 +158,7 @@ class RepeatFlowActionHandlerTestSuite {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new RepeatFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+        actionHandlersRegistry.register(actionHandler, plugin);
 
         const delays = [5, 20, 10];
         const results: number[] = [];
@@ -161,7 +169,7 @@ class RepeatFlowActionHandlerTestSuite {
 
             results.push(opts.index);
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 3,

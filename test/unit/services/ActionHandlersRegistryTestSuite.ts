@@ -1,8 +1,9 @@
 import {suite, test} from 'mocha-typescript';
-import {ActionHandler} from '../../../src/models';
-import {ActionHandlersRegistry} from '../../../src/services';
+import {ActionHandler, ActionSnapshot} from '../../../src/models';
+import {ActionHandlersRegistry, FlowService} from '../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata} from '../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../src/interfaces';
+import {Container} from 'typedi';
 
 const chai = require('chai');
 
@@ -31,16 +32,30 @@ class DummyActionHandler extends ActionHandler {
 
 @suite()
 export class ActionHandlersRegistryTestSuite {
+    after() {
+        Container.reset();
+    }
+
     @test()
     async lifecycle() {
+        Container.get(FlowService).debug = true;
+
         const registry = new ActionHandlersRegistry();
         const id1 = 'test1';
         const id2 = 'test2';
         const actionHandler1 = new DummyActionHandler(id1);
         const actionHandler2 = new DummyActionHandler(id2);
 
-        registry.register(actionHandler1);
-        registry.register(actionHandler2);
+        const plugin: IPlugin = {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0'
+            }
+        };
+
+        registry.register(actionHandler1, plugin);
+        registry.register(actionHandler2, plugin);
 
         // make sure action handlers can be found their ids
         assert.strictEqual(actionHandler1, registry.find(id1));
@@ -66,5 +81,13 @@ export class ActionHandlersRegistryTestSuite {
         // make sure action handler 2 can be found by aliases
         assert.strictEqual(actionHandler2, registry.find(id2 + '.1'));
         assert.strictEqual(actionHandler2, registry.find(id2 + '.2'));
+
+        // make sure override logs are created
+        const snapshot = new ActionSnapshot('id', {}, '.', 0, {});
+        registry.register(actionHandler2, plugin, snapshot);
+
+        const logs = snapshot.getSteps().filter(step => step.type === 'log');
+        assert.strictEqual(logs[0].payload, `Action handler with id ${actionHandler2.getMetadata().id} was overridden by plugin ${plugin.name}@${plugin.version}`);
+        assert.strictEqual(logs[1].payload, `Action handler with alias ${actionHandler2.getMetadata().aliases[0]} was overridden by plugin ${plugin.name}@${plugin.version}`);
     }
 }

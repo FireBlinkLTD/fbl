@@ -7,7 +7,7 @@ import {writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IFlowLocationOptions} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IFlowLocationOptions, IPlugin} from '../../../../src/interfaces';
 import {ContextUtil, FSUtil} from '../../../../src/utils';
 import {dirname, join} from 'path';
 import {c} from 'tar';
@@ -17,6 +17,14 @@ import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFl
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
@@ -131,7 +139,7 @@ class AttachedFlowActionHandlerTestSuite {
             actionHandlerContext = ctx;
         });
 
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
@@ -168,7 +176,7 @@ class AttachedFlowActionHandlerTestSuite {
             actionHandlerContext = ctx;
         });
 
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
@@ -211,7 +219,7 @@ class AttachedFlowActionHandlerTestSuite {
             actionHandlerContext = ctx;
         });
 
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
@@ -547,9 +555,9 @@ class AttachedFlowActionHandlerTestSuite {
 
         const sequenceActionHandler = new SequenceFlowActionHandler();
 
-        actionHandlersRegistry.register(dummyActionHandler);
-        actionHandlersRegistry.register(new AttachedFlowActionHandler());
-        actionHandlersRegistry.register(sequenceActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+        actionHandlersRegistry.register(new AttachedFlowActionHandler(), plugin);
+        actionHandlersRegistry.register(sequenceActionHandler, plugin);
 
         const wd = await tempPathsRegistry.createTempDir();
         const dirA = join(wd, 'a');
@@ -605,7 +613,7 @@ class AttachedFlowActionHandlerTestSuite {
             }
         });
 
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',

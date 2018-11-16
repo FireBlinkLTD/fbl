@@ -1,7 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {ActionHandlersRegistry, FlowService, TemplateUtilitiesRegistry} from '../../../../src/services';
-import {IActionHandlerMetadata} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {TemplateFlowActionHandler} from '../../../../src/plugins/flow/TemplateFlowActionHandler';
@@ -11,6 +11,14 @@ import {ContextUtil} from '../../../../src/utils';
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
+
+const plugin: IPlugin = {
+    name: 'test',
+    version: '1.0.0',
+    requires: {
+        fbl: '>=0.0.0'
+    }
+};
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'repeat.foreach.handler';
@@ -73,14 +81,15 @@ class TemplateFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const templateUtilitiesRegistry = Container.get(TemplateUtilitiesRegistry);
         const actionHandler = new TemplateFlowActionHandler();
-        actionHandlersRegistry.register(actionHandler);
+
+        actionHandlersRegistry.register(actionHandler, plugin);
         templateUtilitiesRegistry.register(new ToJSONTemplateUtility());
 
         let actionHandlerOptions: any;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
             actionHandlerOptions = opts;
         });
-        actionHandlersRegistry.register(dummyActionHandler);
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = `${DummyActionHandler.ID}: <%- $.toJSON(ctx.test) %>`;
 
