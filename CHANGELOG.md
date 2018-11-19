@@ -4,11 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.1.0]
 
-## Fixed
-
 ## Changed
 
-- [#205](https://github.com/FireBlinkLTD/fbl/issues/205) virtual default parameters are now automatically merged. 
+- [#205](https://github.com/FireBlinkLTD/fbl/issues/205) virtual default parameters are now automatically merged.
+- [#207](https://github.com/FireBlinkLTD/fbl/issues/207) $.toJSON replaced with $.escape that allows to escape unquoted strings that can break YAML parser. 
 
 ## Added
 
