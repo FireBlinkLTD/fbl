@@ -356,7 +356,7 @@ or the same with helper function that converts anything to JSON string (JSON is 
 ```yaml
 tpl: |-
   ctx:
-    something: <%- $.toJSON([1, 2, 3]) %> 
+    something: <%- $.escape([1, 2, 3]) %> 
 ```
 
 that will generally produce:
