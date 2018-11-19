@@ -420,7 +420,11 @@ Allows to create virtual action handler for another action (that can be represen
       return parameters.test + defaults.test      
   
   # action to invoke
+  # Note: upon execution all relative paths for given action will be calculated based on the folder
+  # where virtual actually lives. If you need to use relative paths based on the place of invocation
+  # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
   action:
+    # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
     ctx:
       some_field:
         # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)

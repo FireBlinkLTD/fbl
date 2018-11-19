@@ -137,6 +137,7 @@ export class VirtualFlowActionHandler extends ActionHandler {
         }
 
         const dynamicFlowHandler = new DynamicFlowHandler(
+            snapshot.wd,
             options.id,
             options.aliases || [],
             options.parametersSchema,
@@ -153,6 +154,7 @@ export class VirtualFlowActionHandler extends ActionHandler {
  */
 class DynamicFlowHandler extends ActionHandler {
     constructor(
+        private wd: string,
         private id: string,
         private aliases: string[],
         private validationSchema: any | null,
@@ -160,6 +162,10 @@ class DynamicFlowHandler extends ActionHandler {
         private virtualDefaults?: IVirtualDefaults,
     ) {
         super();
+    }
+
+    getWorkingDirectory(): string | null {
+        return this.wd;
     }
 
     getMetadata(): IActionHandlerMetadata {
@@ -215,12 +221,13 @@ class DynamicFlowHandler extends ActionHandler {
 
         const idOrAlias = FBLService.extractIdOrAlias(this.action);
         let metadata = FBLService.extractMetadata(this.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
+        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, this.wd, metadata, context, false, parameters);
 
         parameters = JSON.parse(JSON.stringify(parameters));
         parameters.parameters = this.getMergedOptions(options);
+        parameters.wd = snapshot.wd;
 
-        const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
+        const childSnapshot = await flowService.executeAction(this.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
         snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

@@ -7,6 +7,7 @@ import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFl
 import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../../src/utils';
+import {FSTemplateUtility} from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -404,5 +405,38 @@ class VirtualFlowActionHandlerTestSuite {
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 123);
+    }
+
+    @test()
+    async workingDirectory(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        flowService.debug = true;
+
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.templateUtilityRegistry.register(new FSTemplateUtility());
+
+        let opts;
+        flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
+            opts = options;
+        }), plugin);
+
+        const context = ContextUtil.generateEmptyContext();
+
+        await flowService.executeAction('/tmp1', virtual.getMetadata().id, {}, {
+            id: 'virtual.test',
+            action: {
+                [DummyActionHandler.ID]: '<%- parameters.tst.t %>'
+            }
+        }, context, {});
+
+        const snapshot = await flowService.executeAction('/tmp2', 'virtual.test', {}, {
+            tst: {
+                t: '<%- $.fs.getAbsolutePath("index.txt") %>'
+            }
+        }, context, {});
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, '/tmp1/index.txt');
     }
 }

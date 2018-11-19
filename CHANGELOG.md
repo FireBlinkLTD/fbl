@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Fixed
 
 - [#200](https://github.com/FireBlinkLTD/fbl/issues/200) FSUtil.getAbsolutePath now removes trailing slash if path is already absolute.
+- [#208](https://github.com/FireBlinkLTD/fbl/issues/208) Virtual action handler now uses directory where virtual action handler is located as working directory.
 
 ## Added
 

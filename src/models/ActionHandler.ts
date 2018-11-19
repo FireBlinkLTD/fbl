@@ -40,6 +40,15 @@ export abstract class ActionHandler {
     }
 
     /**
+     * Get working directory
+     * @returns {string} with alternative wd to use
+     * @returns {null} when original working directory should be used
+     */
+    getWorkingDirectory(): string | null {
+        return null;
+    }
+
+    /**
      * Check if handler should be actually executed
      * @param options
      * @param {IContext} context

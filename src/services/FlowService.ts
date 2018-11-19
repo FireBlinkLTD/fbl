@@ -61,10 +61,7 @@ export class FlowService {
         const idx = ++this.index;
         console.log(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
-
         try {
-            snapshot.setInitialContextState(context);
-
             let handler = this.actionHandlersRegistry.find(idOrAlias);
             if (!handler) {
                 handler = context.dynamicActionHandlers.find(idOrAlias);
@@ -74,6 +71,12 @@ export class FlowService {
                 throw new Error(`Unable to find action handler for: ${idOrAlias}`);
             }
 
+            const alternativeWD = handler.getWorkingDirectory();
+            if (alternativeWD) {
+                wd = alternativeWD;
+            }
+
+            snapshot.setInitialContextState(context);
             snapshot.setActionHandlerId(handler.getMetadata().id);
 
             if (!handler.getMetadata().considerOptionsAsSecrets) {
