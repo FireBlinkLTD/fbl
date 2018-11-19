@@ -165,6 +165,41 @@ class AttachedFlowActionHandlerTestSuite {
     }
 
     @test()
+    async corruptedYAML(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const subFlow = [
+            'pipeline:',
+            `  ${DummyActionHandler.ID}:`,
+            ' test: true'
+        ];
+
+        const tmpFile = await tempPathsRegistry.createTempFile();
+
+        await promisify(writeFile)(tmpFile, subFlow.join('\n'), 'utf8');
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await actionHandler.validate(tmpFile, context, snapshot, {});
+
+        await chai.expect(
+            actionHandler.execute(tmpFile, context, snapshot, {})
+        ).to.be.rejected;
+    }
+
+    @test()
     async failOnAttachedFileWithTarget(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
