@@ -193,8 +193,107 @@ class VirtualFlowActionHandlerTestSuite {
                     defaults: {
                         values: {
                             tst: 'ue_'
+                        }
+                    },
+                    action: {
+                        [DummyActionHandler.ID]: '<%- parameters.tst %>'
+                    }
+                }
+            },
+            {
+                'virtual.test': {
+                    'tst': '_val'
+                }
+            }
+        ];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, '_val');
+    }
+
+    @test()
+    async testDefaultsWithMergeModifiers(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+
+        let opts;
+        flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
+            opts = options;
+        }), plugin);
+
+        const actionOptions = [
+            {
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    parametersSchema: {
+                        type: 'object',
+                        properties: {
+                            tst: {
+                                type: 'string'
+                            }
+                        }
+                    },
+                    defaults: {
+                        values: {
+                            tst: 'ue_'
                         },
-                        mergeFunction: 'return { tst: options.tst + defaults.tst };'
+                        modifiers: {
+                            '$.tst': 'return `${defaults}${parameters}`;'
+                        }
+                    },
+                    action: {
+                        [DummyActionHandler.ID]: '<%- parameters.tst %>'
+                    }
+                }
+            },
+            {
+                'virtual.test': {
+                    'tst': '_val'
+                }
+            }
+        ];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, 'ue__val');
+    }
+
+    @test()
+    async testDefaultsWithMergeFunction(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+
+        let opts;
+        flowService.actionHandlersRegistry.register(new DummyActionHandler((options: any) => {
+            opts = options;
+        }), plugin);
+
+        const actionOptions = [
+            {
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    parametersSchema: {
+                        type: 'object',
+                        properties: {
+                            tst: {
+                                type: 'string'
+                            }
+                        }
+                    },
+                    defaults: {
+                        values: {
+                            tst: 'ue_'
+                        },
+                        mergeFunction: 'return { tst: parameters.tst + defaults.tst };'
                     },
                     action: {
                         [DummyActionHandler.ID]: '<%- parameters.tst %>'

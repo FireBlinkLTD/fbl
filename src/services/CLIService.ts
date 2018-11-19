@@ -519,8 +519,7 @@ export class CLIService {
                 value = await FSUtil.readYamlFromFile(file);
 
                 // validate file content to be object
-                const fileContentValidationResult = Joi.validate(value, Joi.object().required());
-                isObject = !fileContentValidationResult.error;
+                isObject = ContextUtil.isObject(value);
             } else {
                 value = chunks[1];
             }

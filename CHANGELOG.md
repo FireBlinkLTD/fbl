@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0]
+
+## Fixed
+
+## Changed
+
+- [#205](https://github.com/FireBlinkLTD/fbl/issues/205) virtual default parameters are now automatically merged. 
+
+## Added
+
+- Virtual merge modification by path. No need to override entire merge behaviour. Override is possible for sub-path elements only.
+
 ## [1.0.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.4) - 2018-11-16
 
 ## Fixed

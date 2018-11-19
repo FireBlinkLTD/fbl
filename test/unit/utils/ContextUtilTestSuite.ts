@@ -1,4 +1,4 @@
-import {suite} from 'mocha-typescript';
+import {suite, test} from 'mocha-typescript';
 import {ContextUtil} from '../../../src/utils';
 import {ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';

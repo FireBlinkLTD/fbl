@@ -6,6 +6,7 @@ import {Container} from 'typedi';
 import {Validator} from 'jsonschema';
 import {AnySchema} from 'joi';
 import {FBL_ACTION_SCHEMA} from '../../schemas';
+import {DeepMergeUtil} from '../../utils';
 
 const createJsonSchema = (): AnySchema => {
     return Joi.object({
@@ -62,7 +63,8 @@ const createJsonSchema = (): AnySchema => {
 
 interface IVirtualDefaults {
     values: any;
-    mergeFunction: Function;
+    mergeFunction?: Function;
+    modifiers?: {[path: string]: Function};
 }
 
 export class VirtualFlowActionHandler extends ActionHandler {
@@ -80,9 +82,12 @@ export class VirtualFlowActionHandler extends ActionHandler {
         id: Joi.string().min(1).required(),
         aliases: Joi.array().items(Joi.string().min(1)),
         defaults: Joi.object({
-           values: Joi.any().required(),
-           mergeFunction: Joi.string().min(1).required()
-        }),
+            values: Joi.any().required(),
+            mergeFunction: Joi.string().min(1),
+            modifiers: Joi.object().pattern(/\$(\.[^\.]+)*/, Joi.string())
+        })
+            .without('mergeFunction', 'modifiers')
+            .without('modifiers', 'mergeFunction'),
         parametersSchema: createJsonSchema(),
         action: FBL_ACTION_SCHEMA
     }).required();
@@ -103,18 +108,32 @@ export class VirtualFlowActionHandler extends ActionHandler {
         let virtualDefaults: IVirtualDefaults;
 
         if (options.defaults) {
-            const script = [
-                'return function(defaults, options) {',
-                options.defaults.mergeFunction,
-                '}'
-            ].join('\n');
-
-            const fn = (new Function(script))();
-
             virtualDefaults = {
-                values: options.defaults.values,
-                mergeFunction: fn
+                values: options.defaults.values
             };
+
+            if (options.defaults.mergeFunction) {
+                const script = [
+                    'return function(defaults, parameters) {',
+                    options.defaults.mergeFunction,
+                    '}'
+                ].join('\n');
+
+                virtualDefaults.mergeFunction = (new Function(script))();
+            }
+
+            if (options.defaults.modifiers) {
+                virtualDefaults.modifiers = {};
+                for (const path of Object.keys(options.defaults.modifiers)) {
+                    const script = [
+                        'return function(defaults, parameters) {',
+                        options.defaults.modifiers[path],
+                        '}'
+                    ].join('\n');
+
+                    virtualDefaults.modifiers[path] = (new Function(script))();
+                }
+            }
         }
 
         const dynamicFlowHandler = new DynamicFlowHandler(
@@ -150,9 +169,28 @@ class DynamicFlowHandler extends ActionHandler {
         };
     }
 
+    private getMergedOptions(options: any): any {
+        let mergedOptions = options;
+
+        if (this.virtualDefaults) {
+            if (this.virtualDefaults.mergeFunction) {
+                mergedOptions = this.virtualDefaults.mergeFunction(this.virtualDefaults.values, options);
+            } else {
+                mergedOptions = DeepMergeUtil.merge(
+                    this.virtualDefaults.values,
+                    options,
+                    this.virtualDefaults.modifiers
+                );
+            }
+        }
+
+        return mergedOptions;
+    }
+
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         if (this.validationSchema) {
-            const mergedOptions = this.virtualDefaults ? this.virtualDefaults.mergeFunction(this.virtualDefaults.values, options) : options;
+            const mergedOptions = this.getMergedOptions(options);
+
             const result = new Validator().validate(mergedOptions, this.validationSchema);
             if (!result.valid) {
                 throw new Error(result.errors
@@ -173,7 +211,6 @@ class DynamicFlowHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        const mergedOptions = this.virtualDefaults ? this.virtualDefaults.mergeFunction(this.virtualDefaults.values, options) : options;
         const flowService = Container.get(FlowService);
 
         const idOrAlias = FBLService.extractIdOrAlias(this.action);
@@ -181,7 +218,7 @@ class DynamicFlowHandler extends ActionHandler {
         metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
         parameters = JSON.parse(JSON.stringify(parameters));
-        parameters.parameters = mergedOptions;
+        parameters.parameters = this.getMergedOptions(options);
 
         const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, this.action[idOrAlias], context, parameters);
         snapshot.registerChildActionSnapshot(childSnapshot);

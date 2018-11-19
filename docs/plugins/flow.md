@@ -395,14 +395,29 @@ Allows to create virtual action handler for another action (that can be represen
       test: 
         type: string
   
-  # [optional] default parameters and merge function      
+  # [optional] default parameters and merge function
+  # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
+  # Upon merge arrays will be concatenated.    
   defaults:
     # [required] default values
     values: 
       test: yes
-    # [required] merge function
+     
+    # [optional] merge modification functions for given paths
+    # This is a recommended way of overriding merge behaviour. 
+    # Use "mergeFunction" only when you need to do something really unique.   
+    # "parameters" - represents field state by given path 
+    # "defaults" - its default value if any
+    modifiers: 
+      $.test: |-
+        return parameters + defaults  
+    
+    # [optional] custom merge function
+    # Use it only when "modifiers" functionality isn't enough
+    # "parameters" - represents provided parameters
+    # "defaults" - defaults by itself
     mergeFunction: |-
-      return options.test + defaults.test      
+      return parameters.test + defaults.test      
   
   # action to invoke
   action:
