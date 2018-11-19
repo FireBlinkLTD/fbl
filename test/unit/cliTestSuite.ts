@@ -1050,14 +1050,14 @@ class CliTestSuite {
             'pipeline:',
             '  "--":',
             '    - ctx:',
-            '     $.local:',
+            '    $.local:', // <- wrong indentation
             '          inline: 1',
         ].join('\n');
 
 
         const flowFile = await tempPathsRegistry.createTempFile();
 
-        await promisify(writeFile)(flowFile, flow, 'utf8');
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
             'node',
@@ -1068,7 +1068,51 @@ class CliTestSuite {
             'prompt_value'
         );
 
-        assert.strictEqual(result.code, 1);
+        if (result.code === 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+    }
+
+    @test()
+    async testLocalTemplateUnquotedScalar(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow = {
+            pipeline: {
+                'ctx': {
+                    '$.test_@': {
+                        inline: '<%- $.escape("@test  ") %>'
+                    }
+                }
+            }
+        };
+
+        const reportFile = await tempPathsRegistry.createTempFile();
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        const result = await CliTestSuite.exec(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-o', reportFile,
+                '-r', 'json',
+                flowFile
+            ],
+            'prompt_value'
+        );
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        const reportJson = await promisify(readFile)(reportFile, 'utf8');
+        assert(reportJson.length > 0);
+        const report = JSON.parse(reportJson);
+
+        assert.deepStrictEqual(report.context.final.ctx, {
+            'test_@': '@test  '
+        });
     }
 
     @test()

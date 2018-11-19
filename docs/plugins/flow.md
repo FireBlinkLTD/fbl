@@ -356,7 +356,7 @@ or the same with helper function that converts anything to JSON string (JSON is 
 ```yaml
 tpl: |-
   ctx:
-    something: <%- $.toJSON([1, 2, 3]) %> 
+    something: <%- $.escape([1, 2, 3]) %> 
 ```
 
 that will generally produce:
@@ -395,17 +395,36 @@ Allows to create virtual action handler for another action (that can be represen
       test: 
         type: string
   
-  # [optional] default parameters and merge function      
+  # [optional] default parameters and merge function
+  # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
+  # Upon merge arrays will be concatenated.    
   defaults:
     # [required] default values
     values: 
       test: yes
-    # [required] merge function
+     
+    # [optional] merge modification functions for given paths
+    # This is a recommended way of overriding merge behaviour. 
+    # Use "mergeFunction" only when you need to do something really unique.   
+    # "parameters" - represents field state by given path 
+    # "defaults" - its default value if any
+    modifiers: 
+      $.test: |-
+        return parameters + defaults  
+    
+    # [optional] custom merge function
+    # Use it only when "modifiers" functionality isn't enough
+    # "parameters" - represents provided parameters
+    # "defaults" - defaults by itself
     mergeFunction: |-
-      return options.test + defaults.test      
+      return parameters.test + defaults.test      
   
   # action to invoke
+  # Note: upon execution all relative paths for given action will be calculated based on the folder
+  # where virtual actually lives. If you need to use relative paths based on the place of invocation
+  # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
   action:
+    # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
     ctx:
       some_field:
         # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)

@@ -9,6 +9,10 @@ export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
 
+    /**
+     * Check if value represents a basic type
+     * @param value
+     */
     static isBasicType(value: any): boolean {
         if (typeof value === 'number') {
             return true;
@@ -25,8 +29,22 @@ export class ContextUtil {
         return false;
     }
 
+    /**
+     * Check if value is null or undefined
+     * @param value
+     */
     static isMissing(value: any): boolean {
         return value === null || value === undefined;
+    }
+
+    /**
+     * Check if value is object
+     * @param value
+     */
+    static isObject(value: any): boolean {
+        const fileContentValidationResult = Joi.validate(value, Joi.object().required());
+
+        return !fileContentValidationResult.error;
     }
 
     /**
@@ -183,8 +201,7 @@ export class ContextUtil {
                 target = target[chunks[i]];
             } else {
                 if (!isLast) {
-                    const fileContentValidationResult = Joi.validate(candidate, Joi.object().required());
-                    if (fileContentValidationResult.error) {
+                    if (!ContextUtil.isObject(candidate)) {
                         throw new Error(`Unable to assign path: ${path}. Sub-path ${subPath} leads to non-object value.`);
                     }
                 }

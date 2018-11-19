@@ -63,14 +63,17 @@ causing template to use shared context snapshot available at that time (that mig
 FBL also provides few handy utility functions you can use inside the template. They all assigned to '$' variable, etc:
 
 ```yaml
-value: <%- $.toJSON({}) %>
+value: <%- $.escape({}) %>
 ```
 
-### JSON Stringification
+### Escape
 
 ```js
-// Convert "something" into JSON formatted string
-$.toJSON(something);
+// If "something" is number or boolean it will be returned without modifications
+// If "something" is string and starts with YAML special or reserved character ([] {} > | * & ! % # ` @ ,) it will be wrapped into double quotes.
+// if string already contains double quotes they will be escaped
+// For any other type "something" will be converted into JSON.    
+$.escape(something);
 ```
 
 Note: JSON is also a valid YAML, so you may want to use it to quickly construct your definitions inside the templates.

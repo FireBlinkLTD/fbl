@@ -2,6 +2,21 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.0) - 2018-11-19
+
+## Changed
+
+- [#205](https://github.com/FireBlinkLTD/fbl/issues/205) virtual default parameters are now automatically merged.
+- [#207](https://github.com/FireBlinkLTD/fbl/issues/207) $.toJSON replaced with $.escape that allows to escape unquoted strings that can break YAML parser. 
+
+## Added
+
+- Virtual merge modification by path. No need to override entire merge behaviour. Override is possible for sub-path elements only.
+
+## Fixed
+
+- [#208](https://github.com/FireBlinkLTD/fbl/issues/208) Virtual action handler now uses directory where virtual action handler is located as working directory.
+
 ## [1.0.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.0.4) - 2018-11-16
 
 ## Fixed
