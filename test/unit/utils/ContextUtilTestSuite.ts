@@ -38,21 +38,14 @@ class ContextUtilTestSuite {
     }
 
     @test()
-    async failPushForRootPath(): Promise<void> {
-        await chai.expect(
-            ContextUtil.push({}, '$', 1, false),
-            'Unable to push value to path $. Path has invalid format.'
-        ).to.be.rejected;
-    }
-
-    @test()
     async failPushForNonArrayTarget(): Promise<void> {
         await chai.expect(
             ContextUtil.push({
                 test: {}
-            }, '$.test', 1, false),
-            'Unable to push child records of value to path $.test Value is not an array.'
-        ).to.be.rejected;
+            }, '$.test', 1, false)
+        ).to.be.rejectedWith(
+            'Unable to push value to path: $.test. Target is not array.'
+        );
     }
 
     @test()

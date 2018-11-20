@@ -158,7 +158,7 @@ export class ContextUtil {
         const searchResult = ContextUtil.findTargetByPath(obj, path, []);
 
         if (!Array.isArray(searchResult.target)) {
-            throw new Error(`Unable to assign path: ${path}. Target is not array.`);
+            throw new Error(`Unable to push value to path: ${path}. Target is not array.`);
         }
 
         if (override) {

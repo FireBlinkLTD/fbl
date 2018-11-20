@@ -238,8 +238,9 @@ class AttachedFlowActionHandlerTestSuite {
 
         await chai.expect(
             actionHandler.execute(options, context, snapshot, {}),
+        ).to.be.rejectedWith(
             `Usage of target is not allowed for flow at path: ${tmpFile}`
-        ).to.be.rejected;
+        );
     }
 
     @test()

@@ -25,9 +25,10 @@ class FlowServiceTestSuite {
         await chai.expect(
             flowService.resolveFlow(<IFlowLocationOptions> {
                 path: 'a/b'
-            }),
+            })
+        ).to.be.rejectedWith(
             'Provided path a/b is not absolute.'
-        ).to.be.rejected;
+        );
     }
 
     @test()
