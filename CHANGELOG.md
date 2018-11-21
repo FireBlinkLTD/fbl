@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.1) - 2018-11-21
+
+## Fixed
+
+- [#213](https://github.com/FireBlinkLTD/fbl/issues/213) "try" action handler now invokes "finally" action regardless of "action" result.
+
+## Added
+
+- [#206](https://github.com/FireBlinkLTD/fbl/issues/206) added option to cache remote flows inside ${FBL_HOME}/cache dir via CLI and "attachment" action.
+
 ## [1.1.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.0) - 2018-11-19
 
 ## Changed
