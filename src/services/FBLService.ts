@@ -143,9 +143,14 @@ export class FBLService {
             if (name) {
                 plugin = requireg(pluginNameOrPath);
             } else {
-                const exists = await FSUtil.exists(pluginNameOrPath);
+                let exists = await FSUtil.exists(pluginNameOrPath);
                 if (exists) {
                     plugin = require(pluginNameOrPath);
+                } else {
+                    exists = await FSUtil.exists(pluginNameOrPath + '.js');
+                    if (exists) {
+                        plugin = require(pluginNameOrPath);
+                    }
                 }
             }
         } catch (e) {

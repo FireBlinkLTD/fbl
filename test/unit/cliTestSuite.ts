@@ -45,12 +45,15 @@ class CliTestSuite {
     async after(): Promise<void> {
         const globalConfigPath = CliTestSuite.getGlobalConfigPath();
         const configExists = await promisify(exists)(globalConfigPath);
+
+        const promises: Promise<void>[] = [];
+
         if (configExists) {
-            await promisify(unlink)(globalConfigPath);
+            promises.push(promisify(unlink)(globalConfigPath));
         }
 
         if (CliTestSuite.globalConfigExists) {
-            await promisify(writeFile)(globalConfigPath, CliTestSuite.existingGlobalConfig, 'utf8');
+            promises.push(promisify(writeFile)(globalConfigPath, CliTestSuite.existingGlobalConfig, 'utf8'));
         }
 
         await Container.get(TempPathsRegistry).cleanup();
@@ -59,14 +62,17 @@ class CliTestSuite {
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
 
-            const tarballFile = await FlowService.getCachedTarballPathForURL(`http://localhost:${dummyServerWrapper.config.port}`);
-            const fileExists = await FSUtil.exists(tarballFile);
+            promises.push((async () => {
+                const tarballFile = await FlowService.getCachedTarballPathForURL(`http://localhost:${dummyServerWrapper.config.port}`);
+                const fileExists = await FSUtil.exists(tarballFile);
 
-            if (fileExists) {
-                await promisify(unlink)(tarballFile);
-            }
+                if (fileExists) {
+                    await promisify(unlink)(tarballFile);
+                }
+            })());
         }
 
+        await Promise.all(promises);
         this.dummyServerWrappers = [];
     }
 
@@ -79,6 +85,7 @@ class CliTestSuite {
      * @return {Promise<{code: number; stdout: string; stderr: string}>}
      */
     private static async exec(cmd: string, args: string[], answer?: string, wd?: string): Promise<{code: number, stdout: string, stderr: string}> {
+        const start = Date.now();
         const stdout: string[] = [];
         const stderr: string[] = [];
         const code = await Container.get(ChildProcessService).exec(
@@ -104,6 +111,8 @@ class CliTestSuite {
                 }
             }
         );
+        const end = Date.now();
+        console.log(`Test -> Execution of command took: ${end - start}ms`);
 
         return {
             code,
@@ -140,15 +149,23 @@ class CliTestSuite {
             custom_st: 'file2'
         };
 
-        const flowDir = await tempPathsRegistry.createTempDir();
-        const reportFile = await tempPathsRegistry.createTempFile();
-        const contextFile = await tempPathsRegistry.createTempFile();
-        const secretsFile = await tempPathsRegistry.createTempFile();
+        const temps = await Promise.all([
+            tempPathsRegistry.createTempDir(),
+            tempPathsRegistry.createTempFile(),
+            tempPathsRegistry.createTempFile(),
+            tempPathsRegistry.createTempFile()
+        ]);
+        const flowDir = temps[0];
+        const reportFile = temps[1];
+        const contextFile = temps[2];
+        const secretsFile = temps[3];
         const flowFile = `${flowDir}/flow.yml`;
 
-        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
-        await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
-        await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
+        await Promise.all([
+            promisify(writeFile)(flowFile, dump(flow), 'utf8'),
+            promisify(writeFile)(contextFile, dump(customContextValues), 'utf8'),
+            promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8'),
+        ]);
 
         const cwdPath = flowDir.split(sep);
         cwdPath.pop();
@@ -556,11 +573,13 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/incompatibleWithFBL',
                 '--no-colors',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `Plugin incompatible.plugin is not compatible with current fbl version (${fblVersion})`);
@@ -568,12 +587,14 @@ class CliTestSuite {
         result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/incompatibleWithFBL'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/incompatibleWithFBL.js',
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
 
         if (result.code !== 0) {
@@ -864,11 +885,13 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/incompatibleWithOtherPlugin',
                 '--no-colors',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `Actual plugin fbl.core.flow version ${fblVersion} doesn't satisfy required 0.0.0`);
@@ -876,12 +899,14 @@ class CliTestSuite {
         result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/incompatibleWithOtherPlugin'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/incompatibleWithOtherPlugin',
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
 
         if (result.code !== 0) {
@@ -914,11 +939,13 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/missingPluginDependency',
                 '--no-colors',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Required plugin %some.unkown.plugin% is not registered. Error: Unable to locate plugin %some.unkown.plugin%');
@@ -926,12 +953,14 @@ class CliTestSuite {
         result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/missingPluginDependency'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/missingPluginDependency',
                 '--no-colors',
                 '--unsafe-plugins',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
 
         if (result.code !== 0) {
@@ -964,11 +993,13 @@ class CliTestSuite {
         const result = await CliTestSuite.exec(
             'node',
             [
-                'dist/src/cli.js',
-                '-p', join(__dirname, 'fakePlugins/satisfiesDependencies'),
+                '../../src/cli.js',
+                '-p', 'fakePlugins/satisfiesDependencies',
                 '--no-colors',
                 flowFile
-            ]
+            ],
+            null,
+            __dirname
         );
 
         if (result.code !== 0) {
