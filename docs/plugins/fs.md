@@ -39,6 +39,8 @@ File System plugin.
     secrets: '$.test'
     # [optional] "parameters" variable name to assign file path to ("test")
     parameters: '$.test'
+    # [optional] clear array by given path before assignment
+    override: true  
   
   # [required] content of the file
   content: |-

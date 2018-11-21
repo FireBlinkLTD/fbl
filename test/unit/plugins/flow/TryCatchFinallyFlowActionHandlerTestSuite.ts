@@ -24,7 +24,7 @@ class DummyActionHandler extends ActionHandler {
 
     constructor(
         private name: string,
-        private fn: Function
+        private fn?: Function
     ) {
         super();
     }
@@ -37,7 +37,9 @@ class DummyActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
+        if (this.fn) {
+            await this.fn(options, context, snapshot, {});
+        }
     }
 }
 
@@ -247,6 +249,51 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         assert.strictEqual(snapshot.ignoreChildFailure, true);
 
         assert.strictEqual(catchCalled, true);
+        assert.strictEqual(finallyCalled, true);
+    }
+
+    @test()
+    async executeWithSuccessfulActionAndFinallyBlocks(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        flowService.debug = true;
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const dummyActionHandler = new DummyActionHandler('action');
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        let catchCalled = false;
+        const dummyCatchHandler = new DummyActionHandler('catch', async () => {
+            catchCalled = true;
+        });
+        actionHandlersRegistry.register(dummyCatchHandler, plugin);
+
+        let finallyCalled = false;
+        const finallyCatchHandler = new DummyActionHandler('finally', async () => {
+            finallyCalled = true;
+        });
+        actionHandlersRegistry.register(finallyCatchHandler, plugin);
+
+        const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
+
+        const options = {
+            action: {
+                [DummyActionHandler.ID + '.action']: {}
+            },
+            catch: {
+                [DummyActionHandler.ID + '.catch']: {}
+            },
+            finally: {
+                [DummyActionHandler.ID + '.finally']: {}
+            }
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', tryFlowActionHandler.getMetadata().id, {}, options, context, {});
+
+        assert.strictEqual(snapshot.successful, true);
+
+        assert.strictEqual(catchCalled, false);
         assert.strictEqual(finallyCalled, true);
     }
 
