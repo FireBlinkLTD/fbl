@@ -3,7 +3,7 @@ import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFl
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {writeFile} from 'fs';
+import {unlink, writeFile} from 'fs';
 import {promisify} from 'util';
 import {dump} from 'js-yaml';
 import * as assert from 'assert';
@@ -46,6 +46,8 @@ class DummyActionHandler extends ActionHandler {
     }
 }
 
+const dummyServerWrappers: DummyServerWrapper[] = [];
+
 @suite()
 class AttachedFlowActionHandlerTestSuite {
 
@@ -57,6 +59,13 @@ class AttachedFlowActionHandlerTestSuite {
 
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
+
+            const tarballFile = await FlowService.getCachedTarballPathForURL(`http://localhost:${dummyServerWrapper.config.port}`);
+            const exists = await FSUtil.exists(tarballFile);
+
+            if (exists) {
+                await promisify(unlink)(tarballFile);
+            }
         }
 
         this.dummyServerWrappers = [];
@@ -507,6 +516,76 @@ class AttachedFlowActionHandlerTestSuite {
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
 
         assert.strictEqual(server.lastRequest.headers.test, options.http.headers.test);
+    }
+
+    @test()
+    async cachedTarballMatch(): Promise<void> {
+        let actionHandlerOptions: any = null;
+        let actionHandlerContext: any = null;
+
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest((opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+
+        // file server
+        const port = 61222;
+        const server = new DummyServerWrapper({
+            port,
+            status: 200,
+            file: tarballPath
+        });
+        this.dummyServerWrappers.push(server);
+        await server.start();
+
+        const actionHandler = new AttachedFlowActionHandler();
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.tst = 123;
+
+        const url = `http://localhost:${port}`;
+        const options = <IFlowLocationOptions> {
+            path: url,
+            http: {
+                headers: {
+                    test: 'first'
+                }
+            },
+            cache: true
+        };
+
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 123);
+
+        assert.strictEqual(server.lastRequest.headers.test, options.http.headers.test);
+
+        // run one more time
+        Container.reset();
+
+        await server.stop();
+        await server.start();
+
+        actionHandlerOptions = null;
+        context.ctx.tst = 124;
+        options.http.headers.test = 'second';
+
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const dummyActionHandler = new DummyActionHandler((opts: any, ctx: any) => {
+            actionHandlerOptions = opts;
+            actionHandlerContext = ctx;
+        });
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        await actionHandler.validate(options, context, snapshot, {});
+        await actionHandler.execute(options, context, snapshot, {});
+
+        assert.strictEqual(actionHandlerOptions, true);
+        assert.strictEqual(actionHandlerContext.ctx.tst, 124);
+        assert.strictEqual(server.requestCount, 1);
+        assert.strictEqual(server.lastRequest.headers.test, 'first');
     }
 
     @test()

@@ -4,4 +4,5 @@ export interface IFlowLocationOptions {
         headers?: {[key: string]: string};
     };
     target?: string;
+    cache?: boolean;
 }

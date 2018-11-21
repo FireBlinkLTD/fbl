@@ -128,6 +128,8 @@ Allows to reference external flow by its pass. Helps to logically split big flow
     # [optional] custom http headers
     headers: 
       Authorization: Basic YWRtaW46YWRtaW4=
+  # [optional] cache downloaded package inside $FBL_HOME/cache folder 
+  cache: true
 ```
 
 ## Action Handler: Repeat flow

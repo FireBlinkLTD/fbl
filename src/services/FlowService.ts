@@ -8,14 +8,16 @@ import {Inject, Service} from 'typedi';
 import {FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
-import {dirname, join} from 'path';
+import {dirname, join, resolve} from 'path';
 import {x} from 'tar';
 import {createWriteStream, readdir, unlink} from 'fs';
 import {promisify} from 'util';
 import * as got from 'got';
 import {TempPathsRegistry} from './TempPathsRegistry';
+import {homedir} from 'os';
 
 const ejsLint = require('ejs-lint');
+const uuidv5 = require('uuid/v5');
 
 @Service()
 export class FlowService {
@@ -29,6 +31,13 @@ export class FlowService {
     constructor() {
         this.flowPathCache = {};
         this.flowResolvers = {};
+    }
+
+    /**
+     * Get FBL home directory
+     */
+    static getHomeDir(): string {
+        return process.env.FBL_HOME || resolve(homedir(), '.fbl');
     }
 
     /**
@@ -120,19 +129,41 @@ export class FlowService {
     }
 
     /**
+     * Get cached tarball pass by given url
+     * @param url
+     */
+    static async getCachedTarballPathForURL(url: string): Promise<string> {
+        const cacheDir = resolve(FlowService.getHomeDir(), 'cache');
+        await FSUtil.mkdirp(cacheDir);
+
+        return resolve(cacheDir, uuidv5(url, uuidv5.URL) + '.tar.gz');
+    }
+
+    /**
      * Download tarball into temp location
      * @param {IFlowLocationOptions} location
      * @param {number} [redirectCount]
      * @return {Promise<string>} temp tarball location
      */
     private async downloadTarball(location: IFlowLocationOptions, redirectCount = 0): Promise<string> {
-        console.log(' -> Downloading tarball from remote URL: '.green + location.path);
+        let tarballFile;
+        if (location.cache) {
+            tarballFile = await FlowService.getCachedTarballPathForURL(location.path);
 
-        const tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
+            const exists = await FSUtil.exists(tarballFile);
+            if (exists) {
+                console.log(' -> Found cached tarball for remote URL: '.green + location.path);
 
+                return tarballFile;
+            }
+        } else {
+            tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
+        }
+
+        console.log(' -> Downloading tarball from remote URL: '.green + location.path + ' to ' + tarballFile);
         const ws = createWriteStream(tarballFile);
         try {
-            await new Promise((resolve, reject) => {
+            await new Promise((res, rej) => {
                 const stream = got.stream(location.path, {
                     timeout: 120 * 1000,
                     headers: location.http && location.http.headers
@@ -140,11 +171,15 @@ export class FlowService {
 
                 stream.pipe(ws);
 
-                ws.on('finish', resolve);
-                stream.on('error', reject);
+                ws.on('finish', res);
+                stream.on('error', rej);
             });
         } catch (e) {
-            await promisify(unlink)(tarballFile);
+            const exists = await FSUtil.exists(tarballFile);
+            /* istanbul ignore else */
+            if (exists) {
+                await promisify(unlink)(tarballFile);
+            }
             throw e;
         }
 
