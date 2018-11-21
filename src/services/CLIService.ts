@@ -5,13 +5,12 @@ import {FlowService, FBLService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
-import {IContext, IFlowLocationOptions, IReport, ISummaryRecord} from '../interfaces';
+import {IContext, IFlowLocationOptions, IPlugin, IReport, ISummaryRecord} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
 
 const prompts = require('prompts');
-const requireg = require('requireg');
 const cliui = require('cliui');
 
 @Service()
@@ -491,7 +490,10 @@ export class CLIService {
      * Register plugins
      */
     private async registerPlugins(): Promise<void> {
-        const plugins = this.plugins.map((path: string) => requireg(path));
+        const plugins = await Promise.all(this.plugins.map(async (nameOrPath: string): Promise<IPlugin> =>
+            await FBLService.requirePlugin(nameOrPath, process.cwd())
+        ));
+
         this.fbl.registerPlugins(plugins);
         await this.fbl.validatePlugins(process.cwd());
     }
