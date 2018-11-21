@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.1.2 - Under Development
+
+## Fixed
+
+- [#215](https://github.com/FireBlinkLTD/fbl/issues/215) plugin loading via CLI is now working same way as "requires" section inside the flow definition.
+
 ## [1.1.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.1) - 2018-11-21
 
 ## Fixed
