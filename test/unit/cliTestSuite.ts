@@ -3,8 +3,8 @@ import {dump} from 'js-yaml';
 import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
 import * as assert from 'assert';
-import {ChildProcessService, CLIService, TempPathsRegistry} from '../../src/services';
-import {basename, dirname, join, sep} from 'path';
+import {ChildProcessService, CLIService, FlowService, TempPathsRegistry} from '../../src/services';
+import {basename, dirname, join, resolve, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
 import {ContextUtil, FSUtil} from '../../src/utils';
@@ -26,25 +26,31 @@ class CliTestSuite {
 
     private dummyServerWrappers: DummyServerWrapper[] = [];
 
+    private static getGlobalConfigPath(): string {
+        return resolve(FlowService.getHomeDir(), 'config');
+    }
+
     async before(): Promise<void> {
+        const globalConfigPath = CliTestSuite.getGlobalConfigPath();
         if (CliTestSuite.globalConfigExists === undefined) {
-            await FSUtil.mkdirp(dirname(CLIService.GLOBAL_CONFIG_PATH));
-            CliTestSuite.globalConfigExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
+            await FSUtil.mkdirp(dirname(globalConfigPath));
+            CliTestSuite.globalConfigExists = await promisify(exists)(globalConfigPath);
             if (CliTestSuite.globalConfigExists) {
-                CliTestSuite.existingGlobalConfig = await promisify(readFile)(CLIService.GLOBAL_CONFIG_PATH, 'utf8');
-                await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
+                CliTestSuite.existingGlobalConfig = await promisify(readFile)(globalConfigPath, 'utf8');
+                await promisify(unlink)(globalConfigPath);
             }
         }
     }
 
     async after(): Promise<void> {
-        const configExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
+        const globalConfigPath = CliTestSuite.getGlobalConfigPath();
+        const configExists = await promisify(exists)(globalConfigPath);
         if (configExists) {
-            await promisify(unlink)(CLIService.GLOBAL_CONFIG_PATH);
+            await promisify(unlink)(globalConfigPath);
         }
 
         if (CliTestSuite.globalConfigExists) {
-            await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, CliTestSuite.existingGlobalConfig, 'utf8');
+            await promisify(writeFile)(globalConfigPath, CliTestSuite.existingGlobalConfig, 'utf8');
         }
 
         await Container.get(TempPathsRegistry).cleanup();
@@ -52,6 +58,13 @@ class CliTestSuite {
 
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
+
+            const tarballFile = await FlowService.getCachedTarballPathForURL(`http://localhost:${dummyServerWrapper.config.port}`);
+            const fileExists = await FSUtil.exists(tarballFile);
+
+            if (fileExists) {
+                await promisify(unlink)(tarballFile);
+            }
         }
 
         this.dummyServerWrappers = [];
@@ -414,7 +427,8 @@ class CliTestSuite {
             'local-template-delimiter': '%'
         };
 
-        await promisify(writeFile)(CLIService.GLOBAL_CONFIG_PATH, dump(globalConfig), 'utf8');
+
+        await promisify(writeFile)(CliTestSuite.getGlobalConfigPath(), dump(globalConfig), 'utf8');
 
         const result = await CliTestSuite.exec(
             'node',
@@ -1350,18 +1364,19 @@ class CliTestSuite {
         await server.start();
         this.dummyServerWrappers.push(server);
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '--http-header', '"test1: y1"',
-                '--http-header', '"test2:y2"',
-                '--http-header', '"test3:    y3 "',
-                '-t', basename(flowFile),
-                `http://localhost:${port}`
-            ]
-        );
+        const cmd = 'node';
+        const args = [
+            'dist/src/cli.js',
+            '--no-colors',
+            '--http-header', '"test1: y1"',
+            '--http-header', '"test2:y2"',
+            '--http-header', '"test3:    y3 "',
+            '--use-cache',
+            '-t', basename(flowFile),
+            `http://localhost:${port}`
+        ];
+
+        let result = await CliTestSuite.exec(cmd, args);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1370,6 +1385,15 @@ class CliTestSuite {
         assert.strictEqual(server.lastRequest.headers.test1, 'y1');
         assert.strictEqual(server.lastRequest.headers.test2, 'y2');
         assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
+
+        // run one more time to check cache match
+        result = await CliTestSuite.exec(cmd, args);
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        assert.strictEqual(server.requestCount, 1);
     }
 
     @test()

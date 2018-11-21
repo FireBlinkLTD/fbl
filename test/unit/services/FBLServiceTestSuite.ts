@@ -384,8 +384,9 @@ export class FBLServiceTestSuite {
                             'missing_app_1234'
                         ]
                     }
-                }, '.'),
+                }, '.')
+        ).to.be.rejectedWith(
             'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable'
-        ).to.be.rejected;
+        );
     }
 }

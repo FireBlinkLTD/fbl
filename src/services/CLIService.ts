@@ -5,10 +5,8 @@ import {FlowService, FBLService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
-import {homedir} from 'os';
 import {IContext, IFlowLocationOptions, IReport, ISummaryRecord} from '../interfaces';
 import {ContextUtil, FSUtil} from '../utils';
-import * as Joi from 'joi';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
 
@@ -18,11 +16,10 @@ const cliui = require('cliui');
 
 @Service()
 export class CLIService {
-    static GLOBAL_CONFIG_PATH = resolve(homedir(), '.fbl/config');
-
     private colors = false;
     private flowFilePath: string;
     private flowTarget: string;
+    private useCache: boolean;
     private reportFilePath?: string;
     private reportFormat?: string;
     private globalEJSDelimiter?: string;
@@ -93,7 +90,8 @@ export class CLIService {
                 http: {
                     headers: this.httpHeaders
                 },
-                target: this.flowTarget
+                target: this.flowTarget,
+                cache: this.useCache
             },
             context,
             {},
@@ -193,10 +191,11 @@ export class CLIService {
      * @return {Promise<void>}
      */
     private async readGlobalConfig(): Promise<void> {
-        const globalConfigExists = await promisify(exists)(CLIService.GLOBAL_CONFIG_PATH);
+        const globalConfigPath = resolve(FlowService.getHomeDir(), 'config');
+        const globalConfigExists = await promisify(exists)(globalConfigPath);
 
         if (globalConfigExists) {
-            const globalConfig = await FSUtil.readYamlFromFile(CLIService.GLOBAL_CONFIG_PATH);
+            const globalConfig = await FSUtil.readYamlFromFile(globalConfigPath);
 
             /* istanbul ignore else */
             if (globalConfig.plugins) {
@@ -351,6 +350,17 @@ export class CLIService {
             },
 
             {
+                flags: '--use-cache',
+                description: [
+                    'Cache remote package into $FBL_HOME/cache folder.',
+                    'If package already exists inside cache dir - it will be used and no HTTP requests will be made.',
+                    '',
+                    'Note: this option will only work for path provided to CLI.',
+                    'Option has no affect on "attachment" actions inside the flow itself.'
+                ]
+            },
+
+            {
                 flags: '-h --help',
                 description: [
                     'Output usage information'
@@ -412,6 +422,10 @@ export class CLIService {
 
         if (commander.unsafeFlows) {
             this.fbl.allowUnsafeFlows = true;
+        }
+
+        if (commander.useCache) {
+            this.useCache = true;
         }
 
         if (commander.globalTemplateDelimiter) {

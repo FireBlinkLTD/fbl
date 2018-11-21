@@ -50,8 +50,9 @@ class ErrorActionHandlerTestSuite {
 
         actionHandler.validate('test', context, snapshot, {});
         await chai.expect(
-            actionHandler.execute('test', context, snapshot, {}),
+            actionHandler.execute('test', context, snapshot, {})
+        ).to.be.rejectedWith(
             'test'
-        ).to.be.rejected;
+        );
     }
 }

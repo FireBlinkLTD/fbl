@@ -41,6 +41,8 @@ assignResultTo:
   secrets: '$.test'
   # [optional] "parameters" variable name to assign results to ("test")
   parameters: '$.test'
+  # [optional] override object by given path instead of assigning results to
+  override: true
   
 # [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
 pushResultTo:
@@ -50,6 +52,10 @@ pushResultTo:
   secrets: '$.test'
   # [optional] "parameters" variable name to push result to ("test")
   parameters: '$.test'
+  # [optional] push nested result array into into array by given path instead of result itself
+  children: true
+  # [optional] override array by given path instead of pushing result to
+  override: true
 ```
 
 ## Action Handler: Shell
@@ -92,6 +98,8 @@ assignResultTo:
   secrets: '$.test'
   # [optional] "parameters" variable name to assign results to ("test")
   parameters: '$.test'
+  # [optional] override object by given path instead of assigning result to
+  override: true    
   
 # [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
 pushResultTo:
@@ -101,6 +109,10 @@ pushResultTo:
   secrets: '$.test'
   # [optional] "parameters" variable name to push result to ("test")
   parameters: '$.test'
+  # [optional] push nested result array into into array by given path instead of result itself
+  children: true
+  # [optional] override array by given path instead of pushing result to
+  override: true
 ```
 
 ## Action Handler: Function

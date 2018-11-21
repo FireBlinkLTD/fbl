@@ -272,9 +272,10 @@ class PromptActionHandlerTestSuite {
                     assignResponseTo: {
                         ctx: '$.test'
                     }
-                }, context, snapshot, {}),
+                }, context, snapshot, {})
+            ).to.be.rejectedWith(
                 'Prompt canceled by user'
-            ).to.be.rejected,
+            ),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printChar('c', 'c', true);

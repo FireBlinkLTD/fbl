@@ -23,7 +23,8 @@ export class AttachedFlowActionHandler extends ActionHandler {
             http: Joi.object({
                 headers: Joi.object().min(1)
             }),
-            target: Joi.string().min(1)
+            target: Joi.string().min(1),
+            cache: Joi.boolean()
         })
     ).required()
         .options({ abortEarly: true });

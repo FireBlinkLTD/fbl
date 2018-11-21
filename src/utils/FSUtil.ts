@@ -112,7 +112,7 @@ export class FSUtil {
      * @return {Promise<void>}
      */
     static async mkdirp(path: string): Promise<void> {
-        const exist = await existsAsync(path);
+        const exist = await FSUtil.exists(path);
         if (!exist) {
             path = normalize(path);
             const parent = dirname(path);

@@ -56,7 +56,7 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
         }
 
         // run finally
-        if (snapshot.childFailure && options.finally) {
+        if (options.finally) {
             idOrAlias = FBLService.extractIdOrAlias(options.finally);
             metadata = FBLService.extractMetadata(options.finally);
             metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);

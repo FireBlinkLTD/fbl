@@ -86,7 +86,8 @@ Flow files can use EJS [templates](docs/templates.md) for a flexible control ove
 
 ## Global Config
 
-Create folder `.fbl` inside your user home directory. Put `config` file inside it with following format:
+Create folder `.fbl` inside your user home directory (or define FBL_HOME environment variable with preferred location).
+Put `config` file inside it with following format:
 
 ```yaml
 # Provide a list of globally installed plugins or absolute paths
