@@ -1,12 +1,13 @@
-# Tarball (packaging)
+# Tarball \(packaging\)
 
 Packaging of flows is possible inside tarball.
 
 Requirements:
-- File name should end with `.tar.gz`
-- `index.yml` file should be located in root of the tarball or in any child directory if each parent dir has only one child.
 
-E.g.: 
+* File name should end with `.tar.gz`
+* `index.yml` file should be located in root of the tarball or in any child directory if each parent dir has only one child.
+
+E.g.:
 
 ## Reference tarball
 
@@ -26,7 +27,7 @@ pipeline:
     - @: http://storage.com/another_flow.tar.gz
 ```
 
-## Tarball creation (Unix)
+## Tarball creation \(Unix\)
 
 Let's assume your flow folder is located under the path `~/flows/sample`
 

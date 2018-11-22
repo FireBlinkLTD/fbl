@@ -7,8 +7,9 @@ Plugin allows to invoke any shell command.
 **ID:** `com.fireblink.fbl.exec`
 
 **Aliases:**
- - `fbl.exec`
- - `exec`
+
+* `fbl.exec`
+* `exec`
 
 **Example:**
 
@@ -43,7 +44,7 @@ assignResultTo:
   parameters: '$.test'
   # [optional] override object by given path instead of assigning results to
   override: true
-  
+
 # [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
 pushResultTo:
   # [optional] "ctx" variable name to push result to ("test")
@@ -63,8 +64,9 @@ pushResultTo:
 **ID:** `com.fireblink.fbl.shell`
 
 **Aliases:**
- - `fbl.shell`
- - `shell`
+
+* `fbl.shell`
+* `shell`
 
 **Example:**
 
@@ -76,11 +78,11 @@ executable: '/bin/bash'
 script: |- 
   cd /tmp
   touch test.txt
-  
+
 # [optional] working directory to run script from.
 # Default value: flow's folder
 wd: <%- cwd %>
-  
+
 # [optional] options
 options:
   # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
@@ -89,7 +91,7 @@ options:
   stderr: true
   # [optional] if provided - stdout and stderr will be logged in report and printed to console
   verbose: false
-    
+
 # [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
 assignResultTo:
   # [optional] "ctx" variable name to assign results to ("test")
@@ -100,7 +102,7 @@ assignResultTo:
   parameters: '$.test'
   # [optional] override object by given path instead of assigning result to
   override: true    
-  
+
 # [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
 pushResultTo:
   # [optional] "ctx" variable name to push result to ("test")
@@ -117,17 +119,18 @@ pushResultTo:
 
 ## Action Handler: Function
 
-Allows to define custom JS script (ES6) to modify context state.
+Allows to define custom JS script \(ES6\) to modify context state.
 
 **ID:** `com.fireblink.fbl.function`
 
 **Aliases:**
- - `fbl.function`
- - `function`
- - `function()`
- - `fn`
- - `fn()`
- 
+
+* `fbl.function`
+* `function`
+* `function()`
+* `fn`
+* `fn()`
+
 **Example:**
 
 ```yaml
@@ -140,3 +143,4 @@ Allows to define custom JS script (ES6) to modify context state.
 fn: |-
   context.ctx.isWindows = require('os').platform() === 'win32';
 ```
+

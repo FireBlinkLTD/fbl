@@ -3,18 +3,19 @@
 Flow order control.
 
 Available steps:
-- [sequence (sync)](#action-handler-sequential-steps-execution)
-- [parallel (async)](#action-handler-parallel-steps-execution)
-- [attachment](#action-handler-attached-flow)
-- [repeat](#action-handler-repeat-flow)
-- [for each of](#action-handler-for-each)
-- [while](#action-handler-while)
-- [switch (conditional)](#action-handler-switch-flow)
-- [try-catch-finally](#action-handler-try---catch---finally-flow)
-- [sleep](#action-handler-sleep)
-- [template](#action-handler-template)
-- [virtual](#action-handler-virtual)
-- [error](#action-handler-error)
+
+* [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution)
+* [parallel \(async\)](flow.md#action-handler-parallel-steps-execution)
+* [attachment](flow.md#action-handler-attached-flow)
+* [repeat](flow.md#action-handler-repeat-flow)
+* [for each of](flow.md#action-handler-for-each)
+* [while](flow.md#action-handler-while)
+* [switch \(conditional\)](flow.md#action-handler-switch-flow)
+* [try-catch-finally](flow.md#action-handler-try---catch---finally-flow)
+* [sleep](flow.md#action-handler-sleep)
+* [template](flow.md#action-handler-template)
+* [virtual](flow.md#action-handler-virtual)
+* [error](flow.md#action-handler-error)
 
 ## Action Handler: Sequential steps execution
 
@@ -23,11 +24,12 @@ Run steps one by one, if any of steps fail - chain of execution will stop on it.
 **ID:** `com.fireblink.fbl.flow.sequence`
 
 **Aliases:**
- - `fbl.flow.sequence`
- - `flow.sequence`
- - `sequence`
- - `sync`
- - `--`
+
+* `fbl.flow.sequence`
+* `flow.sequence`
+* `sequence`
+* `sync`
+* `--`
 
 **Example:**
 
@@ -41,7 +43,7 @@ Run steps one by one, if any of steps fail - chain of execution will stop on it.
   - ctx: 
       fromFile:
         files: 
-          - test.yml 
+          - test.yml
 ```
 
 ## Action Handler: Parallel steps execution
@@ -51,14 +53,15 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
 **ID:** `com.fireblink.fbl.flow.parallel`
 
 **Aliases:**
- - `fbl.flow.parallel`
- - `flow.parallel`
- - `parallel`
- - `async`
- - `||`
- 
-**Example:** 
- 
+
+* `fbl.flow.parallel`
+* `flow.parallel`
+* `parallel`
+* `async`
+* `||`
+
+**Example:**
+
 ```yaml
 # Run steps in parallel
 '||':
@@ -69,7 +72,7 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
   - ctx: 
       fromFile:
         files: 
-          - test.yml 
+          - test.yml
 ```
 
 ## Action Handler: Attached flow
@@ -79,16 +82,17 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 **ID:** `com.fireblink.fbl.flow.attachment`
 
 **Aliases:**
- - `fbl.flow.attachment`
- - `flow.attachment`
- - `attachment`
- - `@`
- 
+
+* `fbl.flow.attachment`
+* `flow.attachment`
+* `attachment`
+* `@`
+
 **Example 1: Specify flow file**
 
 ```yaml
 # Run steps from external flow file or package (*.tar.gz)
-'@': flow.yml 
+'@': flow.yml
 ```
 
 **Example 2: Specify directory**
@@ -96,17 +100,19 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 ```yaml
 # Run steps from external flow file (index.yml) inside "flow" directory
 # Note: slash in the end of path is not required
-'@': flow/ 
+'@': flow/
 ```
 
 **Example 3: Specify url to download a package**
+
 ```yaml
 # Run steps from external flow file (index.yml) inside "flow" directory
 # Note: slash in the end of path is not required
-'@': http://some.host/flow.tar.gz 
+'@': http://some.host/flow.tar.gz
 ```
 
 **Example 4: Specify target inside the package**
+
 ```yaml
 '@':
   # path or url to download the package
@@ -139,9 +145,10 @@ Repeat action multiple times.
 **ID:** `com.fireblink.fbl.flow.repeat`
 
 **Aliases:**
- - `fbl.flow.repeat`
- - `flow.repeat`
- - `repeat`
+
+* `fbl.flow.repeat`
+* `flow.repeat`
+* `repeat`
 
 **Example:**
 
@@ -154,7 +161,7 @@ repeat:
   # action to run
   action: 
     # run flow_0.yml and flow_1.yml flows
-    @: flow_<%- iteration.index %>.yml                 
+    @: flow_<%- iteration.index %>.yml
 ```
 
 ## Action Handler: For Each
@@ -164,11 +171,12 @@ Allows to execute action for every item in the array or key of an object.
 **ID:** `com.fireblink.fbl.flow.foreach`
 
 **Aliases:**
- - `fbl.flow.foreach`
- - `flow.foreach`
- - `foreach`
- - `each`
- 
+
+* `fbl.flow.foreach`
+* `flow.foreach`
+* `foreach`
+* `each`
+
 **Example: Array**
 
 ```yaml
@@ -202,12 +210,13 @@ Allows to run action based on some condition
 **ID:** `com.fireblink.fbl.flow.switch`
 
 **Aliases:**
- - `fbl.flow.switch`
- - `flow.switch`
- - `switch`
- - `if`
- - `?` 
- 
+
+* `fbl.flow.switch`
+* `flow.switch`
+* `switch`
+* `if`
+* `?` 
+
 **Example:**
 
 ```yaml
@@ -218,11 +227,11 @@ Allows to run action based on some condition
     # execute "foo.yml" if "foo"
     foo: 
       @: foo.yml
-      
+
     # execute "bar.yml" if "bar"
     bar: 
       @: bar.yml
-  
+
   # [optional] if no match found "else" handler will get executed
   else:
     @: else.yml
@@ -230,16 +239,18 @@ Allows to run action based on some condition
 
 ## Action Handler: While
 
-Runs action till condition is successful or not (based on configuration).
+Runs action till condition is successful or not \(based on configuration\).
 
 **ID:** `com.fireblink.fbl.flow.while`
 
 **Aliases:**
- - `fbl.flow.while`
- - `flow.while`
- - `while`
 
-**Example: Positive condition check** 
+* `fbl.flow.while`
+* `flow.while`
+* `while`
+
+**Example: Positive condition check**
+
 ```yaml
 while:
     # [required] value to check
@@ -251,7 +262,8 @@ while:
       '@': something.yml
 ```
 
-**Example: Negative condition check** 
+**Example: Negative condition check**
+
 ```yaml
 while:
     # [required] value to check
@@ -262,7 +274,7 @@ while:
     action:
       '@': something.yml
 ```
- 
+
 ## Action Handler: Sleep
 
 Sleep for a given amount of seconds.
@@ -270,32 +282,32 @@ Sleep for a given amount of seconds.
 **ID:** `com.fireblink.fbl.flow.sleep`
 
 **Aliases:**
- - `fbl.flow.sleep`
- - `flow.sleep`
- - `sleep`
- 
+
+* `fbl.flow.sleep`
+* `flow.sleep`
+* `sleep`
+
 **Example:**
 
 ```yaml
 # sleep for a minute
 sleep: 60
 ```
- 
- 
+
 ## Action Handler: Try - Catch - Finally Flow
 
-Allows to run sub-step in isolation causing its failure to be ignored by parent step.
-Optionally catch and finally steps can be invoked.
+Allows to run sub-step in isolation causing its failure to be ignored by parent step. Optionally catch and finally steps can be invoked.
 
 If catch or finally step block will be failed - this step will also be marked as failed even try block passes successfully.
 
 **ID:** `com.fireblink.fbl.flow.try`
 
 **Aliases:**
- - `fbl.flow.try`
- - `flow.try`
- - `try`
- 
+
+* `fbl.flow.try`
+* `flow.try`
+* `try`
+
 **Example:**
 
 ```yaml
@@ -313,7 +325,7 @@ try:
 
 ## Action Handler: Template
 
-Run action based on dynamically constructed template. This is handy as you generally can not dynamically construct YAML with EJS template inside most of the actions. 
+Run action based on dynamically constructed template. This is handy as you generally can not dynamically construct YAML with EJS template inside most of the actions.
 
 E.g: following is invalid:
 
@@ -322,14 +334,14 @@ ctx:
   something: 
     <% [1, 2, 3].forEach(item => { %>
     - <%- item %>
-    <% }) %>    
+    <% }) %>
 ```
 
 It will fail as upon processing everything that goes after something will be treated as string, causing to produce following action:
 
 ```yaml
 ctx:
-  something: '-1\n -2\n -3' 
+  something: '-1\n -2\n -3'
 ```
 
 But there is a template handler that can help you with that.
@@ -337,11 +349,12 @@ But there is a template handler that can help you with that.
 **ID:** `com.fireblink.fbl.flow.template`
 
 **Aliases:**
- - `fbl.flow.template`
- - `flow.template`
- - `template`
- - `tpl`
- 
+
+* `fbl.flow.template`
+* `flow.template`
+* `template`
+* `tpl`
+
 **Example:**
 
 ```yaml
@@ -350,15 +363,15 @@ tpl: |-
     something: 
       <% [1, 2, 3].forEach(item => { %>
       - <%- item %>
-      <% }) %>    
+      <% }) %>
 ```
 
-or the same with helper function that converts anything to JSON string (JSON is a valid YAML):
+or the same with helper function that converts anything to JSON string \(JSON is a valid YAML\):
 
 ```yaml
 tpl: |-
   ctx:
-    something: <%- $.escape([1, 2, 3]) %> 
+    something: <%- $.escape([1, 2, 3]) %>
 ```
 
 that will generally produce:
@@ -370,72 +383,73 @@ ctx:
 
 ## Action Handler: Virtual
 
-Allows to create virtual action handler for another action (that can be represented as one of the flows).
+Allows to create virtual action handler for another action \(that can be represented as one of the flows\).
 
 **ID:** `com.fireblink.fbl.flow.virtual`
 
 **Aliases:**
- - `fbl.flow.virtual`
- - `flow.virtual`
- - `virtual`
- 
- **Example:**
- 
- ```yaml
- virtual:
+
+* `fbl.flow.virtual`
+* `flow.virtual`
+* `virtual`
+
+  **Example:**
+
+  ```yaml
+  virtual:
   # [required] virtual handler ID
   id: handler.id
-  
+
   # [optional] aliases for the handler to reference
   aliases:
-    - handler.alias
-  
+   - handler.alias
+
   # [optional] JSON Schema of options that can/should be passed to the generated handler     
   parametersSchema:
-    type: object
-    properties:
-      test: 
-        type: string
-  
+   type: object
+   properties:
+     test: 
+       type: string
+
   # [optional] default parameters and merge function
   # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
   # Upon merge arrays will be concatenated.    
   defaults:
-    # [required] default values
-    values: 
-      test: yes
-     
-    # [optional] merge modification functions for given paths
-    # This is a recommended way of overriding merge behaviour. 
-    # Use "mergeFunction" only when you need to do something really unique.   
-    # "parameters" - represents field state by given path 
-    # "defaults" - its default value if any
-    modifiers: 
-      $.test: |-
-        return parameters + defaults  
-    
-    # [optional] custom merge function
-    # Use it only when "modifiers" functionality isn't enough
-    # "parameters" - represents provided parameters
-    # "defaults" - defaults by itself
-    mergeFunction: |-
-      return parameters.test + defaults.test      
-  
+   # [required] default values
+   values: 
+     test: yes
+
+   # [optional] merge modification functions for given paths
+   # This is a recommended way of overriding merge behaviour. 
+   # Use "mergeFunction" only when you need to do something really unique.   
+   # "parameters" - represents field state by given path 
+   # "defaults" - its default value if any
+   modifiers: 
+     $.test: |-
+       return parameters + defaults  
+
+   # [optional] custom merge function
+   # Use it only when "modifiers" functionality isn't enough
+   # "parameters" - represents provided parameters
+   # "defaults" - defaults by itself
+   mergeFunction: |-
+     return parameters.test + defaults.test      
+
   # action to invoke
   # Note: upon execution all relative paths for given action will be calculated based on the folder
   # where virtual actually lives. If you need to use relative paths based on the place of invocation
   # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
   action:
-    # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
-    ctx:
-      some_field:
-        # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
-        inline: <%- parameters.test %> 
- ```
- 
+   # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
+   ctx:
+     some_field:
+       # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+       inline: <%- parameters.test %>
+  ```
+
 Then you can reference your generated handler like any other:
- 
- ```yaml
+
+```yaml
 handler.id:
   test: some_field_value
 ```
@@ -447,12 +461,14 @@ Throw error upon execution with given message.
 **ID:** `com.fireblink.fbl.flow.error`
 
 **Aliases:**
- - `fbl.flow.error`
- - `flow.error`
- - `error`
+
+* `fbl.flow.error`
+* `flow.error`
+* `error`
 
 **Example:**
 
- ```yaml
+```yaml
 error: 'message'
 ```
+
