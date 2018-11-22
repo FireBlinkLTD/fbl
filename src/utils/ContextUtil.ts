@@ -6,7 +6,7 @@ import * as Joi from 'joi';
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
-    private static REFERENCE_REGEX = /^\$ref:(ctx|secrets|parameters)(\.[^.]+)$/;
+    private static REFERENCE_REGEX = /^\$ref:(ctx|secrets|parameters)((\.[^.]+)+)$/;
 
     /**
      * Check if value represents a basic type
@@ -228,7 +228,10 @@ export class ContextUtil {
             throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
         }
 
-        const isAssignable = !ContextUtil.isBasicType(value) && !Array.isArray(value) && !ContextUtil.isMissing(value);
+        const isAssignable =
+            !ContextUtil.isBasicType(value) &&
+            !Array.isArray(value) &&
+            !ContextUtil.isMissing(value);
 
         const {target, parent, key} = ContextUtil.findTargetByPath(obj, path, {});
 
@@ -329,30 +332,23 @@ export class ContextUtil {
                 if (match) {
                     let target: any;
 
+                    /* istanbul ignore else */
                     if (match[1] === 'ctx') {
                         target = context.ctx;
-                    }
-
-                    if (match[1] === 'secrets') {
+                    } else if (match[1] === 'secrets') {
                         target = context.secrets;
-                    }
-
-                    if (match[1] === 'parameters') {
+                    } else if (match[1] === 'parameters') {
                         target = parameters.parameters;
-                    }
-
-                    if (!target) {
-                        throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Invalid root field name - ${match[1]}`);
                     }
 
                     const chunks = match[2].substring(1).split('.');
                     for (const subPath of chunks) {
                         if (!ContextUtil.isObject(target)) {
-                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at ${subPath}`);
+                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at: ${subPath}`);
                         }
 
                         if (!target.hasOwnProperty(subPath)) {
-                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at ${subPath}`);
+                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at: ${subPath}`);
                         }
 
                         target = target[subPath];

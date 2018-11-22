@@ -11,3 +11,4 @@ mochawesome-report/
 *.iml
 
 _book/
+.gitbook/
