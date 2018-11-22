@@ -1,13 +1,12 @@
 import {IContext, IContextBase, IDelegatedParameters} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
-import {t} from 'tar';
 import {ActionSnapshot} from '../models';
 import * as Joi from 'joi';
-import {isObject} from 'util';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
+    private static REFERENCE_REGEX = /^\$ref:(ctx|secrets|parameters)(\.[^.]+)$/;
 
     /**
      * Check if value represents a basic type
@@ -174,8 +173,8 @@ export class ContextUtil {
 
     /**
      * Find target by given path
-     * @param {{[p: string]: any}} obj
-     * @param {string} path
+     * @param {{[p: string]: any}} path
+     * @param {string} leaf
      * @return {{target: any; parent: {[p: string]: any}; key: string; subPath: string}}
      */
     private static findTargetByPath(
@@ -310,5 +309,76 @@ export class ContextUtil {
                 local: '%'
             }
         };
+    }
+
+    /**
+     * Resolve $ref:<target>.path references
+     * @param options
+     * @param context
+     * @param parameters
+     */
+    public static resolveReferences(options: any, context: IContext, parameters: IDelegatedParameters): any {
+        if (ContextUtil.isMissing(options)) {
+            return options;
+        }
+
+        if (ContextUtil.isBasicType(options)) {
+            // if options is string - check if it matches pattern
+            if (typeof options === 'string') {
+                const match = options.match(ContextUtil.REFERENCE_REGEX);
+                if (match) {
+                    let target: any;
+
+                    if (match[1] === 'ctx') {
+                        target = context.ctx;
+                    }
+
+                    if (match[1] === 'secrets') {
+                        target = context.secrets;
+                    }
+
+                    if (match[1] === 'parameters') {
+                        target = parameters.parameters;
+                    }
+
+                    if (!target) {
+                        throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Invalid root field name - ${match[1]}`);
+                    }
+
+                    const chunks = match[2].substring(1).split('.');
+                    for (const subPath of chunks) {
+                        if (!ContextUtil.isObject(target)) {
+                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at ${subPath}`);
+                        }
+
+                        if (!target.hasOwnProperty(subPath)) {
+                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at ${subPath}`);
+                        }
+
+                        target = target[subPath];
+                    }
+
+                    return target;
+                }
+
+                return options;
+            }
+
+            // if not string - return it as is
+            return options;
+        }
+
+        // path is not supporting arrays so return it as is
+        if (Array.isArray(options)) {
+            return options;
+        }
+
+        // resolve object field values
+        const obj: any = {};
+        for (const key of Object.keys(options)) {
+            obj[key] = ContextUtil.resolveReferences(options[key], context, parameters);
+        }
+
+        return obj;
     }
 }

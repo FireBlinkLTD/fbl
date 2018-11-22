@@ -91,7 +91,7 @@ class TemplateFlowActionHandlerTestSuite {
         });
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const options = `${DummyActionHandler.ID}: <%- $.escape(ctx.test) %>`;
+        const options = `${DummyActionHandler.ID}: $ref:ctx.test`;
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = ['a1', 'b2', {

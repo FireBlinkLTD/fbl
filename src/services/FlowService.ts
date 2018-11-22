@@ -5,7 +5,7 @@ import {render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
-import {FSUtil} from '../utils';
+import {ContextUtil, FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {dirname, join, resolve} from 'path';
@@ -392,6 +392,10 @@ export class FlowService {
         maskSecrets: boolean,
         parameters: IDelegatedParameters
     ): any {
+        if (!options) {
+            return options;
+        }
+
         if (maskSecrets && context.secrets && Object.keys(context.secrets).length) {
             // make a copy of the options object first
             let json = JSON.stringify(options);
@@ -402,30 +406,32 @@ export class FlowService {
             options = JSON.parse(json);
         }
 
-        if (options) {
-            let tpl = dump(options);
 
-            // fix template after dump
-            // while in yaml following string is fully valid '<%- ctx[''name''] %>'
-            // for EJS it is broken due to quotes escape
-            const lines: string[] = [];
-            const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
-            const doubleQuotesRegEx = /''/g;
-            tpl.split('\n').forEach(line => {
-               if (line.indexOf('\'\'') !== -1) {
-                   // we only want to replace '' to ' inside the EJS template
-                   line = line.replace(ejsTemplateRegEx, function (match, g1): string {
-                        return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
-                   });
-               }
+        let tpl = dump(options);
 
-               lines.push(line);
-            });
+        // fix template after dump
+        // while in yaml following string is fully valid '<%- ctx[''name''] %>'
+        // for EJS it is broken due to quotes escape
+        const lines: string[] = [];
+        const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
+        const doubleQuotesRegEx = /''/g;
+        tpl.split('\n').forEach(line => {
+           if (line.indexOf('\'\'') !== -1) {
+               // we only want to replace '' to ' inside the EJS template
+               line = line.replace(ejsTemplateRegEx, function (match, g1): string {
+                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
+               });
+           }
 
-            tpl = lines.join('\n');
-            const yaml = this.resolveTemplate(delimiter, wd, tpl, context, parameters);
-            options = safeLoad(yaml);
-        }
+           lines.push(line);
+        });
+
+        tpl = lines.join('\n');
+        const yaml = this.resolveTemplate(delimiter, wd, tpl, context, parameters);
+        options = safeLoad(yaml);
+
+        // resolve references
+        options = ContextUtil.resolveReferences(options, context, parameters);
 
         return options;
     }

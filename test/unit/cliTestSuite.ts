@@ -1119,22 +1119,63 @@ class CliTestSuite {
     }
 
     @test()
-    async testLocalTemplateUnquotedScalar(): Promise<void> {
+    async testLocalTemplatePassingValueByReference(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
 
-        const flow = {
-            pipeline: {
-                'ctx': {
-                    '$.test_@': {
-                        inline: '<%- $.escape("@test  ") %>'
-                    }
-                }
-            }
-        };
+        const flow = [
+            'pipeline:',
+            '  ctx:',
+            '    "$.test_[]":',
+            '      inline: $ref:ctx.array'
+        ].join('\n');
 
         const reportFile = await tempPathsRegistry.createTempFile();
         const flowFile = await tempPathsRegistry.createTempFile();
-        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+        const ctxFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, flow, 'utf8');
+
+        await promisify(writeFile)(ctxFile, '[1]', 'utf8');
+
+        const result = await CliTestSuite.exec(
+            'node',
+            [
+                'dist/src/cli.js',
+                '-o', reportFile,
+                '-r', 'json',
+                '-c', `$.array=@${ctxFile}`,
+                flowFile
+            ],
+            'prompt_value'
+        );
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        const reportJson = await promisify(readFile)(reportFile, 'utf8');
+        assert(reportJson.length > 0);
+        const report = JSON.parse(reportJson);
+
+        assert.deepStrictEqual(report.context.final.ctx, {
+            'test_[]': [1],
+            array: [1]
+        });
+    }
+
+    @test()
+    async testLocalTemplateUnquotedScalar(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow = [
+            'pipeline:',
+            '  ctx:',
+            '    "$.test_@":',
+            '      inline: <%- $.escape("@test  ") %>'
+        ].join('\n');
+
+        const reportFile = await tempPathsRegistry.createTempFile();
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, flow, 'utf8');
 
         const result = await CliTestSuite.exec(
             'node',
@@ -1150,6 +1191,7 @@ class CliTestSuite {
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
+
 
         const reportJson = await promisify(readFile)(reportFile, 'utf8');
         assert(reportJson.length > 0);

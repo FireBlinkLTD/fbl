@@ -1,5 +1,4 @@
 import {ITemplateUtility} from '../../interfaces';
-import {ContextUtil} from '../../utils';
 import {number} from 'joi';
 
 export class EscapeTemplateUtility implements ITemplateUtility {
@@ -7,19 +6,19 @@ export class EscapeTemplateUtility implements ITemplateUtility {
         return {
             /**
              * Convert anything into JSON string
-             * @param anything
+             * @param value
              * @return {string}
              */
-            escape: (anything: any): any => {
-                if (typeof anything === 'number' || typeof anything === 'boolean') {
-                    return anything;
+            escape: (value: any): any => {
+                if (typeof value === 'number' || typeof value === 'boolean') {
+                    return value;
                 }
 
-                if (typeof anything === 'string') {
-                    return `"${anything.replace(/"/g, '\\"')}"`;
+                if (typeof value === 'string') {
+                    return `"${value.replace(/"/g, '\\"')}"`;
                 }
 
-                return JSON.stringify(anything);
+                throw Error('Unable to escape value. Use $ref:path to pass value by reference.');
             }
         };
     }
