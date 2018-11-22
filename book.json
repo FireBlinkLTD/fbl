@@ -1,0 +1,28 @@
+{
+  "root": "./docs",
+  "title": "FBL (FireBlink Logistics)",
+  "plugins": [
+    "-sharing",
+    "theme-api",
+    "toolbar"
+  ],
+  "links": {
+    "sidebar": {
+      "Contact Us": "https://fireblink.com#contact",
+      "GitHub": "https://github.com/FireBlinkLTD/fbl"
+    }
+  },
+  "pluginsConfig": {
+    "toolbar": {
+      "buttons":
+      [
+        {
+          "label": "GitHub",
+          "icon": "fa fa-github",
+          "url": "https://github.com/FireBlinkLTD/fbl",
+          "target": "_self"
+        }
+      ]
+    }
+  }
+}
