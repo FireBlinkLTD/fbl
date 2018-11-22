@@ -9,3 +9,5 @@ mochawesome-report/
 
 .idea/
 *.iml
+
+_book/

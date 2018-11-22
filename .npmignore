@@ -17,3 +17,6 @@ tsconfig.json
 yarn-error.log
 
 dist/test/
+
+_book/
+book.json

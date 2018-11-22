@@ -1,15 +1,16 @@
 # Tarball \(packaging\)
 
-Packaging of flows is possible inside tarball.
+Sharing the flow is one of the critical aspects of complex automation tasks. Imagine you created a deployment flow for one of your services.
+But now you need to deploy it to another environment. Of course, you can just copy and paste your flow, but any fixes or changes will be hard to sync.
+
+Package it. Any flow can be easily packaged and imported in other flow or invoked directly via local path or even URL.
 
 Requirements:
 
-* File name should end with `.tar.gz`
+* File extension should be either `.tar.gz` or `.tgz`.
 * `index.yml` file should be located in root of the tarball or in any child directory if each parent dir has only one child.
 
-E.g.:
-
-## Reference tarball
+## Package usage
 
 You can reference tarball as any other flow by just providing path to it, e.g.:
 
@@ -22,21 +23,21 @@ version: 1.0.0
 pipeline:
   '--':
     # reference the flow stored locally
-    - @: path/to/flow.tar.gz
+    - '@': path/to/flow.tar.gz
     # reference the flow stored remotely
-    - @: http://storage.com/another_flow.tar.gz
+    - '@': http://storage.com/another_flow.tar.gz
 ```
 
-## Tarball creation \(Unix\)
+## Packaging - Tarball Creation
 
-Let's assume your flow folder is located under the path `~/flows/sample`
+### Unix
 
-To create a valid tarball do the following in you terminal
+Let's assume your flow is located in folder called `~/flows/sample`
+
+To create a tarball just navigate to flow's parent directory (`flows` in this example) and execute following command:  
 
 ```bash
-# navigate to the parent directory (~/flows)
-cd ~/flows
-# create the tarball
+# create a package named sample.tar.gz with all the files inside sample folder 
 tar czf sample.tar.gz sample
 ```
 

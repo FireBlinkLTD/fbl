@@ -40,7 +40,8 @@ entities:
 summary: []
 ```
 
-\(EJS\)\[[http://ejs.co/](http://ejs.co/)\] template can be used inside options to pass values from shared context. Please refer to plugin documentation if this feature supported and what options are required.
+[EJS](http://ejs.co/) template can be used inside options to pass values from shared context. 
+Please refer to plugin documentation if this feature supported and what options are required.
 
 Example:
 
@@ -360,4 +361,3 @@ summary:
   # [optional] additional data associated with record. Not presented in printed table.
   payload: anything
 ```
-

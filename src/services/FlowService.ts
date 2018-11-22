@@ -321,7 +321,7 @@ export class FlowService {
     async readFlowFromFile(location: IFlowLocationOptions, context: IContext, parameters: IDelegatedParameters, wd: string): Promise<{flow: IFlow, wd: string}> {
         const absolutePath = await this.resolveFlow(location);
 
-        console.log(` -> Reading flow file:`.green + absolutePath);
+        console.log(` -> Reading flow file: `.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);
 
         content = this.resolveTemplate(
@@ -336,7 +336,7 @@ export class FlowService {
         try {
             flow = safeLoad(content) as IFlow;
         } catch (e) {
-            console.error(` -> Reading flow failed from file:`.red + absolutePath + ' Error: ' + e.message.red);
+            console.error(` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red);
             console.error(content.gray);
             throw (e);
         }
