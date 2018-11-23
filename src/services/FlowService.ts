@@ -1,7 +1,7 @@
 import {ActionHandlersRegistry} from './ActionHandlersRegistry';
 import {IContext, IDelegatedParameters, IFlow, IFlowLocationOptions} from '../interfaces';
 import {safeLoad, dump} from 'js-yaml';
-import {render} from 'ejs';
+import {Options, render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
 import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
@@ -91,7 +91,7 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed (only when changes applied)
-                const resolvedOptions = this.resolveOptions(wd, handler, options, context, true, parameters);
+                const resolvedOptions = await this.resolveOptions(wd, handler, options, context, true, parameters);
                 if (JSON.stringify(options) !== JSON.stringify(resolvedOptions)) {
                     snapshot.setOptions(resolvedOptions);
                 }
@@ -100,7 +100,7 @@ export class FlowService {
             }
 
             // resolve without masking
-            options = this.resolveOptions(wd, handler, options, context, false, parameters);
+            options = await this.resolveOptions(wd, handler, options, context, false, parameters);
 
             await handler.validate(options, context, snapshot, parameters);
             snapshot.validated();
@@ -324,7 +324,7 @@ export class FlowService {
         console.log(` -> Reading flow file: `.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);
 
-        content = this.resolveTemplate(
+        content = await this.resolveTemplate(
             context.ejsTemplateDelimiters.global,
             wd,
             content,
@@ -353,13 +353,13 @@ export class FlowService {
      * @param {IDelegatedParameters} parameters
      * @return {string}
      */
-    resolveTemplate(
+    async resolveTemplate(
         delimiter: string,
         wd: string,
         tpl: string,
         context: IContext,
         parameters: IDelegatedParameters
-    ): string {
+    ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
 
@@ -371,7 +371,23 @@ export class FlowService {
         Object.assign(data, parameters);
         Object.assign(data, context);
 
-        return render(tpl, data, { delimiter });
+        const options = <Options> {
+            delimiter,
+            escape: (value: any) => {
+                if (typeof value === 'number' || typeof value === 'boolean') {
+                    return value.toString();
+                }
+
+                if (typeof value === 'string') {
+                    return `"${value.replace(/"/g, '\\"')}"`;
+                }
+
+                throw Error(`Value could not be escaped. Use $ref:path to pass value by reference.`);
+            },
+            async: true
+        };
+
+        return await render(tpl, data, options);
     }
 
     /**
@@ -384,14 +400,14 @@ export class FlowService {
      * @param {IDelegatedParameters} parameters delegated parameters
      * @return {any}
      */
-    resolveOptionsWithNoHandlerCheck(
+    async resolveOptionsWithNoHandlerCheck(
         delimiter: string,
         wd: string,
         options: any,
         context: IContext,
         maskSecrets: boolean,
         parameters: IDelegatedParameters
-    ): any {
+    ): Promise<any> {
         if (!options) {
             return options;
         }
@@ -427,7 +443,7 @@ export class FlowService {
         });
 
         tpl = lines.join('\n');
-        const yaml = this.resolveTemplate(delimiter, wd, tpl, context, parameters);
+        const yaml = await this.resolveTemplate(delimiter, wd, tpl, context, parameters);
         options = safeLoad(yaml);
 
         // resolve references
@@ -446,11 +462,11 @@ export class FlowService {
      * @param {IDelegatedParameters} parameters delegated parameters
      * @returns {Promise<any>}
      */
-    resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, parameters: IDelegatedParameters): any {
+    async resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, parameters: IDelegatedParameters): Promise<any> {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, parameters);
+        return await this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, parameters);
     }
 }

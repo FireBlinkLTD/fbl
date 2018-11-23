@@ -117,7 +117,7 @@ class WhileActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
-        const dummyActionHandler = new DummyActionHandler(async (_options: any, _context: IContext) => {
+        const dummyActionHandler = new DummyActionHandler(async () => {
             count++;
             context.ctx.test = false;
         });

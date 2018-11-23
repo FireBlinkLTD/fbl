@@ -6,7 +6,7 @@ import * as Joi from 'joi';
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
-    private static REFERENCE_REGEX = /^\$ref:(ctx|secrets|parameters)((\.[^.]+)+)$/;
+    private static REFERENCE_REGEX = /^\$ref:(ctx|secrets|entities|parameters)((\.[^.]+)+)$/;
 
     /**
      * Check if value represents a basic type
@@ -337,6 +337,8 @@ export class ContextUtil {
                         target = context.ctx;
                     } else if (match[1] === 'secrets') {
                         target = context.secrets;
+                    } else if (match[1] === 'entities') {
+                        target = context.entities;
                     } else if (match[1] === 'parameters') {
                         target = parameters.parameters;
                     }

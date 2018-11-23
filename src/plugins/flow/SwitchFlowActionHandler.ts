@@ -43,14 +43,14 @@ export class SwitchFlowActionHandler extends ActionHandler {
         const flowService = Container.get(FlowService);
 
         // register masked options in the snapshot
-        const masked = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, true, parameters);
+        const masked = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, true, parameters);
         snapshot.setOptions({
             value: masked,
             is: options.is
         });
 
         // resolve value, as it is mostly likely a template and we're not processing options as a template
-        options.value = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
+        options.value = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
 
         await super.validate(options, context, snapshot, parameters);
     }
@@ -79,7 +79,7 @@ export class SwitchFlowActionHandler extends ActionHandler {
         if (action) {
             const idOrAlias = FBLService.extractIdOrAlias(action);
             let metadata = FBLService.extractMetadata(action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
             snapshot.log(`Based on value: ${options.value} invoking handler: ${idOrAlias}`);
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, parameters);

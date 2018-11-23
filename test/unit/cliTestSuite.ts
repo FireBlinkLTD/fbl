@@ -3,15 +3,14 @@ import {dump} from 'js-yaml';
 import {promisify} from 'util';
 import {exists, readFile, unlink, writeFile} from 'fs';
 import * as assert from 'assert';
-import {ChildProcessService, CLIService, FlowService, TempPathsRegistry} from '../../src/services';
+import {ChildProcessService, FlowService, TempPathsRegistry} from '../../src/services';
 import {basename, dirname, join, resolve, sep} from 'path';
 import {Container} from 'typedi';
 import {IActionStep} from '../../src/models';
 import {ContextUtil, FSUtil} from '../../src/utils';
 import {DummyServerWrapper, IDummyServerWrapperConfig} from '../assets/dummy.http.server.wrapper';
 import {c} from 'tar';
-import {IContextBase} from '../../src/interfaces';
-import {ISummaryRecord} from '../../src/interfaces/ISummaryRecord';
+import {IContextBase, ISummaryRecord} from '../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -78,19 +77,24 @@ class CliTestSuite {
 
     /**
      * Execute action
-     * @param {string} cmd
      * @param {string[]} args
      * @param {string} answer
      * @param {string} wd
      * @return {Promise<{code: number; stdout: string; stderr: string}>}
      */
-    private static async exec(cmd: string, args: string[], answer?: string, wd?: string): Promise<{code: number, stdout: string, stderr: string}> {
+    private static async exec(args: string[], answer?: string, wd?: string): Promise<{code: number, stdout: string, stderr: string}> {
         const start = Date.now();
         const stdout: string[] = [];
         const stderr: string[] = [];
+
+        const nodeArgs = [
+            join(__dirname, '../../src/cli.js'),
+            ...args
+        ];
+
         const code = await Container.get(ChildProcessService).exec(
-            cmd,
-            args,
+            'node',
+            nodeArgs,
             wd || '.',
             {
                 stdout: (data) => {
@@ -174,9 +178,7 @@ class CliTestSuite {
         const flowPath = `${basename(flowDir)}/flow.yml`;
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                `${__dirname}/../../src/cli.js`,
                 '--no-colors',
                 '-c', '$.ct=yes',
                 '-c', `$=@${contextFile}`,
@@ -267,50 +269,34 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-r', 'json',
-                flowFile
-            ]
-        );
+        let result = await CliTestSuite.exec([
+            '-r', 'json',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: --output parameter is required when --report is provided.');
 
-        result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', '/tmp/report.json',
-                flowFile
-            ]
-        );
+        result = await CliTestSuite.exec([
+            '-o', '/tmp/report.json',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: --report parameter is required when --output is provided.');
 
-        result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', '/tmp/report.json',
-                '-r', 'unknown',
-                flowFile
-            ]
-        );
+        result = await CliTestSuite.exec([
+            '-o', '/tmp/report.json',
+            '-r', 'unknown',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Error: Unable to find reporter: unknown');
 
-        result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', '/tmp/report.json',
-                '-r', 'json',
-                '--report-option', 'test=@missing.file',
-                flowFile
-            ]
-        );
+        result = await CliTestSuite.exec([
+            '-o', '/tmp/report.json',
+            '-r', 'json',
+            '--report-option', 'test=@missing.file',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'ENOENT: no such file or directory, open \'missing.file\'');
     }
@@ -337,9 +323,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                'dist/src/cli.js',
                 '-c', '$.ct.yes',
                 '-s', '$.st=yes',
                 flowFile
@@ -375,9 +359,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                'dist/src/cli.js',
                 '-c', '$.ct=yes',
                 '-s', '$.st.yes',
                 flowFile
@@ -447,15 +429,11 @@ class CliTestSuite {
 
         await promisify(writeFile)(CliTestSuite.getGlobalConfigPath(), dump(globalConfig), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', reportFile,
-                '-r', 'json',
-                flowFile
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '-o', reportFile,
+            '-r', 'json',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -501,20 +479,16 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
     }
 
     @test()
     async noParams(): Promise<void> {
-        const result = await CliTestSuite.exec('node', ['dist/src/cli.js']);
+        const result = await CliTestSuite.exec([]);
         assert.strictEqual(result.code, 1);
     }
 
@@ -538,15 +512,11 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-c', '$=test',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '-c', '$=test',
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
     }
 
@@ -571,9 +541,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/incompatibleWithFBL',
                 '--no-colors',
                 flowFile
@@ -585,9 +553,7 @@ class CliTestSuite {
         assert.strictEqual(result.stderr, `Plugin incompatible.plugin is not compatible with current fbl version (${fblVersion})`);
 
         result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/incompatibleWithFBL.js',
                 '--no-colors',
                 '--unsafe-plugins',
@@ -627,26 +593,19 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        let result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `Flow is not compatible with current fbl version (${fblVersion})`);
 
         result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '--unsafe-flows',
-                flowFile
-            ]
-        );
+        [
+            '--no-colors',
+            '--unsafe-flows',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -682,26 +641,19 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        let result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, `Actual plugin ${plugin.name} version ${plugin.version} doesn't satisfy required 0.0.0`);
 
         result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '--unsafe-flows',
-                flowFile
-            ]
-        );
+        [
+            '--no-colors',
+            '--unsafe-flows',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -735,26 +687,18 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        let result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Required plugin test is not registered. Error: Unable to locate plugin test');
 
-        result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '--unsafe-flows',
-                flowFile
-            ]
-        );
+        result = await CliTestSuite.exec([
+            '--no-colors',
+            '--unsafe-flows',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -788,26 +732,18 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        let result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
         assert.strictEqual(result.code, 1);
         assert.strictEqual(result.stderr, 'Application missing_app_1234 required by flow not found, make sure it is installed and its location presents in the PATH environment variable');
 
-        result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '--unsafe-flows',
-                flowFile
-            ]
-        );
+        result = await CliTestSuite.exec([
+            '--no-colors',
+            '--unsafe-flows',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -848,14 +784,10 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowFile
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '--no-colors',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -883,9 +815,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/incompatibleWithOtherPlugin',
                 '--no-colors',
                 flowFile
@@ -897,9 +827,7 @@ class CliTestSuite {
         assert.strictEqual(result.stderr, `Actual plugin fbl.core.flow version ${fblVersion} doesn't satisfy required 0.0.0`);
 
         result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/incompatibleWithOtherPlugin',
                 '--no-colors',
                 '--unsafe-plugins',
@@ -937,9 +865,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/missingPluginDependency',
                 '--no-colors',
                 flowFile
@@ -951,9 +877,7 @@ class CliTestSuite {
         assert.strictEqual(result.stderr, 'Required plugin %some.unkown.plugin% is not registered. Error: Unable to locate plugin %some.unkown.plugin%');
 
         result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/missingPluginDependency',
                 '--no-colors',
                 '--unsafe-plugins',
@@ -991,9 +915,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                '../../src/cli.js',
                 '-p', 'fakePlugins/satisfiesDependencies',
                 '--no-colors',
                 flowFile
@@ -1033,17 +955,13 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowFile, flow, 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', reportFile,
-                '-r', 'json',
-                '--global-template-delimiter', '@',
-                '--local-template-delimiter', '?',
-                flowFile
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '-o', reportFile,
+            '-r', 'json',
+            '--global-template-delimiter', '@',
+            '--local-template-delimiter', '?',
+            flowFile
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1105,9 +1023,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                'dist/src/cli.js',
                 flowFile
             ],
             'prompt_value'
@@ -1137,9 +1053,7 @@ class CliTestSuite {
         await promisify(writeFile)(ctxFile, '[1]', 'utf8');
 
         const result = await CliTestSuite.exec(
-            'node',
             [
-                'dist/src/cli.js',
                 '-o', reportFile,
                 '-r', 'json',
                 '-c', `$.array=@${ctxFile}`,
@@ -1163,24 +1077,26 @@ class CliTestSuite {
     }
 
     @test()
-    async testLocalTemplateUnquotedScalar(): Promise<void> {
+    async testLocalTemplateEscape(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
 
-        const flow = [
+        let flow = [
             'pipeline:',
             '  ctx:',
             '    "$.test_@":',
-            '      inline: <%- $.escape("@test  ") %>'
+            '      inline: <%= "@test  " %>',
+            '    "$.test_n":',
+            '      inline: <%= 1 %>',
+            '    "$.test_b":',
+            '      inline: <%= true %>'
         ].join('\n');
 
         const reportFile = await tempPathsRegistry.createTempFile();
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, flow, 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
+        let result = await CliTestSuite.exec(
             [
-                'dist/src/cli.js',
                 '-o', reportFile,
                 '-r', 'json',
                 flowFile
@@ -1192,22 +1108,46 @@ class CliTestSuite {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
 
-
         const reportJson = await promisify(readFile)(reportFile, 'utf8');
         assert(reportJson.length > 0);
         const report = JSON.parse(reportJson);
 
         assert.deepStrictEqual(report.context.final.ctx, {
-            'test_@': '@test  '
+            'test_@': '@test  ',
+            'test_n': 1,
+            'test_b': true
         });
+
+        // test failure
+
+        flow = [
+            'pipeline:',
+            '  ctx:',
+            '    "$.test_failure":',
+            '      inline: <%= new Promise(() => {return "@test  ";}); %>',
+        ].join('\n');
+
+        await promisify(writeFile)(flowFile, flow, 'utf8');
+
+        result = await CliTestSuite.exec(
+            [
+                '--no-colors',
+                flowFile
+            ],
+            'prompt_value'
+        );
+
+        if (result.code === 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        assert.strictEqual(result.stderr.split('\n')[0], '<- [1] [ctx] Failed with: Error: Value could not be escaped. Use $ref:path to pass value by reference.');
     }
 
     @test()
     async outputHelp(): Promise<void> {
         const result = await CliTestSuite.exec(
-            'node',
             [
-                'dist/src/cli.js',
                 '-h'
             ],
             'prompt_value'
@@ -1220,7 +1160,7 @@ class CliTestSuite {
         assert.strictEqual(result.stdout.split('\n')[0], 'Usage: fbl [options] <file or url>');
     }
 
-    static async indexFileLookupInsideDirectoryTree(extention: 'yml' | 'yaml'): Promise<void> {
+    static async indexFileLookupInsideDirectoryTree(ext: 'yml' | 'yaml'): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
 
         const flow: any = {
@@ -1239,19 +1179,15 @@ class CliTestSuite {
         const reportFile = await tempPathsRegistry.createTempFile();
         const rootDir = await tempPathsRegistry.createTempDir();
         await FSUtil.mkdirp(join(rootDir, 'l1/index.yml/l3'));
-        const indexPath = join(rootDir, `l1/index.yml/l3/index.${extention}`);
+        const indexPath = join(rootDir, `l1/index.yml/l3/index.${ext}`);
 
         await promisify(writeFile)(indexPath, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '-o', reportFile,
-                '-r', 'json',
-                rootDir
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '-o', reportFile,
+            '-r', 'json',
+            rootDir
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1307,13 +1243,7 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowPath, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                rootDir
-            ]
-        );
+        const result = await CliTestSuite.exec([rootDir]);
 
         assert.strictEqual(result.code, 1);
     }
@@ -1342,13 +1272,7 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowPath, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                rootDir
-            ]
-        );
+        const result = await CliTestSuite.exec([rootDir]);
 
         assert.strictEqual(result.code, 1);
     }
@@ -1388,14 +1312,10 @@ class CliTestSuite {
         const flowPath = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowPath, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                flowPath
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '--no-colors',
+            flowPath
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1437,9 +1357,7 @@ class CliTestSuite {
         await server.start();
         this.dummyServerWrappers.push(server);
 
-        const cmd = 'node';
         const args = [
-            'dist/src/cli.js',
             '--no-colors',
             '--http-header', '"test1: y1"',
             '--http-header', '"test2:y2"',
@@ -1449,7 +1367,7 @@ class CliTestSuite {
             `http://localhost:${port}`
         ];
 
-        let result = await CliTestSuite.exec(cmd, args);
+        let result = await CliTestSuite.exec(args);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1460,7 +1378,7 @@ class CliTestSuite {
         assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
 
         // run one more time to check cache match
-        result = await CliTestSuite.exec(cmd, args);
+        result = await CliTestSuite.exec(args);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1571,16 +1489,12 @@ class CliTestSuite {
         };
         await promisify(writeFile)(mainFlowPath, dump(mainFlow), 'utf8');
 
-        const result = await CliTestSuite.exec(
-            'node',
-            [
-                'dist/src/cli.js',
-                '--no-colors',
-                '-r', 'yaml',
-                '-o', reportPath,
-                mainFlowPath
-            ]
-        );
+        const result = await CliTestSuite.exec([
+            '--no-colors',
+            '-r', 'yaml',
+            '-o', reportPath,
+            mainFlowPath
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);

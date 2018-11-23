@@ -59,7 +59,7 @@ class FlowServiceTestSuite {
         context.ctx.test = 'tst';
 
         const flowService = Container.get(FlowService);
-        let resolved = flowService.resolveTemplate(
+        let resolved = await flowService.resolveTemplate(
             context.ejsTemplateDelimiters.global,
             '.',
             tpl,
@@ -91,7 +91,7 @@ class FlowServiceTestSuite {
 
         // test local delimiter
         context.ctx.test = 'new';
-        resolved = flowService.resolveTemplate(
+        resolved = await flowService.resolveTemplate(
             context.ejsTemplateDelimiters.local,
             '.',
             resolved,
