@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.2.0 - Under Development
+
+## Changed
+
+- [\#218](https://github.com/FireBlinkLTD/fbl/issues/218) Breaking change. `$.escape` template utility function has been removed in favor of custom EJS escape function.
+
+## Added
+
+- [\#220](https://github.com/FireBlinkLTD/fbl/issues/220) Added functionality to reference context values in template directly without a need to convert values to JSON beforehand and passing through EJS template.
+
 ## [1.1.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.0) - 2018-11-21
 
 ## Fixed
