@@ -10,20 +10,6 @@ Template utilities just like action handlers are part of plugins. Some plugins m
 
 ## Default Functions
 
-### Escape
-
-If you need to assign string or variable with non basic type, like array or object you need to escape it. 
-
-```js
-// If "something" is number or boolean it will be returned without modifications
-// If "something" is string and starts with YAML special or reserved character ([] {} > | * & ! % # ` @ ,) it will be wrapped into double quotes.
-// If string already contains double quotes they will be escaped, to generate a valid yaml.
-// For any other type "something" will be converted into JSON.    
-$.escape(something);
-```
-
-Note: JSON is also a valid YAML, so you may want to use it to quickly construct your definitions inside the templates.
-
 ### File System
 
 All the default action handlers are treating paths as relative to the directory where flow file is located. However in rare

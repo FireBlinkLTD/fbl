@@ -46,7 +46,7 @@ export class SequenceFlowActionHandler extends ActionHandler {
                 index
             };
 
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
 
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);

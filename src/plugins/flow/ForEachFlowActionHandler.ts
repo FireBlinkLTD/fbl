@@ -40,10 +40,10 @@ export class ForEachFlowActionHandler extends ActionHandler {
 
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
-        options.of = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.of, context, false, parameters);
+        options.of = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.of, context, false, parameters);
 
         if (options.async) {
-            options.async = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.async, context, false, parameters);
+            options.async = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.async, context, false, parameters);
         }
 
         await super.validate(options, context, snapshot, parameters);
@@ -75,7 +75,7 @@ export class ForEachFlowActionHandler extends ActionHandler {
             iterationParams.iteration = iteration;
 
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
 
             if (options.async) {
                 promises.push((async (p, m): Promise<void> => {

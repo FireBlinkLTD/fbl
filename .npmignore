@@ -11,7 +11,6 @@ node_modules/
 
 src/
 test/
-sample.yml
 tslint.json
 tsconfig.json
 yarn-error.log
@@ -20,3 +19,4 @@ dist/test/
 
 _book/
 book.json
+.gitbook/

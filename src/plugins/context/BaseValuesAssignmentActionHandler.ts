@@ -71,7 +71,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                     let fileContent: string = await FSUtil.readTextFile(path);
 
                     // resolve global template
-                    fileContent = flowService.resolveTemplate(
+                    fileContent = await flowService.resolveTemplate(
                         context.ejsTemplateDelimiters.global,
                         snapshot.wd,
                         fileContent,
@@ -82,7 +82,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                     let fileContentObject = safeLoad(fileContent);
 
                     // resolve local template
-                    fileContentObject = flowService.resolveOptionsWithNoHandlerCheck(
+                    fileContentObject = await flowService.resolveOptionsWithNoHandlerCheck(
                         context.ejsTemplateDelimiters.local,
                         snapshot.wd,
                         fileContentObject,

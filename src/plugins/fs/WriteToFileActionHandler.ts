@@ -61,7 +61,7 @@ export class WriteToFileActionHandler extends ActionHandler {
             content = await FSUtil.readTextFile(FSUtil.getAbsolutePath(options.contentFromFile, snapshot.wd));
 
             // resolve with global template delimiter first
-            content = flowService.resolveTemplate(
+            content = await flowService.resolveTemplate(
                 context.ejsTemplateDelimiters.global,
                 snapshot.wd,
                 content,
@@ -70,7 +70,7 @@ export class WriteToFileActionHandler extends ActionHandler {
             );
 
             // resolve local template delimiter
-            content = flowService.resolveTemplate(
+            content = await flowService.resolveTemplate(
                 context.ejsTemplateDelimiters.local,
                 snapshot.wd,
                 content,

@@ -2,6 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ContextUtil} from '../../../src/utils';
 import {ActionSnapshot} from '../../../src/models';
 import * as assert from 'assert';
+import {IDelegatedParameters} from '../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -138,5 +139,57 @@ class ContextUtilTestSuite {
                 parameters_test: ['test']
             }
         });
+    }
+
+    @test()
+    async resolveReferences(): Promise<void> {
+        const context = ContextUtil.generateEmptyContext();
+        const parameters = <IDelegatedParameters> {
+            parameters: {
+                test_parameters: 'p'
+            }
+        };
+
+        context.ctx = {
+            test_ctx: 'c'
+        };
+
+        context.secrets = {
+            test_secrets: 's'
+        };
+
+        const result = ContextUtil.resolveReferences({
+            ctx: '$ref:ctx.test_ctx',
+            secrets: '$ref:secrets.test_secrets',
+            parameters: '$ref:parameters.test_parameters'
+        }, context, parameters);
+
+        assert.deepStrictEqual(result, {
+            ctx: 'c',
+            secrets: 's',
+            parameters: 'p'
+        });
+
+        // check missing
+        const missing: any = null;
+        assert.strictEqual(ContextUtil.resolveReferences(missing, context, parameters), null);
+
+        // check errors
+        chai.expect(() => {
+            ContextUtil.resolveReferences({
+                test: '$ref:ctx.test_ctx_missing'
+            }, context, parameters);
+        }).to.throw(
+            `Unable to find reference match for $.ctx.test_ctx_missing. Missing value found upon traveling the path at: test_ctx_missing`
+        );
+
+        // check errors
+        chai.expect(() => {
+            ContextUtil.resolveReferences({
+                test: '$ref:ctx.test_ctx.missing'
+            }, context, parameters);
+        }).to.throw(
+            `Unable to find reference match for $.ctx.test_ctx.missing. Non-object value found upon traveling the path at: missing`
+        );
     }
 }

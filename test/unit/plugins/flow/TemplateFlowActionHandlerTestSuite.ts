@@ -5,7 +5,6 @@ import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {TemplateFlowActionHandler} from '../../../../src/plugins/flow/TemplateFlowActionHandler';
-import {EscapeTemplateUtility} from '../../../../src/plugins/templateUtilities/EscapeTemplateUtility';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
@@ -79,11 +78,9 @@ class TemplateFlowActionHandlerTestSuite {
     async execute(): Promise<void> {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
-        const templateUtilitiesRegistry = Container.get(TemplateUtilitiesRegistry);
         const actionHandler = new TemplateFlowActionHandler();
 
         actionHandlersRegistry.register(actionHandler, plugin);
-        templateUtilitiesRegistry.register(new EscapeTemplateUtility());
 
         let actionHandlerOptions: any;
         const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
@@ -91,7 +88,7 @@ class TemplateFlowActionHandlerTestSuite {
         });
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const options = `${DummyActionHandler.ID}: <%- $.escape(ctx.test) %>`;
+        const options = `${DummyActionHandler.ID}: $ref:ctx.test`;
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = ['a1', 'b2', {

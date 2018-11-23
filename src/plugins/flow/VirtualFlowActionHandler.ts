@@ -221,7 +221,7 @@ class DynamicFlowHandler extends ActionHandler {
 
         const idOrAlias = FBLService.extractIdOrAlias(this.action);
         let metadata = FBLService.extractMetadata(this.action);
-        metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, this.wd, metadata, context, false, parameters);
+        metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, this.wd, metadata, context, false, parameters);
 
         parameters = JSON.parse(JSON.stringify(parameters));
         parameters.parameters = this.getMergedOptions(options);

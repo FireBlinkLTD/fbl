@@ -56,7 +56,7 @@ export class WhileActionHandler extends ActionHandler {
      * @param {IDelegatedParameters} parameters
      * @return {boolean}
      */
-    static isShouldExecute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): boolean {
+    async isShouldExecute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<boolean> {
         const flowService = Container.get(FlowService);
 
         if (snapshot.childFailure) {
@@ -64,13 +64,13 @@ export class WhileActionHandler extends ActionHandler {
             return false;
         }
 
-        const value = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
+        const value = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
         if (options.is !== undefined) {
-            const is = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.is, context, false, parameters);
+            const is = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.is, context, false, parameters);
 
             return value.toString() === is.toString();
         } else {
-            const not = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.not, context, false, parameters);
+            const not = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.not, context, false, parameters);
 
             return value.toString() !== not.toString();
         }
@@ -79,13 +79,16 @@ export class WhileActionHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        while (WhileActionHandler.isShouldExecute(options, context, snapshot, parameters)) {
+        let execute = await this.isShouldExecute(options, context, snapshot, parameters);
+        while (execute) {
             const idOrAlias = FBLService.extractIdOrAlias(options.action);
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, parameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
+
+            execute = await this.isShouldExecute(options, context, snapshot, parameters);
         }
     }
 }

@@ -49,7 +49,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
             };
 
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
 
             if (options.async) {
                 promises.push((async (p, m): Promise<void> => {

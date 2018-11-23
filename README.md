@@ -4,7 +4,7 @@
 [![CircleCI](https://circleci.com/gh/FireBlinkLTD/fbl.svg?style=svg)](https://circleci.com/gh/FireBlinkLTD/fbl)
 [![codecov](https://codecov.io/gh/FireBlinkLTD/fbl/branch/master/graph/badge.svg)](https://codecov.io/gh/FireBlinkLTD/fbl)
 
-Swiss knife for any kind of automation. Read more [here](https://fbl.fireblink.com);
+Swiss knife for any kind of automation. [Click here](https://fbl.fireblink.com) to read more.
 
 # Usage
 
