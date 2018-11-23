@@ -102,7 +102,11 @@ export class DeepMergeUtil {
         if (modifiers && modifiers[path]) {
             return modifiers[path](arg1, arg2);
         } else {
-            arg1.push(...arg2);
+            for (const item of arg2) {
+                if (arg1.indexOf(item) < 0) {
+                    arg1.push(item);
+                }
+            }
         }
 
         return arg1;
