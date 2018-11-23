@@ -26,7 +26,7 @@ class DeepMergeUtilTestSuite {
                 array: [3, 4],
                 obj: {
                     b: false,
-                    array: [13, 14]
+                    array: [12, 13, 14]
                 },
                 override: 111
             }

@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file. The format 
 
 - [\#220](https://github.com/FireBlinkLTD/fbl/issues/220) Added functionality to reference context values in template directly without a need to convert values to JSON beforehand and passing through EJS template.
 
+## Fixed
+
+- [\#219](https://github.com/FireBlinkLTD/fbl/issues/219) Default virtual's merge function no longer produces duplicated records upon merging arrays.
+
 ## [1.1.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.0) - 2018-11-21
 
 ## Fixed
