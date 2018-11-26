@@ -1,8 +1,19 @@
 import * as Joi from 'joi';
-import {FBL_ASSIGN_TO_SCHEMA} from './assignTo';
+import {FBL_ASSIGN_TO_OBJECT_SCHEMA, FBL_ASSIGN_TO_STRING_SCHEMA} from './assignTo';
 
-const FBL_PUSH_TO_SCHEMA = FBL_ASSIGN_TO_SCHEMA.keys({
+const FBL_PUSH_TO_OBJECT_SCHEMA = FBL_ASSIGN_TO_OBJECT_SCHEMA.keys({
     children: Joi.boolean()
 });
 
-export {FBL_PUSH_TO_SCHEMA};
+const FBL_PUSH_TO_STRING_SCHEMA = FBL_ASSIGN_TO_STRING_SCHEMA;
+
+const FBL_PUSH_TO_SCHEMA = Joi.alternatives(
+    FBL_PUSH_TO_OBJECT_SCHEMA,
+    FBL_PUSH_TO_STRING_SCHEMA
+);
+
+export {
+    FBL_PUSH_TO_OBJECT_SCHEMA,
+    FBL_PUSH_TO_STRING_SCHEMA,
+    FBL_PUSH_TO_SCHEMA
+};

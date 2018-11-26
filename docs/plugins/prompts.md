@@ -15,7 +15,7 @@ Ask user to confirm something.
 * `prompts.confirm`
 * `confirm`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 confirm:
@@ -44,6 +44,23 @@ confirm:
       parameters: '$.test'
 ```
 
+**Example 2:**
+
+```yaml
+confirm:
+    # [required] confirm message
+    message: 'Are you sure you want to proceed?'
+
+    # [optional] default response value
+    default: false
+
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   assignResponseTo: '$.ctx.test'
+     
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   pushResponseTo: '$.ctx.test'  
+```
+
 ## Action Handler: Prompt
 
 Ask user to type the response.
@@ -57,7 +74,7 @@ Ask user to type the response.
 * `prompts.prompt`
 * `prompt`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 prompt:
@@ -94,6 +111,31 @@ prompt:
       parameters: '$.test'
 ```
 
+**Example 2:**
+
+```yaml
+prompt:
+    # [required] confirm message
+    message: 'Are you sure you want to proceed?'
+
+    # [optional] whether answer should be masked
+    password: false
+
+    # [optional] default response
+    default: "not sure"
+
+    # [optional] json schema validation schema
+    # note: only "string", "integer" and "number" types are supported
+    schema:
+        type: string
+
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   assignResponseTo: '$.ctx.test'
+     
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   pushResponseTo: '$.ctx.test'   
+```
+
 ## Action Handler: Select
 
 Ask user to select one given answer from provided options.
@@ -107,7 +149,7 @@ Ask user to select one given answer from provided options.
 * `prompts.select`
 * `select`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 select:
@@ -143,6 +185,30 @@ select:
      parameters: '$.test'
 ```
 
+**Example 2:**
+
+```yaml
+select:
+    # [required] confirm message
+    message: 'Pick your age:'
+
+    # [optional] default selected option
+    default: "I don't want to answer"
+
+    # [required] list of options user needs to pick answer from
+    options:
+     - I don't want to answer
+     - under 21
+     - 21 - 59
+     - 60+
+
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   assignResponseTo: '$.ctx.test'
+     
+   # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+   pushResponseTo: '$.ctx.test'     
+```
+
 ## Action Handler: Multi Select
 
 Aks user to pick one or more options.
@@ -156,7 +222,7 @@ Aks user to pick one or more options.
 * `prompts.multiselect`
 * `multiselect`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 multiselect:
@@ -190,3 +256,24 @@ multiselect:
       parameters: '$.test'
 ```
 
+**Example 2:**
+
+```yaml
+multiselect:
+    # [required] confirm message
+    message: 'Select tags:'
+
+    # [optional] default selected option
+    default: ["music"]
+
+    # [required] list of options user needs to pick answer from
+    options:
+     - music
+     - art
+
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    assignResponseTo: '$.ctx.test'
+         
+    # [optional] either "assignResponseTo" or "pushResponseTo" should exist
+    pushResponseTo: '$.ctx.test'  
+```

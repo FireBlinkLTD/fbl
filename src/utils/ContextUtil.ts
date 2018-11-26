@@ -61,10 +61,19 @@ export class ContextUtil {
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
-        paths: {ctx?: string, secrets?: string, parameters?: string},
+        paths: {ctx?: string, secrets?: string, parameters?: string} | string,
         value: any,
         override: boolean
     ): Promise<void> {
+        if (typeof paths === 'string') {
+            const chunks = paths.split('.');
+            const target = chunks[1];
+            chunks.splice(0, 2);
+            paths = {
+                [target]: `$.${chunks.join('.')}`
+            };
+        }
+
         /* istanbul ignore else */
         if (paths.ctx) {
             await ContextUtil.assignToField(context.ctx, paths.ctx, value, override);
@@ -103,11 +112,20 @@ export class ContextUtil {
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
-        paths: {ctx?: string, secrets?: string, parameters?: string},
+        paths: {ctx?: string, secrets?: string, parameters?: string} | string,
         value: any,
         children: boolean,
         override: boolean
     ): Promise<void> {
+        if (typeof paths === 'string') {
+            const chunks = paths.split('.');
+            const target = chunks[1];
+            chunks.splice(0, 2);
+            paths = {
+                [target]: `$.${chunks.join('.')}`
+            };
+        }
+
         /* istanbul ignore else */
         if (paths.ctx) {
             await ContextUtil.push(context.ctx, paths.ctx, value, children, override);

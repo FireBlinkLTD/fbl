@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-const FBL_ASSIGN_TO_SCHEMA = Joi.object({
+const FBL_ASSIGN_TO_OBJECT_SCHEMA = Joi.object({
     ctx: Joi.string()
         .regex(/^\$\.[^.]+(\.[^.]+)*$/)
         .min(1),
@@ -13,4 +13,18 @@ const FBL_ASSIGN_TO_SCHEMA = Joi.object({
     override: Joi.boolean()
 }).or('ctx', 'secrets', 'parameters');
 
-export {FBL_ASSIGN_TO_SCHEMA};
+const FBL_ASSIGN_TO_STRING_SCHEMA = Joi
+    .string()
+    .regex(/^\$\.(ctx|secrets|parameters)\.[^.]+(\.[^.]+)*$/)
+    .min(1);
+
+const FBL_ASSIGN_TO_SCHEMA = Joi.alternatives(
+    FBL_ASSIGN_TO_OBJECT_SCHEMA,
+    FBL_ASSIGN_TO_STRING_SCHEMA
+);
+
+export {
+    FBL_ASSIGN_TO_OBJECT_SCHEMA,
+    FBL_ASSIGN_TO_STRING_SCHEMA,
+    FBL_ASSIGN_TO_SCHEMA
+};
