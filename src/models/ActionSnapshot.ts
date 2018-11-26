@@ -1,5 +1,5 @@
 import {Container} from 'typedi';
-import {FlowService} from '../services';
+import {FlowService, LogService} from '../services';
 import {IContext} from '../interfaces';
 import {IMetadata} from '../interfaces/IMetadata';
 import {ContextUtil} from '../utils';
@@ -44,9 +44,15 @@ export class ActionSnapshot {
     /**
      * Register log message
      * @param {string} message
+     * @param {boolean} [error]
      */
-    log(message: string) {
-        console.log(` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message);
+    log(message: string, error = false) {
+        const logMessage = ` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message;
+        if (error) {
+            Container.get(LogService).error(logMessage);
+        } else {
+            Container.get(LogService).info(logMessage);
+        }
 
         this.registerStep('log', message);
     }

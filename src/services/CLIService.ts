@@ -1,7 +1,7 @@
 import {Inject, Service} from 'typedi';
 import * as commander from 'commander';
 import * as colors from 'colors';
-import {FlowService, FBLService} from './index';
+import {FlowService, FBLService, LogService} from './index';
 import {exists} from 'fs';
 import {promisify} from 'util';
 import {resolve} from 'path';
@@ -47,6 +47,9 @@ export class CLIService {
 
     @Inject(() => TempPathsRegistry)
     tempPathsRegistry: TempPathsRegistry;
+
+    @Inject(() => LogService)
+    logService: LogService;
 
     async run(): Promise<void> {
         await this.readGlobalConfig();
@@ -360,9 +363,16 @@ export class CLIService {
             },
 
             {
+                flags: '--verbose',
+                description: [
+                    'Output additional logs.'
+                ]
+            },
+
+            {
                 flags: '-h --help',
                 description: [
-                    'Output usage information'
+                    'Output usage information.'
                 ],
                 fn: () => {
                     this.printHelp(options);
@@ -433,6 +443,10 @@ export class CLIService {
 
         if (commander.localTemplateDelimiter) {
             this.localEJSDelimiter = commander.localTemplateDelimiter;
+        }
+
+        if (commander.verbose) {
+            this.logService.enableInfoLogs();
         }
     }
 

@@ -2,7 +2,23 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 1.2.0 - Under Development
+## [1.2.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.1) - 2018-11-26
+
+## Fixed
+
+- [\#225](https://github.com/FireBlinkLTD/fbl/issues/225) Fixed issue, when "select" and "multiselect" action handlers were not printing options correctly.
+- [\#226](https://github.com/FireBlinkLTD/fbl/issues/226) Allow `false` value assignment for context actions handlers.
+
+## Added
+
+- [\#227](https://github.com/FireBlinkLTD/fbl/issues/227) Added `--verbose` CLI parameter to print all log statements.
+- [\#224](https://github.com/FireBlinkLTD/fbl/issues/224) Added ability to use `assignTo` and `pushTo` parameters with alternative syntax.
+
+## Changed
+
+- [\#227](https://github.com/FireBlinkLTD/fbl/issues/227) All previously printed `info` logs are now suppressed by default.
+
+## [1.2.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.0) - 2018-11-23
 
 ## Changed
 
@@ -16,7 +32,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - [\#219](https://github.com/FireBlinkLTD/fbl/issues/219) Default virtual's merge function no longer produces duplicated records upon merging arrays.
 
-## [1.1.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.0) - 2018-11-21
+## [1.1.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.1.2) - 2018-11-21
 
 ## Fixed
 

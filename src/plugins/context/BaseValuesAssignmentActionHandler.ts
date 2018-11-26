@@ -55,7 +55,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
             const priorityOnFiles = options[name].priority === 'files';
 
             if (options[name].files) {
-                if ((options[name].inline || options[name].inline === null) && priorityOnFiles) {
+                if ((options[name].inline !== undefined || options[name].inline === null) && priorityOnFiles) {
                     if (options[name].push) {
                         await ContextUtil.push(context[key], name, options[name].inline, children, override);
                     }  else {
@@ -101,7 +101,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                 }
             }
 
-            if ((options[name].inline || options[name].inline === null) && !priorityOnFiles) {
+            if ((options[name].inline !== undefined || options[name].inline === null) && !priorityOnFiles) {
                 if (options[name].push) {
                     await ContextUtil.push(context[key], name, options[name].inline, children, override);
                 }  else {

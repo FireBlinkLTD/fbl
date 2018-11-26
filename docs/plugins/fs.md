@@ -81,6 +81,27 @@ File System plugin.
   contentFromFile: /tmp/template.ejs
 ```
 
+**Example 3: Alternative assignPathTo and pushPathTo syntax**
+
+```yaml
+->: 
+  # [optional] file path, if not provided content will be written to temporary location directory.
+  # Note: all missing parent directories will be automatically created
+  path: /tmp/test.txt
+
+  # [optional] 
+  # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
+  assignPathTo: '$.ctx.test'
+    
+  # [optional] 
+  # Note: required if "path" and "assignPathTo" (above) is not provided
+  pushPathTo: '$.ctx.test'    
+
+  # [required] content of the file
+  content: |-
+    test content
+```
+
 ## Action Handler: Encrypt files
 
 Encrypt files by mask with aes-256-cbc and password converted with pbkdf2 algorithm into sha512 hash.

@@ -11,7 +11,7 @@ Plugin allows to invoke any shell command.
 * `fbl.exec`
 * `exec`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 # executable to invoke
@@ -59,6 +59,36 @@ pushResultTo:
   override: true
 ```
 
+**Example 2:**
+
+```yaml
+# executable to invoke
+command: 'echo'
+
+# additional executable arguments, note "command" cannot have arguments in its value, just executable alias or path to it
+args: 
+  - 'test'
+
+# [optional] working directory to run command from.
+# Default value: flow's folder
+wd: <%- cwd %>
+
+# [optional] options
+options:
+  # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
+  stdout: true
+  # [optional]  if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
+  stderr: true
+  # [optional] if provided - stdout and stderr will be logged in report and printed to console
+  verbose: false
+
+# [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
+assignResultTo: '$.ctx.test'
+
+# [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
+pushResultTo: '$.ctx.test'
+```
+
 ## Action Handler: Shell
 
 **ID:** `com.fireblink.fbl.shell`
@@ -68,7 +98,7 @@ pushResultTo:
 * `fbl.shell`
 * `shell`
 
-**Example:**
+**Example 1:**
 
 ```yaml
 # shell executable
@@ -115,6 +145,37 @@ pushResultTo:
   children: true
   # [optional] override array by given path instead of pushing result to
   override: true
+```
+
+**Example 2:**
+
+```yaml
+# shell executable
+executable: '/bin/bash'
+
+# script to be invoked
+script: |- 
+  cd /tmp
+  touch test.txt
+
+# [optional] working directory to run script from.
+# Default value: flow's folder
+wd: <%- cwd %>
+
+# [optional] options
+options:
+  # [optional] if provided "stdout" will be included inside assigned object to proviced "ctx" and/or "secrets" name 
+  stdout: true
+  # [optional] if provided "stderr" will be included inside assigned object to proviced "ctx" and/or "secrets" name
+  stderr: true
+  # [optional] if provided - stdout and stderr will be logged in report and printed to console
+  verbose: false
+
+# [optional] assign execution result {code: 0-255, stdout?: string, stderr?: string }
+assignResultTo: '$.ctx.test'
+
+# [optional] push execution result {code: 0-255, stdout?: string, stderr?: string }
+pushResultTo: '$.ctx.test'
 ```
 
 ## Action Handler: Function

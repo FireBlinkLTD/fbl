@@ -189,8 +189,11 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             '$.inlineNumber': {
                 inline: 1
             },
-            '$.inlineBoolean': {
+            '$.inlineBooleanTrue': {
                 inline: true
+            },
+            '$.inlineBooleanFalse': {
+                inline: false
             },
             '$.inlineString': {
                 inline: 'test'
@@ -220,7 +223,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.inlineArray, options['$.inlineArray'].inline);
         assert.strictEqual(context.ctx.inlineNumber, options['$.inlineNumber'].inline);
         assert.strictEqual(context.ctx.inlineString, options['$.inlineString'].inline);
-        assert.strictEqual(context.ctx.inlineBoolean, options['$.inlineBoolean'].inline);
+        assert.strictEqual(context.ctx.inlineBooleanTrue, true);
+        assert.strictEqual(context.ctx.inlineBooleanFalse, false);
         assert.deepStrictEqual(context.ctx.fromFile1.file_content, 'ftpo');
         assert.deepStrictEqual(context.ctx.fromFile2, fileContent2);
         assert.strictEqual(context.ctx.toRemove, null);
@@ -238,7 +242,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.ctx.inlineArray, options['$.inlineArray'].inline);
         assert.strictEqual(context.ctx.inlineNumber, options['$.inlineNumber'].inline);
         assert.strictEqual(context.ctx.inlineString, options['$.inlineString'].inline);
-        assert.strictEqual(context.ctx.inlineBoolean, options['$.inlineBoolean'].inline);
+        assert.strictEqual(context.ctx.inlineBooleanTrue, true);
+        assert.strictEqual(context.ctx.inlineBooleanFalse, false);
         assert.deepStrictEqual(context.ctx.fromFile1.file_content, 'ftpo');
         assert.deepStrictEqual(context.ctx.fromFile2, fileContent2);
     }

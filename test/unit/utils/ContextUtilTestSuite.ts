@@ -88,6 +88,30 @@ class ContextUtilTestSuite {
     }
 
     @test()
+    async assignToByString(): Promise<void> {
+        const context = ContextUtil.generateEmptyContext();
+        const parameters = {};
+        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+
+        await ContextUtil.assignTo(context, parameters, snapshot, '$.ctx.test', 'test', false);
+        assert.deepStrictEqual(context.ctx, {
+            test: 'test'
+        });
+    }
+
+    @test()
+    async pushToByString(): Promise<void> {
+        const context = ContextUtil.generateEmptyContext();
+        const parameters = {};
+        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+
+        await ContextUtil.pushTo(context, parameters, snapshot, '$.ctx.test', 'test', false, false);
+        assert.deepStrictEqual(context.ctx, {
+            test: ['test']
+        });
+    }
+
+    @test()
     async assignTo(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};

@@ -15,6 +15,7 @@ import {promisify} from 'util';
 import * as got from 'got';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {homedir} from 'os';
+import {LogService} from './LogService';
 
 const ejsLint = require('ejs-lint');
 const uuidv5 = require('uuid/v5');
@@ -55,6 +56,9 @@ export class FlowService {
     @Inject(() => TempPathsRegistry)
     tempPathsRegistry: TempPathsRegistry;
 
+    @Inject(() => LogService)
+    logService: LogService;
+
     /**
      * Execute action
      * @param {string} wd Working Directory
@@ -68,7 +72,7 @@ export class FlowService {
      */
     async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
         const idx = ++this.index;
-        console.log(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
+        this.logService.info(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
         try {
             let handler = this.actionHandlersRegistry.find(idOrAlias);
@@ -112,16 +116,16 @@ export class FlowService {
                 snapshot.success();
 
                 if (snapshot.successful) {
-                    console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
+                    this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
                 } else {
-                    console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
+                    this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
                 }
             } else {
-                console.log(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped');
+                this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped');
                 snapshot.skipped();
             }
         } catch (e) {
-            console.error(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
+            this.logService.error(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
             snapshot.failure(e);
         }
 
@@ -152,7 +156,7 @@ export class FlowService {
 
             const exists = await FSUtil.exists(tarballFile);
             if (exists) {
-                console.log(' -> Found cached tarball for remote URL: '.green + location.path);
+                this.logService.info(' -> Found cached tarball for remote URL: '.green + location.path);
 
                 return tarballFile;
             }
@@ -160,7 +164,7 @@ export class FlowService {
             tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
         }
 
-        console.log(' -> Downloading tarball from remote URL: '.green + location.path + ' to ' + tarballFile);
+        this.logService.info(' -> Downloading tarball from remote URL: '.green + location.path + ' to ' + tarballFile);
         const ws = createWriteStream(tarballFile);
         try {
             await new Promise((res, rej) => {
@@ -192,7 +196,7 @@ export class FlowService {
      * @return {Promise<string>} path to temp dir
      */
     private async extractTarball(path: string): Promise<string> {
-        console.log(' -> Extracting tarball at path: '.green + path);
+        this.logService.info(' -> Extracting tarball at path: '.green + path);
         const tarball = path;
         const result = await this.tempPathsRegistry.createTempDir();
 
@@ -321,7 +325,7 @@ export class FlowService {
     async readFlowFromFile(location: IFlowLocationOptions, context: IContext, parameters: IDelegatedParameters, wd: string): Promise<{flow: IFlow, wd: string}> {
         const absolutePath = await this.resolveFlow(location);
 
-        console.log(` -> Reading flow file: `.green + absolutePath);
+        this.logService.info(` -> Reading flow file: `.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);
 
         content = await this.resolveTemplate(
@@ -336,8 +340,8 @@ export class FlowService {
         try {
             flow = safeLoad(content) as IFlow;
         } catch (e) {
-            console.error(` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red);
-            console.error(content.gray);
+            this.logService.error(` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red);
+            this.logService.error(content.gray);
             throw (e);
         }
 

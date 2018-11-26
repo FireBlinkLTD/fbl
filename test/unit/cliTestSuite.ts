@@ -1132,6 +1132,7 @@ class CliTestSuite {
         result = await CliTestSuite.exec(
             [
                 '--no-colors',
+                '--verbose',
                 flowFile
             ],
             'prompt_value'

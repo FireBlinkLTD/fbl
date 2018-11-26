@@ -52,7 +52,7 @@ export class MultiSelectActionHandler extends BasePromptActionHandler {
             type: 'multiselect',
             choices: options.options.map((o: string | number) => {
                 return {
-                    title: o.toString,
+                    title: o.toString(),
                     value: o,
                     selected: options.default && options.default.indexOf(o) >= 0
                 };
