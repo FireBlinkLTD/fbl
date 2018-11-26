@@ -49,7 +49,7 @@ export class SelectActionHandler extends BasePromptActionHandler {
             initial: options.default ? options.options.indexOf(options.default) : undefined,
             choices: options.options.map((o: string | number) => {
                 return {
-                    title: o.toString,
+                    title: o.toString(),
                     value: o
                 };
             }),
