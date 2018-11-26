@@ -7,7 +7,15 @@ All notable changes to this project will be documented in this file. The format 
 ## Fixed
 
 - [\#225](https://github.com/FireBlinkLTD/fbl/issues/225) - Fixed issue, when "select" and "multiselect" action handlers were not printing options correctly.
-- [\#226](https://github.com/FireBlinkLTD/fbl/issues/225) - Allow `false` value assignment for context actions handlers.
+- [\#226](https://github.com/FireBlinkLTD/fbl/issues/226) - Allow `false` value assignment for context actions handlers.
+
+## Added
+
+- [\#227](https://github.com/FireBlinkLTD/fbl/issues/227) - Added `--verbose` CLI parameter to print all log statements.
+
+## Changed
+
+- [\#227](https://github.com/FireBlinkLTD/fbl/issues/227) All previously printed `info` logs are now suppressed by default.
 
 ## [1.2.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.0) - 2018-11-23
 

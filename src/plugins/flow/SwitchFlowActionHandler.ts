@@ -85,7 +85,7 @@ export class SwitchFlowActionHandler extends ActionHandler {
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, parameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
         } else {
-            snapshot.log(`Unable to find handler for value: ${options.value}`);
+            snapshot.log(`Unable to find handler for value: ${options.value}`, true);
         }
     }
 }

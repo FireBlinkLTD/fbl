@@ -1,7 +1,8 @@
 import {ActionHandler, ActionSnapshot} from '../models';
-import {Service} from 'typedi';
+import {Inject, Service} from 'typedi';
 import {FBLService} from './FBLService';
 import {IPlugin} from '../interfaces';
+import {LogService} from './LogService';
 
 @Service()
 export class ActionHandlersRegistry {
@@ -11,6 +12,9 @@ export class ActionHandlersRegistry {
     constructor() {
         this.cleanup();
     }
+
+    @Inject(() => LogService)
+    logService: LogService;
 
     /**
      * Register new entity
@@ -35,11 +39,10 @@ export class ActionHandlersRegistry {
         const metadata = handler.getMetadata();
 
         if (this.registry[metadata.id]) {
-            console.log(' -> Warning'.red + ' action handler with id: ' + metadata.id.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
-
-            /* istanbul ignore else */
             if (snapshot) {
-                snapshot.log(`Action handler with id ${metadata.id} was overridden by plugin ${plugin.name}@${plugin.version}`);
+                snapshot.log(`Action handler with id ${metadata.id} was overridden by plugin ${plugin.name}@${plugin.version}`, true);
+            } else {
+                this.logService.error(' -> Warning'.red + ' action handler with id: ' + metadata.id.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
             }
         }
 
@@ -47,11 +50,11 @@ export class ActionHandlersRegistry {
         if (metadata.aliases) {
             metadata.aliases.forEach(alias => {
                 if (this.aliases[alias]) {
-                    console.log(' -> Warning'.red + ' action handler with alias: ' + alias.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
-
                     /* istanbul ignore else */
                     if (snapshot) {
-                        snapshot.log(`Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${plugin.version}`);
+                        snapshot.log(`Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${plugin.version}`, true);
+                    } else {
+                        this.logService.error(' -> Warning'.red + ' action handler with alias: ' + alias.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
                     }
                 }
                 this.aliases[alias] = metadata.id;
