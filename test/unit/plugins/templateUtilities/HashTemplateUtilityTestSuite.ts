@@ -2,6 +2,10 @@ import {suite, test} from 'mocha-typescript';
 import {HashTemplateUtility} from '../../../../src/plugins/templateUtilities/HashTemplateUtility';
 import * as assert from 'assert';
 
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+
 @suite()
 class HashTemplateUtilityTestSuite {
     @test()
@@ -17,5 +21,19 @@ class HashTemplateUtilityTestSuite {
 
         hex = hash('test', 'sha256', 'base64');
         assert.strictEqual(hex, 'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=');
+    }
+
+    @test()
+    async validation(): Promise<void> {
+        const hash = new HashTemplateUtility().getUtilities('.').hash;
+        assert(hash);
+
+        chai.expect(() => {
+            hash(undefined);
+        }).to.throw('Unable to calculate hash of missing value');
+
+        chai.expect(() => {
+            hash(12345);
+        }).to.throw('Unable to calculate hash of non-string value');
     }
 }

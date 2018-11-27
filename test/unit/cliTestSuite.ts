@@ -1124,7 +1124,7 @@ class CliTestSuite {
             'pipeline:',
             '  ctx:',
             '    "$.test_failure":',
-            '      inline: <%= new Promise(() => {return "@test  ";}); %>',
+            '      inline: <%= new Promise(() => {}); %>',
         ].join('\n');
 
         await promisify(writeFile)(flowFile, flow, 'utf8');
@@ -1142,7 +1142,7 @@ class CliTestSuite {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
 
-        assert.strictEqual(result.stderr.split('\n')[0], '<- [1] [ctx] Failed with: Error: Value could not be escaped. Use $ref:path to pass value by reference.');
+        assert(result.stderr.indexOf('Value could not be escaped. Use $ref:path to pass value by reference.') >= 0);
     }
 
     @test()

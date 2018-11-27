@@ -3,7 +3,7 @@
 FBL also provides few handy utility functions (JavaScript) you can use inside the template. They all assigned to '$' variable, so you can use them like this:
 
 ```yaml
-value: <%- $.escape({}) %>
+value: <%- $.hash(ctx.string_field) %>
 ```
 
 Template utilities just like action handlers are part of plugins. Some plugins may add their own handy functions.
@@ -22,7 +22,7 @@ $.fs.getAbsolutePath(path);
 
 You may also want to create a relative path based on the directory from where `fbl` command was executed (might be handy for packaged flows):
 
-```bash
+```js
 // get absolute path relative to the working directory of fbl command execution
 $.fs.getAbsolutePath(path, cwd);
 ```

@@ -7,6 +7,7 @@ import {MarkEntitiesAsUpdatedActionHandler} from './MarkEntitiesAsUpdatedActionH
 import {MarkEntitiesAsDeletedActionHandler} from './MarkEntitiesAsDeletedActionHandler';
 import {SecretValuesAssignmentActionHandler} from './SecretValuesAssignmentActionHandler';
 import {SummaryRecordActionHandler} from './SummaryRecordActionHandler';
+import {ParametersValuesAssignmentActionHandler} from './ParametersValuesAssignmentActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -21,6 +22,7 @@ module.exports = <IPlugin> {
         new MarkEntitiesAsCreatedActionHandler(),
         new MarkEntitiesAsUpdatedActionHandler(),
         new MarkEntitiesAsDeletedActionHandler(),
+        new ParametersValuesAssignmentActionHandler(),
         new SecretValuesAssignmentActionHandler(),
         new SummaryRecordActionHandler()
     ],
