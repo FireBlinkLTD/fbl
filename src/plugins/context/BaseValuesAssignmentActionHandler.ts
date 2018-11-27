@@ -30,7 +30,30 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         return BaseValuesAssignmentActionHandler.validationSchema;
     }
 
-    abstract getAssignmentKey(): 'ctx' | 'secrets';
+    abstract getAssignmentKey(): 'ctx' | 'secrets' | 'parameters';
+
+    /**
+     * Get value assignment target based on assignment key
+     * @param context
+     * @param parameters
+     */
+    private getAssignmentTarget(context: IContext, parameters: IDelegatedParameters): any {
+        const key = this.getAssignmentKey();
+
+        if (key === 'ctx') {
+            return context.ctx;
+        }
+
+        if (key === 'secrets') {
+            return context.secrets;
+        }
+
+        if (!parameters.parameters) {
+            parameters.parameters = {};
+        }
+
+        return parameters.parameters;
+    }
 
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await super.validate(options, context, snapshot, parameters);
@@ -44,7 +67,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
     }
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        const key = this.getAssignmentKey();
+        const target = this.getAssignmentTarget(context, parameters);
 
         const flowService = Container.get(FlowService);
 
@@ -57,9 +80,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
             if (options[name].files) {
                 if ((options[name].inline !== undefined || options[name].inline === null) && priorityOnFiles) {
                     if (options[name].push) {
-                        await ContextUtil.push(context[key], name, options[name].inline, children, override);
+                        await ContextUtil.push(target, name, options[name].inline, children, override);
                     }  else {
-                        await ContextUtil.assign(context[key], name, options[name].inline, override);
+                        await ContextUtil.assign(target, name, options[name].inline, override);
                     }
                     override = false;
                 }
@@ -93,9 +116,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
 
                     if (options[name].push) {
-                        await ContextUtil.push(context[key], name, fileContentObject, children, override);
+                        await ContextUtil.push(target, name, fileContentObject, children, override);
                     }  else {
-                        await ContextUtil.assign(context[key], name, fileContentObject, override);
+                        await ContextUtil.assign(target, name, fileContentObject, override);
                     }
                     override = false;
                 }
@@ -103,9 +126,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
             if ((options[name].inline !== undefined || options[name].inline === null) && !priorityOnFiles) {
                 if (options[name].push) {
-                    await ContextUtil.push(context[key], name, options[name].inline, children, override);
+                    await ContextUtil.push(target, name, options[name].inline, children, override);
                 }  else {
-                    await ContextUtil.assign(context[key], name, options[name].inline, override);
+                    await ContextUtil.assign(target, name, options[name].inline, override);
                 }
             }
         });

@@ -204,6 +204,79 @@ Same as above, but for secrets. All the options will me masked in report to prev
      children: false
 ```
 
+## Action Handler: Parameters Values Assignment
+
+Same as above, but for parameters.
+
+**ID:** `com.fireblink.fbl.parameters.values`
+
+**Aliases:**
+
+* `fbl.parameters.values`
+* `parameters.values`
+* `parameters`
+
+**Example 1: Assign values to parameters root directly:**
+
+```yaml
+parameters: 
+  '$': 
+    inline:
+      something: true
+      else: false
+```
+
+**Example 2: Assign values from file "vars.yml" to field "vars -&gt; files":**
+
+```yaml
+parameters: 
+  $.vars: 
+    files: 
+      - vars.yml
+```
+
+**Example 3: Assign values from file "vars.yml" after inline ones:**
+
+```yaml
+parameters: 
+  '.':
+    inline: 
+      test: true 
+    files: 
+      - vars.yml 
+
+    # [optional] specify that files have a priority over inline vars
+    # if not provided inline vars will have priority over files
+    priority: 'files'
+```
+
+**Example 4: Override instead of assigning**
+
+```yaml
+parameters: 
+  '$.test':
+    inline: 
+      test: true
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true
+```
+
+**Example 5: Push to array**
+
+```yaml
+parameters:
+  '$.test':
+    inline: 1      
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true
+    # [required] if you want to push inline or value(s) from file(s) to array
+    push: true 
+    # [optional] if enambled and value is array its child items will be pushed instead of array itself
+    children: false
+```
+
 ## Action Handler: Mark entities as registered
 
 Mark some entity as registered, meaning it supposed to exist.

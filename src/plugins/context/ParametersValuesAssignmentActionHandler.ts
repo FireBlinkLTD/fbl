@@ -1,23 +1,22 @@
 import {IActionHandlerMetadata} from '../../interfaces';
 import {BaseValuesAssignmentActionHandler} from './BaseValuesAssignmentActionHandler';
 
-export class SecretValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
+export class ParametersValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
     private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.secret.values',
+        id: 'com.fireblink.fbl.parameters.values',
         aliases: [
-            'fbl.secret.values',
-            'secret.values',
-            'secrets',
-            'secret'
+            'fbl.parameters.values',
+            'parameters.values',
+            'parameters'
         ],
         considerOptionsAsSecrets: true
     };
 
     getMetadata(): IActionHandlerMetadata {
-        return SecretValuesAssignmentActionHandler.metadata;
+        return ParametersValuesAssignmentActionHandler.metadata;
     }
 
     getAssignmentKey(): 'ctx' | 'secrets' | 'parameters' {
-        return 'secrets';
+        return 'parameters';
     }
 }
