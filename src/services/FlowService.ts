@@ -386,6 +386,10 @@ export class FlowService {
                     return `"${value.replace(/"/g, '\\"')}"`;
                 }
 
+                if (ContextUtil.isMissing(value)) {
+                    return 'null';
+                }
+
                 throw Error(`Value could not be escaped. Use $ref:path to pass value by reference.`);
             },
             async: true
