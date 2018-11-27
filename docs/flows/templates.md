@@ -2,7 +2,7 @@
 
 The most advanced feature of FBL is support of EJS templates inside the definitions.
 
-The best way to understand who it works is to review following example in details:
+The best way to understand how it works is to review following example in details:
 
 ```yaml
 version: 1.0.0
