@@ -19,7 +19,7 @@ pipeline:
 
 ## Action Handler: Context Values Assignment
 
-Assign non-secret values to context \("ctx"\). May be used to provide "global" configuration.
+Assign non-secret values to context `ctx` field or its child properties by [path](../GLOSSARY.md#path). General use case: register shared non-sensitive options that later will be used by actions.
 
 **ID:** `com.fireblink.fbl.context.values`
 
@@ -86,7 +86,7 @@ ctx:
     # [optional] override everything tha tis inside "test" object with { test: true }
     # use with caution
     override: true
-    # [required] if you want to push inline or value(s) from file(s) to array
+    # [required] if you want to push inline or value(s) from file(s) to targets array
     push: true 
     # [optional] if enambled and value is array its child items will be pushed instead of array itself
     children: false
@@ -160,7 +160,7 @@ Same as above, but for secrets. All the options will me masked in report to prev
      # [optional] override everything tha tis inside "test" object with { test: true }
      # use with caution
      override: true
-     # [required] if you want to push inline or value(s) from file(s) to array
+     # [required] if you want to push inline or value(s) from file(s) to target's array
      push: true 
      # [optional] if enambled and value is array its child items will be pushed instead of array itself
      children: false

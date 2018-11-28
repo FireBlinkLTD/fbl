@@ -26,7 +26,8 @@ ctx:
 secrets:
    key: secret
 
-# saved, removed, edited 
+# Any kind of objects that were created, updated or removed upon flow execution
+# and or manually assigned to corresponding fields via special actions (check default "context" plugin for more information)
 entities:
     # "registered" by convention should store all created or updated entities  
     registered:  
@@ -46,8 +47,14 @@ entities:
     # only entities that were deleted, same entities should also exist in "unregistered" list
     deleted: []
 
-# Summary records
-summary: []
+# Summary records that will be printed in the end of execution in a nice ASCII table for user
+# Generally used to present tests results or simple tracing reports for user
+summary: 
+  - title: Count to 5
+    status: SUCCESS
+    duration: 5ms
+    payload: 
+      additional: information
 ```
 
 ## Flow
@@ -77,3 +84,4 @@ Generally parameters are used to isolate specific values from global scope.
 ## Plugin
 
 Embedded or external Node.js module that has specific structure and exposes action handlers, template utility functions or custom reporters.
+
