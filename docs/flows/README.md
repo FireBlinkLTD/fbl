@@ -34,10 +34,9 @@ pipeline:
     args: 
       - 'Hello World'
 
-  # Metadata
+  # Metadata field.
   # Each action may have zero or more additional metadata fields associated with it.
-  # All metadata fields follow same naming convention: they all start with dollar sign - $.
-  # Action ID or aliases could not start with $.   
+  # All metadata fields should start with dollar sign ($). 
   $title: 'Say hello'
 ```
 
