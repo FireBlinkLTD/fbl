@@ -30,7 +30,7 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         return BaseValuesAssignmentActionHandler.validationSchema;
     }
 
-    abstract getAssignmentKey(): 'ctx' | 'secrets' | 'parameters';
+    abstract getAssignmentKey(): 'ctx' | 'secrets';
 
     /**
      * Get value assignment target based on assignment key
@@ -39,20 +39,8 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
      */
     private getAssignmentTarget(context: IContext, parameters: IDelegatedParameters): any {
         const key = this.getAssignmentKey();
-
-        if (key === 'ctx') {
-            return context.ctx;
-        }
-
-        if (key === 'secrets') {
-            return context.secrets;
-        }
-
-        if (!parameters.parameters) {
-            parameters.parameters = {};
-        }
-
-        return parameters.parameters;
+        
+        return context[key];
     }
 
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {

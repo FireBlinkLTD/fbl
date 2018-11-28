@@ -71,6 +71,14 @@ export class FlowService {
      * @returns {Promise<void>}
      */
     async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
+        if (metadata && metadata.$parameters) {
+            /* istanbul ignore else */
+            if (!parameters.parameters) {
+                parameters.parameters = {};
+            }
+            await ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
+        }
+
         const idx = ++this.index;
         this.logService.info(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
         const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);

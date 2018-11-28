@@ -16,7 +16,7 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
         return ContextValuesAssignmentActionHandler.metadata;
     }
 
-    getAssignmentKey(): 'ctx' | 'secrets' | 'parameters' {
+    getAssignmentKey(): 'ctx' | 'secrets' {
         return 'ctx';
     }
 

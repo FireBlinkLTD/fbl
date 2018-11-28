@@ -17,7 +17,7 @@ export class SecretValuesAssignmentActionHandler extends BaseValuesAssignmentAct
         return SecretValuesAssignmentActionHandler.metadata;
     }
 
-    getAssignmentKey(): 'ctx' | 'secrets' | 'parameters' {
+    getAssignmentKey(): 'ctx' | 'secrets' {
         return 'secrets';
     }
 }

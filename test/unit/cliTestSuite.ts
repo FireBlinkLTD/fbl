@@ -10,7 +10,7 @@ import {IActionStep} from '../../src/models';
 import {ContextUtil, FSUtil} from '../../src/utils';
 import {DummyServerWrapper, IDummyServerWrapperConfig} from '../assets/dummy.http.server.wrapper';
 import {c} from 'tar';
-import {IContextBase, ISummaryRecord} from '../../src/interfaces';
+import {IContextBase, IReport, ISummaryRecord} from '../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -1386,6 +1386,43 @@ class CliTestSuite {
         }
 
         assert.strictEqual(server.requestCount, 1);
+    }
+
+    @test()
+    async metadataParameters(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const flowPath = await tempPathsRegistry.createTempFile();
+        const reportPath = await tempPathsRegistry.createTempFile();
+
+        const flow: any = {
+            pipeline: {
+                '$parameters': {
+                    meta: 'yes'
+                },
+                ctx: {
+                    '$.field': {
+                        inline: '<%- parameters.meta %>'
+                    },
+                }
+            }
+        };
+        await promisify(writeFile)(flowPath, dump(flow), 'utf8');
+
+        const result = await CliTestSuite.exec([
+            '--no-colors',
+            '-r', 'yaml',
+            '-o', reportPath,
+            flowPath
+        ]);
+
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+
+        const report: IReport = await FSUtil.readYamlFromFile(reportPath);
+        assert.deepStrictEqual(report.context.final.ctx, {
+            field: 'yes'
+        });
     }
 
     @test()
