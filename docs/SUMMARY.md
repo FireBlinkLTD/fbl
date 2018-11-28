@@ -9,12 +9,13 @@
     * [Metadata Fields](flows/metadata.md)
     
 * [Plugins](plugins/README.md)
-    * [Flow Execution Control](plugins/flow.md)
-    * [Context Manipulation](plugins/context.md)
-    * [Commands and Scripts Execution](plugins/exec.md)
-    * [File System Operations](plugins/fs.md)
-    * [Interactive User Prompts](plugins/prompts.md)
+    * [Flow Control](plugins/flow.md)
+    * [Context State](plugins/context.md)
+    * [Shell](plugins/exec.md)
+    * [File System](plugins/fs.md)
+    * [CLI Prompts](plugins/prompts.md)
     * [Execution Reporters](plugins/reporters.md)
+    * [Common Options](plugins/common.md)
     
 * [Packages](tarball.md)
 * [Global Config](global-config.md)

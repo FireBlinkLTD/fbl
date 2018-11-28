@@ -1,6 +1,6 @@
-# Common Action Handlers Options
+# Common Options
 
-This section contains common definitions for action handlers.
+This section contains common option definitions for action handlers.
 
 ## Assign To
 
