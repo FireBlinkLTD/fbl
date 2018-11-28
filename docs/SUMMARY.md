@@ -6,6 +6,7 @@
     * [Hello World](flows/hello-world.md)
     * [Templates](flows/templates.md)
     * [Template Functions](flows/utilities.md)
+    * [Metadata Fields](flows/metadata.md)
     
 * [Plugins](plugins/README.md)
     * [Flow Execution Control](plugins/flow.md)
@@ -15,7 +16,7 @@
     * [Interactive User Prompts](plugins/prompts.md)
     * [Execution Reporters](plugins/reporters.md)
     
-* [Packaging](tarball.md)
+* [Packages](tarball.md)
 * [Global Config](global-config.md)
     
 * [Glossary](GLOSSARY.md)
