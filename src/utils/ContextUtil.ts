@@ -1,4 +1,4 @@
-import {IContext, IContextBase, IDelegatedParameters} from '../interfaces';
+import {IContext, IContextBase, IDelegatedParameters, IPushTo, IAssignTo} from '../interfaces';
 import {ActionHandlersRegistry} from '../services/';
 import {ActionSnapshot} from '../models';
 import * as Joi from 'joi';
@@ -51,7 +51,7 @@ export class ContextUtil {
      * @param {IContext} context
      * @param {IDelegatedParameters} parameters
      * @param {ActionSnapshot} snapshot
-     * @param {{ctx?: string; secrets?: string; parameters?: string}} paths
+     * @param {IAssignTo | string} paths
      * @param value
      * @param {boolean} override
      * @return {Promise<void>}
@@ -61,7 +61,7 @@ export class ContextUtil {
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
-        paths: {ctx?: string, secrets?: string, parameters?: string} | string,
+        paths: IAssignTo | string,
         value: any,
         override: boolean
     ): Promise<void> {
@@ -101,7 +101,7 @@ export class ContextUtil {
      * @param {IContext} context
      * @param {IDelegatedParameters} parameters
      * @param {ActionSnapshot} snapshot
-     * @param {{ctx?: string; secrets?: string; parameters?: string}} paths
+     * @param {IPushTo | string} paths
      * @param value
      * @param {boolean} children
      * @param {boolean} override
@@ -112,7 +112,7 @@ export class ContextUtil {
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
-        paths: {ctx?: string, secrets?: string, parameters?: string} | string,
+        paths: IPushTo | string,
         value: any,
         children: boolean,
         override: boolean
