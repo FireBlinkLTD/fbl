@@ -18,7 +18,7 @@ Title is used to make `--verbose` output more meaningful for the user. Instead o
 
 ## $parameters
 
-User to assign additional or provide inital parameters to the action.
+Used to assign additional, provide initial or merge with existing parameters before running the action.
 
 ```yaml
 pipeline:
