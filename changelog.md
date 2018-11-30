@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## 1.2.4 - Under Development
 
+### Fixed
+
+* [\#241](https://github.com/FireBlinkLTD/fbl/issues/241) Reference resoling (`$ref:`) now also works for array items.
+
 ### Added
 
 * Added `IAssignTo` and `IPushTo` interfaces to describe `assignTo` and `pushTo` options.
