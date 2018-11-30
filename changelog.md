@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.2.4(https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.4) - 2018-11-30
+
+### Fixed
+
+* [\#241](https://github.com/FireBlinkLTD/fbl/issues/241) Reference resoling (`$ref:`) now also works for array items.
+
+### Added
+
+* Added `IAssignTo` and `IPushTo` interfaces to describe `assignTo` and `pushTo` options.
+
 ## [1.2.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.3) - 2018-11-28
 
 ### Fixed

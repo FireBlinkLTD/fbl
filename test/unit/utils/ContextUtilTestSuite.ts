@@ -185,13 +185,21 @@ class ContextUtilTestSuite {
         const result = ContextUtil.resolveReferences({
             ctx: '$ref:ctx.test_ctx',
             secrets: '$ref:secrets.test_secrets',
-            parameters: '$ref:parameters.test_parameters'
+            parameters: '$ref:parameters.test_parameters',
+            array: [
+                {
+                    arr1: '$ref:ctx.test_ctx'
+                }
+            ]
         }, context, parameters);
 
         assert.deepStrictEqual(result, {
             ctx: 'c',
             secrets: 's',
-            parameters: 'p'
+            parameters: 'p',
+            array: [{
+                arr1: 'c'
+            }]
         });
 
         // check missing

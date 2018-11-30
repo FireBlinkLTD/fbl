@@ -84,7 +84,7 @@ ctx:
     l2: 'value'
 ```
 
-To pass `l2` value by reference you need to use: `$ref.ctx.l1.l2` 
+To pass `l2` value by reference you need to use: `$ref:ctx.l1.l2` 
 
 **Note:** FBL does not support referencing nested array elements with paths, only nested object fields.
 
