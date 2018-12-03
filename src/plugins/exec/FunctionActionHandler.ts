@@ -28,12 +28,20 @@ export class FunctionActionHandler extends ActionHandler {
 
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const script = [
-            'return async function(context, require) {',
+            'return async function(require, cwd, ctx, secrets, entities, parameters, iteration) {',
             options,
             '}'
         ].join('\n');
 
         const fn = (new Function(script))();
-        await fn(context, require);
+        await fn(
+            require,     
+            context.cwd,
+            context.ctx,
+            context.secrets,
+            context.entities,
+            parameters.parameters, 
+            parameters.iteration
+        );
     }
 }

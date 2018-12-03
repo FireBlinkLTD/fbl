@@ -171,9 +171,14 @@ class ContextUtilTestSuite {
         const parameters = <IDelegatedParameters> {
             parameters: {
                 test_parameters: 'p'
+            },
+            iteration: {
+                index: 0,
+                value: 'value'
             }
         };
 
+        context.cwd = '/cwd';
         context.ctx = {
             test_ctx: 'c'
         };
@@ -186,6 +191,8 @@ class ContextUtilTestSuite {
             ctx: '$ref:ctx.test_ctx',
             secrets: '$ref:secrets.test_secrets',
             parameters: '$ref:parameters.test_parameters',
+            iteration: '$ref:iteration ',
+            cwd: ' $ref:cwd',
             array: [
                 {
                     arr1: '$ref:ctx.test_ctx'
@@ -194,9 +201,14 @@ class ContextUtilTestSuite {
         }, context, parameters);
 
         assert.deepStrictEqual(result, {
+            cwd: '/cwd',
             ctx: 'c',
             secrets: 's',
             parameters: 'p',
+            iteration: {
+                index: 0,
+                value: 'value'
+            },
             array: [{
                 arr1: 'c'
             }]
