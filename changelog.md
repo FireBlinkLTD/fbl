@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 1.2.5(https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.5) - 2018-12-03
+## 1.2.6 - Under Development
+
+### Changes
+
+* [\#251](https://github.com/FireBlinkLTD/fbl/issues/251) "function" action handler now also can return object that will be used to override context and parameters.
+
+## [1.2.5](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.5) - 2018-12-03
 
 ### Fixed
 

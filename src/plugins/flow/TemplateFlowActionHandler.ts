@@ -17,7 +17,9 @@ export class TemplateFlowActionHandler extends ActionHandler {
         ]
     };
 
-    private static validationSchema = Joi.string().min(1).required()
+    private static validationSchema = Joi.string()
+        .min(1)
+        .required()
         .options({abortEarly: true});
 
     getMetadata(): IActionHandlerMetadata {
@@ -43,6 +45,7 @@ export class TemplateFlowActionHandler extends ActionHandler {
 
         const action = safeLoad(options);
         const idOrAlias = FBLService.extractIdOrAlias(action);
+        
         let metadata = FBLService.extractMetadata(action);
         metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 

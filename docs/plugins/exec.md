@@ -107,7 +107,7 @@ But also to Node.js `require` function and can interact with awailable node modu
 * `fn`
 * `fn()`
 
-**Example:**
+**Example: Direct Changes**
 
 ```yaml
 # Action handler expects valid JS function content string.
@@ -118,3 +118,28 @@ fn: |-
   ctx.isWindows = require('os').platform() === 'win32';
 ```
 
+**Example: Overrides**
+
+Alternativelly function can return object that will be used to override entire state of context and parameters fields.
+
+```yaml
+fn: |-
+  return {
+    cwd: '/tmp',
+    ctx: {
+      test: true
+    }      
+  }
+```
+
+```yaml
+fn: |-
+  return {
+    secrets: {
+      test: true
+    },
+    parameters: {
+      p1: ctx.p2
+    }
+  }
+```

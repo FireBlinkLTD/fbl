@@ -63,4 +63,68 @@ class FunctionActionHandlerTestSuite {
 
         assert.deepStrictEqual(context.ctx, { test: 3 });
     }
+
+    @test()
+    async execResultOverride(): Promise<void> {
+        const actionHandler = new FunctionActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+
+        const fn = [
+            'return {',
+            '  ctx: {test: parameters.t1 + iteration.value},',
+            '  secrets: {a: true},',
+            '  cwd: "/test",',
+            '  entities: {registered: [{type: "Test", id: 0}]},',
+            '  parameters: {p: 123},',
+            '  iteration: {index: 0},',
+            '}'
+        ].join('\n');
+
+        const parameters = {
+            parameters: {
+                t1: 1                
+            },
+            iteration: {
+                index: 0,
+                value: 2
+            }
+        };
+
+        await actionHandler.execute(fn, context, snapshot, parameters);
+
+        assert.deepStrictEqual(context.cwd, '/test');
+        assert.deepStrictEqual(context.ctx, {test: 3});
+        assert.deepStrictEqual(context.secrets, {a: true});
+        assert.deepStrictEqual(context.entities, {registered: [{type: 'Test', id: 0}]});
+        assert.deepStrictEqual(parameters.parameters, {p: 123});
+        assert.deepStrictEqual(parameters.iteration, {index: 0});
+    }
+
+    @test()
+    async failValidationOfResultOverride(): Promise<void> {
+        const actionHandler = new FunctionActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+
+        const fn = [
+            'return {',
+            '  ctx: true,',
+            '}'
+        ].join('\n');
+
+        const parameters = {
+            parameters: {
+                t1: 1                
+            },
+            iteration: {
+                index: 0,
+                value: 2
+            }
+        };
+
+        await chai.expect(
+            actionHandler.execute(fn, context, snapshot, parameters)
+        ).to.be.rejected;        
+    }
 }
