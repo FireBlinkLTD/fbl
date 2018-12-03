@@ -11,7 +11,7 @@
 * [Plugins](plugins/README.md)
     * [Flow Control](plugins/flow.md)
     * [Context State](plugins/context.md)
-    * [Shell](plugins/exec.md)
+    * [Execute (Shell & JavaScript)](plugins/exec.md)
     * [File System](plugins/fs.md)
     * [CLI Prompts](plugins/prompts.md)
     * [Execution Reporters](plugins/reporters.md)

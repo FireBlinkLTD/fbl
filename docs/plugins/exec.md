@@ -1,8 +1,10 @@
-# Shell command execution
+# Shell and JavaScript Function execution
 
 Plugin allows to invoke any shell command.
 
-## Action Handler: Exec
+## Action Handler: Shell Command
+
+Invoice single shell command.
 
 **ID:** `com.fireblink.fbl.exec`
 
@@ -41,7 +43,9 @@ assignResultTo: # follows common assignment logic practicies https://fbl.firebli
 pushResultTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to  
 ```
 
-## Action Handler: Shell
+## Action Handler: Shell Script
+
+Invoke shell script. While it gives a more convinient way to integrate shell scripts into the flow it also makes your flow less platform agnostic. 
 
 **ID:** `com.fireblink.fbl.shell`
 
@@ -83,7 +87,15 @@ ushResultTo: # follows common push logic practicies https://fbl.fireblink.com/pl
 
 ## Action Handler: Function
 
-Allows to define custom JS script \(ES6\) to modify context state.
+Allows to invoke custom JavaScript script \(ES6\). Script has access to all context variables:
+* cwd
+* ctx
+* secrets
+* entities
+* parameters
+* iteration
+
+But also to Node.js `require` function and can interact with awailable node modules. Though, it is recomended to use fbl plugins instead.
 
 **ID:** `com.fireblink.fbl.function`
 
@@ -99,12 +111,10 @@ Allows to define custom JS script \(ES6\) to modify context state.
 
 ```yaml
 # Action handler expects valid JS function content string.
-# Context is available via "context" variable. 
-# You can also "require" node modules inside the script.
 #
 # Note: script is wrapped into async function, so you can "await" promises inside it 
 # if you need to do some long running operations. 
 fn: |-
-  context.ctx.isWindows = require('os').platform() === 'win32';
+  ctx.isWindows = require('os').platform() === 'win32';
 ```
 

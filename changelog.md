@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 1.2.4(https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.4) - 2018-11-30
+## 1.2.5 - Under Development
+
+### Fixed
+
+* [\#247](https://github.com/FireBlinkLTD/fbl/issues/247) Expose "parameters" and "iteration" properties to "function" action handler.
+
+### Changes
+
+* Along with [\#247](https://github.com/FireBlinkLTD/fbl/issues/247) fix, `context` property no longer wraps context fields. Instead all the fields are not available without a wrapper.
+
+## [1.2.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.4) - 2018-11-30
 
 ### Fixed
 

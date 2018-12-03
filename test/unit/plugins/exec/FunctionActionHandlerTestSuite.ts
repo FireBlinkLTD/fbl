@@ -51,8 +51,16 @@ class FunctionActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute('context.ctx.test = 1;', context, snapshot, {});
+        await actionHandler.execute('ctx.test = parameters.t1 + iteration.value;', context, snapshot, {
+            parameters: {
+                t1: 1                
+            },
+            iteration: {
+                index: 0,
+                value: 2
+            }
+        });
 
-        assert.deepStrictEqual(context.ctx, { test: 1 });
+        assert.deepStrictEqual(context.ctx, { test: 3 });
     }
 }
