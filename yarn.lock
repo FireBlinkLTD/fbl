@@ -109,10 +109,10 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
   integrity sha512-2Y8uPt0/jwjhQ6EiluT0XCri1Dbplr0ZxfFXUz+ye13gaqE8u5gL5ppao1JrUYr9cIip5S6MvQzBS7Kke7U9VA==
 
-"@types/ejs@2.6.0":
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-2.6.0.tgz#56502bca6e2e1b4cf9351918ca76cdaa93fe3b6c"
-  integrity sha512-1ISPltnwvcNU1VTxV0Zusv/nUViHO/S+TUIjiHlvXdmU6e9B/WpCWN6Ewz+fCB7sugdIe5lhsJbbZ6/6+dA1Gg==
+"@types/ejs@2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-2.6.1.tgz#cf9cd850a0fd3a55fc4813c97efb0b6503c6f4e6"
+  integrity sha512-WD8015V8Y+uDfFIjiVHU7t9SgHptqTGGN8w0A2LcrL0NLtqColM15cswkHZMUfodyuTf35sup8vW0hpWRHu0dQ==
 
 "@types/events@*":
   version "1.2.0"
@@ -2139,10 +2139,10 @@ https-proxy-agent@^2.1.0:
     agent-base "^4.1.0"
     debug "^3.1.0"
 
-humanize-duration@3.15.3:
-  version "3.15.3"
-  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.15.3.tgz#600a939bd9d9a16b696e907b3fc08d1a4f15e8c9"
-  integrity sha512-BMz6w8p3NVa6QP9wDtqUkXfwgBqDaZ5z/np0EYdoWrLqL849Onp6JWMXMhbHtuvO9jUThLN5H1ThRQ8dUWnYkA==
+humanize-duration@3.16.0:
+  version "3.16.0"
+  resolved "https://registry.yarnpkg.com/humanize-duration/-/humanize-duration-3.16.0.tgz#c7ec3b898305f007c63893f891870b2b5a2e0a7d"
+  integrity sha512-LDnNSe8EkJjhRsijWgUK12UK7ivbCww2R3LW9quKdBDoQjeAewqnGHch5AJTCOny1cPLhnXTzvniXVP3B9O6Ew==
 
 humanize-ms@^1.2.1:
   version "1.2.1"

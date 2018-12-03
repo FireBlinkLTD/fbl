@@ -366,14 +366,6 @@ tpl: |-
       <% }) %>
 ```
 
-or the same with helper function that converts anything to JSON string \(JSON is a valid YAML\):
-
-```yaml
-tpl: |-
-  ctx:
-    something: <%- $.escape([1, 2, 3]) %>
-```
-
 that will generally produce:
 
 ```yaml
