@@ -6,7 +6,7 @@ import * as Joi from 'joi';
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
-    private static REFERENCE_REGEX = /^\s*\$ref:(ctx|secrets|entities|parameters)((\.[^.]+)+)\s*$/;
+    private static REFERENCE_REGEX = /^\s*\$ref:(cwd|ctx|secrets|entities|parameters|iteration)((\.[^.]+)+)?\s*$/;
 
     /**
      * Check if value represents a basic type
@@ -352,7 +352,9 @@ export class ContextUtil {
                     let target: any;
 
                     /* istanbul ignore else */
-                    if (match[1] === 'ctx') {
+                    if (match[1] === 'cwd') {
+                        target = context.cwd;
+                    } else if (match[1] === 'ctx') {
                         target = context.ctx;
                     } else if (match[1] === 'secrets') {
                         target = context.secrets;
@@ -360,20 +362,24 @@ export class ContextUtil {
                         target = context.entities;
                     } else if (match[1] === 'parameters') {
                         target = parameters.parameters;
+                    } else if (match[1] === 'iteration') {
+                        target = parameters.iteration;
                     }
 
-                    const chunks = match[2].substring(1).split('.');
-                    for (const subPath of chunks) {
-                        if (!ContextUtil.isObject(target)) {
-                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at: ${subPath}`);
-                        }
+                    if (match[2]) {
+                        const chunks = match[2].substring(1).split('.');
+                        for (const subPath of chunks) {
+                            if (!ContextUtil.isObject(target)) {
+                                throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at: ${subPath}`);
+                            }
 
-                        if (!target.hasOwnProperty(subPath)) {
-                            throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at: ${subPath}`);
-                        }
+                            if (!target.hasOwnProperty(subPath)) {
+                                throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at: ${subPath}`);
+                            }
 
-                        target = target[subPath];
-                    }
+                            target = target[subPath];
+                        }
+                    }   
 
                     return target;
                 }

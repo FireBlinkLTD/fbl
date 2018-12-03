@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. The format 
 ### Fixed
 
 * [\#247](https://github.com/FireBlinkLTD/fbl/issues/247) Expose "parameters" and "iteration" properties to "function" action handler.
+* [\#243](https://github.com/FireBlinkLTD/fbl/issues/243) Reference extended to support `$ref:cwd` and `$ref:iteration`
 
 ### Changes
 
