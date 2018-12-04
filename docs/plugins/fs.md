@@ -23,25 +23,11 @@ File System plugin.
 
   # [optional] 
   # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
-  assignPathTo:
-    # [optional] "ctx" variable name to assign file path to ("test")
-    ctx: '$.test'
-    # [optional] "secrets" variable name to assign file path to ("test")
-    secrets: '$.test'
-    # [optional] "parameters" variable name to assign file path to ("test")
-    parameters: '$.test'
+  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#assign-to     
 
   # [optional] 
   # Note: required if "path" and "assignPathTo" (above) is not provided
-  pushPathTo:
-    # [optional] "ctx" variable name to assign file path to ("test")
-    ctx: '$.test'
-    # [optional] "secrets" variable name to assign file path to ("test")
-    secrets: '$.test'
-    # [optional] "parameters" variable name to assign file path to ("test")
-    parameters: '$.test'
-    # [optional] clear array by given path before assignment
-    override: true  
+  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
 
   # [required] content of the file
   content: |-
@@ -58,48 +44,15 @@ File System plugin.
 
   # [optional] 
   # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
-  assignPathTo:
-    # [optional] "ctx" variable name to assign file path to ("test")
-    ctx: '$.test'
-    # [optional] "secrets" variable name to assign file path to ("test")
-    secrets: '$.test'
-    # [optional] "parameters" variable name to assign file path to ("test")
-    parameters: '$.test'
+  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to 
 
   # [optional] 
   # Note: required if "path" and "assignPathTo" (above) is not provided
-  pushPathTo:
-    # [optional] "ctx" variable name to assign file path to ("test")
-    ctx: '$.test'
-    # [optional] "secrets" variable name to assign file path to ("test")
-    secrets: '$.test'
-    # [optional] "parameters" variable name to assign file path to ("test")
-    parameters: '$.test'
+  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
 
   # [required] template file
   # Note: global and then local EJS template processing will be applied to the template before writing
   contentFromFile: /tmp/template.ejs
-```
-
-**Example 3: Alternative assignPathTo and pushPathTo syntax**
-
-```yaml
-->: 
-  # [optional] file path, if not provided content will be written to temporary location directory.
-  # Note: all missing parent directories will be automatically created
-  path: /tmp/test.txt
-
-  # [optional] 
-  # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
-  assignPathTo: '$.ctx.test'
-    
-  # [optional] 
-  # Note: required if "path" and "assignPathTo" (above) is not provided
-  pushPathTo: '$.ctx.test'    
-
-  # [required] content of the file
-  content: |-
-    test content
 ```
 
 ## Action Handler: Encrypt files
