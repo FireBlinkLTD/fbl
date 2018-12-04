@@ -13,10 +13,16 @@ export class SecretValuesAssignmentActionHandler extends BaseValuesAssignmentAct
         considerOptionsAsSecrets: true
     };
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return SecretValuesAssignmentActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getAssignmentKey(): 'ctx' | 'secrets' {
         return 'secrets';
     }

@@ -22,14 +22,23 @@ export class CopyPathActionHandler extends ActionHandler {
         to: Joi.string().min(1).required()
     }).required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return CopyPathActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return CopyPathActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let from = FSUtil.getAbsolutePath(options.from, snapshot.wd);
         if (options.from.endsWith(sep)) {

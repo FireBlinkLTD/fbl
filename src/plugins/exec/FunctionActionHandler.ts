@@ -55,14 +55,23 @@ export class FunctionActionHandler extends ActionHandler {
                 })
         });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return FunctionActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return FunctionActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const script = [
             'return async function(require, cwd, ctx, secrets, entities, parameters, iteration) {',

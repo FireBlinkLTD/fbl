@@ -32,14 +32,23 @@ export class ShellActionHandler extends BaseExecutableActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return ShellActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return ShellActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const file = await Container.get(TempPathsRegistry).createTempFile();
         await promisify(writeFile)(file, options.script, 'utf8');

@@ -5,6 +5,14 @@ import {Container} from 'typedi';
 import {ChildProcessService} from '../../services';
 
 export abstract class BaseExecutableActionHandler extends ActionHandler {
+    /**
+     * Execute shell command
+     * @param snapshot 
+     * @param executable 
+     * @param args 
+     * @param wd 
+     * @param options 
+     */
     async exec(
         snapshot: ActionSnapshot,
         executable: string,
@@ -75,6 +83,15 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         return result;
     }
 
+    /**
+     * Store execution result in context
+     * @param snapshot 
+     * @param context 
+     * @param parameters 
+     * @param assignTo 
+     * @param pushTo 
+     * @param result 
+     */
     async storeResult(
         snapshot: ActionSnapshot,
         context: IContext,

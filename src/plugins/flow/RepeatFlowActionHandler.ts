@@ -4,6 +4,7 @@ import {FBLService, FlowService} from '../../services';
 import {Container} from 'typedi';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration} from '../../interfaces';
 import {FBL_ACTION_SCHEMA} from '../../schemas';
+import { IMetadata } from '../../interfaces/IMetadata';
 
 export class RepeatFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -26,14 +27,36 @@ export class RepeatFlowActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return RepeatFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return RepeatFlowActionHandler.validationSchema;
     }
 
+    /**
+     * Get parameters for single iteration
+     * @param metadata 
+     * @param parameters 
+     * @param index 
+     */
+    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
+        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
+        actionParameters.iteration = {index};
+        
+        return actionParameters;
+    }
+
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
@@ -43,10 +66,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
 
         for (let i = 0; i < options.times; i++) {
-            const iterationParams = JSON.parse(JSON.stringify(parameters));
-            iterationParams.iteration = <IIteration> {
-                index: i
-            };
+            const iterationParams = RepeatFlowActionHandler.getParameters(snapshot.metadata, parameters, i);
 
             let metadata = FBLService.extractMetadata(options.action);
             metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);

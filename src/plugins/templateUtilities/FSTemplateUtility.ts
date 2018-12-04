@@ -3,6 +3,9 @@ import {FSUtil} from '../../utils';
 import {readFileSync} from 'fs';
 
 export class FSTemplateUtility implements ITemplateUtility {
+    /**
+     * @inheritdoc
+     */
     getUtilities(wd: string): {[key: string]: any} {
         return {
             fs: {

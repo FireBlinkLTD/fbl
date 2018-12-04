@@ -24,14 +24,23 @@ export class TryCatchFinallyFlowActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return TryCatchFinallyFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return TryCatchFinallyFlowActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 

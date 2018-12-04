@@ -35,14 +35,23 @@ export class WriteToFileActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return WriteToFileActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return WriteToFileActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let file;
         if (options.path) {

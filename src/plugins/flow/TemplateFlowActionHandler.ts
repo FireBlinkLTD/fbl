@@ -22,14 +22,23 @@ export class TemplateFlowActionHandler extends ActionHandler {
         .required()
         .options({abortEarly: true});
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return TemplateFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return TemplateFlowActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await super.validate(options, context, snapshot, parameters);
 
@@ -40,6 +49,9 @@ export class TemplateFlowActionHandler extends ActionHandler {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 

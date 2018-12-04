@@ -4,7 +4,7 @@ import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {Container} from 'typedi';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin, IDelegatedParameters} from '../../../../src/interfaces';
 import {ContextUtil} from '../../../../src/utils';
 
 const chai = require('chai');
@@ -36,13 +36,13 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
+    async execute(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         // wait first
         await new Promise(resolve => {
            setTimeout(resolve, this.delay);
         });
 
-        await this.fn(options, context, snapshot, {});
+        await this.fn(options, context, snapshot, parameters);
     }
 }
 
@@ -130,8 +130,7 @@ export class SequenceFlowActionHandlerTestSuite {
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 1);
-        assert.strictEqual(results[1], 2);
+        assert.deepStrictEqual(results, [1, 2]);        
     }
 
     @test()
@@ -197,7 +196,42 @@ export class SequenceFlowActionHandlerTestSuite {
         const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(results[0], 0);
-        assert.strictEqual(results[1], 1);
+        assert.deepStrictEqual(results, [0, 1]);        
+    }
+
+    @test()
+    async shareParameters(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new SequenceFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const results: number[] = [];
+        const dummyActionHandler1 = new DummyActionHandler(1, 0, async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+            results.push(_options);
+            _parameters.parameters = {
+                test: 1
+            };
+        });
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
+
+        const dummyActionHandler2 = new DummyActionHandler(2, 0, async (opts: any) => {
+            results.push(opts);
+        });
+        actionHandlersRegistry.register(dummyActionHandler2, plugin);
+
+        const options = {
+            shareParameters: true,
+            actions: [
+                {[DummyActionHandler.ID + '.1']: 0},
+                {[DummyActionHandler.ID + '.2']: '<%- parameters.test %>'},
+            ]
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});        
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.deepStrictEqual(results, [0, 1]);        
     }
 }

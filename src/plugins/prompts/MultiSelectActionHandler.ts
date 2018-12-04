@@ -39,14 +39,23 @@ export class MultiSelectActionHandler extends BasePromptActionHandler {
         .or('assignResponseTo', 'pushResponseTo')
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return MultiSelectActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return MultiSelectActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const value = await this.prompt({
             type: 'multiselect',

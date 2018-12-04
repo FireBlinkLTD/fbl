@@ -33,14 +33,23 @@ export class ExecActionHandler extends BaseExecutableActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return ExecActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return ExecActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const result = await this.exec(
             snapshot,

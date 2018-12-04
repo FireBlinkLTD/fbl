@@ -18,14 +18,23 @@ export class SleepFlowActionHandler extends ActionHandler {
     )
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return SleepFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return SleepFlowActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await new Promise<void>(resolve => setTimeout(resolve, Number(options) * 1000));
     }

@@ -27,14 +27,23 @@ export class ConfirmActionHandler extends BasePromptActionHandler {
         .or('assignResponseTo', 'pushResponseTo')
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return ConfirmActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return ConfirmActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const value = await this.prompt({
             type: 'confirm',

@@ -3,6 +3,9 @@ import {createHash} from 'crypto';
 import {ContextUtil} from '../../utils';
 
 export class HashTemplateUtility implements ITemplateUtility {
+    /**
+     * @inheritdoc
+     */
     getUtilities(wd: string): {[key: string]: any} {
         return {
             hash: (

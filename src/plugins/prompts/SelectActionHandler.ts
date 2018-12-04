@@ -35,14 +35,23 @@ export class SelectActionHandler extends BasePromptActionHandler {
         .or('assignResponseTo', 'pushResponseTo')
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return SelectActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return SelectActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const value = await this.prompt({
             type: 'select',

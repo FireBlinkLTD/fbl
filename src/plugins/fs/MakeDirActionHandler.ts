@@ -19,14 +19,23 @@ export class MakeDirActionHandler extends ActionHandler {
         .min(1)
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return MakeDirActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return MakeDirActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const path = FSUtil.getAbsolutePath(options, snapshot.wd);
         await FSUtil.mkdirp(path);

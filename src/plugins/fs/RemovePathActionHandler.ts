@@ -21,14 +21,23 @@ export class RemovePathActionHandler extends ActionHandler {
         .min(1)
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return RemovePathActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return RemovePathActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const path = FSUtil.getAbsolutePath(options, snapshot.wd);
         await FSUtil.remove(path);

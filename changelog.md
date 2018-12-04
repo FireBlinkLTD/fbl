@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 ## 1.2.6 - Under Development
 
+### Added
+
+* [\#250](https://github.com/FireBlinkLTD/fbl/issues/250) "sequence" action handler now supports alternative options syntax with "shareParameters" options. That options allow to re-use `parameters` across all invoked actions instead of making a clone for each.
+
 ### Changes
 
 * [\#251](https://github.com/FireBlinkLTD/fbl/issues/251) "function" action handler now also can return object that will be used to override context and parameters.

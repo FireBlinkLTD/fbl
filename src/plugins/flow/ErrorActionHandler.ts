@@ -15,14 +15,23 @@ export class ErrorActionHandler extends ActionHandler {
     private static validationSchema = Joi.string().min(1).required()
         .options({abortEarly: true});
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return ErrorActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return ErrorActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         throw new Error(options);
     }

@@ -164,10 +164,16 @@ class DynamicFlowHandler extends ActionHandler {
         super();
     }
 
+    /**
+     * @inheritdoc
+     */
     getWorkingDirectory(): string | null {
         return this.wd;
     }
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return <IActionHandlerMetadata> {
             id: this.id,
@@ -175,6 +181,10 @@ class DynamicFlowHandler extends ActionHandler {
         };
     }
 
+    /**
+     * Merge passed options with default values
+     * @param options 
+     */
     private getMergedOptions(options: any): any {
         let mergedOptions = options;
 
@@ -194,6 +204,9 @@ class DynamicFlowHandler extends ActionHandler {
         return mergedOptions;
     }
 
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         if (this.validationSchema) {
             const mergedOptions = this.getMergedOptions(options);
@@ -216,7 +229,10 @@ class DynamicFlowHandler extends ActionHandler {
             }
         }
     }
-
+    
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 

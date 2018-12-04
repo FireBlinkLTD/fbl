@@ -26,10 +26,16 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return BaseValuesAssignmentActionHandler.validationSchema;
     }
 
+    /**
+     * Get context field name to assign values
+     */
     abstract getAssignmentKey(): 'ctx' | 'secrets';
 
     /**
@@ -43,6 +49,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         return context[key];
     }
 
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await super.validate(options, context, snapshot, parameters);
 
@@ -54,6 +63,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const target = this.getAssignmentTarget(context, parameters);
 

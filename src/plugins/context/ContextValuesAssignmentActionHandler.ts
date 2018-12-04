@@ -12,14 +12,23 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
         ]
     };
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return ContextValuesAssignmentActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getAssignmentKey(): 'ctx' | 'secrets' {
         return 'ctx';
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await super.execute(options, context, snapshot, parameters);
         snapshot.setContext(context);
