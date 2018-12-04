@@ -21,14 +21,23 @@ export class SummaryRecordActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return SummaryRecordActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return SummaryRecordActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         context.summary.push(<ISummaryRecord> options);
         snapshot.setContext(context);

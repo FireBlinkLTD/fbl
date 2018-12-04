@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Command Line tool to automate any kind of work. Originally designed to help with deployments.",
   "keywords": [
     "fireblink",
@@ -17,7 +17,7 @@
   "engines": {
     "node": ">=8.12.0"
   },
-  "main": "dist/cli.js",
+  "main": "dist/index.js",
   "scripts": {
     "tsc": "tsc",
     "rimraf": "rimraf",
@@ -66,7 +66,7 @@
     "@types/got": "9.2.1",
     "@types/joi": "14.0.0",
     "@types/js-yaml": "3.11.2",
-    "@types/node": "10.12.11",
+    "@types/node": "10.12.12",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.0",
     "@types/table": "4.0.5",

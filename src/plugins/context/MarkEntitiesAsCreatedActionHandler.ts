@@ -12,10 +12,16 @@ export class MarkEntitiesAsCreatedActionHandler extends BaseMarkEntityAsActionHa
         ]
     };
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return MarkEntitiesAsCreatedActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         context.entities.created.push(...options);
         context.entities.registered.push(...options);

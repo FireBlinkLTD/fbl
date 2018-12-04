@@ -26,10 +26,19 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return BaseCryptoActionHandler.validationSchema;
     }
 
+    /**
+     * Create pbkdf2 hash with 100k iterations with provided password and optionally salt
+     * If salt is not provided - it will be generated and returned back
+     * @param password 
+     * @param salt 
+     */
     private static async getPasswordHash(password: string, salt?: Buffer): Promise<{hash: Buffer, salt: Buffer}> {
         salt = salt || randomBytes(BaseCryptoActionHandler.saltSize);
         const hash = await promisify(pbkdf2)(password, salt, 100000, BaseCryptoActionHandler.keySize, BaseCryptoActionHandler.hashAlgorithm);
@@ -40,6 +49,11 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         };
     }
 
+    /**
+     * Encrypt file with provided password
+     * @param file
+     * @param password 
+     */
     protected async encrypt(file: string, password: string): Promise<void> {
         const passwordHash = await BaseCryptoActionHandler.getPasswordHash(password);
         const iv = randomBytes(BaseCryptoActionHandler.ivSize);
@@ -70,6 +84,10 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         await promisify(rename)(tmpFile, file);
     }
 
+    /**
+     * Read stream into buffer
+     * @param stream 
+     */
     private static streamToBuffer(stream: ReadStream): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             const buffers: Buffer[] = [];
@@ -79,6 +97,11 @@ export abstract class BaseCryptoActionHandler extends ActionHandler {
         });
     }
 
+    /**
+     * Decrypt file
+     * @param file 
+     * @param password 
+     */
     protected async decrypt(file: string, password: string): Promise<void> {
         const headerSize = 2 + BaseCryptoActionHandler.saltSize + BaseCryptoActionHandler.ivSize;
 

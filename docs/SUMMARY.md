@@ -16,9 +16,11 @@
     * [CLI Prompts](plugins/prompts.md)
     * [Execution Reporters](plugins/reporters.md)
     * [Common Options](plugins/common.md)
+
+* [Anti-Patterns & Pitfalls](pitfalls/README.md)
+    * [Sequence Action Handler - "shareParameters" option](pitfalls/sequence-share-parameters.md)
     
 * [Packages](tarball.md)
 * [Global Config](global-config.md)
-    
 * [Glossary](GLOSSARY.md)
    

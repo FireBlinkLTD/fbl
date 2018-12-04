@@ -19,7 +19,9 @@ Available steps:
 
 ## Action Handler: Sequential steps execution
 
-Run steps one by one, if any of steps fail - chain of execution will stop on it.
+Run steps one by one, if any of steps fail - chain of execution will stop on it. 
+
+Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Meaning each action will start its own `branch` unless `sharedParameters` option is used.
 
 **ID:** `com.fireblink.fbl.flow.sequence`
 
@@ -31,10 +33,10 @@ Run steps one by one, if any of steps fail - chain of execution will stop on it.
 * `sync`
 * `--`
 
-**Example:**
+**Example 1: Short Declaration Variant**
 
 ```yaml
-# Run steps in a sequence
+# Run actions in a sequence
 '--':
   - ctx:
       '.':
@@ -45,6 +47,28 @@ Run steps one by one, if any of steps fail - chain of execution will stop on it.
         files: 
           - test.yml
 ```
+**Example 2: Detailed Declaration Varian**
+
+```yaml
+# Run actions in a sequence
+'--':
+  # [optional] whether to share parameters between actions instead of making a clone.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false
+  
+  # [required] list of actions to invoke in a sequence
+  actions:
+    - ctx:
+        '.':
+          inline: 
+            something: true
+    - ctx: 
+        fromFile:
+          files: 
+            - test.yml
+```
+
+**Warning:** `shareParameters` usage is considered an [anti-pattern](../pitfalls/sequence-share-parameters.md)
 
 ## Action Handler: Parallel steps execution
 

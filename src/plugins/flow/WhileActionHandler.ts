@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import {Container} from 'typedi';
 import {FBL_ACTION_SCHEMA} from '../../schemas';
+import { IMetadata } from '../../interfaces/IMetadata';
 
 export class WhileActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -40,21 +41,22 @@ export class WhileActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return WhileActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return WhileActionHandler.validationSchema;
     }
 
     /**
-     * Check if should execute action
-     * @param options
-     * @param {IContext} context
-     * @param {ActionSnapshot} snapshot
-     * @param {IDelegatedParameters} parameters
-     * @return {boolean}
+     * @inheritdoc
      */
     async isShouldExecute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<boolean> {
         const flowService = Container.get(FlowService);
@@ -76,19 +78,38 @@ export class WhileActionHandler extends ActionHandler {
         }
     }
 
+    /**
+     * Get parameters for single iteration
+     * @param metadata 
+     * @param parameters 
+     * @param index 
+     */
+    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
+        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
+        actionParameters.iteration = {index};
+        
+        return actionParameters;
+    }
+
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        let execute = await this.isShouldExecute(options, context, snapshot, parameters);
+        let actionParameters: any = WhileActionHandler.getParameters(snapshot.metadata, options, 0);
+        
+        let execute = await this.isShouldExecute(options, context, snapshot, actionParameters);
         while (execute) {
             const idOrAlias = FBLService.extractIdOrAlias(options.action);
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
 
-            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, parameters);
+            const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
 
-            execute = await this.isShouldExecute(options, context, snapshot, parameters);
+            actionParameters = WhileActionHandler.getParameters(snapshot.metadata, options, 0);
+            execute = await this.isShouldExecute(options, context, snapshot, actionParameters);
         }
     }
 }

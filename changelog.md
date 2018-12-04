@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 1.2.5(https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.5) - 2018-12-03
+## [1.2.6](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.6) - 2018-12-04
+
+### Added
+
+* [\#250](https://github.com/FireBlinkLTD/fbl/issues/250) "sequence" action handler now supports alternative options syntax with "shareParameters" options. That options allow to re-use `parameters` across all invoked actions instead of making a clone for each.
+
+### Changes
+
+* [\#251](https://github.com/FireBlinkLTD/fbl/issues/251) "function" action handler now also can return object that will be used to override context and parameters.
+
+## [1.2.5](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.5) - 2018-12-03
 
 ### Fixed
 

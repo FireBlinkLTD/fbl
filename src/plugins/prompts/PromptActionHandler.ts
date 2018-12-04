@@ -50,14 +50,23 @@ export class PromptActionHandler extends BasePromptActionHandler {
         .or('assignResponseTo', 'pushResponseTo')
         .required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return PromptActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return PromptActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let type = 'text';
         let float: boolean | undefined;

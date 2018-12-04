@@ -164,10 +164,16 @@ class DynamicFlowHandler extends ActionHandler {
         super();
     }
 
+    /**
+     * @inheritdoc
+     */
     getWorkingDirectory(): string | null {
         return this.wd;
     }
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return <IActionHandlerMetadata> {
             id: this.id,
@@ -175,12 +181,17 @@ class DynamicFlowHandler extends ActionHandler {
         };
     }
 
+    /**
+     * Merge passed options with default values
+     * @param options 
+     */
     private getMergedOptions(options: any): any {
         let mergedOptions = options;
 
         if (this.virtualDefaults) {
             if (this.virtualDefaults.mergeFunction) {
-                mergedOptions = this.virtualDefaults.mergeFunction(this.virtualDefaults.values, options);
+                const clonedDefaults = JSON.parse(JSON.stringify(this.virtualDefaults.values));
+                mergedOptions = this.virtualDefaults.mergeFunction(clonedDefaults, options);
             } else {
                 mergedOptions = DeepMergeUtil.merge(
                     this.virtualDefaults.values,
@@ -193,6 +204,9 @@ class DynamicFlowHandler extends ActionHandler {
         return mergedOptions;
     }
 
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         if (this.validationSchema) {
             const mergedOptions = this.getMergedOptions(options);
@@ -215,7 +229,10 @@ class DynamicFlowHandler extends ActionHandler {
             }
         }
     }
-
+    
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
@@ -223,7 +240,6 @@ class DynamicFlowHandler extends ActionHandler {
         let metadata = FBLService.extractMetadata(this.action);
         metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, this.wd, metadata, context, false, parameters);
 
-        parameters = JSON.parse(JSON.stringify(parameters));
         parameters.parameters = this.getMergedOptions(options);
         parameters.wd = snapshot.wd;
 

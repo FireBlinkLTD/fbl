@@ -13,10 +13,16 @@ export class DecryptActionHandler extends BaseCryptoActionHandler {
         ]
     };
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return DecryptActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const files = await FSUtil.findFilesByMasks(options.include, options.exclude, snapshot.wd);
         for (const file of files) {

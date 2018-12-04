@@ -35,10 +35,23 @@ export class SwitchFlowActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return SwitchFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
+    getValidationSchema(): Joi.SchemaLike | null {
+        return SwitchFlowActionHandler.validationSchema;
+    }
+
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
@@ -55,10 +68,9 @@ export class SwitchFlowActionHandler extends ActionHandler {
         await super.validate(options, context, snapshot, parameters);
     }
 
-    getValidationSchema(): Joi.SchemaLike | null {
-        return SwitchFlowActionHandler.validationSchema;
-    }
-
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 

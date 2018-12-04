@@ -17,17 +17,28 @@ export class TemplateFlowActionHandler extends ActionHandler {
         ]
     };
 
-    private static validationSchema = Joi.string().min(1).required()
+    private static validationSchema = Joi.string()
+        .min(1)
+        .required()
         .options({abortEarly: true});
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return TemplateFlowActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return TemplateFlowActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         await super.validate(options, context, snapshot, parameters);
 
@@ -38,11 +49,15 @@ export class TemplateFlowActionHandler extends ActionHandler {
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const action = safeLoad(options);
         const idOrAlias = FBLService.extractIdOrAlias(action);
+        
         let metadata = FBLService.extractMetadata(action);
         metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
 

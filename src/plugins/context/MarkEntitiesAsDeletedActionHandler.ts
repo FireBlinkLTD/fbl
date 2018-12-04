@@ -12,10 +12,16 @@ export class MarkEntitiesAsDeletedActionHandler extends BaseMarkEntityAsActionHa
         ]
     };
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return MarkEntitiesAsDeletedActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         context.entities.deleted.push(...options);
         context.entities.unregistered.push(...options);

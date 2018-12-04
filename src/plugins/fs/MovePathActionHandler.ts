@@ -18,18 +18,27 @@ export class MovePathActionHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.object({
-      from: Joi.string().min(1).required(),
-      to: Joi.string().min(1).required()
+        from: Joi.string().min(1).required(),
+        to: Joi.string().min(1).required()
     }).required();
 
+    /**
+     * @inheritdoc
+     */
     getMetadata(): IActionHandlerMetadata {
         return MovePathActionHandler.metadata;
     }
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return MovePathActionHandler.validationSchema;
     }
 
+    /**
+     * @inheritdoc
+     */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         let from = FSUtil.getAbsolutePath(options.from, snapshot.wd);
         if (options.from.endsWith(sep)) {

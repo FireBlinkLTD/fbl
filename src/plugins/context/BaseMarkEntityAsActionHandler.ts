@@ -15,6 +15,9 @@ export abstract class BaseMarkEntityAsActionHandler extends ActionHandler {
         .required()
         .options({ abortEarly: true });
 
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
         return BaseMarkEntityAsActionHandler.validationSchema;
     }
