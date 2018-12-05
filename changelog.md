@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.3.0 - Under Development
+
+### Added
+
+* [\#254]https://github.com/FireBlinkLTD/fbl/issues/254) Added `$.assignTo` and `$.pushTo` template utility functions. 
+
+### Fixed
+
+* [\#253](https://github.com/FireBlinkLTD/fbl/issues/253) "virtual" action handler now processes templates inside "defaults" and "parametersSchema" fields.
+* [\#255](https://github.com/FireBlinkLTD/fbl/issues/255) "function" action handler now has access to template utility functions directly inside the body.
+
 ## [1.2.6](https://github.com/FireBlinkLTD/fbl/releases/tag/1.2.6) - 2018-12-04
 
 ### Added
