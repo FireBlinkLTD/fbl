@@ -99,7 +99,7 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         assignTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean},
         pushTo: {ctx?: string, secrets?: string, parameters?: string, override?: boolean, children?: boolean},
         result: {code: number, stdout?: string, stderr?: string, error?: any}
-    ) {
+    ): Promise<void> {
         const value = {
             code: result.code,
             stdout: result.stdout,
@@ -107,11 +107,11 @@ export abstract class BaseExecutableActionHandler extends ActionHandler {
         };
 
         if (assignTo) {
-            await ContextUtil.assignTo(context, parameters, snapshot, assignTo, value, assignTo.override);
+            ContextUtil.assignTo(context, parameters, snapshot, assignTo, value);
         }
 
         if (pushTo) {
-            await ContextUtil.pushTo(context, parameters, snapshot, pushTo, value, pushTo.children, pushTo.override);
+            ContextUtil.pushTo(context, parameters, snapshot, pushTo, value);
         }
 
         if (result.error) {

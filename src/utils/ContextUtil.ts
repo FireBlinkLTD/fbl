@@ -54,17 +54,16 @@ export class ContextUtil {
      * @param {IAssignTo | string} paths
      * @param value
      * @param {boolean} override
-     * @return {Promise<void>}
-     * @return {Promise<void>}
+     * @return {void}    
      */
-    static async assignTo(
+    static assignTo(
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
         paths: IAssignTo | string,
-        value: any,
-        override: boolean
-    ): Promise<void> {
+        value: any
+    ): void {
+        let override = false;
         if (typeof paths === 'string') {
             const chunks = paths.split('.');
             const target = chunks[1];
@@ -72,17 +71,19 @@ export class ContextUtil {
             paths = {
                 [target]: `$.${chunks.join('.')}`
             };
+        } else {
+            override = paths.override;
         }
 
         /* istanbul ignore else */
         if (paths.ctx) {
-            await ContextUtil.assignToField(context.ctx, paths.ctx, value, override);
+            ContextUtil.assignToField(context.ctx, paths.ctx, value, override);
             snapshot.setContext(context);
         }
 
         /* istanbul ignore else */
         if (paths.secrets) {
-            await ContextUtil.assignToField(context.secrets, paths.secrets, value, override);
+            ContextUtil.assignToField(context.secrets, paths.secrets, value, override);
         }
 
         /* istanbul ignore else */
@@ -92,7 +93,7 @@ export class ContextUtil {
                 parameters.parameters = {};
             }
 
-            await ContextUtil.assignToField(parameters.parameters, paths.parameters, value, override);
+            ContextUtil.assignToField(parameters.parameters, paths.parameters, value, override);
         }
     }
 
@@ -103,20 +104,17 @@ export class ContextUtil {
      * @param {ActionSnapshot} snapshot
      * @param {IPushTo | string} paths
      * @param value
-     * @param {boolean} children
-     * @param {boolean} override
-     * @return {Promise<void>}
-     * @return {Promise<void>}
+     * @return {Promise<void>}    
      */
-    static async pushTo(
+    static pushTo(
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
         paths: IPushTo | string,
-        value: any,
-        children: boolean,
-        override: boolean
-    ): Promise<void> {
+        value: any
+    ): void {
+        let override = false;
+        let children = false;
         if (typeof paths === 'string') {
             const chunks = paths.split('.');
             const target = chunks[1];
@@ -124,17 +122,20 @@ export class ContextUtil {
             paths = {
                 [target]: `$.${chunks.join('.')}`
             };
+        } else {
+            override = paths.override;
+            children = paths.children;
         }
 
         /* istanbul ignore else */
         if (paths.ctx) {
-            await ContextUtil.push(context.ctx, paths.ctx, value, children, override);
+            ContextUtil.push(context.ctx, paths.ctx, value, children, override);
             snapshot.setContext(context);
         }
 
         /* istanbul ignore else */
         if (paths.secrets) {
-            await ContextUtil.push(context.secrets, paths.secrets, value, children, override);
+            ContextUtil.push(context.secrets, paths.secrets, value, children, override);
         }
 
         /* istanbul ignore else */
@@ -144,7 +145,7 @@ export class ContextUtil {
                 parameters.parameters = {};
             }
 
-            await ContextUtil.push(parameters.parameters, paths.parameters, value, override);
+            ContextUtil.push(parameters.parameters, paths.parameters, value, override);
         }
     }
 
@@ -155,27 +156,27 @@ export class ContextUtil {
      * @param value
      * @param {boolean} children
      * @param {boolean} override
-     * @return {Promise<void>}
+     * @return {void}
      */
-    static async push(
+    static push(
         obj: {[key: string]: any},
         path: string, value: any,
         children: boolean,
         override = false
-    ): Promise<void> {
+    ): void {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
-            throw new Error(`Unable to push value to path ${path}. Path has invalid format.`);
+            throw new Error(`Unable to push value to path "${path}". Path has invalid format.`);
         }
 
         const isArray = Array.isArray(value);
         if (!isArray && children) {
-            throw new Error(`Unable to push child records of value to path ${path}. Value is not an array.`);
+            throw new Error(`Unable to push child records of value to path "${path}". Value is not an array.`);
         }
 
         const searchResult = ContextUtil.findTargetByPath(obj, path, []);
 
         if (!Array.isArray(searchResult.target)) {
-            throw new Error(`Unable to push value to path: ${path}. Target is not array.`);
+            throw new Error(`Unable to push value to path "${path}". Target is not array.`);
         }
 
         if (override) {
@@ -219,7 +220,7 @@ export class ContextUtil {
             } else {
                 if (!isLast) {
                     if (!ContextUtil.isObject(candidate)) {
-                        throw new Error(`Unable to assign path: ${path}. Sub-path ${subPath} leads to non-object value.`);
+                        throw new Error(`Unable to assign path "${path}". Sub-path "${subPath}" leads to non-object value.`);
                     }
                 }
 
@@ -240,10 +241,11 @@ export class ContextUtil {
      * @param {string} path
      * @param value
      * @param {boolean} [override]
+     * @returns {void}
      */
-    static async assign(obj: {[key: string]: any}, path: string, value: any, override: boolean): Promise<void> {
+    static assign(obj: {[key: string]: any}, path: string, value: any, override: boolean): void {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
-            throw new Error(`Unable to assign value to path ${path}. Path has invalid format.`);
+            throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
         const isAssignable =
@@ -255,7 +257,7 @@ export class ContextUtil {
 
         if (isAssignable) {
             if (typeof target !== 'object') {
-                throw new Error(`Unable to assign path: ${path}. Target is not an object.`);
+                throw new Error(`Unable to assign path "${path}". Target is not an object.`);
             }
 
             if (override) {
@@ -268,7 +270,7 @@ export class ContextUtil {
             Object.assign(target, value);
         } else {
             if (!parent) {
-                throw new Error('Unable to assign non-object value to root path');
+                throw new Error('Unable to assign non-object value to root path.');
             }
 
             parent[key] = value;
@@ -281,9 +283,9 @@ export class ContextUtil {
      * @param {string} path
      * @param value
      * @param override
-     * @return {Promise<void>}
+     * @return {void}
      */
-    static async assignToField(obj: {[key: string]: any}, path: string, value: any, override: boolean): Promise<void> {
+    static assignToField(obj: {[key: string]: any}, path: string, value: any, override: boolean): void {
         if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
@@ -292,7 +294,7 @@ export class ContextUtil {
         const fieldName = chunks[chunks.length - 1];
         const parentPath = path.substring(0, path.length - (fieldName.length + 1));
 
-        await ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
+        ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
     }
 
     /**
@@ -370,11 +372,11 @@ export class ContextUtil {
                         const chunks = match[2].substring(1).split('.');
                         for (const subPath of chunks) {
                             if (!ContextUtil.isObject(target)) {
-                                throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Non-object value found upon traveling the path at: ${subPath}`);
+                                throw new Error(`Unable to find reference match for "$.${match[1]}${match[2]}". Non-object value found upon traveling the path at "${subPath}".`);
                             }
 
                             if (!target.hasOwnProperty(subPath)) {
-                                throw new Error(`Unable to find reference match for $.${match[1]}${match[2]}. Missing value found upon traveling the path at: ${subPath}`);
+                                throw new Error(`Unable to find reference match for "$.${match[1]}${match[2]}". Missing value found upon traveling the path at "${subPath}".`);
                             }
 
                             target = target[subPath];

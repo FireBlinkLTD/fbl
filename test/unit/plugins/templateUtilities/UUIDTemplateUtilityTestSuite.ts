@@ -1,6 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {UUIDTemplateUtility} from '../../../../src/plugins/templateUtilities/UUIDTemplateUtility';
 import * as assert from 'assert';
+import { ContextUtil, ActionSnapshot } from '../../../../src';
 
 @suite()
 class UUIDTemplateUtilityTestSuite {
@@ -8,7 +9,11 @@ class UUIDTemplateUtilityTestSuite {
 
     @test()
     async v4(): Promise<void> {
-        const UUID = new UUIDTemplateUtility().getUtilities('.').UUID;
+        const UUID = new UUIDTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).UUID;
         assert(UUID);
         assert(UUID.v4);
 
@@ -22,7 +27,11 @@ class UUIDTemplateUtilityTestSuite {
 
     @test()
     async v5DNS(): Promise<void> {
-        const UUID = new UUIDTemplateUtility().getUtilities('.').UUID;
+        const UUID = new UUIDTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).UUID;
         assert(UUID);
         assert(UUID.v5);
         assert(UUID.v5.DNS);
@@ -36,7 +45,11 @@ class UUIDTemplateUtilityTestSuite {
 
     @test()
     async v5URL(): Promise<void> {
-        const UUID = new UUIDTemplateUtility().getUtilities('.').UUID;
+        const UUID = new UUIDTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).UUID;
         assert(UUID);
         assert(UUID.v5);
         assert(UUID.v5.URL);
@@ -50,7 +63,11 @@ class UUIDTemplateUtilityTestSuite {
 
     @test()
     async v5custom(): Promise<void> {
-        const UUID = new UUIDTemplateUtility().getUtilities('.').UUID;
+        const UUID = new UUIDTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).UUID;
         assert(UUID);
         assert(UUID.v5);
         assert(UUID.v5.custom);

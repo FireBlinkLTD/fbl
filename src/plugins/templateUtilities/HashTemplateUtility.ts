@@ -1,12 +1,13 @@
-import {ITemplateUtility} from '../../interfaces';
+import {ITemplateUtility, IContext, IDelegatedParameters} from '../../interfaces';
 import {createHash} from 'crypto';
 import {ContextUtil} from '../../utils';
+import { ActionSnapshot } from '../../models';
 
 export class HashTemplateUtility implements ITemplateUtility {
     /**
      * @inheritdoc
      */
-    getUtilities(wd: string): {[key: string]: any} {
+    getUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): {[key: string]: any} {
         return {
             hash: (
                 str: string,

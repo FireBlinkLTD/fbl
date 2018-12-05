@@ -1,5 +1,6 @@
 import {Service} from 'typedi';
-import {ITemplateUtility} from '../interfaces';
+import {ITemplateUtility, IContext, IDelegatedParameters} from '../interfaces';
+import { ActionSnapshot } from '../models';
 
 @Service()
 export class TemplateUtilitiesRegistry {
@@ -35,14 +36,16 @@ export class TemplateUtilitiesRegistry {
 
     /**
      * Generate utilities for tempalte
-     * @param {string} wd - current working directory
+     * @param {IContext} context action context
+     * @param {ActionSnapshot} snapshot action snapshot
+     * @param {IDelegatedParameters} parameters action parameters
      * @return {{[key: string]: any}}
      */
-    public generateUtilities(wd: string): {[key: string]: any} {
+    public generateUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): {[key: string]: any} {
         const result: {[key: string]: any} = {};
 
         for (const utility of this.registry) {
-            Object.assign(result, utility.getUtilities(wd));
+            Object.assign(result, utility.getUtilities(context, snapshot, parameters));
         }
 
         return result;

@@ -5,6 +5,7 @@ import {promisify} from 'util';
 import {writeFile} from 'fs';
 import {TempPathsRegistry} from '../../../../src/services';
 import {Container} from 'typedi';
+import { ContextUtil, ActionSnapshot } from '../../../../src';
 
 @suite()
 class FSTemplateUtilityTestSuite {
@@ -15,7 +16,11 @@ class FSTemplateUtilityTestSuite {
 
     @test()
     async getAbsolutePath(): Promise<void> {
-        const fs = new FSTemplateUtility().getUtilities('/tmp').fs;
+        const fs = new FSTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            {}
+        ).fs;
 
         assert(fs);
         assert(fs.getAbsolutePath);
@@ -34,7 +39,11 @@ class FSTemplateUtilityTestSuite {
         const file = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(file, 'test', 'utf8');
 
-        const readText = new FSTemplateUtility().getUtilities('/tmp').fs.read.text;
+        const readText = new FSTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            {}
+        ).fs.read.text;
         const txt = readText(file);
 
         assert.strictEqual(txt, 'test');
@@ -47,7 +56,11 @@ class FSTemplateUtilityTestSuite {
         const file = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(file, 'test', 'utf8');
 
-        const readBase64 = new FSTemplateUtility().getUtilities('/tmp').fs.read.base64;
+        const readBase64 = new FSTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            {}
+        ).fs.read.base64;
         const base64 = readBase64(file);
 
         assert.strictEqual(base64, 'dGVzdA==');

@@ -1,6 +1,7 @@
 import {suite, test} from 'mocha-typescript';
 import {HashTemplateUtility} from '../../../../src/plugins/templateUtilities/HashTemplateUtility';
 import * as assert from 'assert';
+import { ContextUtil, ActionSnapshot } from '../../../../src';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -10,7 +11,11 @@ chai.use(chaiAsPromised);
 class HashTemplateUtilityTestSuite {
     @test()
     async makeHash(): Promise<void> {
-        const hash = new HashTemplateUtility().getUtilities('.').hash;
+        const hash = new HashTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).hash;
         assert(hash);
 
         let hex = hash('test', 'md5', 'hex');
@@ -25,7 +30,11 @@ class HashTemplateUtilityTestSuite {
 
     @test()
     async validation(): Promise<void> {
-        const hash = new HashTemplateUtility().getUtilities('.').hash;
+        const hash = new HashTemplateUtility().getUtilities(
+            ContextUtil.generateEmptyContext(),
+            new ActionSnapshot('', {}, '.', 0, {}),
+            {}
+        ).hash;
         assert(hash);
 
         chai.expect(() => {

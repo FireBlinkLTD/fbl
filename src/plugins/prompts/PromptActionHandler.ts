@@ -127,26 +127,23 @@ export class PromptActionHandler extends BasePromptActionHandler {
 
         /* istanbul ignore else */
         if (options.assignResponseTo) {
-            await ContextUtil.assignTo(
+            ContextUtil.assignTo(
                 context,
                 parameters,
                 snapshot,
                 options.assignResponseTo,
-                value,
-                options.assignResponseTo.override
+                value        
             );
         }
 
         /* istanbul ignore else */
         if (options.pushResponseTo) {
-            await ContextUtil.pushTo(
+            ContextUtil.pushTo(
                 context,
                 parameters,
                 snapshot,
                 options.pushResponseTo,
-                value,
-                options.pushResponseTo.children,
-                options.pushResponseTo.override
+                value
             );
         }
     }

@@ -59,7 +59,14 @@ export class TemplateFlowActionHandler extends ActionHandler {
         const idOrAlias = FBLService.extractIdOrAlias(action);
         
         let metadata = FBLService.extractMetadata(action);
-        metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, parameters);
+        metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            metadata, 
+            context, 
+            snapshot, 
+            parameters,
+            false
+        );
 
         const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, parameters);
         snapshot.registerChildActionSnapshot(childSnapshot);

@@ -80,9 +80,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
             if (options[name].files) {
                 if ((options[name].inline !== undefined || options[name].inline === null) && priorityOnFiles) {
                     if (options[name].push) {
-                        await ContextUtil.push(target, name, options[name].inline, children, override);
+                        ContextUtil.push(target, name, options[name].inline, children, override);
                     }  else {
-                        await ContextUtil.assign(target, name, options[name].inline, override);
+                        ContextUtil.assign(target, name, options[name].inline, override);
                     }
                     override = false;
                 }
@@ -96,9 +96,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                     // resolve global template
                     fileContent = await flowService.resolveTemplate(
                         context.ejsTemplateDelimiters.global,
-                        snapshot.wd,
                         fileContent,
                         context,
+                        snapshot,
                         parameters
                     );
 
@@ -107,18 +107,18 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
                     // resolve local template
                     fileContentObject = await flowService.resolveOptionsWithNoHandlerCheck(
                         context.ejsTemplateDelimiters.local,
-                        snapshot.wd,
                         fileContentObject,
                         context,
-                        false,
-                        parameters
+                        snapshot,
+                        parameters,
+                        false
                     );
 
 
                     if (options[name].push) {
-                        await ContextUtil.push(target, name, fileContentObject, children, override);
+                        ContextUtil.push(target, name, fileContentObject, children, override);
                     }  else {
-                        await ContextUtil.assign(target, name, fileContentObject, override);
+                        ContextUtil.assign(target, name, fileContentObject, override);
                     }
                     override = false;
                 }
@@ -126,9 +126,9 @@ export abstract class BaseValuesAssignmentActionHandler extends ActionHandler {
 
             if ((options[name].inline !== undefined || options[name].inline === null) && !priorityOnFiles) {
                 if (options[name].push) {
-                    await ContextUtil.push(target, name, options[name].inline, children, override);
+                    ContextUtil.push(target, name, options[name].inline, children, override);
                 }  else {
-                    await ContextUtil.assign(target, name, options[name].inline, override);
+                    ContextUtil.assign(target, name, options[name].inline, override);
                 }
             }
         });

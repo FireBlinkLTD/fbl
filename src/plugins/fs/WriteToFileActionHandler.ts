@@ -72,18 +72,18 @@ export class WriteToFileActionHandler extends ActionHandler {
             // resolve with global template delimiter first
             content = await flowService.resolveTemplate(
                 context.ejsTemplateDelimiters.global,
-                snapshot.wd,
                 content,
                 context,
+                snapshot,
                 parameters
             );
 
             // resolve local template delimiter
             content = await flowService.resolveTemplate(
                 context.ejsTemplateDelimiters.local,
-                snapshot.wd,
                 content,
                 context,
+                snapshot,
                 parameters
             );
         }
@@ -93,26 +93,23 @@ export class WriteToFileActionHandler extends ActionHandler {
 
         /* istanbul ignore else */
         if (options.assignPathTo) {
-            await ContextUtil.assignTo(
+            ContextUtil.assignTo(
                 context,
                 parameters,
                 snapshot,
                 options.assignPathTo,
-                file,
-                options.assignPathTo.override
+                file
             );
         }
 
         /* istanbul ignore else */
         if (options.pushPathTo) {
-            await ContextUtil.pushTo(
+            ContextUtil.pushTo(
                 context,
                 parameters,
                 snapshot,
                 options.pushPathTo,
-                file,
-                options.pushPathTo.children,
-                options.pushPathTo.override
+                file
             );
         }
     }

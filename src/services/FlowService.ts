@@ -76,7 +76,7 @@ export class FlowService {
             if (!parameters.parameters) {
                 parameters.parameters = {};
             }
-            await ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
+            ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
         }
 
         const idx = ++this.index;
@@ -94,7 +94,7 @@ export class FlowService {
 
             const alternativeWD = handler.getWorkingDirectory();
             if (alternativeWD) {
-                wd = alternativeWD;
+                snapshot.wd = alternativeWD;
             }
 
             snapshot.setInitialContextState(context);
@@ -103,7 +103,7 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed (only when changes applied)
-                const resolvedOptions = await this.resolveOptions(wd, handler, options, context, true, parameters);
+                const resolvedOptions = await this.resolveOptions(handler, options, context, snapshot, parameters, true);
                 if (JSON.stringify(options) !== JSON.stringify(resolvedOptions)) {
                     snapshot.setOptions(resolvedOptions);
                 }
@@ -112,7 +112,7 @@ export class FlowService {
             }
 
             // resolve without masking
-            options = await this.resolveOptions(wd, handler, options, context, false, parameters);
+            options = await this.resolveOptions(handler, options, context, snapshot, parameters, false);
 
             await handler.validate(options, context, snapshot, parameters);
             snapshot.validated();
@@ -326,11 +326,16 @@ export class FlowService {
      * Read flow from file
      * @param {IFlowLocationOptions} location
      * @param {IContext} context
+     * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
-     * @param {string} wd working directory
      * @returns {Promise<IFlow>}
      */
-    async readFlowFromFile(location: IFlowLocationOptions, context: IContext, parameters: IDelegatedParameters, wd: string): Promise<{flow: IFlow, wd: string}> {
+    async readFlowFromFile(
+        location: IFlowLocationOptions, 
+        context: IContext, 
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters         
+    ): Promise<{flow: IFlow, wd: string}> {
         const absolutePath = await this.resolveFlow(location);
 
         this.logService.info(` -> Reading flow file: `.green + absolutePath);
@@ -338,9 +343,9 @@ export class FlowService {
 
         content = await this.resolveTemplate(
             context.ejsTemplateDelimiters.global,
-            wd,
             content,
             context,
+            snapshot,
             parameters
         );
 
@@ -358,25 +363,25 @@ export class FlowService {
 
     /**
      * Resolve template
-     * @param {string} delimiter - EJS template delimiter
-     * @param {string} wd - working directory
-     * @param {string} tpl - template to resolve
+     * @param {string} delimiter EJS template delimiter
+     * @param {string} tpl template to resolve
      * @param {IContext} context
+     * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
      * @return {string}
      */
     async resolveTemplate(
         delimiter: string,
-        wd: string,
         tpl: string,
         context: IContext,
-        parameters: IDelegatedParameters
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,        
     ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
 
         const data: any = {
-            $: this.templateUtilityRegistry.generateUtilities(wd),
+            $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters),
             env: process.env
         };
 
@@ -409,20 +414,20 @@ export class FlowService {
     /**
      * Resolve options with no handler check
      * @param {string} delimiter - EJS template delimiter, by default EJS is using %
-     * @param {string} wd current working directory
      * @param options
      * @param {IContext} context
-     * @param {boolean} [maskSecrets] if true - all secrets will be masked
+     * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters delegated parameters
+     * @param {boolean} maskSecrets if true - all secrets will be masked     
      * @return {any}
      */
     async resolveOptionsWithNoHandlerCheck(
         delimiter: string,
-        wd: string,
         options: any,
-        context: IContext,
-        maskSecrets: boolean,
-        parameters: IDelegatedParameters
+        context: IContext,        
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+        maskSecrets: boolean        
     ): Promise<any> {
         if (!options) {
             return options;
@@ -459,7 +464,7 @@ export class FlowService {
         });
 
         tpl = lines.join('\n');
-        const yaml = await this.resolveTemplate(delimiter, wd, tpl, context, parameters);
+        const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters);
         options = safeLoad(yaml);
 
         // resolve references
@@ -470,19 +475,32 @@ export class FlowService {
 
     /**
      * Resolve options for handler
-     * @param {string} wd current working directory
      * @param {ActionHandler} handler
      * @param options
      * @param {IContext} context
-     * @param {boolean} [maskSecrets] if true - all secrets will be masked
      * @param {IDelegatedParameters} parameters delegated parameters
+     * @param {boolean} maskSecrets if true - all secrets will be masked     
      * @returns {Promise<any>}
      */
-    async resolveOptions(wd: string, handler: ActionHandler, options: any, context: IContext, maskSecrets: boolean, parameters: IDelegatedParameters): Promise<any> {
+    async resolveOptions(
+        handler: ActionHandler, 
+        options: any, 
+        context: IContext, 
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters, 
+        maskSecrets: boolean
+    ): Promise<any> {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
-        return await this.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, options, context, maskSecrets, parameters);
+        return await this.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            options, 
+            context, 
+            snapshot, 
+            parameters,
+            maskSecrets
+        );
     }
 }

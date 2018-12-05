@@ -1,4 +1,5 @@
-import {ITemplateUtility} from '../../interfaces';
+import {ITemplateUtility, IContext, IDelegatedParameters} from '../../interfaces';
+import { ActionSnapshot } from '../../models';
 
 const uuidv4 = require('uuid/v4');
 const uuidv5 = require('uuid/v5');
@@ -7,7 +8,7 @@ export class UUIDTemplateUtility implements ITemplateUtility {
     /**
      * @inheritdoc
      */
-    getUtilities(wd: string): {[key: string]: any} {
+    getUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): {[key: string]: any} {
         return {
             UUID: {
                 v4: (): string => {

@@ -50,7 +50,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
     private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
         const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
         actionParameters.iteration = {index};
-        
+
         return actionParameters;
     }
 
@@ -69,7 +69,14 @@ export class RepeatFlowActionHandler extends ActionHandler {
             const iterationParams = RepeatFlowActionHandler.getParameters(snapshot.metadata, parameters, i);
 
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                metadata, 
+                context,
+                snapshot,
+                iterationParams,
+                false
+            );
 
             if (options.async) {
                 promises.push((async (p, m): Promise<void> => {
