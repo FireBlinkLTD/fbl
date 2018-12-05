@@ -9,6 +9,7 @@ import {IContext, IFlowLocationOptions, IPlugin, IReport, ISummaryRecord} from '
 import {ContextUtil, FSUtil} from '../utils';
 import {TempPathsRegistry} from './TempPathsRegistry';
 import {table} from 'table';
+import { ActionSnapshot } from '../models';
 
 const prompts = require('prompts');
 const cliui = require('cliui');
@@ -96,8 +97,8 @@ export class CLIService {
                 cache: this.useCache
             },
             context,
-            {},
-            process.cwd()
+            new ActionSnapshot('', {}, process.cwd(), 0, {}),
+            {}
         );
 
         const initialContextState = this.reportFilePath ?
@@ -556,12 +557,12 @@ export class CLIService {
 
             if (chunks[0] === '$') {
                 if (isObject) {
-                    await ContextUtil.assign(target, chunks[0], value, false);
+                    ContextUtil.assign(target, chunks[0], value, false);
                 } else {
                     throw new Error('Unable to assign non-object value to root path "$"');
                 }
             } else {
-                await ContextUtil.assignToField(target, chunks[0], value, false);
+                ContextUtil.assignToField(target, chunks[0], value, false);
             }
         }));
     }

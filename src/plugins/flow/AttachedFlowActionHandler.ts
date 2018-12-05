@@ -60,7 +60,7 @@ export class AttachedFlowActionHandler extends ActionHandler {
         const fbl = Container.get(FBLService);
 
         snapshot.log(`Attaching flow at path ${options.path}.`);
-        const flow = await flowService.readFlowFromFile(options, context, parameters, snapshot.wd);
+        const flow = await flowService.readFlowFromFile(options, context, snapshot, parameters);
 
         const childSnapshot = await fbl.execute(
             flow.wd,

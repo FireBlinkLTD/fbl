@@ -89,7 +89,14 @@ export class SequenceFlowActionHandler extends ActionHandler {
             let metadata = FBLService.extractMetadata(action);
 
             const actionParameters = SequenceFlowActionHandler.getParameters(shareParameters, snapshot.metadata, parameters, index);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                metadata, 
+                context, 
+                snapshot,
+                actionParameters,
+                false
+            );
 
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);

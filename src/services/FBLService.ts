@@ -351,7 +351,14 @@ export class FBLService {
 
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         let metadata = FBLService.extractMetadata(flow.pipeline);
-        metadata = await this.flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, wd, metadata, context, false, parameters);
+        metadata = await this.flowService.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            metadata, 
+            context, 
+            new ActionSnapshot('', {}, wd, 0, {}),
+            parameters,
+            false
+        );
 
         const options = flow.pipeline[idOrAlias];
 

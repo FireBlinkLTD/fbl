@@ -50,10 +50,23 @@ export class ForEachFlowActionHandler extends ActionHandler {
      */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
-        options.of = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.of, context, false, parameters);
+        options.of = await flowService.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            options.of, 
+            context, 
+            snapshot, 
+            parameters,
+            false
+        );
 
         if (options.async) {
-            options.async = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.async, context, false, parameters);
+            options.async = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.async, 
+                context, 
+                snapshot, 
+                parameters,
+                false);
         }
 
         await super.validate(options, context, snapshot, parameters);
@@ -100,7 +113,14 @@ export class ForEachFlowActionHandler extends ActionHandler {
             const actionParameters = ForEachFlowActionHandler.getParameters(snapshot.metadata, parameters, iteration);
 
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                metadata,
+                context,
+                snapshot,
+                actionParameters,
+                false
+            );
 
             if (options.async) {
                 promises.push((async (p, m): Promise<void> => {

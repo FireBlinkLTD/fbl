@@ -49,7 +49,7 @@ export class ParallelFlowActionHandler extends ActionHandler {
     private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
         const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
         actionParameters.iteration = {index};
-        
+
         return actionParameters;
     }
 
@@ -65,7 +65,14 @@ export class ParallelFlowActionHandler extends ActionHandler {
             let metadata = FBLService.extractMetadata(action);
 
             const iterationParams = ParallelFlowActionHandler.getParameters(snapshot.metadata, parameters, index);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, iterationParams);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                metadata, 
+                context, 
+                snapshot,
+                iterationParams,
+                false
+            );
             snapshots[index] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, action[idOrAlias], context, iterationParams);
         });
 

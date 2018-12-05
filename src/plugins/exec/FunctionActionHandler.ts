@@ -2,6 +2,8 @@ import {ActionHandler, ActionSnapshot} from '../../models';
 import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
 import * as Joi from 'joi';
 import { ContextUtil } from '../../utils';
+import Container from 'typedi';
+import { TemplateUtilitiesRegistry } from '../../services';
 
 export class FunctionActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata> {
@@ -74,7 +76,7 @@ export class FunctionActionHandler extends ActionHandler {
      */
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const script = [
-            'return async function(require, cwd, ctx, secrets, entities, parameters, iteration) {',
+            'return async function($, env, require, cwd, ctx, secrets, entities, parameters, iteration) {',
             options,
             '}'
         ].join('\n');
@@ -82,6 +84,8 @@ export class FunctionActionHandler extends ActionHandler {
         const fn = (new Function(script))();
         
         const result = await fn(
+            Container.get(TemplateUtilitiesRegistry).generateUtilities(context, snapshot, parameters),
+            process.env,
             require,     
             context.cwd,
             context.ctx,

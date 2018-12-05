@@ -66,13 +66,34 @@ export class WhileActionHandler extends ActionHandler {
             return false;
         }
 
-        const value = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.value, context, false, parameters);
+        const value = await flowService.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            options.value,
+            context, 
+            snapshot, 
+            parameters,
+            false
+        );
         if (options.is !== undefined) {
-            const is = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.is, context, false, parameters);
+            const is = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.is, 
+                context, 
+                snapshot,
+                parameters,
+                false
+            );
 
             return value.toString() === is.toString();
         } else {
-            const not = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, options.not, context, false, parameters);
+            const not = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.not, 
+                context, 
+                snapshot, 
+                parameters,
+                false
+            );
 
             return value.toString() !== not.toString();
         }
@@ -87,7 +108,7 @@ export class WhileActionHandler extends ActionHandler {
     private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
         const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
         actionParameters.iteration = {index};
-        
+
         return actionParameters;
     }
 
@@ -103,7 +124,14 @@ export class WhileActionHandler extends ActionHandler {
         while (execute) {
             const idOrAlias = FBLService.extractIdOrAlias(options.action);
             let metadata = FBLService.extractMetadata(options.action);
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, snapshot.wd, metadata, context, false, actionParameters);
+            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                metadata, 
+                context, 
+                snapshot,
+                actionParameters,
+                false
+            );
 
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);

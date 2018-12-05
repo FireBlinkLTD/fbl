@@ -6,7 +6,7 @@ import {Container} from 'typedi';
 import {Validator} from 'jsonschema';
 import {AnySchema} from 'joi';
 import {FBL_ACTION_SCHEMA} from '../../schemas';
-import {DeepMergeUtil} from '../../utils';
+import {DeepMergeUtil, ContextUtil} from '../../utils';
 
 const createJsonSchema = (): AnySchema => {
     return Joi.object({
@@ -101,6 +101,58 @@ export class VirtualFlowActionHandler extends ActionHandler {
     }
 
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        let unmaskedParametersSchema;
+        if (options.hasOwnProperty('parametersSchema')) {
+            const masked = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.parametersSchema, 
+                context, 
+                snapshot, 
+                parameters,
+                true
+            );
+
+            unmaskedParametersSchema = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.parametersSchema, 
+                context, 
+                snapshot, 
+                parameters,
+                false
+            );
+
+            options.parametersSchema = masked;                        
+        }
+
+        let unmaskedDefaults;
+        if (options.hasOwnProperty('defaults')) {
+            const masked = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.defaults, 
+                context, 
+                snapshot, 
+                parameters,
+                true
+            );
+
+            unmaskedDefaults = await flowService.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local, 
+                options.defaults, 
+                context, 
+                snapshot, 
+                parameters,
+                false
+            );
+
+            options.defaults = masked; 
+        }
+        snapshot.setOptions(options);
+        
+        options.parametersSchema = unmaskedParametersSchema;
+        options.defaults = unmaskedDefaults;
+                
         await super.validate(options, context, snapshot, parameters);
     }
 
@@ -208,6 +260,7 @@ class DynamicFlowHandler extends ActionHandler {
      * @inheritdoc
      */
     async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        snapshot.wd = this.wd;
         if (this.validationSchema) {
             const mergedOptions = this.getMergedOptions(options);
 
@@ -236,9 +289,17 @@ class DynamicFlowHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
+        snapshot.wd = this.wd;
         const idOrAlias = FBLService.extractIdOrAlias(this.action);
         let metadata = FBLService.extractMetadata(this.action);
-        metadata = await flowService.resolveOptionsWithNoHandlerCheck(context.ejsTemplateDelimiters.local, this.wd, metadata, context, false, parameters);
+        metadata = await flowService.resolveOptionsWithNoHandlerCheck(
+            context.ejsTemplateDelimiters.local, 
+            metadata, 
+            context, 
+            snapshot,            
+            parameters,
+            false
+        );
 
         parameters.parameters = this.getMergedOptions(options);
         parameters.wd = snapshot.wd;

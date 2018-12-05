@@ -6,6 +6,7 @@ import {FlowService, TempPathsRegistry} from '../../../src/services';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../src/utils';
 import {IFlowLocationOptions} from '../../../src/interfaces';
+import { ActionSnapshot } from '../../../src';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -58,12 +59,14 @@ class FlowServiceTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = 'tst';
 
+        const snapshot = new ActionSnapshot('', {}, '.', 0, {});
+
         const flowService = Container.get(FlowService);
         let resolved = await flowService.resolveTemplate(
             context.ejsTemplateDelimiters.global,
-            '.',
             tpl,
             context,
+            snapshot,
             {}
         );
 
@@ -93,9 +96,9 @@ class FlowServiceTestSuite {
         context.ctx.test = 'new';
         resolved = await flowService.resolveTemplate(
             context.ejsTemplateDelimiters.local,
-            '.',
             resolved,
             context,
+            snapshot,
             {}
         );
 
