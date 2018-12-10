@@ -8,7 +8,11 @@ All notable changes to this project will be documented in this file. The format 
 
 * [\#259](https://github.com/FireBlinkLTD/fbl/issues/259) Added root facade to make plugin import more organized. 
 
-## [1.3.0]https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.0) - 2018-12-05
+### Fixed
+
+* [\#263](https://github.com/FireBlinkLTD/fbl/issues/263) `$.assignTo` and `$.pushTo` no longer fails on missing paths, instead it just ignores the execution.
+
+## [1.3.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.0) - 2018-12-05
 
 ### Added
 

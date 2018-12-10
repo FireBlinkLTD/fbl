@@ -30,7 +30,11 @@ class ContextTemplateUtilityTestSuite {
             action: {
                 fn: `
                     $.assignTo(parameters.assignTo, 'assignToValue');
-                    $.pushTo(parameters.pushTo, 'pushToValue');                    
+                    $.pushTo(parameters.pushTo, 'pushToValue');      
+                    
+                    // should not cause errors, but just have no effect:
+                    $.pushTo(undefined, 'pv');
+                    $.assignTo(null, 'av');
                 `
             }
         };

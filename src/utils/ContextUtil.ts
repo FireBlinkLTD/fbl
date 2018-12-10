@@ -63,6 +63,10 @@ export class ContextUtil {
         paths: IAssignTo | string,
         value: any
     ): void {
+        if (!paths) {
+            return;
+        }
+        
         let override = false;
         if (typeof paths === 'string') {
             const chunks = paths.split('.');
@@ -113,6 +117,10 @@ export class ContextUtil {
         paths: IPushTo | string,
         value: any
     ): void {
+        if (!paths) {
+            return;
+        }
+
         let override = false;
         let children = false;
         if (typeof paths === 'string') {
