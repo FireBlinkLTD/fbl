@@ -3,6 +3,7 @@ dist/
 
 yarn-error.log
 
+.history/
 .nyc_output/
 coverage/
 mochawesome-report/
