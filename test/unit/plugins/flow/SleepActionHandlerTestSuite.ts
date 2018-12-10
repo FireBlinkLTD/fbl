@@ -70,6 +70,6 @@ class SleepActionHandlerTestSuite {
         await actionHandler.execute(0.1, context, snapshot, {});
         const end = Date.now();
 
-        assert(end - start >= 100);
+        assert(end - start >= 100, `Action took took ${end - start}ms, but expected to run in about 100ms.`);
     }
 }
