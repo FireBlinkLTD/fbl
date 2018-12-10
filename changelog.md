@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.3.1 - Under Development
+
+### Added
+
+* [\#259](https://github.com/FireBlinkLTD/fbl/issues/259) Added root facade to make plugin import more organized. 
+
 ## [1.3.0]https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.0) - 2018-12-05
 
 ### Added
 
-* [\#254]https://github.com/FireBlinkLTD/fbl/issues/254) Added `$.assignTo` and `$.pushTo` template utility functions. 
+* [\#254](https://github.com/FireBlinkLTD/fbl/issues/254) Added `$.assignTo` and `$.pushTo` template utility functions. 
 
 ### Fixed
 
