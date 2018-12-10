@@ -70,3 +70,70 @@ $.hash('test', 'md5');
 // generate hash for custom algorithm as Base64
 $.hash('test', 'md5', 'base64');
 ```
+
+### Assign To
+
+Assign value to context.  
+
+```js
+// Assing 'value' string to ctx.test field
+$.assignTo('$.ctx.test', 'value');
+
+// Assign 'value' to both ctx.c1 and secrets.s2 fields
+$.assignTo(
+    {
+        ctx: '$.c1',
+        secrets: '$.s2'
+    }, 
+    'value'
+);
+```
+
+**Note:** first parameter is using same syntax as [common assignTo syntax](../plugins/common.md#assign-to).
+
+### Push To
+
+Assign value to context.  
+
+```js
+// Push 'value' string to ctx.test field
+$.pushTo('$.ctx.test', 'value');
+
+// Push 'value' to both ctx.c1 and secrets.s2 fields
+$.pushTo(
+    {
+        ctx: '$.c1',
+        secrets: '$.s2'
+    }, 
+    'value'
+);
+```
+
+**Note:** first parameter is using same syntax as [common assignTo syntax](../plugins/common.md#push-to).
+
+### Assign To / Push To - JSON Schema generation
+
+It might be handy to use `$.assignTo()`/`$.pushTo()` in pair with `$.assignToSchema()`/`$.pushToSchema()` function inside virtual. To generate action like virtual. 
+
+```js
+$.assignToSchema();
+$.pushToSchema();
+```
+
+**Virtual Example:**
+
+```yaml
+pipeline:
+  virtual:
+    id: 'ftpo'
+    # define parameters schema with generates assignTo and pushTo properties
+    parametersSchema: 
+      type: object
+      properties:
+        assignTo: <$- JSON.stringify($.assignToSchema()) $>
+        pushTo: <$- JSON.stringify($.pushToSchema()) $>
+    action:
+      fn: |-
+        $.assignTo(parameters.assignTo, 'some value');
+        $.pushTo(parameters.pushTo, 'some value');
+```
