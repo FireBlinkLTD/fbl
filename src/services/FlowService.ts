@@ -3,7 +3,6 @@ import {IContext, IDelegatedParameters, IFlow, IFlowLocationOptions} from '../in
 import {safeLoad, dump} from 'js-yaml';
 import {Options, render} from 'ejs';
 import {ActionHandler, ActionSnapshot} from '../models';
-import 'reflect-metadata';
 import {Inject, Service} from 'typedi';
 import {ContextUtil, FSUtil} from '../utils';
 import {IMetadata} from '../interfaces/IMetadata';

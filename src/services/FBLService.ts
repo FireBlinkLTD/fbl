@@ -8,7 +8,6 @@ import * as semver from 'semver';
 import {IMetadata} from '../interfaces/IMetadata';
 import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
 import {which} from 'shelljs';
-import {boolean} from 'joi';
 import {resolve} from 'path';
 import {FSUtil} from '../utils';
 import {FBL_FLOW_SCHEMA} from '../schemas';

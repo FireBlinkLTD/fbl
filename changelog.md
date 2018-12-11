@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 1.3.2 - Under development
+
+### Added
+
+* [\#267](https://github.com/FireBlinkLTD/fbl/issues/267) Added `shareParameters` option for `while` action handler.
+
 ## [1.3.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.1) - 2018-12-10
 
 ### Added

@@ -277,6 +277,9 @@ Runs action till condition is successful or not \(based on configuration\).
 
 ```yaml
 while:
+    # [optional] whether to share parameters between actions instead of making a clone of parameters.
+    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+    shareParameters: false    
     # [required] value to check
     value: <%- ctx.something %>
     # [required] if value IS equal to provided one - action will get executed
@@ -290,6 +293,9 @@ while:
 
 ```yaml
 while:
+    # [optional] whether to share parameters between actions instead of making a clone of parameters.
+    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+    shareParameters: false  
     # [required] value to check
     value: <%- ctx.something %>
     # [required] if value IS NOT equal to provided one - action will get executed
