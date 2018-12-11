@@ -205,21 +205,31 @@ Allows to execute action for every item in the array or key of an object.
 
 ```yaml
 each:  
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false 
+  # [required] array to iterate over
   of: [1, 2, 3]
+  # [required] action to invoke on every iteration
   action:
     ctx: 
       test_<%- iteration.index %>: 
         # assign 1,2,3 to test_0, test_1, test_3
-        inline: <%- iteration.value %>
+        inline: $ref:iteration.value
 ```
 
 **Example: Object**
 
 ```yaml
 each:  
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false 
+  # [required] object to iterate over
   of: 
     a: 1
     b: 2
+  # [required] action to invoke for each iteration
   action:
     ctx: 
       test_<%- iteration.index %>: 

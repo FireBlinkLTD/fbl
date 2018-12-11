@@ -272,4 +272,47 @@ class ForEachFlowActionHandlerTestSuite {
         assert.deepStrictEqual(results[1], {index: 2, value: 3, key: 'c'});
         assert.deepStrictEqual(results[2], {index: 1, value: 2, key: 'b'});
     }
+
+    @test()
+    async shareParameters(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new ForEachFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.end = false;
+        const parameters = <IDelegatedParameters> {
+            parameters: {
+                test: 1
+            }
+        };
+
+        const dummyActionHandler1 = new DummyActionHandler(async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+            _parameters.parameters.test += _parameters.parameters.test * _options;            
+        });
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
+
+        const options = {
+            shareParameters: true,
+            of: [1, 2, 3],
+            action: {
+                [DummyActionHandler.ID]: '$ref:iteration.value'            
+            }
+        };
+
+        const snapshot = await flowService.executeAction(
+            '.', 
+            actionHandler.getMetadata().id, 
+            {}, 
+            options, 
+            context, 
+            parameters
+        );        
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.deepStrictEqual(parameters.parameters, {
+            test: 2 + 2 * 2 + 6 * 3
+        });        
+    }
 }
