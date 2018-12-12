@@ -102,6 +102,7 @@ export class WhileActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param index 

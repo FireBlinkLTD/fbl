@@ -75,15 +75,21 @@ export class ForEachFlowActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param iteration 
      */
     private static getParameters(shareParameters: boolean, metadata: IMetadata, parameters: IDelegatedParameters, iteration: IIteration): any {
-        const actionParameters: IDelegatedParameters = shareParameters ? parameters : JSON.parse(JSON.stringify(parameters));
-        actionParameters.iteration = iteration;
+        const result = <IDelegatedParameters> {
+            iteration: iteration
+        };  
         
-        return actionParameters;
+        if (parameters && parameters.parameters !== undefined) {
+            result.parameters = shareParameters ? parameters.parameters : JSON.parse(JSON.stringify(parameters.parameters));  
+        }
+
+        return result;
     }
 
     /**

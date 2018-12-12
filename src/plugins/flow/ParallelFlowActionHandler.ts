@@ -20,11 +20,25 @@ export class ParallelFlowActionHandler extends ActionHandler {
         skipTemplateProcessing: true
     };
 
-    private static validationSchema = Joi.array()
+    private static actionsValidationSchema = Joi.array()
         .items(FBL_ACTION_SCHEMA)
         .min(1)
         .required()
         .options({ abortEarly: true });
+
+    private static validationSchema = Joi.alternatives(
+        ParallelFlowActionHandler.actionsValidationSchema,
+        Joi.object()
+            .keys({
+                actions: ParallelFlowActionHandler.actionsValidationSchema,
+                shareParameters: Joi.boolean()
+            })
+            .required()
+            .options({
+                allowUnknown: false,
+                abortEarly: true
+            })
+    );    
 
     /**
      * @inheritdoc
@@ -42,15 +56,21 @@ export class ParallelFlowActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param index 
      */
-    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
-        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
-        actionParameters.iteration = {index};
+    private static getParameters(shareParameters: boolean, metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
+        const result = <IDelegatedParameters> {
+            iteration: {index}
+        };  
+        
+        if (parameters && parameters.parameters !== undefined) {
+            result.parameters = shareParameters ? parameters.parameters : JSON.parse(JSON.stringify(parameters.parameters));  
+        }
 
-        return actionParameters;
+        return result;
     }
 
     /**
@@ -59,12 +79,27 @@ export class ParallelFlowActionHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
+        let actions;
+        let shareParameters = false;
+        if (Array.isArray(options)) {
+            actions = options;
+        } else {
+            actions = options.actions;
+            shareParameters = options.shareParameters;
+        }
+
         const snapshots: ActionSnapshot[] = [];
-        const promises = options.map(async (action: any, index: number): Promise<void> => {
+        const promises = actions.map(async (action: any, index: number): Promise<void> => {
             const idOrAlias = FBLService.extractIdOrAlias(action);
             let metadata = FBLService.extractMetadata(action);
 
-            const iterationParams = ParallelFlowActionHandler.getParameters(snapshot.metadata, parameters, index);
+            const iterationParams = ParallelFlowActionHandler.getParameters(
+                shareParameters, 
+                snapshot.metadata, 
+                parameters, 
+                index
+            );
+            
             metadata = await flowService.resolveOptionsWithNoHandlerCheck(
                 context.ejsTemplateDelimiters.local, 
                 metadata, 
