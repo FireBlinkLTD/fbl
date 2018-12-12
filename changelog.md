@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 
 * [\#267](https://github.com/FireBlinkLTD/fbl/issues/267) Added `shareParameters` option for `while` action handler.
 * [\#268](https://github.com/FireBlinkLTD/fbl/issues/268) Added `shareParameters` option for `each` action handler.
+* [\#269](https://github.com/FireBlinkLTD/fbl/issues/269) Added `shareParameters` option for `parallel` action handler.
 
 ## [1.3.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.1) - 2018-12-10
 
