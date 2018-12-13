@@ -21,6 +21,7 @@ export class ForEachFlowActionHandler extends ActionHandler {
 
     private static validationSchema =
         Joi.object({
+            shareParameters: Joi.boolean(),
             of: Joi.alternatives(
                 Joi.object(),
                 Joi.array()
@@ -74,15 +75,21 @@ export class ForEachFlowActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param iteration 
      */
-    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, iteration: IIteration): any {
-        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
-        actionParameters.iteration = iteration;
+    private static getParameters(shareParameters: boolean, metadata: IMetadata, parameters: IDelegatedParameters, iteration: IIteration): any {
+        const result = <IDelegatedParameters> {
+            iteration: iteration
+        };  
+        
+        if (parameters && parameters.parameters !== undefined) {
+            result.parameters = shareParameters ? parameters.parameters : JSON.parse(JSON.stringify(parameters.parameters));  
+        }
 
-        return actionParameters;
+        return result;
     }
 
     /**
@@ -110,7 +117,7 @@ export class ForEachFlowActionHandler extends ActionHandler {
                 iteration.key = iterable[i];
             }
 
-            const actionParameters = ForEachFlowActionHandler.getParameters(snapshot.metadata, parameters, iteration);
+            const actionParameters = ForEachFlowActionHandler.getParameters(options.shareParameters, snapshot.metadata, parameters, iteration);
 
             let metadata = FBLService.extractMetadata(options.action);
             metadata = await flowService.resolveOptionsWithNoHandlerCheck(

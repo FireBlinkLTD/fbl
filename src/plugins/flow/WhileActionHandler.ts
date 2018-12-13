@@ -20,6 +20,7 @@ export class WhileActionHandler extends ActionHandler {
     };
 
     private static validationSchema = Joi.object({
+        shareParameters: Joi.boolean(),
         value: Joi.alternatives(
                 Joi.string(),
                 Joi.number(),
@@ -101,14 +102,15 @@ export class WhileActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param index 
      */
-    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
-        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
+    private static getParameters(shareParameters: boolean, metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
+        const actionParameters: IDelegatedParameters = shareParameters ? parameters : JSON.parse(JSON.stringify(parameters));
         actionParameters.iteration = {index};
-
+        
         return actionParameters;
     }
 
@@ -118,7 +120,7 @@ export class WhileActionHandler extends ActionHandler {
     async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        let actionParameters: any = WhileActionHandler.getParameters(snapshot.metadata, options, 0);
+        let actionParameters: any = WhileActionHandler.getParameters(options.shareParameters, snapshot.metadata, parameters, 0);
         
         let execute = await this.isShouldExecute(options, context, snapshot, actionParameters);
         while (execute) {
@@ -136,7 +138,7 @@ export class WhileActionHandler extends ActionHandler {
             const childSnapshot = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, actionParameters);
             snapshot.registerChildActionSnapshot(childSnapshot);
 
-            actionParameters = WhileActionHandler.getParameters(snapshot.metadata, options, 0);
+            actionParameters = WhileActionHandler.getParameters(options.shareParameters, snapshot.metadata, parameters, 0);
             execute = await this.isShouldExecute(options, context, snapshot, actionParameters);
         }
     }

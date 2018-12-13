@@ -5,7 +5,7 @@ import {ContextUtil} from '../../../../src/utils';
 import {WhileActionHandler} from '../../../../src/plugins/flow/WhileActionHandler';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IContext, IPlugin} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IContext, IPlugin, IDelegatedParameters} from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -34,8 +34,8 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
+    async execute(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        await this.fn(options, context, snapshot, parameters);
     }
 }
 
@@ -237,5 +237,52 @@ class WhileActionHandlerTestSuite {
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
+    }
+
+    @test()
+    async shareParameters(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new WhileActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.end = false;
+        const parameters = <IDelegatedParameters> {
+            parameters: {
+                test: 1
+            }
+        };
+
+        let count = 1;
+        const dummyActionHandler1 = new DummyActionHandler(async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+            _parameters.parameters.test += _parameters.parameters.test;
+            count++;
+            context.ctx.end = count === 3;
+        });
+        actionHandlersRegistry.register(dummyActionHandler1, plugin);
+
+        const options = {
+            shareParameters: true,
+            value: '$ref:ctx.end',
+            is: false,
+            action: {
+                [DummyActionHandler.ID]: ''            
+            }
+        };
+
+        const snapshot = await flowService.executeAction(
+            '.', 
+            actionHandler.getMetadata().id, 
+            {}, 
+            options, 
+            context, 
+            parameters
+        );        
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.deepStrictEqual(parameters.parameters, {
+            test: 1 + 1 + 2
+        });        
     }
 }

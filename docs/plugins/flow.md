@@ -33,7 +33,7 @@ Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Me
 * `sync`
 * `--`
 
-**Example 1: Short Declaration Variant**
+**Example 1: Base Declaration**
 
 ```yaml
 # Run actions in a sequence
@@ -47,7 +47,7 @@ Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Me
         files: 
           - test.yml
 ```
-**Example 2: Detailed Declaration Varian**
+**Example 2: Detailed Declaration**
 
 ```yaml
 # Run actions in a sequence
@@ -84,7 +84,7 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
 * `async`
 * `||`
 
-**Example:**
+**Example 1: Base syntax**
 
 ```yaml
 # Run steps in parallel
@@ -94,6 +94,26 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
         inline: 
           something: true
   - ctx: 
+      fromFile:
+        files: 
+          - test.yml
+```
+
+**Example 2: Alternative syntax**
+
+```yaml
+'||':
+  # [optional] whether to share parameters between actions instead of making a clone.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false
+
+  # [required] actions to invoke in parallel
+  actions: 
+    - ctx:
+      '.':
+        inline: 
+          something: true
+    - ctx: 
       fromFile:
         files: 
           - test.yml
@@ -139,7 +159,7 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 
 ```yaml
 '@':
-  # path or url to download the package
+  # [required] path or url to download the package
   path: flow.tar.gz
   # [optional] specify custom flow entry file name inside the package
   target: custom.yml
@@ -149,15 +169,18 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 
 ```yaml
 '@':
-  # path or url to download the package
+  # [required] path or url to download the package
   path: http://some.host/flow.tar.gz
+  
   # [optional] specify custom flow entry file name inside the package
   target: custom.yml
+  
   # [optional] http parameters
   http: 
     # [optional] custom http headers
     headers: 
       Authorization: Basic YWRtaW46YWRtaW4=
+  
   # [optional] cache downloaded package inside $FBL_HOME/cache folder 
   cache: true
 ```
@@ -178,11 +201,18 @@ Repeat action multiple times.
 
 ```yaml
 repeat:
-  # number of iteration
+  # [optional] whether to share parameters between actions instead of making a clone.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false
+  
+  # [required] number of iteration
   times: 2
-  # whether each iteration should wait previous to complete or run in parallel
+  
+  # [optional] whether each iteration should wait previous to complete or run in parallel
+  # Default value: false
   async: false
-  # action to run
+  
+  # [required] action to run
   action: 
     # run flow_0.yml and flow_1.yml flows
     @: flow_<%- iteration.index %>.yml
@@ -205,21 +235,35 @@ Allows to execute action for every item in the array or key of an object.
 
 ```yaml
 each:  
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false 
+  
+  # [required] array to iterate over
   of: [1, 2, 3]
+  
+  # [required] action to invoke on every iteration
   action:
     ctx: 
       test_<%- iteration.index %>: 
         # assign 1,2,3 to test_0, test_1, test_3
-        inline: <%- iteration.value %>
+        inline: $ref:iteration.value
 ```
 
 **Example: Object**
 
 ```yaml
 each:  
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  shareParameters: false 
+  
+  # [required] object to iterate over
   of: 
     a: 1
     b: 2
+  
+  # [required] action to invoke for each iteration
   action:
     ctx: 
       test_<%- iteration.index %>: 
@@ -245,8 +289,10 @@ Allows to run action based on some condition
 
 ```yaml
 ?: 
-  # check if context value "test" is one of provided values
+  # [required] value to check
   value: <% ctx.test %>
+
+  # [requied] actions to run on specific value
   is:
     # execute "foo.yml" if "foo"
     foo: 
@@ -277,10 +323,16 @@ Runs action till condition is successful or not \(based on configuration\).
 
 ```yaml
 while:
+    # [optional] whether to share parameters between actions instead of making a clone of parameters.
+    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+    shareParameters: false    
+    
     # [required] value to check
     value: <%- ctx.something %>
+    
     # [required] if value IS equal to provided one - action will get executed
     is: true
+    
     # [required] action to run
     action:
       '@': something.yml
@@ -290,10 +342,16 @@ while:
 
 ```yaml
 while:
+    # [optional] whether to share parameters between actions instead of making a clone of parameters.
+    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+    shareParameters: false  
+    
     # [required] value to check
     value: <%- ctx.something %>
+    
     # [required] if value IS NOT equal to provided one - action will get executed
     not: true
+    
     # [required] action to run
     action:
       '@': something.yml
@@ -336,12 +394,14 @@ If catch or finally step block will be failed - this step will also be marked as
 
 ```yaml
 try:
-    # [optional] try to run action
+    # [required] action to run
     action:
       @: foo.yml
+    
     # [optional] call error.yml if foo.yml failed
     catch:
       @: error.yml
+    
     # [optional] call cleanup.yml either after successful execution of foo.yml or error.yml
     finally:
       @: cleanup.yml
@@ -409,59 +469,59 @@ Allows to create virtual action handler for another action \(that can be represe
 * `flow.virtual`
 * `virtual`
 
-  **Example:**
+**Example:**
 
-  ```yaml
-  virtual:
-  # [required] virtual handler ID
-  id: handler.id
+```yaml
+virtual:
+# [required] virtual handler ID
+id: handler.id
 
-  # [optional] aliases for the handler to reference
-  aliases:
-   - handler.alias
+# [optional] aliases for the handler to reference
+aliases:
+  - handler.alias
 
-  # [optional] JSON Schema of options that can/should be passed to the generated handler     
-  parametersSchema:
-   type: object
-   properties:
-     test: 
-       type: string
+# [optional] JSON Schema of options that can/should be passed to the generated handler     
+parametersSchema:
+  type: object
+  properties:
+    test: 
+      type: string
 
-  # [optional] default parameters and merge function
-  # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
-  # Upon merge arrays will be concatenated.    
-  defaults:
-   # [required] default values
-   values: 
-     test: yes
+# [optional] default parameters and merge function
+# Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
+# Upon merge arrays will be concatenated.    
+defaults:
+  # [required] default values
+  values: 
+    test: yes
 
-   # [optional] merge modification functions for given paths
-   # This is a recommended way of overriding merge behaviour. 
-   # Use "mergeFunction" only when you need to do something really unique.   
-   # "parameters" - represents field state by given path 
-   # "defaults" - its default value if any
-   modifiers: 
-     $.test: |-
-       return parameters + defaults  
+  # [optional] merge modification functions for given paths
+  # This is a recommended way of overriding merge behaviour. 
+  # Use "mergeFunction" only when you need to do something really unique.   
+  # "parameters" - represents field state by given path 
+  # "defaults" - its default value if any
+  modifiers: 
+    $.test: |-
+      return parameters + defaults  
 
-   # [optional] custom merge function
-   # Use it only when "modifiers" functionality isn't enough
-   # "parameters" - represents provided parameters
-   # "defaults" - defaults by itself
-   mergeFunction: |-
-     return parameters.test + defaults.test      
+  # [optional] custom merge function
+  # Use it only when "modifiers" functionality isn't enough
+  # "parameters" - represents provided parameters
+  # "defaults" - defaults by itself
+  mergeFunction: |-
+    return parameters.test + defaults.test      
 
-  # action to invoke
-  # Note: upon execution all relative paths for given action will be calculated based on the folder
-  # where virtual actually lives. If you need to use relative paths based on the place of invocation
-  # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
-  action:
-   # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
-   ctx:
-     some_field:
-       # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
-       inline: <%- parameters.test %>
-  ```
+# [required] action to invoke
+# Note: upon execution all relative paths for given action will be calculated based on the folder
+# where virtual actually lives. If you need to use relative paths based on the place of invocation
+# use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
+action:
+  # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
+  ctx:
+    some_field:
+      # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+      inline: <%- parameters.test %>
+```
 
 Then you can reference your generated handler like any other:
 

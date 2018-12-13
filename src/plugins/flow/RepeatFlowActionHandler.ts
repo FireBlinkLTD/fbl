@@ -20,6 +20,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
 
     private static validationSchema =
         Joi.object({
+            shareParameters: Joi.boolean(),
             times: Joi.number().min(1).required(),
             action: FBL_ACTION_SCHEMA,
             async: Joi.boolean()
@@ -43,15 +44,21 @@ export class RepeatFlowActionHandler extends ActionHandler {
 
     /**
      * Get parameters for single iteration
+     * @param shareParameters
      * @param metadata 
      * @param parameters 
      * @param index 
      */
-    private static getParameters(metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
-        const actionParameters: IDelegatedParameters = JSON.parse(JSON.stringify(parameters));
-        actionParameters.iteration = {index};
+    private static getParameters(shareParameters: boolean, metadata: IMetadata, parameters: IDelegatedParameters, index: number): any {
+        const result = <IDelegatedParameters> {
+            iteration: {index}
+        };  
+        
+        if (parameters && parameters.parameters !== undefined) {
+            result.parameters = shareParameters ? parameters.parameters : JSON.parse(JSON.stringify(parameters.parameters));  
+        }
 
-        return actionParameters;
+        return result;
     }
 
     /**
@@ -66,7 +73,7 @@ export class RepeatFlowActionHandler extends ActionHandler {
         const idOrAlias = FBLService.extractIdOrAlias(options.action);
 
         for (let i = 0; i < options.times; i++) {
-            const iterationParams = RepeatFlowActionHandler.getParameters(snapshot.metadata, parameters, i);
+            const iterationParams = RepeatFlowActionHandler.getParameters(options.shareParameters, snapshot.metadata, parameters, i);
 
             let metadata = FBLService.extractMetadata(options.action);
             metadata = await flowService.resolveOptionsWithNoHandlerCheck(
@@ -83,7 +90,6 @@ export class RepeatFlowActionHandler extends ActionHandler {
                     snapshots[p.iteration.index] = await flowService.executeAction(snapshot.wd, idOrAlias, m, options.action[idOrAlias], context, p);
                 })(iterationParams, metadata));
             } else {
-
                 snapshots[i] = await flowService.executeAction(snapshot.wd, idOrAlias, metadata, options.action[idOrAlias], context, iterationParams);
             }
         }
