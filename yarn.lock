@@ -136,10 +136,10 @@
     "@types/node" "*"
     "@types/tough-cookie" "*"
 
-"@types/joi@14.0.0":
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-14.0.0.tgz#7906aca6850868f39f888efcaef28bbcbbab5498"
-  integrity sha512-q3r+5QfNrthJL+5Pvb9MOP7rJniTfAV+cGbsO2a3ItGSuwmp2vdjjZ/VCWKwGT5lNx4eOvZI4O3IpSIXh3f4RA==
+"@types/joi@14.0.1":
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/@types/joi/-/joi-14.0.1.tgz#739be8a8899a75631a3c9f15611e54bbab06c024"
+  integrity sha512-0uZZ+nffpr480zwwUXsk0Z5O0szllffNW1EbkI+dDzKhNKhiX4QOwpwK37WpKIpaPLk9V8U9y2We/VOeD6zyhQ==
 
 "@types/js-yaml@3.11.2":
   version "3.11.2"
