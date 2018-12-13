@@ -262,6 +262,5 @@ export class ParallelFlowActionHandlerTestSuite {
         assert.strictEqual(parameters.parameters.test.length, 2);
         assert(parameters.parameters.test.indexOf(0) >= 0);
         assert(parameters.parameters.test.indexOf(1) >= 0);    
-        
     }
 }

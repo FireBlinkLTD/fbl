@@ -2,7 +2,7 @@ import {suite, test} from 'mocha-typescript';
 import {ActionHandler, ActionSnapshot} from '../../../../src/models';
 import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
 import {RepeatFlowActionHandler} from '../../../../src/plugins/flow/RepeatFlowActionHandler';
-import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
+import {IActionHandlerMetadata, IPlugin, IDelegatedParameters} from '../../../../src/interfaces';
 import {Container} from 'typedi';
 import * as assert from 'assert';
 import {ContextUtil} from '../../../../src/utils';
@@ -34,8 +34,8 @@ class DummyActionHandler extends ActionHandler {
         };
     }
 
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
+    async execute(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+        await this.fn(options, context, snapshot, parameters);
     }
 }
 
@@ -188,5 +188,49 @@ class RepeatFlowActionHandlerTestSuite {
         assert.strictEqual(results[0], 0);
         assert.strictEqual(results[1], 2);
         assert.strictEqual(results[2], 1);
+    }
+
+    @test()
+    async shareParameters(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        flowService.debug = true;
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new RepeatFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const parameters = <IDelegatedParameters> {
+            parameters: {
+                test: []
+            }
+        };
+
+        const results: number[] = [];
+        const dummyActionHandler = new DummyActionHandler(async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+            results.push(_options);
+            _parameters.parameters.test.push(_options); 
+        });
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const options = {
+            shareParameters: true,
+            times: 2,
+            action: {
+                [DummyActionHandler.ID]: '<%- iteration.index %>'                
+            },
+            async: true
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, parameters);        
+
+        console.log(snapshot.getSteps());
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.strictEqual(results.length, 2);
+        assert(results.indexOf(0) >= 0);
+        assert(results.indexOf(1) >= 0);            
+        assert.strictEqual(parameters.parameters.test.length, 2);
+        assert(parameters.parameters.test.indexOf(0) >= 0);
+        assert(parameters.parameters.test.indexOf(1) >= 0);    
     }
 }
