@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.2) - 2018-12-17
+
+### Added
+
+* [\#276](https://github.com/FireBlinkLTD/fbl/issues/276) Added `echo` action handler.
+
 ## [1.3.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.2) - 2018-12-13
 
 ### Added

@@ -1,5 +1,6 @@
 import {IPlugin} from '../../interfaces';
 import {AttachedFlowActionHandler} from './AttachedFlowActionHandler';
+import {EchoActionHandler} from './EchoActionHandler';
 import {ForEachFlowActionHandler} from './ForEachFlowActionHandler';
 import {ParallelFlowActionHandler} from './ParallelFlowActionHandler';
 import {SequenceFlowActionHandler} from './SequenceFlowActionHandler';
@@ -24,6 +25,7 @@ module.exports = <IPlugin> {
 
     actionHandlers: [
         new AttachedFlowActionHandler(),
+        new EchoActionHandler(),
         new ErrorActionHandler(),
         new ForEachFlowActionHandler(),
         new ParallelFlowActionHandler(),
