@@ -16,6 +16,7 @@ Available steps:
 * [template](flow.md#action-handler-template)
 * [virtual](flow.md#action-handler-virtual)
 * [error](flow.md#action-handler-error)
+* [echo](flow.md#action-handler-echo)
 
 ## Action Handler: Sequential steps execution
 
@@ -546,5 +547,23 @@ Throw error upon execution with given message.
 
 ```yaml
 error: 'message'
+```
+
+## Action Handler: Echo
+
+Print message to console
+
+**ID:** `com.fireblink.fbl.flow.echo`
+
+**Aliases:**
+
+* `fbl.flow.echo`
+* `flow.echo`
+* `echo`
+
+**Example:**
+
+```yaml
+echo: 'message'
 ```
 
