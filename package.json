@@ -62,7 +62,7 @@
   "devDependencies": {
     "@types/chai": "4.1.7",
     "@types/ejs": "2.6.1",
-    "@types/got": "9.2.1",
+    "@types/got": "9.2.2",
     "@types/joi": "14.0.1",
     "@types/js-yaml": "3.11.2",
     "@types/node": "10.12.15",
