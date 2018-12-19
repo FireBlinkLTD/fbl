@@ -64,7 +64,7 @@
     "@types/ejs": "2.6.1",
     "@types/got": "9.2.1",
     "@types/joi": "14.0.1",
-    "@types/js-yaml": "3.11.2",
+    "@types/js-yaml": "3.11.3",
     "@types/node": "10.12.15",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.1",
