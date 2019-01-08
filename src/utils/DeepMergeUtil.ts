@@ -1,4 +1,4 @@
-import {ContextUtil} from './ContextUtil';
+import { ContextUtil } from './ContextUtil';
 
 export class DeepMergeUtil {
     /**
@@ -7,16 +7,11 @@ export class DeepMergeUtil {
      * @param arg2
      * @param modifiers
      */
-    static merge(arg1: any, arg2: any, modifiers?: {[key: string]: Function}): any {
+    static merge(arg1: any, arg2: any, modifiers?: { [key: string]: Function }): any {
         const arg1Clone = ContextUtil.isMissing(arg1) ? arg1 : JSON.parse(JSON.stringify(arg1));
         const arg2Clone = ContextUtil.isMissing(arg2) ? arg2 : JSON.parse(JSON.stringify(arg2));
 
-        return DeepMergeUtil.mergeUnknown(
-            arg1Clone,
-            arg2Clone,
-            '$',
-            modifiers
-        );
+        return DeepMergeUtil.mergeUnknown(arg1Clone, arg2Clone, '$', modifiers);
     }
 
     /**
@@ -26,7 +21,7 @@ export class DeepMergeUtil {
      * @param path
      * @param modifiers
      */
-    private static mergeUnknown(arg1: any, arg2: any, path: string, modifiers?: {[key: string]: Function}): any {
+    private static mergeUnknown(arg1: any, arg2: any, path: string, modifiers?: { [key: string]: Function }): any {
         if (arg2 === undefined) {
             return arg1;
         }
@@ -53,7 +48,7 @@ export class DeepMergeUtil {
      * @param path
      * @param modifiers
      */
-    private static mergeBasic(arg1: any, arg2: any, path: string, modifiers?: {[key: string]: Function}): any {
+    private static mergeBasic(arg1: any, arg2: any, path: string, modifiers?: { [key: string]: Function }): any {
         if (modifiers && modifiers[path]) {
             return modifiers[path](arg1, arg2);
         }
@@ -68,7 +63,7 @@ export class DeepMergeUtil {
      * @param path
      * @param modifiers
      */
-    private static mergeObjects(arg1: any, arg2: any, path: string, modifiers?: {[key: string]: Function}): any {
+    private static mergeObjects(arg1: any, arg2: any, path: string, modifiers?: { [key: string]: Function }): any {
         if (!ContextUtil.isObject(arg2)) {
             throw new Error(`Unable to merge. Merge value at path ${path} is not an object.`);
         }
@@ -94,7 +89,7 @@ export class DeepMergeUtil {
         return arg1;
     }
 
-    private static mergeArrays(arg1: any[], arg2: any[], path: string, modifiers?: {[key: string]: Function}): any {
+    private static mergeArrays(arg1: any[], arg2: any[], path: string, modifiers?: { [key: string]: Function }): any {
         if (!Array.isArray(arg2)) {
             throw new Error(`Unable to merge. Merge value at path ${path} is not an array.`);
         }

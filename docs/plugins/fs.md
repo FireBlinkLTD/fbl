@@ -55,64 +55,6 @@ File System plugin.
   contentFromFile: /tmp/template.ejs
 ```
 
-## Action Handler: Encrypt files
-
-Encrypt files by mask with aes-256-cbc and password converted with pbkdf2 algorithm into sha512 hash.
-
-**ID:** `com.fireblink.fbl.fs.encrypt`
-
-**Aliases:**
-
-* `fbl.fs.encrypt`
-* `fs.encrypt`
-* `encrypt`
-
-**Example:**
-
-```yaml
-encrypt:
-  # [required] password used to encrypt files
-  # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
-  password: <%- secrets.password %>
-
-  # [required] list of masks to find files to be encrypted
-  inlude:
-  - /tmp/*.*      
-
-  # [optional] list of masks to exclude
-  exclude:
-    - /tmp/*.log
-```
-
-## Action Handler: Decrypt files
-
-Same as above, but instead of encryption will decrypt files.
-
-**ID:** `com.fireblink.fbl.fs.decrypt`
-
-**Aliases:**
-
-* `fbl.fs.decrypt`
-* `fs.decrypt`
-* `decrypt`
-
-**Example:**
-
-```yaml
-decrypt:
-  # [required] password used to decrypt files
-  # Warning: don't reference it directly, better place in "secrets", as in report it will be masked.    
-  password: <%- secrets.password %>
-
-  # [required] list of masks to find files to be decrypted
-  inlude:
-    - /tmp/*.*      
-
-  # [optional] list of masks to exclude
-  exclude:
-    - /tmp/*.log
-```
-
 ## Action Handler: Create Directories
 
 Create directory \(and all parent ones if missing\).

@@ -1,4 +1,4 @@
-import {ChildProcess, fork} from 'child_process';
+import { ChildProcess, fork } from 'child_process';
 
 export interface IDummyServerWrapperConfig {
     port: number;
@@ -23,11 +23,7 @@ export class DummyServerWrapper {
     }
 
     private prepareOptions(): string[] {
-        const options = [
-            '-p', this.config.port.toString(),
-            '-s', (this.config.status || 200).toString(),
-            '-t', '1'
-        ];
+        const options = ['-p', this.config.port.toString(), '-s', (this.config.status || 200).toString(), '-t', '1'];
 
         if (this.config.delay) {
             options.push('-d', this.config.delay.toString());
@@ -38,9 +34,12 @@ export class DummyServerWrapper {
         }
 
         if (this.config.redirectTo) {
-            options.push('-h', JSON.stringify({
-                Location: this.config.redirectTo
-            }));
+            options.push(
+                '-h',
+                JSON.stringify({
+                    Location: this.config.redirectTo,
+                }),
+            );
         }
 
         options.push(this.config.file || 'missing_file.txt');
@@ -59,14 +58,14 @@ export class DummyServerWrapper {
 
         this.server = fork('dummy.http.server', options, {
             cwd: __dirname,
-            silent: true
+            silent: true,
         });
 
-        this.server.stdout.on('data', (data) => {
+        this.server.stdout.on('data', data => {
             console.error(`-> Server.stdout: ${data.toString().trim()}`);
         });
 
-        this.server.stderr.on('data', (data) => {
+        this.server.stderr.on('data', data => {
             console.error(`-> Server.stderr: ${data.toString().trim()}`);
         });
 

@@ -1,9 +1,9 @@
-import {Container} from 'typedi';
-import {FlowService, LogService} from '../services';
-import {IContext} from '../interfaces';
-import {IMetadata} from '../interfaces/IMetadata';
-import {ContextUtil} from '../utils';
-import {IDelegatedParameters} from '../interfaces/IDelegatedParameters';
+import { Container } from 'typedi';
+import { FlowService, LogService } from '../services';
+import { IContext } from '../interfaces';
+import { IMetadata } from '../interfaces/IMetadata';
+import { ContextUtil } from '../utils';
+import { IDelegatedParameters } from '../interfaces/IDelegatedParameters';
 
 const humanizeDuration = require('humanize-duration');
 const deepObjectDiff = require('deep-object-diff');
@@ -25,7 +25,7 @@ export class ActionSnapshot {
         public metadata: IMetadata,
         public wd: string,
         public idx: number,
-        public parameters: IDelegatedParameters
+        public parameters: IDelegatedParameters,
     ) {
         this.createdAt = new Date();
         this.steps = [];
@@ -47,7 +47,8 @@ export class ActionSnapshot {
      * @param {boolean} [error]
      */
     log(message: string, error = false) {
-        const logMessage = ` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message;
+        const logMessage =
+            ` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message;
         if (error) {
             Container.get(LogService).error(logMessage);
         } else {
@@ -88,9 +89,8 @@ export class ActionSnapshot {
             const diff = deepObjectDiff.detailedDiff(this.previousContextState, newState);
             this.previousContextState = newState;
 
-            const changes = Object.keys(diff.added).length +
-                Object.keys(diff.deleted).length +
-                Object.keys(diff.updated).length;
+            const changes =
+                Object.keys(diff.added).length + Object.keys(diff.deleted).length + Object.keys(diff.updated).length;
 
             // store diff
             if (changes > 0) {
@@ -116,10 +116,10 @@ export class ActionSnapshot {
      */
     registerStep(type: string, payload?: any) {
         if (Container.get(FlowService).debug) {
-            this.steps.push(<IActionStep> {
+            this.steps.push(<IActionStep>{
                 type: type,
                 createdAt: new Date(),
-                payload: payload
+                payload: payload,
             });
         }
     }
@@ -146,7 +146,6 @@ export class ActionSnapshot {
         this.completedAt = new Date();
         this.duration = this.completedAt.getTime() - this.createdAt.getTime();
         this.successful = this.ignoreChildFailure || !this.childFailure;
-
     }
 
     /**

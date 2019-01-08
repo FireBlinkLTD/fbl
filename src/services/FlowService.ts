@@ -1,20 +1,20 @@
-import {ActionHandlersRegistry} from './ActionHandlersRegistry';
-import {IContext, IDelegatedParameters, IFlow, IFlowLocationOptions} from '../interfaces';
-import {safeLoad, dump} from 'js-yaml';
-import {Options, render} from 'ejs';
-import {ActionHandler, ActionSnapshot} from '../models';
-import {Inject, Service} from 'typedi';
-import {ContextUtil, FSUtil} from '../utils';
-import {IMetadata} from '../interfaces/IMetadata';
-import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
-import {dirname, join, resolve} from 'path';
-import {x} from 'tar';
-import {createWriteStream, readdir, unlink} from 'fs';
-import {promisify} from 'util';
+import { ActionHandlersRegistry } from './ActionHandlersRegistry';
+import { IContext, IDelegatedParameters, IFlow, IFlowLocationOptions } from '../interfaces';
+import { safeLoad, dump } from 'js-yaml';
+import { Options, render } from 'ejs';
+import { ActionHandler, ActionSnapshot } from '../models';
+import { Inject, Service } from 'typedi';
+import { ContextUtil, FSUtil } from '../utils';
+import { IMetadata } from '../interfaces/IMetadata';
+import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
+import { dirname, join, resolve } from 'path';
+import { x } from 'tar';
+import { createWriteStream, readdir, unlink } from 'fs';
+import { promisify } from 'util';
 import * as got from 'got';
-import {TempPathsRegistry} from './TempPathsRegistry';
-import {homedir} from 'os';
-import {LogService} from './LogService';
+import { TempPathsRegistry } from './TempPathsRegistry';
+import { homedir } from 'os';
+import { LogService } from './LogService';
 
 const ejsLint = require('ejs-lint');
 const uuidv5 = require('uuid/v5');
@@ -25,8 +25,8 @@ export class FlowService {
 
     public static MASKED = '{MASKED}';
 
-    private flowPathCache: {[key: string]: string};
-    private flowResolvers: {[key: string]: Promise<string>};
+    private flowPathCache: { [key: string]: string };
+    private flowResolvers: { [key: string]: Promise<string> };
 
     constructor() {
         this.flowPathCache = {};
@@ -69,7 +69,14 @@ export class FlowService {
      * @param [parameters]
      * @returns {Promise<void>}
      */
-    async executeAction(wd: string, idOrAlias: string, metadata: IMetadata, options: any, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
+    async executeAction(
+        wd: string,
+        idOrAlias: string,
+        metadata: IMetadata,
+        options: any,
+        context: IContext,
+        parameters: IDelegatedParameters,
+    ): Promise<ActionSnapshot> {
         if (metadata && metadata.$parameters) {
             /* istanbul ignore else */
             if (!parameters.parameters) {
@@ -102,7 +109,14 @@ export class FlowService {
             if (!handler.getMetadata().considerOptionsAsSecrets) {
                 snapshot.setOptions(options);
                 // register options twice to see what's actually has been changed (only when changes applied)
-                const resolvedOptions = await this.resolveOptions(handler, options, context, snapshot, parameters, true);
+                const resolvedOptions = await this.resolveOptions(
+                    handler,
+                    options,
+                    context,
+                    snapshot,
+                    parameters,
+                    true,
+                );
                 if (JSON.stringify(options) !== JSON.stringify(resolvedOptions)) {
                     snapshot.setOptions(resolvedOptions);
                 }
@@ -123,16 +137,29 @@ export class FlowService {
                 snapshot.success();
 
                 if (snapshot.successful) {
-                    this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue + ' Completed successfully withing ' + snapshot.getHumanReadableDuration().blue);
+                    this.logService.info(
+                        ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue +
+                            ' Completed successfully withing ' +
+                            snapshot.getHumanReadableDuration().blue,
+                    );
                 } else {
-                    this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Marked as failed. Took ' + snapshot.getHumanReadableDuration().yellow);
+                    this.logService.info(
+                        ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow +
+                            ' Marked as failed. Took ' +
+                            snapshot.getHumanReadableDuration().yellow,
+                    );
                 }
             } else {
-                this.logService.info(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped');
+                this.logService.info(
+                    ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped',
+                );
                 snapshot.skipped();
             }
         } catch (e) {
-            this.logService.error(` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red + ` Failed with: ${e.toString().red}`);
+            this.logService.error(
+                ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red +
+                    ` Failed with: ${e.toString().red}`,
+            );
             snapshot.failure(e);
         }
 
@@ -177,7 +204,7 @@ export class FlowService {
             await new Promise((res, rej) => {
                 const stream = got.stream(location.path, {
                     timeout: 120 * 1000,
-                    headers: location.http && location.http.headers
+                    headers: location.http && location.http.headers,
                 });
 
                 stream.pipe(ws);
@@ -209,7 +236,7 @@ export class FlowService {
 
         await x({
             file: tarball,
-            C: result
+            C: result,
         });
 
         return result;
@@ -330,11 +357,11 @@ export class FlowService {
      * @returns {Promise<IFlow>}
      */
     async readFlowFromFile(
-        location: IFlowLocationOptions, 
-        context: IContext, 
+        location: IFlowLocationOptions,
+        context: IContext,
         snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters         
-    ): Promise<{flow: IFlow, wd: string}> {
+        parameters: IDelegatedParameters,
+    ): Promise<{ flow: IFlow; wd: string }> {
         const absolutePath = await this.resolveFlow(location);
 
         this.logService.info(` -> Reading flow file: `.green + absolutePath);
@@ -345,19 +372,21 @@ export class FlowService {
             content,
             context,
             snapshot,
-            parameters
+            parameters,
         );
 
         let flow;
         try {
             flow = safeLoad(content) as IFlow;
         } catch (e) {
-            this.logService.error(` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red);
+            this.logService.error(
+                ` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red,
+            );
             this.logService.error(content.gray);
-            throw (e);
+            throw e;
         }
 
-        return {flow, wd: dirname(absolutePath)};
+        return { flow, wd: dirname(absolutePath) };
     }
 
     /**
@@ -374,20 +403,20 @@ export class FlowService {
         tpl: string,
         context: IContext,
         snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,        
+        parameters: IDelegatedParameters,
     ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
 
         const data: any = {
             $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters),
-            env: process.env
+            env: process.env,
         };
 
         Object.assign(data, parameters);
         Object.assign(data, context);
 
-        const options = <Options> {
+        const options = <Options>{
             delimiter,
             escape: (value: any) => {
                 if (typeof value === 'number' || typeof value === 'boolean') {
@@ -404,7 +433,7 @@ export class FlowService {
 
                 throw Error(`Value could not be escaped. Use $ref:path to pass value by reference.`);
             },
-            async: true
+            async: true,
         };
 
         return await render(tpl, data, options);
@@ -417,16 +446,16 @@ export class FlowService {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters delegated parameters
-     * @param {boolean} maskSecrets if true - all secrets will be masked     
+     * @param {boolean} maskSecrets if true - all secrets will be masked
      * @return {any}
      */
     async resolveOptionsWithNoHandlerCheck(
         delimiter: string,
         options: any,
-        context: IContext,        
+        context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-        maskSecrets: boolean        
+        maskSecrets: boolean,
     ): Promise<any> {
         if (!options) {
             return options;
@@ -442,7 +471,6 @@ export class FlowService {
             options = JSON.parse(json);
         }
 
-
         let tpl = dump(options);
 
         // fix template after dump
@@ -452,14 +480,14 @@ export class FlowService {
         const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
         const doubleQuotesRegEx = /''/g;
         tpl.split('\n').forEach(line => {
-           if (line.indexOf('\'\'') !== -1) {
-               // we only want to replace '' to ' inside the EJS template
-               line = line.replace(ejsTemplateRegEx, function (match, g1): string {
+            if (line.indexOf('\'\'') !== -1) {
+                // we only want to replace '' to ' inside the EJS template
+                line = line.replace(ejsTemplateRegEx, function(match, g1): string {
                     return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
-               });
-           }
+                });
+            }
 
-           lines.push(line);
+            lines.push(line);
         });
 
         tpl = lines.join('\n');
@@ -478,28 +506,28 @@ export class FlowService {
      * @param options
      * @param {IContext} context
      * @param {IDelegatedParameters} parameters delegated parameters
-     * @param {boolean} maskSecrets if true - all secrets will be masked     
+     * @param {boolean} maskSecrets if true - all secrets will be masked
      * @returns {Promise<any>}
      */
     async resolveOptions(
-        handler: ActionHandler, 
-        options: any, 
-        context: IContext, 
+        handler: ActionHandler,
+        options: any,
+        context: IContext,
         snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters, 
-        maskSecrets: boolean
+        parameters: IDelegatedParameters,
+        maskSecrets: boolean,
     ): Promise<any> {
         if (handler.getMetadata().skipTemplateProcessing) {
             return options;
         }
 
         return await this.resolveOptionsWithNoHandlerCheck(
-            context.ejsTemplateDelimiters.local, 
-            options, 
-            context, 
-            snapshot, 
+            context.ejsTemplateDelimiters.local,
+            options,
+            context,
+            snapshot,
             parameters,
-            maskSecrets
+            maskSecrets,
         );
     }
 }

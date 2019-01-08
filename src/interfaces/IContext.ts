@@ -1,11 +1,11 @@
-import {ActionHandlersRegistry} from '../services';
-import {ISummaryRecord} from './ISummaryRecord';
+import { ActionHandlersRegistry } from '../services';
+import { ISummaryRecord } from './ISummaryRecord';
 
 export interface IContextBase {
     /**
      * Context variables
      */
-    ctx: {[key: string]: any};
+    ctx: { [key: string]: any };
 
     /**
      * Summary report records
@@ -54,13 +54,13 @@ export interface IContext extends IContextBase {
      * Should not be exposed to report.
      * Plugins developers are responsible to not expose it in any way in the report.
      */
-    secrets: {[key: string]: any};
+    secrets: { [key: string]: any };
 
     dynamicActionHandlers: ActionHandlersRegistry;
 
     ejsTemplateDelimiters: {
-        global: string,
-        local: string
+        global: string;
+        local: string;
     };
 }
 

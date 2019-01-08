@@ -1,6 +1,6 @@
-import {ActionHandler} from '../models';
-import {IReporter} from './IReporter';
-import {ITemplateUtility} from './ITemplateUtility';
+import { ActionHandler } from '../models';
+import { IReporter } from './IReporter';
+import { ITemplateUtility } from './ITemplateUtility';
 
 export interface IPlugin {
     /**
@@ -18,7 +18,7 @@ export interface IPlugin {
      */
     requires: {
         fbl: string;
-        plugins?: {[id: string]: string};
+        plugins?: { [id: string]: string };
         applications?: string[];
     };
 

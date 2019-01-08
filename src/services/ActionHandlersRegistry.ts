@@ -1,13 +1,13 @@
-import {ActionHandler, ActionSnapshot} from '../models';
-import {Inject, Service} from 'typedi';
-import {FBLService} from './FBLService';
-import {IPlugin} from '../interfaces';
-import {LogService} from './LogService';
+import { ActionHandler, ActionSnapshot } from '../models';
+import { Inject, Service } from 'typedi';
+import { FBLService } from './FBLService';
+import { IPlugin } from '../interfaces';
+import { LogService } from './LogService';
 
 @Service()
 export class ActionHandlersRegistry {
-    private registry: {[name: string]: ActionHandler};
-    private aliases: {[alias: string]: string};
+    private registry: { [name: string]: ActionHandler };
+    private aliases: { [alias: string]: string };
 
     constructor() {
         this.cleanup();
@@ -27,22 +27,39 @@ export class ActionHandlersRegistry {
         if (handler.getMetadata().aliases) {
             for (const alias of handler.getMetadata().aliases) {
                 if (alias.startsWith(FBLService.METADATA_PREFIX)) {
-                    throw new Error(`Unable to register action handler with alias "${alias}". It can not start with ${FBLService.METADATA_PREFIX}`);
+                    throw new Error(
+                        `Unable to register action handler with alias "${alias}". It can not start with ${
+                            FBLService.METADATA_PREFIX
+                        }`,
+                    );
                 }
             }
         }
 
         if (handler.getMetadata().id.startsWith(FBLService.METADATA_PREFIX)) {
-            throw new Error(`Unable to register action handler with id "${handler.getMetadata().id}". It can not start with ${FBLService.METADATA_PREFIX}`);
+            throw new Error(
+                `Unable to register action handler with id "${handler.getMetadata().id}". It can not start with ${
+                    FBLService.METADATA_PREFIX
+                }`,
+            );
         }
 
         const metadata = handler.getMetadata();
 
         if (this.registry[metadata.id]) {
             if (snapshot) {
-                snapshot.log(`Action handler with id ${metadata.id} was overridden by plugin ${plugin.name}@${plugin.version}`, true);
+                snapshot.log(
+                    `Action handler with id ${metadata.id} was overridden by plugin ${plugin.name}@${plugin.version}`,
+                    true,
+                );
             } else {
-                this.logService.error(' -> Warning'.red + ' action handler with id: ' + metadata.id.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
+                this.logService.error(
+                    ' -> Warning'.red +
+                        ' action handler with id: ' +
+                        metadata.id.red +
+                        ' was overridden by plugin ' +
+                        `${plugin.name}@${plugin.version}`.red,
+                );
             }
         }
 
@@ -52,9 +69,20 @@ export class ActionHandlersRegistry {
                 if (this.aliases[alias]) {
                     /* istanbul ignore else */
                     if (snapshot) {
-                        snapshot.log(`Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${plugin.version}`, true);
+                        snapshot.log(
+                            `Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${
+                                plugin.version
+                            }`,
+                            true,
+                        );
                     } else {
-                        this.logService.error(' -> Warning'.red + ' action handler with alias: ' + alias.red + ' was overridden by plugin ' + `${plugin.name}@${plugin.version}`.red);
+                        this.logService.error(
+                            ' -> Warning'.red +
+                                ' action handler with alias: ' +
+                                alias.red +
+                                ' was overridden by plugin ' +
+                                `${plugin.name}@${plugin.version}`.red,
+                        );
                     }
                 }
                 this.aliases[alias] = metadata.id;

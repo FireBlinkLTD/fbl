@@ -1,7 +1,7 @@
 import * as Joi from 'joi';
-import {IActionHandlerMetadata, IContext} from '../interfaces';
-import {ActionSnapshot} from './ActionSnapshot';
-import {IDelegatedParameters} from '../interfaces/IDelegatedParameters';
+import { IActionHandlerMetadata, IContext } from '../interfaces';
+import { ActionSnapshot } from './ActionSnapshot';
+import { IDelegatedParameters } from '../interfaces/IDelegatedParameters';
 
 /**
  * Context variables resolver
@@ -22,7 +22,12 @@ export abstract class ActionHandler {
      * @param parameters
      * @returns {Promise<void>}
      */
-    async validate(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+    async validate(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<void> {
         const schema = this.getValidationSchema();
         if (schema) {
             const result = Joi.validate(options, schema);
@@ -56,7 +61,12 @@ export abstract class ActionHandler {
      * @param {IDelegatedParameters} parameters
      * @returns {Promise<boolean>}
      */
-    async isShouldExecute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<boolean> {
+    async isShouldExecute(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<boolean> {
         return true;
     }
 
@@ -68,5 +78,10 @@ export abstract class ActionHandler {
      * @param {IDelegatedParameters} parameters
      * @returns {Promise<void>}
      */
-    abstract async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void>;
+    abstract async execute(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<void>;
 }

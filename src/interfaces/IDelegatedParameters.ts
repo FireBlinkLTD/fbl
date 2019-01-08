@@ -1,7 +1,7 @@
-import {IIteration} from './IIteration';
+import { IIteration } from './IIteration';
 
 export interface IDelegatedParameters {
     wd?: string;
-    parameters?: {[key: string]: any};
+    parameters?: { [key: string]: any };
     iteration?: IIteration;
 }

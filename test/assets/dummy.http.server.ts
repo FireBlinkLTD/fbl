@@ -1,7 +1,7 @@
-import {createServer, OutgoingHttpHeaders} from 'http';
+import { createServer, OutgoingHttpHeaders } from 'http';
 
 import * as commander from 'commander';
-import {createReadStream} from 'fs';
+import { createReadStream } from 'fs';
 
 // prepare commander
 commander
@@ -20,13 +20,13 @@ commander
 commander.parse(process.argv);
 
 const processSend = (name: string, payload?: any) => {
-    process.send({name, payload});
+    process.send({ name, payload });
 };
 
 console.log('Starting server with options: ' + JSON.stringify(commander.opts()));
 createServer(async (request, response) => {
     processSend('onRequest', {
-        headers: request.headers
+        headers: request.headers,
     });
 
     if (commander.delay) {
@@ -52,7 +52,7 @@ createServer(async (request, response) => {
         const fileStream = createReadStream(commander.file);
         fileStream.pipe(response);
 
-        fileStream.on('end', function () {
+        fileStream.on('end', function() {
             response.end();
         });
     } else {

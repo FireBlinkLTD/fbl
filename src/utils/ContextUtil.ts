@@ -1,6 +1,6 @@
-import {IContext, IContextBase, IDelegatedParameters, IPushTo, IAssignTo} from '../interfaces';
-import {ActionHandlersRegistry} from '../services/';
-import {ActionSnapshot} from '../models';
+import { IContext, IContextBase, IDelegatedParameters, IPushTo, IAssignTo } from '../interfaces';
+import { ActionHandlersRegistry } from '../services/';
+import { ActionSnapshot } from '../models';
 import * as Joi from 'joi';
 
 export class ContextUtil {
@@ -54,26 +54,26 @@ export class ContextUtil {
      * @param {IAssignTo | string} paths
      * @param value
      * @param {boolean} override
-     * @return {void}    
+     * @return {void}
      */
     static assignTo(
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
         paths: IAssignTo | string,
-        value: any
+        value: any,
     ): void {
         if (!paths) {
             return;
         }
-        
+
         let override = false;
         if (typeof paths === 'string') {
             const chunks = paths.split('.');
             const target = chunks[1];
             chunks.splice(0, 2);
             paths = {
-                [target]: `$.${chunks.join('.')}`
+                [target]: `$.${chunks.join('.')}`,
             };
         } else {
             override = paths.override;
@@ -108,14 +108,14 @@ export class ContextUtil {
      * @param {ActionSnapshot} snapshot
      * @param {IPushTo | string} paths
      * @param value
-     * @return {Promise<void>}    
+     * @return {Promise<void>}
      */
     static pushTo(
         context: IContext,
         parameters: IDelegatedParameters,
         snapshot: ActionSnapshot,
         paths: IPushTo | string,
-        value: any
+        value: any,
     ): void {
         if (!paths) {
             return;
@@ -128,7 +128,7 @@ export class ContextUtil {
             const target = chunks[1];
             chunks.splice(0, 2);
             paths = {
-                [target]: `$.${chunks.join('.')}`
+                [target]: `$.${chunks.join('.')}`,
             };
         } else {
             override = paths.override;
@@ -166,12 +166,7 @@ export class ContextUtil {
      * @param {boolean} override
      * @return {void}
      */
-    static push(
-        obj: {[key: string]: any},
-        path: string, value: any,
-        children: boolean,
-        override = false
-    ): void {
+    static push(obj: { [key: string]: any }, path: string, value: any, children: boolean, override = false): void {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to push value to path "${path}". Path has invalid format.`);
         }
@@ -205,13 +200,14 @@ export class ContextUtil {
      * @return {{target: any; parent: {[p: string]: any}; key: string; subPath: string}}
      */
     private static findTargetByPath(
-        obj: {[key: string]: any}, path: string,
-        leaf: any
-    ): {target: any, parent: {[key: string]: any}, key: string} {
+        obj: { [key: string]: any },
+        path: string,
+        leaf: any,
+    ): { target: any; parent: { [key: string]: any }; key: string } {
         const chunks = path.split('.');
 
         let target: any = obj;
-        let parent: {[key: string]: any} = null;
+        let parent: { [key: string]: any } = null;
         let key: string = null;
 
         let subPath = chunks[0];
@@ -228,7 +224,9 @@ export class ContextUtil {
             } else {
                 if (!isLast) {
                     if (!ContextUtil.isObject(candidate)) {
-                        throw new Error(`Unable to assign path "${path}". Sub-path "${subPath}" leads to non-object value.`);
+                        throw new Error(
+                            `Unable to assign path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                        );
                     }
                 }
 
@@ -239,7 +237,7 @@ export class ContextUtil {
         return {
             target,
             parent,
-            key
+            key,
         };
     }
 
@@ -251,17 +249,14 @@ export class ContextUtil {
      * @param {boolean} [override]
      * @returns {void}
      */
-    static assign(obj: {[key: string]: any}, path: string, value: any, override: boolean): void {
+    static assign(obj: { [key: string]: any }, path: string, value: any, override: boolean): void {
         if (!ContextUtil.OBJECT_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
-        const isAssignable =
-            !ContextUtil.isBasicType(value) &&
-            !Array.isArray(value) &&
-            !ContextUtil.isMissing(value);
+        const isAssignable = !ContextUtil.isBasicType(value) && !Array.isArray(value) && !ContextUtil.isMissing(value);
 
-        const {target, parent, key} = ContextUtil.findTargetByPath(obj, path, {});
+        const { target, parent, key } = ContextUtil.findTargetByPath(obj, path, {});
 
         if (isAssignable) {
             if (typeof target !== 'object') {
@@ -293,7 +288,7 @@ export class ContextUtil {
      * @param override
      * @return {void}
      */
-    static assignToField(obj: {[key: string]: any}, path: string, value: any, override: boolean): void {
+    static assignToField(obj: { [key: string]: any }, path: string, value: any, override: boolean): void {
         if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
@@ -314,7 +309,7 @@ export class ContextUtil {
         return {
             ctx: context.ctx,
             summary: context.summary,
-            entities: context.entities
+            entities: context.entities,
         };
     }
 
@@ -323,7 +318,7 @@ export class ContextUtil {
      * @return {IContext}
      */
     public static generateEmptyContext(): IContext {
-        return <IContext> {
+        return <IContext>{
             cwd: process.cwd(),
             ctx: {},
             secrets: {},
@@ -332,14 +327,14 @@ export class ContextUtil {
                 unregistered: [],
                 created: [],
                 updated: [],
-                deleted: []
+                deleted: [],
             },
             summary: [],
             dynamicActionHandlers: new ActionHandlersRegistry(),
             ejsTemplateDelimiters: {
                 global: '$',
-                local: '%'
-            }
+                local: '%',
+            },
         };
     }
 
@@ -380,16 +375,24 @@ export class ContextUtil {
                         const chunks = match[2].substring(1).split('.');
                         for (const subPath of chunks) {
                             if (!ContextUtil.isObject(target)) {
-                                throw new Error(`Unable to find reference match for "$.${match[1]}${match[2]}". Non-object value found upon traveling the path at "${subPath}".`);
+                                throw new Error(
+                                    `Unable to find reference match for "$.${match[1]}${
+                                        match[2]
+                                    }". Non-object value found upon traveling the path at "${subPath}".`,
+                                );
                             }
 
                             if (!target.hasOwnProperty(subPath)) {
-                                throw new Error(`Unable to find reference match for "$.${match[1]}${match[2]}". Missing value found upon traveling the path at "${subPath}".`);
+                                throw new Error(
+                                    `Unable to find reference match for "$.${match[1]}${
+                                        match[2]
+                                    }". Missing value found upon traveling the path at "${subPath}".`,
+                                );
                             }
 
                             target = target[subPath];
                         }
-                    }   
+                    }
 
                     return target;
                 }
@@ -404,7 +407,7 @@ export class ContextUtil {
         if (Array.isArray(options)) {
             return options.map(item => {
                 return ContextUtil.resolveReferences(item, context, parameters);
-            });            
+            });
         }
 
         // resolve object field values

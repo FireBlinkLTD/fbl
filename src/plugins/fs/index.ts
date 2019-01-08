@@ -1,6 +1,4 @@
 import {IPlugin} from '../../interfaces';
-import {EncryptActionHandler} from './EncryptActionHandler';
-import {DecryptActionHandler} from './DecryptActionHandler';
 import {WriteToFileActionHandler} from './WriteToFileActionHandler';
 import {MakeDirActionHandler} from './MakeDirActionHandler';
 import {RemovePathActionHandler} from './RemovePathActionHandler';
@@ -15,8 +13,6 @@ module.exports = <IPlugin> {
 
     actionHandlers: [
         new CopyPathActionHandler(),
-        new EncryptActionHandler(),
-        new DecryptActionHandler(),
         new MakeDirActionHandler(),
         new MovePathActionHandler(),
         new RemovePathActionHandler(),
