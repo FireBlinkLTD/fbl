@@ -99,7 +99,7 @@ class CopyPathActionHandlerTestSuite {
 
         const parameters: IDelegatedParameters = {
             parameters: {}
-        }
+        };
         
         await actionHandler.execute({
             include: ['**/*'],
