@@ -10,5 +10,5 @@ export interface ITemplateUtility {
      * @param {IDelegatedParameters} parameters
      * @return {{[key: string]: any}}
      */
-    getUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): {[key: string]: any};
+    getUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): { [key: string]: any };
 }

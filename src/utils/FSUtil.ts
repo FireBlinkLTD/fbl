@@ -1,9 +1,9 @@
 import * as glob from 'glob-promise';
-import {homedir} from 'os';
-import {basename, dirname, isAbsolute, normalize, resolve, sep} from 'path';
-import {safeLoad} from 'js-yaml';
-import {promisify} from 'util';
-import {copyFile, exists, mkdir, readdir, readFile, rename, rmdir, stat, unlink} from 'fs';
+import { homedir } from 'os';
+import { basename, dirname, isAbsolute, normalize, resolve, sep } from 'path';
+import { safeLoad } from 'js-yaml';
+import { promisify } from 'util';
+import { copyFile, exists, mkdir, readdir, readFile, rename, rmdir, stat, unlink } from 'fs';
 
 const unlinkAsync = promisify(unlink);
 const existsAsync = promisify(exists);
@@ -57,7 +57,7 @@ export class FSUtil {
                 ignore: (ignore || []).map(i => FSUtil.getAbsolutePath(i, wd)),
                 nodir: true,
                 absolute: true,
-                dot: true
+                dot: true,
             });
 
             result.push(...matches);
@@ -125,7 +125,9 @@ export class FSUtil {
         } else {
             const directory = await FSUtil.isDirectory(path);
             if (!directory) {
-                throw new Error(`Unable to create folder at path: ${path}. Path already exists and it is not a folder.`);
+                throw new Error(
+                    `Unable to create folder at path: ${path}. Path already exists and it is not a folder.`,
+                );
             }
         }
     }
@@ -137,7 +139,7 @@ export class FSUtil {
      * @return {Promise<void>}
      */
     static async remove(path: string, skipNotFound = false): Promise<void> {
-        if (!await existsAsync(path)) {
+        if (!(await existsAsync(path))) {
             if (skipNotFound) {
                 return;
             }
@@ -175,7 +177,7 @@ export class FSUtil {
      * @return {Promise<void>}
      */
     static async move(from: string, to: string): Promise<void> {
-        if (!await existsAsync(from)) {
+        if (!(await existsAsync(from))) {
             throw new Error(`Unable to find file or folder at path: ${from}`);
         }
 
@@ -229,7 +231,7 @@ export class FSUtil {
      * @return {Promise<void>}
      */
     static async copy(from: string, to: string): Promise<void> {
-        if (!await existsAsync(from)) {
+        if (!(await existsAsync(from))) {
             throw new Error(`Unable to find file or folder at path: ${from}`);
         }
 

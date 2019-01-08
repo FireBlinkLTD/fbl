@@ -1,5 +1,5 @@
-import {Service} from 'typedi';
-import {FSUtil} from '../utils';
+import { Service } from 'typedi';
+import { FSUtil } from '../utils';
 
 const tmp = require('tmp-promise');
 
@@ -13,7 +13,7 @@ export class TempPathsRegistry {
 
     async createTempDir(keep = false): Promise<string> {
         const dir = await tmp.dir({
-            keep
+            keep,
         });
 
         if (!keep) {
@@ -26,7 +26,7 @@ export class TempPathsRegistry {
     async createTempFile(keep = false, postfix?: string): Promise<string> {
         const file = await tmp.file({
             keep,
-            postfix
+            postfix,
         });
 
         if (!keep) {
@@ -37,8 +37,6 @@ export class TempPathsRegistry {
     }
 
     async cleanup(): Promise<void> {
-        await Promise.all(
-            this.tempPaths.map(path => FSUtil.remove(path, true))
-        );
+        await Promise.all(this.tempPaths.map(path => FSUtil.remove(path, true)));
     }
 }

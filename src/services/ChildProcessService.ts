@@ -1,5 +1,5 @@
-import {ChildProcess, spawn} from 'child_process';
-import {Service} from 'typedi';
+import { ChildProcess, spawn } from 'child_process';
+import { Service } from 'typedi';
 
 @Service()
 export class ChildProcessService {
@@ -16,27 +16,27 @@ export class ChildProcessService {
         args: any[],
         wd: string,
         on?: {
-            stdout?: (chunk: any) => void,
-            stderr?: (chunk: any) => void,
-            process?: (process: ChildProcess) => void,
-        }
+            stdout?: (chunk: any) => void;
+            stderr?: (chunk: any) => void;
+            process?: (process: ChildProcess) => void;
+        },
     ): Promise<number> {
         let exitCode = -1;
 
         await new Promise<void>((resolve, reject) => {
             const process = spawn(executable, args, {
                 cwd: wd,
-                shell: true
+                shell: true,
             });
 
             if (on && on.stdout) {
-                process.stdout.on('data', (data) => {
+                process.stdout.on('data', data => {
                     on.stdout(data);
                 });
             }
 
             if (on && on.stderr) {
-                process.stderr.on('data', (data) => {
+                process.stderr.on('data', data => {
                     on.stderr(data);
                 });
             }
@@ -46,11 +46,11 @@ export class ChildProcessService {
             }
 
             let error: Error;
-            process.on('error', (e) => {
+            process.on('error', e => {
                 error = e;
             });
 
-            process.on('close', (code) => {
+            process.on('close', code => {
                 exitCode = code;
 
                 if (error) {

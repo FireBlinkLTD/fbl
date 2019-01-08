@@ -1,14 +1,14 @@
-import {Inject, Service} from 'typedi';
+import { Inject, Service } from 'typedi';
 import * as commander from 'commander';
 import * as colors from 'colors';
-import {FlowService, FBLService, LogService} from './index';
-import {exists} from 'fs';
-import {promisify} from 'util';
-import {resolve} from 'path';
-import {IContext, IFlowLocationOptions, IPlugin, IReport, ISummaryRecord} from '../interfaces';
-import {ContextUtil, FSUtil} from '../utils';
-import {TempPathsRegistry} from './TempPathsRegistry';
-import {table} from 'table';
+import { FlowService, FBLService, LogService } from './index';
+import { exists } from 'fs';
+import { promisify } from 'util';
+import { resolve } from 'path';
+import { IContext, IFlowLocationOptions, IPlugin, IReport, ISummaryRecord } from '../interfaces';
+import { ContextUtil, FSUtil } from '../utils';
+import { TempPathsRegistry } from './TempPathsRegistry';
+import { table } from 'table';
 import { ActionSnapshot } from '../models';
 
 const prompts = require('prompts');
@@ -38,7 +38,7 @@ export class CLIService {
     private configKVPairs: string[] = [];
     private secretKVPairs: string[] = [];
     private reportKVPairs: string[] = [];
-    private httpHeaders: {[key: string]: string} = {};
+    private httpHeaders: { [key: string]: string } = {};
 
     @Inject(() => FBLService)
     fbl: FBLService;
@@ -88,49 +88,41 @@ export class CLIService {
         }
 
         const flow = await this.flowService.readFlowFromFile(
-            <IFlowLocationOptions> {
+            <IFlowLocationOptions>{
                 path: FSUtil.getAbsolutePath(this.flowFilePath, process.cwd()),
                 http: {
-                    headers: this.httpHeaders
+                    headers: this.httpHeaders,
                 },
                 target: this.flowTarget,
-                cache: this.useCache
+                cache: this.useCache,
             },
             context,
             new ActionSnapshot('', {}, process.cwd(), 0, {}),
-            {}
+            {},
         );
 
-        const initialContextState = this.reportFilePath ?
-            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
-            null;
+        const initialContextState = this.reportFilePath
+            ? JSON.parse(JSON.stringify(ContextUtil.toBase(context)))
+            : null;
 
-        const snapshot = await this.fbl.execute(
-            flow.wd,
-            flow.flow,
-            context,
-            {}
-        );
+        const snapshot = await this.fbl.execute(flow.wd, flow.flow, context, {});
 
-        const finalContextState = this.reportFilePath ?
-            JSON.parse(JSON.stringify(ContextUtil.toBase(context))) :
-            null;
+        const finalContextState = this.reportFilePath ? JSON.parse(JSON.stringify(ContextUtil.toBase(context))) : null;
 
         if (this.reportFilePath) {
-            const report = <IReport> {
+            const report = <IReport>{
                 context: {
                     initial: initialContextState,
-                    final: finalContextState
+                    final: finalContextState,
                 },
-                snapshot: snapshot
+                snapshot: snapshot,
             };
 
             const options = {};
             await this.convertKVPairs(this.reportKVPairs, options);
 
             // generate report
-            await this.fbl.getReporter(this.reportFormat)
-                .generate(this.reportFilePath, options, report);
+            await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, report);
         }
 
         // remove all temp files and folders
@@ -159,8 +151,8 @@ export class CLIService {
         }
 
         console.log();
-        console.log(table(
-            [
+        console.log(
+            table([
                 head,
                 ...records.map(r => {
                     let status = r.status.trim();
@@ -184,9 +176,9 @@ export class CLIService {
                     }
 
                     return row;
-                })
-            ]
-        ));
+                }),
+            ]),
+        );
     }
 
     /**
@@ -236,15 +228,13 @@ export class CLIService {
      * Parse parameters passed via CLI
      */
     private parseParameters(): void {
-        const options: {flags: string, description: string[], fn?: Function}[] = [
+        const options: { flags: string; description: string[]; fn?: Function }[] = [
             {
                 flags: '-p --plugin <file>',
-                description: [
-                    'Plugin file.'
-                ],
+                description: ['Plugin file.'],
                 fn: (val: string) => {
                     this.plugins.push(val);
-                }
+                },
             },
 
             {
@@ -252,11 +242,11 @@ export class CLIService {
                 description: [
                     'Key value pair of default context values.',
                     'Expected key format: $[.<parent>][.child][...]',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
                 ],
                 fn: (val: string) => {
                     this.configKVPairs.push(val);
-                }
+                },
             },
 
             {
@@ -265,91 +255,77 @@ export class CLIService {
                     'Key value pair of default secret values. Secrets will not be available in report.',
                     'Expected key format: $[.<parent>][.child][...]',
                     'If only key is provided you will be prompted to enter the value in the console.',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
                 ],
                 fn: (val: string) => {
                     this.secretKVPairs.push(val);
-                }
+                },
             },
 
             {
                 flags: '-o --output <file>',
-                description: [
-                    'Execution report path'
-                ]
+                description: ['Execution report path'],
             },
 
             {
                 flags: '-r --report <name>',
-                description: [
-                    'Execution report format'
-                ]
+                description: ['Execution report format'],
             },
 
             {
                 flags: '-t --target <path>',
-                description: [
-                    'Custom relative path inside the packaged flow (tarball).'
-                ]
+                description: ['Custom relative path inside the packaged flow (tarball).'],
             },
 
             {
                 flags: '--report-option <key=value>',
                 description: [
                     'Key value pair of report option',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.'
+                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
                 ],
                 fn: (val: string) => {
                     this.reportKVPairs.push(val);
-                }
+                },
             },
 
             {
                 flags: '--unsafe-plugins',
                 description: [
                     'If provided incompatible plugins will still be registered and be available for use,',
-                    'but may lead to unexpected results or errors.'
-                ]
+                    'but may lead to unexpected results or errors.',
+                ],
             },
 
             {
                 flags: '--unsafe-flows',
                 description: [
                     'If provided incompatible flow requirements will be ignored,',
-                    'but may lead to unexpected results or errors.'
-                ]
+                    'but may lead to unexpected results or errors.',
+                ],
             },
 
             {
                 flags: '--no-colors',
-                description: [
-                    'Remove colors from output. Make it boring.'
-                ]
+                description: ['Remove colors from output. Make it boring.'],
             },
 
             {
                 flags: '--global-template-delimiter <delimiter>',
-                description: [
-                    'Global EJS template delimiter. Default: $'
-                ]
+                description: ['Global EJS template delimiter. Default: $'],
             },
 
             {
                 flags: '--local-template-delimiter <delimiter>',
-                description: [
-                    'Local EJS template delimiter. Default: %'
-                ]
+                description: ['Local EJS template delimiter. Default: %'],
             },
 
             {
                 flags: '--http-header <header>',
-                description: [
-                    'Custom HTTP headers to send with GET request to fetch flow from remote location.'
-                ],
+                description: ['Custom HTTP headers to send with GET request to fetch flow from remote location.'],
                 fn: (val: string) => {
                     const name = val.split(':')[0];
                     this.httpHeaders[name] = val.substring(name.length + 1).trimLeft();
-                }
+                },
             },
 
             {
@@ -359,29 +335,24 @@ export class CLIService {
                     'If package already exists inside cache dir - it will be used and no HTTP requests will be made.',
                     '',
                     'Note: this option will only work for path provided to CLI.',
-                    'Option has no affect on "attachment" actions inside the flow itself.'
-                ]
+                    'Option has no affect on "attachment" actions inside the flow itself.',
+                ],
             },
 
             {
                 flags: '--verbose',
-                description: [
-                    'Output additional logs.'
-                ]
+                description: ['Output additional logs.'],
             },
 
             {
                 flags: '-h --help',
-                description: [
-                    'Output usage information.'
-                ],
+                description: ['Output usage information.'],
                 fn: () => {
                     this.printHelp(options);
                     process.exit(0);
-                }
-            }
+                },
+            },
         ];
-
 
         // prepare commander
         commander
@@ -455,15 +426,13 @@ export class CLIService {
      * Output help to stdout
      * @param options
      */
-    private printHelp(options: {flags: string, description: string[]}[]): void {
-        const allOptions: {flags: string, description: string[]}[] = [
+    private printHelp(options: { flags: string; description: string[] }[]): void {
+        const allOptions: { flags: string; description: string[] }[] = [
             ...options,
             {
                 flags: '-V, --version',
-                description: [
-                    'Output the version number'
-                ]
-            }
+                description: ['Output the version number'],
+            },
         ];
 
         let maxFlagsLength = 0;
@@ -481,7 +450,7 @@ export class CLIService {
         ui.div('Usage: fbl [options] <file or url>');
         ui.div({
             text: 'Options:',
-            padding: [1, 0, 1, 0]
+            padding: [1, 0, 1, 0],
         });
 
         allOptions.forEach(option => {
@@ -489,12 +458,12 @@ export class CLIService {
                 {
                     text: option.flags,
                     width: maxFlagsLength + 4,
-                    padding: [0, 2, 0, 2]
+                    padding: [0, 2, 0, 2],
                 },
                 {
                     text: option.description.join('\n'),
-                    width: maxDescriptionLength
-                }
+                    width: maxDescriptionLength,
+                },
             );
         });
 
@@ -505,9 +474,12 @@ export class CLIService {
      * Register plugins
      */
     private async registerPlugins(): Promise<void> {
-        const plugins = await Promise.all(this.plugins.map(async (nameOrPath: string): Promise<IPlugin> =>
-            await FBLService.requirePlugin(nameOrPath, process.cwd())
-        ));
+        const plugins = await Promise.all(
+            this.plugins.map(
+                async (nameOrPath: string): Promise<IPlugin> =>
+                    await FBLService.requirePlugin(nameOrPath, process.cwd()),
+            ),
+        );
 
         this.fbl.registerPlugins(plugins);
         await this.fbl.validatePlugins(process.cwd());
@@ -532,38 +504,42 @@ export class CLIService {
      * @param secret
      */
     private async convertKVPairs(pairs: string[], target: any, secret?: boolean): Promise<void> {
-        await Promise.all(pairs.map(async (kv: string): Promise<void> => {
-            const chunks = kv.split('=');
-            if (chunks.length !== 2) {
-                chunks[1] = (await prompts({
-                    type: 'text',
-                    name: 'value',
-                    style: secret ? 'password' : 'default',
-                    message: `${chunks[0]}: `
-                })).value;
-            }
+        await Promise.all(
+            pairs.map(
+                async (kv: string): Promise<void> => {
+                    const chunks = kv.split('=');
+                    if (chunks.length !== 2) {
+                        chunks[1] = (await prompts({
+                            type: 'text',
+                            name: 'value',
+                            style: secret ? 'password' : 'default',
+                            message: `${chunks[0]}: `,
+                        })).value;
+                    }
 
-            let value;
-            let isObject = false;
-            if (chunks[1][0] === '@') {
-                const file = chunks[1].substring(1);
-                value = await FSUtil.readYamlFromFile(file);
+                    let value;
+                    let isObject = false;
+                    if (chunks[1][0] === '@') {
+                        const file = chunks[1].substring(1);
+                        value = await FSUtil.readYamlFromFile(file);
 
-                // validate file content to be object
-                isObject = ContextUtil.isObject(value);
-            } else {
-                value = chunks[1];
-            }
+                        // validate file content to be object
+                        isObject = ContextUtil.isObject(value);
+                    } else {
+                        value = chunks[1];
+                    }
 
-            if (chunks[0] === '$') {
-                if (isObject) {
-                    ContextUtil.assign(target, chunks[0], value, false);
-                } else {
-                    throw new Error('Unable to assign non-object value to root path "$"');
-                }
-            } else {
-                ContextUtil.assignToField(target, chunks[0], value, false);
-            }
-        }));
+                    if (chunks[0] === '$') {
+                        if (isObject) {
+                            ContextUtil.assign(target, chunks[0], value, false);
+                        } else {
+                            throw new Error('Unable to assign non-object value to root path "$"');
+                        }
+                    } else {
+                        ContextUtil.assignToField(target, chunks[0], value, false);
+                    }
+                },
+            ),
+        );
     }
 }

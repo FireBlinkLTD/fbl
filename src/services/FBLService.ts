@@ -1,16 +1,16 @@
-import {Inject, Service} from 'typedi';
-import {IContext, IDelegatedParameters, IFlow, IPlugin, IReporter} from '../interfaces';
+import { Inject, Service } from 'typedi';
+import { IContext, IDelegatedParameters, IFlow, IPlugin, IReporter } from '../interfaces';
 import * as Joi from 'joi';
-import {FlowService} from './index';
-import {ActionSnapshot} from '../models';
-import {ActionHandlersRegistry} from './ActionHandlersRegistry';
+import { FlowService } from './index';
+import { ActionSnapshot } from '../models';
+import { ActionHandlersRegistry } from './ActionHandlersRegistry';
 import * as semver from 'semver';
-import {IMetadata} from '../interfaces/IMetadata';
-import {TemplateUtilitiesRegistry} from './TemplateUtilitiesRegistry';
-import {which} from 'shelljs';
-import {resolve} from 'path';
-import {FSUtil} from '../utils';
-import {FBL_FLOW_SCHEMA} from '../schemas';
+import { IMetadata } from '../interfaces/IMetadata';
+import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
+import { which } from 'shelljs';
+import { resolve } from 'path';
+import { FSUtil } from '../utils';
+import { FBL_FLOW_SCHEMA } from '../schemas';
 
 const requireg = require('requireg');
 
@@ -18,12 +18,12 @@ const fblVersion: string = require('../../../package.json').version;
 
 @Service()
 export class FBLService {
-    private plugins: {[name: string]: IPlugin} = {};
-    private processedPlugins: {[name: string]: string} = {};
+    private plugins: { [name: string]: IPlugin } = {};
+    private processedPlugins: { [name: string]: string } = {};
 
     public static METADATA_PREFIX = '$';
 
-    private reporters: {[name: string]: IReporter} = {};
+    private reporters: { [name: string]: IReporter } = {};
 
     // if plugin dependencies are not satisfied instead of throwing error log statements will be printed only
     public allowUnsafePlugins = false;
@@ -45,7 +45,7 @@ export class FBLService {
      * @param {object} step
      * @return {string}
      */
-    static extractIdOrAlias(step: {[key: string]: any}): string {
+    static extractIdOrAlias(step: { [key: string]: any }): string {
         const keys = Object.keys(step);
 
         for (const key of keys) {
@@ -63,8 +63,8 @@ export class FBLService {
      * @param {object} step
      * @return {IMetadata}
      */
-    static extractMetadata(step: {[key: string]: any}): IMetadata {
-        const result: {[key: string]: any} = {};
+    static extractMetadata(step: { [key: string]: any }): IMetadata {
+        const result: { [key: string]: any } = {};
         const keys = Object.keys(step);
 
         for (const key of keys) {
@@ -125,7 +125,7 @@ export class FBLService {
      */
     registerPlugins(plugins: IPlugin[]): void {
         plugins.forEach(plugin => {
-           this.registerPlugin(plugin);
+            this.registerPlugin(plugin);
         });
     }
 
@@ -200,7 +200,13 @@ export class FBLService {
      * @param {string} wd working directory
      * @param {boolean} dryRun if true plugin just be verified, not actually registered
      */
-    async validateRequiredPlugin(pluginName: string, pluginExpectedVersion: string, errors: string[], wd: string, dryRun: boolean): Promise<void> {
+    async validateRequiredPlugin(
+        pluginName: string,
+        pluginExpectedVersion: string,
+        errors: string[],
+        wd: string,
+        dryRun: boolean,
+    ): Promise<void> {
         let version = this.processedPlugins[pluginName];
 
         if (!version) {
@@ -223,7 +229,11 @@ export class FBLService {
         }
 
         if (version && !semver.satisfies(version, pluginExpectedVersion)) {
-            errors.push(`Actual plugin ${pluginName.red} version ${version.red} doesn't satisfy required ${pluginExpectedVersion.red}`);
+            errors.push(
+                `Actual plugin ${pluginName.red} version ${version.red} doesn't satisfy required ${
+                    pluginExpectedVersion.red
+                }`,
+            );
         }
     }
 
@@ -250,7 +260,7 @@ export class FBLService {
                     dependencyPluginRequiredVersion,
                     errors,
                     wd,
-                    dryRun
+                    dryRun,
                 );
             }
         }
@@ -259,7 +269,11 @@ export class FBLService {
             for (const application of plugin.requires.applications) {
                 /* istanbul ignore else */
                 if (!which(application)) {
-                    errors.push(`Application ${application.red} required by plugin ${plugin.name.red} not found, make sure it is installed and its location presents in the PATH environment variable`);
+                    errors.push(
+                        `Application ${application.red} required by plugin ${
+                            plugin.name.red
+                        } not found, make sure it is installed and its location presents in the PATH environment variable`,
+                    );
                 }
             }
         }
@@ -304,20 +318,18 @@ export class FBLService {
                 for (const pluginName of Object.keys(flow.requires.plugins)) {
                     const pluginExpectedVersion = flow.requires.plugins[pluginName];
 
-                    await this.validateRequiredPlugin(
-                        pluginName,
-                        pluginExpectedVersion,
-                        errors,
-                        wd,
-                        dryRun
-                    );
+                    await this.validateRequiredPlugin(pluginName, pluginExpectedVersion, errors, wd, dryRun);
                 }
             }
 
             if (flow.requires.applications) {
                 for (const application of flow.requires.applications) {
                     if (!which(application)) {
-                        errors.push(`Application ${application.red} required by flow not found, make sure it is installed and its location presents in the PATH environment variable`);
+                        errors.push(
+                            `Application ${
+                                application.red
+                            } required by flow not found, make sure it is installed and its location presents in the PATH environment variable`,
+                        );
                     }
                 }
             }
@@ -340,7 +352,12 @@ export class FBLService {
      * @param {IDelegatedParameters} parameters
      * @returns {Promise<ActionSnapshot>}
      */
-    async execute(wd: string, flow: IFlow, context: IContext, parameters: IDelegatedParameters): Promise<ActionSnapshot> {
+    async execute(
+        wd: string,
+        flow: IFlow,
+        context: IContext,
+        parameters: IDelegatedParameters,
+    ): Promise<ActionSnapshot> {
         const result = Joi.validate(flow, FBL_FLOW_SCHEMA);
         if (result.error) {
             throw new Error(result.error.details.map(d => d.message).join('\n'));
@@ -351,12 +368,12 @@ export class FBLService {
         const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
         let metadata = FBLService.extractMetadata(flow.pipeline);
         metadata = await this.flowService.resolveOptionsWithNoHandlerCheck(
-            context.ejsTemplateDelimiters.local, 
-            metadata, 
-            context, 
+            context.ejsTemplateDelimiters.local,
+            metadata,
+            context,
             new ActionSnapshot('', {}, wd, 0, {}),
             parameters,
-            false
+            false,
         );
 
         const options = flow.pipeline[idOrAlias];

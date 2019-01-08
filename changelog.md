@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.4.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.4.0) - 2019-01-08
+
+### Added
+
+* [\#288](https://github.com/FireBlinkLTD/fbl/issues/288) Added `find` action handler that allows to search files by masks.
+
+### Changes
+
+* \[Breaking\] [\#287](https://github.com/FireBlinkLTD/fbl/issues/287) `encrypt` and `decrypt` action handlers moved out to separate [plugin](https://github.com/FireBlinkLTD/fbl-plugins-crypto).
+
 ## [1.3.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.3.2) - 2018-12-17
 
 ### Added
