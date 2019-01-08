@@ -198,3 +198,39 @@ cp:
   to: /tmp/target
 ```
 
+## Action Handler: Find files
+
+Find files by mask.
+
+**ID:** `com.fireblink.fbl.fs.find`
+
+**Aliases:**
+
+* `fbl.fs.find`
+* `fs.find`
+* `find`
+
+**Example:**
+
+```yaml
+find:
+  # [required] list of masks to find files
+  include:
+    - /tmp/**/*.txt
+    - ./**/*
+
+  # [optional] list of masks to exclude
+  exclude:
+    - ./**/.*
+
+  # [required] result storage configuration
+  result:
+    # [optional] 
+    # Note: either `assignTo` or `pushTo` is requred
+    assignTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+
+    # [optional] 
+    # Note: either `assignTo` or `pushTo` is requred
+    pushTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+
+```

@@ -20,7 +20,11 @@ export class CopyPathActionHandler extends ActionHandler {
     private static validationSchema = Joi.object({
         from: Joi.string().min(1).required(),
         to: Joi.string().min(1).required()
-    }).required();
+    })
+        .required()
+        .options({
+            abortEarly: true
+        });
 
     /**
      * @inheritdoc

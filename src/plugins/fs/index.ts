@@ -4,6 +4,7 @@ import {MakeDirActionHandler} from './MakeDirActionHandler';
 import {RemovePathActionHandler} from './RemovePathActionHandler';
 import {MovePathActionHandler} from './MovePathActionHandler';
 import {CopyPathActionHandler} from './CopyPathActionHandler';
+import { FindActionHandler } from './FindActionHandler';
 
 const version: string = require('../../../../package.json').version;
 
@@ -13,6 +14,7 @@ module.exports = <IPlugin> {
 
     actionHandlers: [
         new CopyPathActionHandler(),
+        new FindActionHandler(),
         new MakeDirActionHandler(),
         new MovePathActionHandler(),
         new RemovePathActionHandler(),
