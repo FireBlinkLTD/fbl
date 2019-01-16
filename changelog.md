@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 1.5.0 - Under Development
+## [1.5.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.5.0) - 2019-01-16
 
 ### Changes
 
 - \[Breaking\] [\#295](https://github.com/FireBlinkLTD/fbl/issues/295) global file format changed. Old one no longer works.
+- [\#297](https://github.com/FireBlinkLTD/fbl/issues/297) DeepMergeUtil replaced with [object-collider](https://www.npmjs.com/package/object-collider) module.
 
 ## [1.4.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.4.0) - 2019-01-08
 

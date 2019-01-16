@@ -1,7 +1,7 @@
 {
   "name": "fbl",
-  "version": "1.4.0",
-  "description": "Command Line tool to automate any kind of work. Originally designed to help with deployments.",
+  "version": "1.5.0",
+  "description": "CLI tool to manage routine automation tasks.",
   "keywords": [
     "fireblink",
     "fbl",
