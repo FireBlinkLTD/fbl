@@ -15,6 +15,7 @@ import * as got from 'got';
 import { TempPathsRegistry } from './TempPathsRegistry';
 import { homedir } from 'os';
 import { LogService } from './LogService';
+import { isMissing } from 'object-collider';
 
 const ejsLint = require('ejs-lint');
 const uuidv5 = require('uuid/v5');
@@ -78,10 +79,6 @@ export class FlowService {
         parameters: IDelegatedParameters,
     ): Promise<ActionSnapshot> {
         if (metadata && metadata.$parameters) {
-            /* istanbul ignore else */
-            if (!parameters.parameters) {
-                parameters.parameters = {};
-            }
             ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
         }
 
@@ -427,7 +424,7 @@ export class FlowService {
                     return `"${value.replace(/"/g, '\\"')}"`;
                 }
 
-                if (ContextUtil.isMissing(value)) {
+                if (isMissing(value)) {
                     return 'null';
                 }
 
@@ -480,10 +477,10 @@ export class FlowService {
         const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
         const doubleQuotesRegEx = /''/g;
         tpl.split('\n').forEach(line => {
-            if (line.indexOf('\'\'') !== -1) {
+            if (line.indexOf("''") !== -1) {
                 // we only want to replace '' to ' inside the EJS template
                 line = line.replace(ejsTemplateRegEx, function(match, g1): string {
-                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
+                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, "'")}${delimiter}>`;
                 });
             }
 

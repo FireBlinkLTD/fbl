@@ -1,38 +1,65 @@
 # Global Config
 
-FBL upon launch will try to look for `${FBL_HOME}/config` to read default configuration. 
+FBL upon launch will try to look for `${FBL_HOME}/config` to read default configuration.
 
 If `FBL_HOME` environment variable is not provided it will match `.fbl` folder inside user's HOME directory.
 
-## Config format
-
+## Config file format
 
 ```yaml
-# Provide a list of globally installed plugins or absolute paths
-# Has same effect as "-p" option.
+# [optional] list of plugins to automatically load upon launch of the flow
 plugins:
-  - fbl-plugin-name
-  - /home/user/test/fbl-plugins/fbl-plugin-name
-  
-# Provide list of context key=value pairs
-# Has same effect as "-c" option.
-# Note: if you will provide just a key you will get prompted to provide a value each time you invoke the "fbl" cli
-context:
-  - key=value
+  - '@fbl-plugin/http'
 
-# Provide list of secrets key=value pairs
-# Has same effect as "-s" option.
-# Note: if you will provide just a key you will get prompted to provide a value each time you invoke the "fbl" cli
-secrets:
-  - key=value
+# [optional] Default context values
+context: {
+  # [optional]
+  ctx:
+    test: 123
 
-# Disable console colorful output
-# Has same effect as "--no-colors" option
-no-colors: true
+  # [optional]
+  secrets:
+    password: XXXXX
 
-# Custom global EJS template delimiter
-global-template-delimiter: $
+  # [optional]
+  parameters:
+    var: true
 
-# Custom local EJS template delimiter
-local-template-delimiter: %
+# [optional] reporting configuration
+report:
+  # [optional] output path for report
+  output: /tmp/report.json
+  # [optional] report format type
+  type: json
+  # [optional] custom reporting options
+  options:
+
+# [optional] additional request configuration for case when flow path is provided as URL
+http:
+  # [optional] additional HTTP headers to send with GET request
+  headers:
+    Authorization: Bearer XXXXX
+
+# [optional] other options
+other:
+  # [optional] disable plugin version compatibility check
+  allowUnsafePlugins: true
+
+  # [optional] disable flow requirements compatibility check
+  allowUnsafeFlows: true
+
+  # [optional] enable remove flow caching
+  # Note: cache hits by URL, if remote flow changes cached might be outdated and should be cleaned manually, so use this option with caution
+  useCache: true
+
+  # [optional] disable colorful output
+  noColors: true
+
+  # [optional] override default global EJS template delimiter
+  # Default value: $
+  globalTemplateDelimiter: '$'
+
+  # [optional] override default local EJS template delimiter
+  # Default value: %
+  localTemplateDelimiter: '%'
 ```

@@ -2,6 +2,7 @@ export * from './IActionHandlerMetadata';
 export * from './IAssignTo';
 export * from './IContext';
 export * from './IDelegatedParameters';
+export * from './IFBLGlobalConfig';
 export * from './IFlow';
 export * from './IFlowLocationOptions';
 export * from './IIteration';

@@ -1,50 +1,12 @@
 import { IContext, IContextBase, IDelegatedParameters, IPushTo, IAssignTo } from '../interfaces';
 import { ActionHandlersRegistry } from '../services/';
 import { ActionSnapshot } from '../models';
-import * as Joi from 'joi';
+import { isObject, isBasicType, isMissing } from 'object-collider';
 
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
     private static REFERENCE_REGEX = /^\s*\$ref:(cwd|ctx|secrets|entities|parameters|iteration)((\.[^.]+)+)?\s*$/;
-
-    /**
-     * Check if value represents a basic type
-     * @param value
-     */
-    static isBasicType(value: any): boolean {
-        if (typeof value === 'number') {
-            return true;
-        }
-
-        if (typeof value === 'string') {
-            return true;
-        }
-
-        if (typeof value === 'boolean') {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if value is null or undefined
-     * @param value
-     */
-    static isMissing(value: any): boolean {
-        return value === null || value === undefined;
-    }
-
-    /**
-     * Check if value is object
-     * @param value
-     */
-    static isObject(value: any): boolean {
-        const fileContentValidationResult = Joi.validate(value, Joi.object().required());
-
-        return !fileContentValidationResult.error;
-    }
 
     /**
      * Assign value based on paths
@@ -218,12 +180,12 @@ export class ContextUtil {
 
             const candidate = target[chunks[i]];
             const isLast = i === chunks.length - 1;
-            if (ContextUtil.isMissing(candidate)) {
+            if (isMissing(candidate)) {
                 target[chunks[i]] = isLast ? leaf : {};
                 target = target[chunks[i]];
             } else {
                 if (!isLast) {
-                    if (!ContextUtil.isObject(candidate)) {
+                    if (!isObject(candidate)) {
                         throw new Error(
                             `Unable to assign path "${path}". Sub-path "${subPath}" leads to non-object value.`,
                         );
@@ -254,7 +216,7 @@ export class ContextUtil {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
-        const isAssignable = !ContextUtil.isBasicType(value) && !Array.isArray(value) && !ContextUtil.isMissing(value);
+        const isAssignable = !isBasicType(value) && !Array.isArray(value) && !isMissing(value);
 
         const { target, parent, key } = ContextUtil.findTargetByPath(obj, path, {});
 
@@ -281,6 +243,31 @@ export class ContextUtil {
     }
 
     /**
+     * Find value at given path
+     * @param obj
+     * @param path
+     */
+    static getValueAtPath(obj: { [key: string]: any }, path: string): any {
+        const chunks = path.split('.');
+
+        let subPath = '$';
+        for (let i = 1; i < chunks.length; i++) {
+            const name = chunks[i];
+
+            if (isMissing(obj) || !isObject(obj)) {
+                throw new Error(
+                    `Unable to get value at path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                );
+            }
+
+            subPath += '.' + name;
+            obj = obj[name];
+        }
+
+        return obj;
+    }
+
+    /**
      * Assign value to context object's field
      * @param {object} obj
      * @param {string} path
@@ -293,11 +280,54 @@ export class ContextUtil {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
-        const chunks = path.split('.');
-        const fieldName = chunks[chunks.length - 1];
-        const parentPath = path.substring(0, path.length - (fieldName.length + 1));
+        const fieldName = path.split('.').pop();
+        const parentPath = ContextUtil.getParentPath(path);
 
         ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
+    }
+
+    /**
+     * Add child properties based on path if they're not presented.
+     * @param obj
+     * @param path
+     */
+    static instantiateObjectPath(obj: { [key: string]: any }, path: string): void {
+        if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
+            throw new Error(`Unable to instantiate child properties based on path "${path}". Path has invalid format.`);
+        }
+
+        const chunks = path.split('.');
+        let subPath = '$';
+        for (let i = 1; i < chunks.length; i++) {
+            const name = chunks[i];
+            const value = obj[name];
+            subPath += '.' + name;
+
+            if (value !== undefined && !isObject(value)) {
+                throw new Error(
+                    `Unable to instantiate child properties based on path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                );
+            }
+
+            obj[name] = {};
+            obj = obj[name];
+        }
+    }
+
+    /**
+     * Get parent path of given one
+     * @param path
+     * @returns parent path relative to given one
+     */
+    static getParentPath(path: string): string {
+        if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
+            throw new Error(`Unable to get parent path of "${path}". Path has invalid format.`);
+        }
+
+        const chunks = path.split('.');
+        chunks.pop();
+
+        return chunks.join('.');
     }
 
     /**
@@ -345,11 +375,11 @@ export class ContextUtil {
      * @param parameters
      */
     public static resolveReferences(options: any, context: IContext, parameters: IDelegatedParameters): any {
-        if (ContextUtil.isMissing(options)) {
+        if (isMissing(options)) {
             return options;
         }
 
-        if (ContextUtil.isBasicType(options)) {
+        if (isBasicType(options)) {
             // if options is string - check if it matches pattern
             if (typeof options === 'string') {
                 const match = options.match(ContextUtil.REFERENCE_REGEX);
@@ -374,7 +404,7 @@ export class ContextUtil {
                     if (match[2]) {
                         const chunks = match[2].substring(1).split('.');
                         for (const subPath of chunks) {
-                            if (!ContextUtil.isObject(target)) {
+                            if (!isObject(target)) {
                                 throw new Error(
                                     `Unable to find reference match for "$.${match[1]}${
                                         match[2]

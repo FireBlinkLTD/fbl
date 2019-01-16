@@ -1,11 +1,20 @@
 import { Inject, Service } from 'typedi';
 import * as commander from 'commander';
+import { collideUnsafe, isObject, collide } from 'object-collider';
 import * as colors from 'colors';
 import { FlowService, FBLService, LogService } from './index';
 import { exists } from 'fs';
 import { promisify } from 'util';
 import { resolve } from 'path';
-import { IContext, IFlowLocationOptions, IPlugin, IReport, ISummaryRecord } from '../interfaces';
+import {
+    IContext,
+    IFlowLocationOptions,
+    IPlugin,
+    IReport,
+    ISummaryRecord,
+    IFBLGlobalConfig,
+    IDelegatedParameters,
+} from '../interfaces';
 import { ContextUtil, FSUtil } from '../utils';
 import { TempPathsRegistry } from './TempPathsRegistry';
 import { table } from 'table';
@@ -16,16 +25,11 @@ const cliui = require('cliui');
 
 @Service()
 export class CLIService {
-    private colors = false;
+    private globalConfig: IFBLGlobalConfig;
     private flowFilePath: string;
     private flowTarget: string;
-    private useCache: boolean;
-    private reportFilePath?: string;
-    private reportFormat?: string;
-    private globalEJSDelimiter?: string;
-    private localEJSDelimiter?: string;
 
-    private plugins = [
+    private static CORE_PLUGINS = [
         __dirname + '/../plugins/context',
         __dirname + '/../plugins/exec',
         __dirname + '/../plugins/flow',
@@ -34,11 +38,6 @@ export class CLIService {
         __dirname + '/../plugins/reporters',
         __dirname + '/../plugins/templateUtilities',
     ];
-
-    private configKVPairs: string[] = [];
-    private secretKVPairs: string[] = [];
-    private reportKVPairs: string[] = [];
-    private httpHeaders: { [key: string]: string } = {};
 
     @Inject(() => FBLService)
     fbl: FBLService;
@@ -53,63 +52,83 @@ export class CLIService {
     logService: LogService;
 
     async run(): Promise<void> {
-        await this.readGlobalConfig();
-        this.parseParameters();
+        this.globalConfig = {};
 
-        if (this.colors) {
-            colors.enable();
-        } else {
+        await this.readGlobalConfig();
+        this.globalConfig.plugins.push(...CLIService.CORE_PLUGINS);
+
+        await this.parseParameters();
+
+        if (this.globalConfig.other.noColors) {
             colors.disable();
+        } else {
+            colors.enable();
         }
 
-        if (this.reportFilePath) {
+        if (commander.unsafePlugins) {
+            this.fbl.allowUnsafePlugins = true;
+        }
+
+        if (commander.unsafeFlows) {
+            this.fbl.allowUnsafeFlows = true;
+        }
+
+        if (this.globalConfig.report.output) {
             // enable debug mode when report generation is requested
             this.flowService.debug = true;
         }
 
         await this.registerPlugins();
 
-        if (this.reportFormat) {
-            if (!this.fbl.getReporter(this.reportFormat)) {
-                console.error(`Error: Unable to find reporter: ${this.reportFormat}`);
+        if (this.globalConfig.report.output) {
+            if (!this.fbl.getReporter(this.globalConfig.report.type)) {
+                console.error(`Error: Unable to find reporter: ${this.globalConfig.report.type}`);
                 commander.outputHelp();
                 process.exit(1);
             }
         }
 
         const context = await this.prepareContext();
+        const parameters = <IDelegatedParameters>{
+            parameters: this.globalConfig.context.parameters,
+        };
 
-        if (this.globalEJSDelimiter) {
-            context.ejsTemplateDelimiters.global = this.globalEJSDelimiter;
+        if (this.globalConfig.other && this.globalConfig.other.globalTemplateDelimiter) {
+            context.ejsTemplateDelimiters.global = this.globalConfig.other.globalTemplateDelimiter;
         }
 
-        if (this.localEJSDelimiter) {
-            context.ejsTemplateDelimiters.local = this.localEJSDelimiter;
+        if (this.globalConfig.other && this.globalConfig.other.localTemplateDelimiter) {
+            context.ejsTemplateDelimiters.local = this.globalConfig.other.localTemplateDelimiter;
         }
 
         const flow = await this.flowService.readFlowFromFile(
             <IFlowLocationOptions>{
                 path: FSUtil.getAbsolutePath(this.flowFilePath, process.cwd()),
                 http: {
-                    headers: this.httpHeaders,
+                    headers: this.globalConfig.http && this.globalConfig.http.headers,
                 },
                 target: this.flowTarget,
-                cache: this.useCache,
+                cache: this.globalConfig.other.useCache,
             },
             context,
             new ActionSnapshot('', {}, process.cwd(), 0, {}),
-            {},
+            parameters,
         );
 
-        const initialContextState = this.reportFilePath
-            ? JSON.parse(JSON.stringify(ContextUtil.toBase(context)))
-            : null;
+        let initialContextState;
+        let finalContextState;
 
-        const snapshot = await this.fbl.execute(flow.wd, flow.flow, context, {});
+        if (this.globalConfig.report.output) {
+            initialContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+        }
 
-        const finalContextState = this.reportFilePath ? JSON.parse(JSON.stringify(ContextUtil.toBase(context))) : null;
+        const snapshot = await this.fbl.execute(flow.wd, flow.flow, context, parameters);
 
-        if (this.reportFilePath) {
+        if (this.globalConfig.report.output) {
+            finalContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+        }
+
+        if (this.globalConfig.report.output) {
             const report = <IReport>{
                 context: {
                     initial: initialContextState,
@@ -118,11 +137,10 @@ export class CLIService {
                 snapshot: snapshot,
             };
 
-            const options = {};
-            await this.convertKVPairs(this.reportKVPairs, options);
-
             // generate report
-            await this.fbl.getReporter(this.reportFormat).generate(this.reportFilePath, options, report);
+            await this.fbl
+                .getReporter(this.globalConfig.report.type)
+                .generate(this.globalConfig.report.output, this.globalConfig.report.options, report);
         }
 
         // remove all temp files and folders
@@ -189,76 +207,52 @@ export class CLIService {
         const globalConfigPath = resolve(FlowService.getHomeDir(), 'config');
         const globalConfigExists = await promisify(exists)(globalConfigPath);
 
+        this.globalConfig = <IFBLGlobalConfig>{
+            plugins: [],
+            context: {
+                ctx: {},
+                secrets: {},
+                parameters: {},
+            },
+            report: {
+                options: {},
+            },
+            http: {
+                headers: {},
+            },
+            other: {},
+        };
+
         if (globalConfigExists) {
-            const globalConfig = await FSUtil.readYamlFromFile(globalConfigPath);
-
-            /* istanbul ignore else */
-            if (globalConfig.plugins) {
-                this.plugins.push(...globalConfig.plugins);
-            }
-
-            /* istanbul ignore else */
-            if (globalConfig.context) {
-                this.configKVPairs.push(...globalConfig.context);
-            }
-
-            /* istanbul ignore else */
-            if (globalConfig.secrets) {
-                this.secretKVPairs.push(...globalConfig.secrets);
-            }
-
-            /* istanbul ignore else */
-            if (globalConfig['no-colors']) {
-                this.colors = false;
-            }
-
-            /* istanbul ignore else */
-            if (globalConfig['global-template-delimiter']) {
-                this.globalEJSDelimiter = globalConfig['global-template-delimiter'];
-            }
-
-            /* istanbul ignore else */
-            if (globalConfig['local-template-delimiter']) {
-                this.localEJSDelimiter = globalConfig['local-template-delimiter'];
-            }
+            const config: IFBLGlobalConfig = await FSUtil.readYamlFromFile(globalConfigPath);
+            collideUnsafe(this.globalConfig, config);
         }
     }
 
     /**
      * Parse parameters passed via CLI
      */
-    private parseParameters(): void {
+    private async parseParameters(): Promise<void> {
+        const assign: string[] = [];
+        const reportOptions: string[] = [];
         const options: { flags: string; description: string[]; fn?: Function }[] = [
             {
                 flags: '-p --plugin <file>',
                 description: ['Plugin file.'],
                 fn: (val: string) => {
-                    this.plugins.push(val);
+                    this.globalConfig.plugins.push(val);
                 },
             },
 
             {
-                flags: '-c --context <key=value>',
+                flags: '-a --assign <key=value>',
                 description: [
-                    'Key value pair of default context values.',
-                    'Expected key format: $[.<parent>][.child][...]',
+                    'Assign key value pair as default values for cxt, secrets or parameters.',
+                    'Expected key format: $.<ctx | secrets | parameters>[.<parent>][.child][...]',
                     'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
                 ],
                 fn: (val: string) => {
-                    this.configKVPairs.push(val);
-                },
-            },
-
-            {
-                flags: '-s --secret <key=value|name>',
-                description: [
-                    'Key value pair of default secret values. Secrets will not be available in report.',
-                    'Expected key format: $[.<parent>][.child][...]',
-                    'If only key is provided you will be prompted to enter the value in the console.',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
-                ],
-                fn: (val: string) => {
-                    this.secretKVPairs.push(val);
+                    assign.push(val);
                 },
             },
 
@@ -284,7 +278,7 @@ export class CLIService {
                     'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
                 ],
                 fn: (val: string) => {
-                    this.reportKVPairs.push(val);
+                    reportOptions.push(val);
                 },
             },
 
@@ -324,7 +318,7 @@ export class CLIService {
                 description: ['Custom HTTP headers to send with GET request to fetch flow from remote location.'],
                 fn: (val: string) => {
                     const name = val.split(':')[0];
-                    this.httpHeaders[name] = val.substring(name.length + 1).trimLeft();
+                    this.globalConfig.http.headers[name] = val.substring(name.length + 1).trimLeft();
                 },
             },
 
@@ -370,51 +364,42 @@ export class CLIService {
         // parse environment variables
         commander.parse(process.argv);
 
+        for (const v of assign) {
+            await this.convertKVPair(v, this.globalConfig.context);
+        }
+
+        for (const v of reportOptions) {
+            await this.convertKVPair(v, this.globalConfig.report.options);
+        }
+
         if (!commander.file) {
             console.error('Error: flow descriptor file was not provided.');
             commander.outputHelp();
             process.exit(1);
         }
 
-        if (commander.output || commander.report) {
-            if (!commander.output) {
-                console.error('Error: --output parameter is required when --report is provided.');
-                commander.outputHelp();
-                process.exit(1);
-            }
+        this.globalConfig.report.output = commander.output || this.globalConfig.report.output;
+        this.globalConfig.report.type = commander.report || this.globalConfig.report.type;
 
-            if (!commander.report) {
-                console.error('Error: --report parameter is required when --output is provided.');
-                commander.outputHelp();
-                process.exit(1);
-            }
-
-            this.reportFilePath = commander.output;
-            this.reportFormat = commander.report;
+        if (this.globalConfig.report.output && !this.globalConfig.report.type) {
+            console.error('Error: --report parameter is missing.');
+            commander.outputHelp();
+            process.exit(1);
         }
 
         this.flowFilePath = commander.file;
-        this.colors = commander.colors;
+        this.globalConfig.other.noColors = !commander.colors;
+        this.globalConfig.other.useCache = commander.useCache;
+        this.globalConfig.other.allowUnsafePlugins = commander.unsafePlugins;
+        this.globalConfig.other.allowUnsafeFlows = commander.unsafeFlows;
         this.flowTarget = commander.target;
 
-        if (commander.unsafePlugins) {
-            this.fbl.allowUnsafePlugins = true;
-        }
-
-        if (commander.unsafeFlows) {
-            this.fbl.allowUnsafeFlows = true;
-        }
-
-        if (commander.useCache) {
-            this.useCache = true;
-        }
-
         if (commander.globalTemplateDelimiter) {
-            this.globalEJSDelimiter = commander.globalTemplateDelimiter;
+            this.globalConfig.other.globalTemplateDelimiter = commander.globalTemplateDelimiter;
         }
 
         if (commander.localTemplateDelimiter) {
-            this.localEJSDelimiter = commander.localTemplateDelimiter;
+            this.globalConfig.other.localTemplateDelimiter = commander.localTemplateDelimiter;
         }
 
         if (commander.verbose) {
@@ -474,12 +459,11 @@ export class CLIService {
      * Register plugins
      */
     private async registerPlugins(): Promise<void> {
-        const plugins = await Promise.all(
-            this.plugins.map(
-                async (nameOrPath: string): Promise<IPlugin> =>
-                    await FBLService.requirePlugin(nameOrPath, process.cwd()),
-            ),
-        );
+        const plugins: IPlugin[] = [];
+        for (const nameOrPath of this.globalConfig.plugins) {
+            const plugin = await FBLService.requirePlugin(nameOrPath, process.cwd());
+            plugins.push(plugin);
+        }
 
         this.fbl.registerPlugins(plugins);
         await this.fbl.validatePlugins(process.cwd());
@@ -491,55 +475,57 @@ export class CLIService {
      */
     private async prepareContext(): Promise<IContext> {
         const context = ContextUtil.generateEmptyContext();
-        await this.convertKVPairs(this.configKVPairs, context.ctx);
-        await this.convertKVPairs(this.secretKVPairs, context.secrets, true);
+        context.ctx = this.globalConfig.context.ctx;
+        context.secrets = this.globalConfig.context.secrets;
 
         return context;
     }
 
     /**
      * Convert key=value pairs into object
-     * @param {string[]} pairs
+     * @param {string} kv key/value pair string
      * @param target
      * @param secret
      */
-    private async convertKVPairs(pairs: string[], target: any, secret?: boolean): Promise<void> {
-        await Promise.all(
-            pairs.map(
-                async (kv: string): Promise<void> => {
-                    const chunks = kv.split('=');
-                    if (chunks.length !== 2) {
-                        chunks[1] = (await prompts({
-                            type: 'text',
-                            name: 'value',
-                            style: secret ? 'password' : 'default',
-                            message: `${chunks[0]}: `,
-                        })).value;
-                    }
+    private async convertKVPair(kv: string, target: any): Promise<void> {
+        const chunks = kv.split('=');
+        if (chunks.length !== 2) {
+            const secret = chunks[0].startsWith('$.secrets.');
+            chunks[1] = (await prompts({
+                type: 'text',
+                name: 'value',
+                style: secret ? 'password' : 'default',
+                message: `${chunks[0]}: `,
+            })).value;
+        }
 
-                    let value;
-                    let isObject = false;
-                    if (chunks[1][0] === '@') {
-                        const file = chunks[1].substring(1);
-                        value = await FSUtil.readYamlFromFile(file);
+        let value;
+        let isObj = false;
+        const path = chunks[0];
+        if (chunks[1][0] === '@') {
+            const file = chunks[1].substring(1);
+            value = await FSUtil.readYamlFromFile(file);
 
-                        // validate file content to be object
-                        isObject = ContextUtil.isObject(value);
-                    } else {
-                        value = chunks[1];
-                    }
+            // validate file content to be object
+            isObj = isObject(value);
+        } else {
+            value = chunks[1];
+        }
 
-                    if (chunks[0] === '$') {
-                        if (isObject) {
-                            ContextUtil.assign(target, chunks[0], value, false);
-                        } else {
-                            throw new Error('Unable to assign non-object value to root path "$"');
-                        }
-                    } else {
-                        ContextUtil.assignToField(target, chunks[0], value, false);
-                    }
-                },
-            ),
-        );
+        if (path === '$') {
+            if (isObj) {
+                collide(target, value);
+            } else {
+                throw new Error('Unable to assign non-object value to root path "$"');
+            }
+        } else {
+            const parentPath = ContextUtil.getParentPath(path);
+            if (parentPath !== '$') {
+                ContextUtil.instantiateObjectPath(target, parentPath);
+            }
+
+            const parent = ContextUtil.getValueAtPath(target, parentPath);
+            collideUnsafe(parent, { [path.split('.').pop()]: value });
+        }
     }
 }
