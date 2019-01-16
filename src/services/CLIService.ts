@@ -1,6 +1,6 @@
 import { Inject, Service } from 'typedi';
 import * as commander from 'commander';
-import { collideUnsafe, isObject } from 'object-collider';
+import { collideUnsafe, isObject, collide } from 'object-collider';
 import * as colors from 'colors';
 import { FlowService, FBLService, LogService } from './index';
 import { exists } from 'fs';
@@ -15,7 +15,7 @@ import {
     IFBLGlobalConfig,
     IDelegatedParameters,
 } from '../interfaces';
-import { ContextUtil, FSUtil, DeepMergeUtil } from '../utils';
+import { ContextUtil, FSUtil } from '../utils';
 import { TempPathsRegistry } from './TempPathsRegistry';
 import { table } from 'table';
 import { ActionSnapshot } from '../models';
@@ -514,7 +514,7 @@ export class CLIService {
 
         if (path === '$') {
             if (isObj) {
-                DeepMergeUtil.merge(target, value);
+                collide(target, value);
             } else {
                 throw new Error('Unable to assign non-object value to root path "$"');
             }

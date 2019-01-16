@@ -15,6 +15,7 @@ import * as got from 'got';
 import { TempPathsRegistry } from './TempPathsRegistry';
 import { homedir } from 'os';
 import { LogService } from './LogService';
+import { isMissing } from 'object-collider';
 
 const ejsLint = require('ejs-lint');
 const uuidv5 = require('uuid/v5');
@@ -423,7 +424,7 @@ export class FlowService {
                     return `"${value.replace(/"/g, '\\"')}"`;
                 }
 
-                if (ContextUtil.isMissing(value)) {
+                if (isMissing(value)) {
                     return 'null';
                 }
 
