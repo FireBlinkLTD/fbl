@@ -281,6 +281,31 @@ export class ContextUtil {
     }
 
     /**
+     * Find value at given path
+     * @param obj
+     * @param path
+     */
+    static getValueAtPath(obj: { [key: string]: any }, path: string): any {
+        const chunks = path.split('.');
+
+        let subPath = '$';
+        for (let i = 1; i < chunks.length; i++) {
+            const name = chunks[i];
+
+            if (ContextUtil.isMissing(obj) || !ContextUtil.isObject(obj)) {
+                throw new Error(
+                    `Unable to get value at path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                );
+            }
+
+            subPath += '.' + name;
+            obj = obj[name];
+        }
+
+        return obj;
+    }
+
+    /**
      * Assign value to context object's field
      * @param {object} obj
      * @param {string} path
@@ -293,11 +318,54 @@ export class ContextUtil {
             throw new Error(`Unable to assign value to path "${path}". Path has invalid format.`);
         }
 
-        const chunks = path.split('.');
-        const fieldName = chunks[chunks.length - 1];
-        const parentPath = path.substring(0, path.length - (fieldName.length + 1));
+        const fieldName = path.split('.').pop();
+        const parentPath = ContextUtil.getParentPath(path);
 
         ContextUtil.assign(obj, parentPath, { [fieldName]: value }, false);
+    }
+
+    /**
+     * Add child properties based on path if they're not presented.
+     * @param obj
+     * @param path
+     */
+    static instantiateObjectPath(obj: { [key: string]: any }, path: string): void {
+        if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
+            throw new Error(`Unable to instantiate child properties based on path "${path}". Path has invalid format.`);
+        }
+
+        const chunks = path.split('.');
+        let subPath = '$';
+        for (let i = 1; i < chunks.length; i++) {
+            const name = chunks[i];
+            const value = obj[name];
+            subPath += '.' + name;
+
+            if (value !== undefined && !ContextUtil.isObject(value)) {
+                throw new Error(
+                    `Unable to instantiate child properties based on path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                );
+            }
+
+            obj[name] = {};
+            obj = obj[name];
+        }
+    }
+
+    /**
+     * Get parent path of given one
+     * @param path
+     * @returns parent path relative to given one
+     */
+    static getParentPath(path: string): string {
+        if (!ContextUtil.FIELD_PATH_REGEX.test(path)) {
+            throw new Error(`Unable to get parent path of "${path}". Path has invalid format.`);
+        }
+
+        const chunks = path.split('.');
+        chunks.pop();
+
+        return chunks.join('.');
     }
 
     /**

@@ -1,11 +1,11 @@
-import {suite, test} from 'mocha-typescript';
-import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
-import {RepeatFlowActionHandler} from '../../../../src/plugins/flow/RepeatFlowActionHandler';
-import {IActionHandlerMetadata, IPlugin, IDelegatedParameters} from '../../../../src/interfaces';
-import {Container} from 'typedi';
+import { suite, test } from 'mocha-typescript';
+import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
+import { RepeatFlowActionHandler } from '../../../../src/plugins/flow/RepeatFlowActionHandler';
+import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { Container } from 'typedi';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils';
+import { ContextUtil } from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,33 +15,35 @@ const plugin: IPlugin = {
     name: 'test',
     version: '1.0.0',
     requires: {
-        fbl: '>=0.0.0'
-    }
+        fbl: '>=0.0.0',
+    },
 };
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'repeat.iteration.handler';
 
-    constructor(
-        private fn: Function
-    ) {
+    constructor(private fn: Function) {
         super();
     }
 
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
-            id: DummyActionHandler.ID
+        return <IActionHandlerMetadata>{
+            id: DummyActionHandler.ID,
         };
     }
 
-    async execute(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+    async execute(
+        options: any,
+        context: any,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<void> {
         await this.fn(options, context, snapshot, parameters);
     }
 }
 
 @suite()
 class RepeatFlowActionHandlerTestSuite {
-
     after() {
         Container.reset();
     }
@@ -52,52 +54,64 @@ class RepeatFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate('test', context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+
         await chai.expect(
-            actionHandler.validate(123, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    times: 1,
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context, snapshot, {})
+            actionHandler.validate(
+                {
+                    times: 1,
+                    action: [],
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    times: 1,
+                    action: {
+                        min: 1,
+                        max: 2,
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                times: 1
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                times: 1,
-                action: []
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                times: 1,
-                action: {
-                    min: 1,
-                    max: 2
-                }
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                times: 0,
-                action: {
-                    min: 1
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    times: 0,
+                    action: {
+                        min: 1,
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -108,12 +122,17 @@ class RepeatFlowActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({
-                times: 1,
-                action: {
-                    min: 1
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    times: 1,
+                    action: {
+                        min: 1,
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
     }
 
@@ -139,9 +158,9 @@ class RepeatFlowActionHandlerTestSuite {
             times: 3,
             action: {
                 [DummyActionHandler.ID]: {
-                    index: '<%- iteration.index %>'
-                }
-            }
+                    index: '<%- iteration.index %>',
+                },
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -175,10 +194,10 @@ class RepeatFlowActionHandlerTestSuite {
             times: 3,
             action: {
                 [DummyActionHandler.ID]: {
-                    index: '<%- iteration.index %>'
-                }
+                    index: '<%- iteration.index %>',
+                },
             },
-            async: true
+            async: true,
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -198,39 +217,46 @@ class RepeatFlowActionHandlerTestSuite {
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
-        const parameters = <IDelegatedParameters> {
+        const parameters = <IDelegatedParameters>{
             parameters: {
-                test: []
-            }
+                test: [],
+            },
         };
 
         const results: number[] = [];
-        const dummyActionHandler = new DummyActionHandler(async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-            results.push(_options);
-            _parameters.parameters.test.push(_options); 
-        });
+        const dummyActionHandler = new DummyActionHandler(
+            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+                results.push(_options);
+                _parameters.parameters.test.push(_options);
+            },
+        );
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             shareParameters: true,
             times: 2,
             action: {
-                [DummyActionHandler.ID]: '<%- iteration.index %>'                
+                [DummyActionHandler.ID]: '<%- iteration.index %>',
             },
-            async: true
+            async: true,
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, parameters);        
-
-        console.log(snapshot.getSteps());
+        const snapshot = await flowService.executeAction(
+            '.',
+            actionHandler.getMetadata().id,
+            {},
+            options,
+            context,
+            parameters,
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results.length, 2);
         assert(results.indexOf(0) >= 0);
-        assert(results.indexOf(1) >= 0);            
+        assert(results.indexOf(1) >= 0);
         assert.strictEqual(parameters.parameters.test.length, 2);
         assert(parameters.parameters.test.indexOf(0) >= 0);
-        assert(parameters.parameters.test.indexOf(1) >= 0);    
+        assert(parameters.parameters.test.indexOf(1) >= 0);
     }
 }

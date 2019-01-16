@@ -78,10 +78,6 @@ export class FlowService {
         parameters: IDelegatedParameters,
     ): Promise<ActionSnapshot> {
         if (metadata && metadata.$parameters) {
-            /* istanbul ignore else */
-            if (!parameters.parameters) {
-                parameters.parameters = {};
-            }
             ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
         }
 
@@ -480,10 +476,10 @@ export class FlowService {
         const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
         const doubleQuotesRegEx = /''/g;
         tpl.split('\n').forEach(line => {
-            if (line.indexOf('\'\'') !== -1) {
+            if (line.indexOf("''") !== -1) {
                 // we only want to replace '' to ' inside the EJS template
                 line = line.replace(ejsTemplateRegEx, function(match, g1): string {
-                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, '\'')}${delimiter}>`;
+                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, "'")}${delimiter}>`;
                 });
             }
 

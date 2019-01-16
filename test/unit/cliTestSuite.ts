@@ -10,7 +10,7 @@ import { IActionStep } from '../../src/models';
 import { ContextUtil, FSUtil } from '../../src/utils';
 import { DummyServerWrapper, IDummyServerWrapperConfig } from '../assets/dummy.http.server.wrapper';
 import { c } from 'tar';
-import { IContextBase, IReport, ISummaryRecord } from '../../src/interfaces';
+import { IContextBase, IReport, ISummaryRecord, IFBLGlobalConfig } from '../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -180,16 +180,16 @@ class CliTestSuite {
         const result = await CliTestSuite.exec(
             [
                 '--no-colors',
-                '-c',
-                '$.ct=yes',
-                '-c',
-                `$=@${contextFile}`,
-                '-s',
-                '$.st=yes',
+                '-a',
+                '$.ctx.ct=yes',
+                '-a',
+                `$.ctx=@${contextFile}`,
+                '-a',
+                '$.secrets.st=yes',
                 '-p',
                 `${__dirname}/../../src/plugins/flow`,
-                '-s',
-                `$=@${secretsFile}`,
+                '-a',
+                `$.secrets=@${secretsFile}`,
                 '-o',
                 reportFile,
                 '-r',
@@ -208,7 +208,6 @@ class CliTestSuite {
         assert(reportJson.length > 0);
 
         const report = JSON.parse(reportJson);
-
         assert.deepStrictEqual(report.context.initial, <IContextBase>{
             ctx: {
                 ct: 'yes',
@@ -270,13 +269,9 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        let result = await CliTestSuite.exec(['-r', 'json', flowFile]);
+        let result = await CliTestSuite.exec(['-o', '/tmp/report.json', flowFile]);
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Error: --output parameter is required when --report is provided.');
-
-        result = await CliTestSuite.exec(['-o', '/tmp/report.json', flowFile]);
-        assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'Error: --report parameter is required when --output is provided.');
+        assert.strictEqual(result.stderr, 'Error: --report parameter is missing.');
 
         result = await CliTestSuite.exec(['-o', '/tmp/report.json', '-r', 'unknown', flowFile]);
         assert.strictEqual(result.code, 1);
@@ -292,7 +287,7 @@ class CliTestSuite {
             flowFile,
         ]);
         assert.strictEqual(result.code, 1);
-        assert.strictEqual(result.stderr, 'ENOENT: no such file or directory, open \'missing.file\'');
+        assert.strictEqual(result.stderr, "ENOENT: no such file or directory, open 'missing.file'");
     }
 
     @test()
@@ -316,8 +311,15 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(['-c', '$.ct.yes', '-s', '$.st=yes', flowFile], 'prompt_value');
+        let result = await CliTestSuite.exec(
+            ['-a', '$.ctx.ct.yes', '-a', '$.secrets.st=yes', flowFile],
+            'prompt_value',
+        );
+        if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
 
+        result = await CliTestSuite.exec(['-a', '$.ctx.ct.yes=yes', '-a', '$.secrets.st', flowFile], 'prompt_value');
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
@@ -345,7 +347,7 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(['-c', '$.ct=yes', '-s', '$.st.yes', flowFile], 'prompt_value');
+        const result = await CliTestSuite.exec(['-a', '$.ctx.ct=yes', '-a', '$.secrets.st=yes', flowFile]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -364,8 +366,6 @@ class CliTestSuite {
                         inline: {
                             ct: '<%- ctx.ct %>',
                             st: '<%- secrets.st %>',
-                            custom_ct: '<%- ctx.custom_ct %>',
-                            custom_st: '<%- secrets.custom_st %>',
                         },
                     },
                 },
@@ -389,13 +389,21 @@ class CliTestSuite {
         await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
         await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
 
-        const globalConfig = {
+        const globalConfig = <IFBLGlobalConfig>{
             plugins: [`${__dirname}/../../src/plugins/flow`],
-            context: ['$.ct=yes', `$=@${contextFile}`],
-            secrets: ['$.st=yes', `$=@${secretsFile}`],
-            'no-colors': true,
-            'global-template-delimiter': '$',
-            'local-template-delimiter': '%',
+            context: {
+                ctx: {
+                    ct: 'yes',
+                },
+                secrets: {
+                    st: 'yes',
+                },
+            },
+            other: {
+                noColors: true,
+                globalTemplateDelimiter: '$',
+                localTemplateDelimiter: '%',
+            },
         };
 
         await promisify(writeFile)(CliTestSuite.getGlobalConfigPath(), dump(globalConfig), 'utf8');
@@ -418,8 +426,6 @@ class CliTestSuite {
                     test: {
                         ct: 'yes',
                         st: 'yes',
-                        custom_ct: 'file1',
-                        custom_st: 'file2',
                     },
                 },
             },
@@ -466,7 +472,7 @@ class CliTestSuite {
                 ctx: {
                     '$.test': {
                         inline: {
-                            ct: true,
+                            ct: 'true',
                         },
                     },
                 },
@@ -476,8 +482,33 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec(['-c', '$=test', '--no-colors', flowFile]);
+        let result = await CliTestSuite.exec(['-a', '$=test', '--no-colors', flowFile]);
         assert.strictEqual(result.code, 1);
+
+        const contextFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(
+            contextFile,
+            dump({
+                ctx: 'test',
+            }),
+            'utf8',
+        );
+
+        result = await CliTestSuite.exec(['-a', `$=@${contextFile}`, '--no-colors', flowFile]);
+        assert.strictEqual(result.code, 1);
+
+        await promisify(writeFile)(
+            contextFile,
+            dump({
+                ctx: {
+                    a: 'test',
+                },
+            }),
+            'utf8',
+        );
+
+        result = await CliTestSuite.exec(['-a', `$=@${contextFile}`, '--no-colors', flowFile]);
+        assert.strictEqual(result.code, 0);
     }
 
     @test()
@@ -961,7 +992,7 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
-        const result = await CliTestSuite.exec([flowFile], 'prompt_value');
+        const result = await CliTestSuite.exec([flowFile]);
 
         if (result.code === 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -981,10 +1012,15 @@ class CliTestSuite {
 
         await promisify(writeFile)(ctxFile, '[1]', 'utf8');
 
-        const result = await CliTestSuite.exec(
-            ['-o', reportFile, '-r', 'json', '-c', `$.array=@${ctxFile}`, flowFile],
-            'prompt_value',
-        );
+        const result = await CliTestSuite.exec([
+            '-o',
+            reportFile,
+            '-r',
+            'json',
+            '-a',
+            `$.ctx.array=@${ctxFile}`,
+            flowFile,
+        ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1019,7 +1055,7 @@ class CliTestSuite {
         const flowFile = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(flowFile, flow, 'utf8');
 
-        let result = await CliTestSuite.exec(['-o', reportFile, '-r', 'json', flowFile], 'prompt_value');
+        let result = await CliTestSuite.exec(['-o', reportFile, '-r', 'json', flowFile]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1043,7 +1079,7 @@ class CliTestSuite {
 
         await promisify(writeFile)(flowFile, flow, 'utf8');
 
-        result = await CliTestSuite.exec(['--no-colors', '--verbose', flowFile], 'prompt_value');
+        result = await CliTestSuite.exec(['--no-colors', '--verbose', flowFile]);
 
         if (result.code === 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
@@ -1054,7 +1090,7 @@ class CliTestSuite {
 
     @test()
     async outputHelp(): Promise<void> {
-        const result = await CliTestSuite.exec(['-h'], 'prompt_value');
+        const result = await CliTestSuite.exec(['-h']);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
