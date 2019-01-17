@@ -40,7 +40,7 @@
     "ejs": "2.6.1",
     "ejs-lint": "0.3.0",
     "glob-promise": "3.4.0",
-    "got": "9.5.1",
+    "got": "9.6.0",
     "humanize-duration": "3.17.0",
     "joi": "14.3.1",
     "js-yaml": "3.12.1",
