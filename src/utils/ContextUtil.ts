@@ -300,7 +300,7 @@ export class ContextUtil {
         let subPath = '$';
         for (let i = 1; i < chunks.length; i++) {
             const name = chunks[i];
-            const value = obj[name];
+            let value = obj[name];
             subPath += '.' + name;
 
             if (value !== undefined && !isObject(value)) {
@@ -309,7 +309,9 @@ export class ContextUtil {
                 );
             }
 
-            obj[name] = {};
+            if (!value) {
+                value = obj[name] = {};
+            }
             obj = obj[name];
         }
     }

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.5.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.5.1) - 2019-01-17
+
+### Fixed
+
+- [\#304](https://github.com/FireBlinkLTD/fbl/issues/304) - CLI assignment no longer overrides values when multiple assignment arguments passed to the same parent path.
+
+### Changes
+
 ## [1.5.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.5.0) - 2019-01-16
 
 ### Changes

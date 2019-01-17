@@ -183,6 +183,8 @@ class CliTestSuite {
                 '-a',
                 '$.ctx.ct=yes',
                 '-a',
+                '$.ctx.ct2=no',
+                '-a',
                 `$.ctx=@${contextFile}`,
                 '-a',
                 '$.secrets.st=yes',
@@ -211,6 +213,7 @@ class CliTestSuite {
         assert.deepStrictEqual(report.context.initial, <IContextBase>{
             ctx: {
                 ct: 'yes',
+                ct2: 'no',
                 custom_ct: 'file1',
             },
             summary: <ISummaryRecord[]>[],
@@ -220,6 +223,7 @@ class CliTestSuite {
         assert.deepStrictEqual(report.context.final, <IContextBase>{
             ctx: {
                 ct: 'yes',
+                ct2: 'no',
                 custom_ct: 'file1',
                 test: {
                     ct: 'yes',
