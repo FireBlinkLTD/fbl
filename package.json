@@ -21,7 +21,7 @@
   "scripts": {
     "commit": "npx git-cz",
     "start": "node dist/src/cli.js",
-    "test": "rimraf ./coverage/ && nyc mocha",
+    "test": "rimraf ./coverage/ && nyc --reporter=html --reporter=text mocha",
     "build": "rimraf ./dist/ && tsc",
     "lint": "tslint -c tslint.json src/**/*.ts test/**/*.ts index.ts",
     "prettify": "prettier src/**/*.{md,ts,json} test/**/*.{md,ts,json} index.{md,ts,json} --write --config .prettierrc.yml && tslint 'src/**/*.ts' 'test/**/*.ts' 'index.ts' --fix",
