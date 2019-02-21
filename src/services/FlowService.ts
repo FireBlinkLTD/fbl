@@ -2,7 +2,7 @@ import { ActionHandlersRegistry } from './ActionHandlersRegistry';
 import { IContext, IDelegatedParameters, IFlow, IFlowLocationOptions } from '../interfaces';
 import { safeLoad, dump } from 'js-yaml';
 import { Options, render } from 'ejs';
-import { ActionHandler, ActionSnapshot } from '../models';
+import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../models';
 import { Inject, Service } from 'typedi';
 import { ContextUtil, FSUtil } from '../utils';
 import { IMetadata } from '../interfaces/IMetadata';
@@ -84,7 +84,14 @@ export class FlowService {
 
         const idx = ++this.index;
         this.logService.info(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
-        const snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
+
+        let snapshot: ActionSnapshot;
+        if (this.debug) {
+            snapshot = new EnabledActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
+        } else {
+            snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
+        }
+
         try {
             let handler = this.actionHandlersRegistry.find(idOrAlias);
             if (!handler) {

@@ -1,5 +1,5 @@
 import { Container } from 'typedi';
-import { FlowService, LogService } from '../services';
+import { LogService } from '../services';
 import { IContext } from '../interfaces';
 import { IMetadata } from '../interfaces/IMetadata';
 import { ContextUtil } from '../utils';
@@ -9,16 +9,16 @@ const humanizeDuration = require('humanize-duration');
 const deepObjectDiff = require('deep-object-diff');
 
 export class ActionSnapshot {
-    private previousContextState: IContext;
+    previousContextState: IContext;
 
-    private createdAt: Date;
-    private completedAt: Date;
-    private steps: IActionStep[];
+    createdAt: Date;
+    completedAt: Date;
+    steps: IActionStep[];
 
-    public successful: boolean;
-    public childFailure: boolean;
-    public ignoreChildFailure = false;
-    public duration = 0;
+    successful: boolean;
+    childFailure: boolean;
+    ignoreChildFailure = false;
+    duration = 0;
 
     constructor(
         public idOrAlias: string,
@@ -64,64 +64,6 @@ export class ActionSnapshot {
      */
     setActionHandlerId(id: string) {
         this.registerStep('actionHandler', id);
-    }
-
-    /**
-     * Set initial context state before applying any actions
-     * @param {IContext} context
-     */
-    setInitialContextState(context: IContext) {
-        if (Container.get(FlowService).debug) {
-            this.previousContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
-        }
-    }
-
-    /**
-     * Register context
-     * @param context
-     */
-    setContext(context: IContext) {
-        if (Container.get(FlowService).debug) {
-            // only selected fields should be exposed
-            const newState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
-
-            // extract diff
-            const diff = deepObjectDiff.detailedDiff(this.previousContextState, newState);
-            this.previousContextState = newState;
-
-            const changes =
-                Object.keys(diff.added).length + Object.keys(diff.deleted).length + Object.keys(diff.updated).length;
-
-            // store diff
-            if (changes > 0) {
-                this.registerStep('context', diff);
-            }
-        }
-    }
-
-    /**
-     * Register options
-     * @param options
-     */
-    setOptions(options: any) {
-        if (Container.get(FlowService).debug && options) {
-            this.registerStep('options', JSON.parse(JSON.stringify(options)));
-        }
-    }
-
-    /**
-     * Register step. Use this method only when other methods do not suite your needs.
-     * @param {string} type
-     * @param payload
-     */
-    registerStep(type: string, payload?: any) {
-        if (Container.get(FlowService).debug) {
-            this.steps.push(<IActionStep>{
-                type: type,
-                createdAt: new Date(),
-                payload: payload,
-            });
-        }
     }
 
     /**
@@ -186,6 +128,83 @@ export class ActionSnapshot {
      */
     public getSteps(): IActionStep[] {
         return this.steps;
+    }
+
+    /**
+     * Set initial context state before applying any actions
+     * @param {IContext} context
+     */
+    setInitialContextState(context: IContext) {} // tslint:disable-line
+
+    /**
+     * Register step. Use this method only when other methods do not suite your needs.
+     * @param {string} type
+     * @param payload
+     */
+    registerStep(type: string, payload?: any) {} // tslint:disable-line
+
+    /**
+     * Register context
+     * @param context
+     */
+    setContext(context: IContext) {} // tslint:disable-line
+
+    /**
+     * Register options
+     * @param options
+     */
+    setOptions(options: any) {} // tslint:disable-line
+}
+
+export class EnabledActionSnapshot extends ActionSnapshot {
+    constructor(idOrAlias: string, metadata: IMetadata, wd: string, idx: number, parameters: IDelegatedParameters) {
+        super(idOrAlias, metadata, wd, idx, parameters);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    setInitialContextState(context: IContext) {
+        this.previousContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+    }
+
+    /**
+     * Register context
+     * @inheritdoc
+     */
+    setContext(context: IContext) {
+        // only selected fields should be exposed
+        const newState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
+
+        // extract diff
+        const diff = deepObjectDiff.detailedDiff(this.previousContextState, newState);
+        this.previousContextState = newState;
+
+        const changes =
+            Object.keys(diff.added).length + Object.keys(diff.deleted).length + Object.keys(diff.updated).length;
+
+        // store diff
+        if (changes > 0) {
+            this.registerStep('context', diff);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    setOptions(options: any) {
+        this.registerStep('options', JSON.parse(JSON.stringify(options)));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    registerStep(type: string, payload?: any) {
+        this.steps.push(<IActionStep>{
+            type: type,
+            createdAt: new Date(),
+            payload: payload,
+        });
     }
 }
 

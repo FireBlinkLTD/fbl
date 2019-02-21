@@ -208,7 +208,6 @@ export class ParallelFlowActionHandlerTestSuite {
     @test()
     async shareParameters(): Promise<void> {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
-        flowService.debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
