@@ -275,10 +275,10 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
   integrity sha512-2Y8uPt0/jwjhQ6EiluT0XCri1Dbplr0ZxfFXUz+ye13gaqE8u5gL5ppao1JrUYr9cIip5S6MvQzBS7Kke7U9VA==
 
-"@types/ejs@2.6.2":
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-2.6.2.tgz#d59bd4b12114a62d203ed137dbee5bebc2333f93"
-  integrity sha512-Ehk6cOumvNawmngI6pCigAGHa8PipyG1XK9TodqYJOZgrOYWxxtgnTFTVERndcWFfmPu5dx3C/yy0T/NURIylg==
+"@types/ejs@2.6.3":
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-2.6.3.tgz#b6509e9925d7eb5e95c8c73b6492e5baae7c1e6a"
+  integrity sha512-/F+qQ0Fr0Dr1YvHjX+FCvbba4sQ27RdCPDqmP/si0e1v1GOkbQ3VRBvZPSQM7NoQ3iz3SyiJVscCP2f0vKuIhQ==
 
 "@types/events@*":
   version "1.2.0"
