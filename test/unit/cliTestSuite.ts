@@ -1004,6 +1004,23 @@ class CliTestSuite {
     }
 
     @test()
+    async testActionWithoutOption(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow: string = ['version: 1.0.0', 'pipeline:', '  "--":', '    - void'].join('\n');
+
+        const flowFile = await tempPathsRegistry.createTempFile();
+
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        const result = await CliTestSuite.exec([flowFile]);
+
+        if (result.code === 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+    }
+
+    @test()
     async testLocalTemplatePassingValueByReference(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
 
