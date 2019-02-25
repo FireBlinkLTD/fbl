@@ -4,23 +4,24 @@ Flow order control.
 
 Available steps:
 
-* [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution)
-* [parallel \(async\)](flow.md#action-handler-parallel-steps-execution)
-* [attachment](flow.md#action-handler-attached-flow)
-* [repeat](flow.md#action-handler-repeat-flow)
-* [for each of](flow.md#action-handler-for-each)
-* [while](flow.md#action-handler-while)
-* [switch \(conditional\)](flow.md#action-handler-switch-flow)
-* [try-catch-finally](flow.md#action-handler-try---catch---finally-flow)
-* [sleep](flow.md#action-handler-sleep)
-* [template](flow.md#action-handler-template)
-* [virtual](flow.md#action-handler-virtual)
-* [error](flow.md#action-handler-error)
-* [echo](flow.md#action-handler-echo)
+- [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution)
+- [parallel \(async\)](flow.md#action-handler-parallel-steps-execution)
+- [attachment](flow.md#action-handler-attached-flow)
+- [repeat](flow.md#action-handler-repeat-flow)
+- [for each of](flow.md#action-handler-for-each)
+- [while](flow.md#action-handler-while)
+- [switch \(conditional\)](flow.md#action-handler-switch-flow)
+- [try-catch-finally](flow.md#action-handler-try---catch---finally-flow)
+- [sleep](flow.md#action-handler-sleep)
+- [template](flow.md#action-handler-template)
+- [virtual](flow.md#action-handler-virtual)
+- [error](flow.md#action-handler-error)
+- [echo](flow.md#action-handler-echo)
+- [void](flow.md#action-handler-void)
 
 ## Action Handler: Sequential steps execution
 
-Run steps one by one, if any of steps fail - chain of execution will stop on it. 
+Run steps one by one, if any of steps fail - chain of execution will stop on it.
 
 Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Meaning each action will start its own `branch` unless `sharedParameters` option is used.
 
@@ -28,11 +29,11 @@ Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Me
 
 **Aliases:**
 
-* `fbl.flow.sequence`
-* `flow.sequence`
-* `sequence`
-* `sync`
-* `--`
+- `fbl.flow.sequence`
+- `flow.sequence`
+- `sequence`
+- `sync`
+- `--`
 
 **Example 1: Base Declaration**
 
@@ -41,31 +42,32 @@ Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Me
 '--':
   - ctx:
       '.':
-        inline: 
+        inline:
           something: true
-  - ctx: 
+  - ctx:
       fromFile:
-        files: 
+        files:
           - test.yml
 ```
+
 **Example 2: Detailed Declaration**
 
 ```yaml
 # Run actions in a sequence
 '--':
   # [optional] whether to share parameters between actions instead of making a clone.
-  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
   shareParameters: false
-  
+
   # [required] list of actions to invoke in a sequence
   actions:
     - ctx:
         '.':
-          inline: 
+          inline:
             something: true
-    - ctx: 
+    - ctx:
         fromFile:
-          files: 
+          files:
             - test.yml
 ```
 
@@ -79,11 +81,11 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
 
 **Aliases:**
 
-* `fbl.flow.parallel`
-* `flow.parallel`
-* `parallel`
-* `async`
-* `||`
+- `fbl.flow.parallel`
+- `flow.parallel`
+- `parallel`
+- `async`
+- `||`
 
 **Example 1: Base syntax**
 
@@ -92,11 +94,11 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
 '||':
   - ctx:
       '.':
-        inline: 
+        inline:
           something: true
-  - ctx: 
+  - ctx:
       fromFile:
-        files: 
+        files:
           - test.yml
 ```
 
@@ -105,18 +107,18 @@ Run all steps in parallel. If any of steps will fail - it will not affect others
 ```yaml
 '||':
   # [optional] whether to share parameters between actions instead of making a clone.
-  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
   shareParameters: false
 
   # [required] actions to invoke in parallel
-  actions: 
+  actions:
     - ctx:
       '.':
-        inline: 
+        inline:
           something: true
-    - ctx: 
+    - ctx:
       fromFile:
-        files: 
+        files:
           - test.yml
 ```
 
@@ -128,10 +130,10 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 
 **Aliases:**
 
-* `fbl.flow.attachment`
-* `flow.attachment`
-* `attachment`
-* `@`
+- `fbl.flow.attachment`
+- `flow.attachment`
+- `attachment`
+- `@`
 
 **Example 1: Specify flow file**
 
@@ -172,17 +174,17 @@ Allows to reference external flow by its pass. Helps to logically split big flow
 '@':
   # [required] path or url to download the package
   path: http://some.host/flow.tar.gz
-  
+
   # [optional] specify custom flow entry file name inside the package
   target: custom.yml
-  
+
   # [optional] http parameters
-  http: 
+  http:
     # [optional] custom http headers
-    headers: 
+    headers:
       Authorization: Basic YWRtaW46YWRtaW4=
-  
-  # [optional] cache downloaded package inside $FBL_HOME/cache folder 
+
+  # [optional] cache downloaded package inside $FBL_HOME/cache folder
   cache: true
 ```
 
@@ -194,27 +196,27 @@ Repeat action multiple times.
 
 **Aliases:**
 
-* `fbl.flow.repeat`
-* `flow.repeat`
-* `repeat`
+- `fbl.flow.repeat`
+- `flow.repeat`
+- `repeat`
 
 **Example:**
 
 ```yaml
 repeat:
   # [optional] whether to share parameters between actions instead of making a clone.
-  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
   shareParameters: false
-  
+
   # [required] number of iteration
   times: 2
-  
+
   # [optional] whether each iteration should wait previous to complete or run in parallel
   # Default value: false
   async: false
-  
+
   # [required] action to run
-  action: 
+  action:
     # run flow_0.yml and flow_1.yml flows
     @: flow_<%- iteration.index %>.yml
 ```
@@ -227,26 +229,26 @@ Allows to execute action for every item in the array or key of an object.
 
 **Aliases:**
 
-* `fbl.flow.foreach`
-* `flow.foreach`
-* `foreach`
-* `each`
+- `fbl.flow.foreach`
+- `flow.foreach`
+- `foreach`
+- `each`
 
 **Example: Array**
 
 ```yaml
-each:  
+each:
   # [optional] whether to share parameters between actions instead of making a clone of parameters.
-  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
-  shareParameters: false 
-  
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
+  shareParameters: false
+
   # [required] array to iterate over
   of: [1, 2, 3]
-  
+
   # [required] action to invoke on every iteration
   action:
-    ctx: 
-      test_<%- iteration.index %>: 
+    ctx:
+      test_<%- iteration.index %>:
         # assign 1,2,3 to test_0, test_1, test_3
         inline: $ref:iteration.value
 ```
@@ -254,21 +256,21 @@ each:
 **Example: Object**
 
 ```yaml
-each:  
+each:
   # [optional] whether to share parameters between actions instead of making a clone of parameters.
-  # Default value: false, e.g. make cloned parameters for each action in a sequence.  
-  shareParameters: false 
-  
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
+  shareParameters: false
+
   # [required] object to iterate over
-  of: 
+  of:
     a: 1
     b: 2
-  
+
   # [required] action to invoke for each iteration
   action:
-    ctx: 
-      test_<%- iteration.index %>: 
-        # assign 1a to test_0 and b2 to test_1 values        
+    ctx:
+      test_<%- iteration.index %>:
+        # assign 1a to test_0 and b2 to test_1 values
         inline: <%- iteration.value %><%- iteration.name %>
 ```
 
@@ -280,27 +282,27 @@ Allows to run action based on some condition
 
 **Aliases:**
 
-* `fbl.flow.switch`
-* `flow.switch`
-* `switch`
-* `if`
-* `?` 
+- `fbl.flow.switch`
+- `flow.switch`
+- `switch`
+- `if`
+- `?`
 
 **Example:**
 
 ```yaml
-?: 
+?:
   # [required] value to check
   value: <% ctx.test %>
 
   # [requied] actions to run on specific value
   is:
     # execute "foo.yml" if "foo"
-    foo: 
+    foo:
       @: foo.yml
 
     # execute "bar.yml" if "bar"
-    bar: 
+    bar:
       @: bar.yml
 
   # [optional] if no match found "else" handler will get executed
@@ -316,46 +318,46 @@ Runs action till condition is successful or not \(based on configuration\).
 
 **Aliases:**
 
-* `fbl.flow.while`
-* `flow.while`
-* `while`
+- `fbl.flow.while`
+- `flow.while`
+- `while`
 
 **Example: Positive condition check**
 
 ```yaml
 while:
-    # [optional] whether to share parameters between actions instead of making a clone of parameters.
-    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
-    shareParameters: false    
-    
-    # [required] value to check
-    value: <%- ctx.something %>
-    
-    # [required] if value IS equal to provided one - action will get executed
-    is: true
-    
-    # [required] action to run
-    action:
-      '@': something.yml
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
+  shareParameters: false
+
+  # [required] value to check
+  value: <%- ctx.something %>
+
+  # [required] if value IS equal to provided one - action will get executed
+  is: true
+
+  # [required] action to run
+  action:
+    '@': something.yml
 ```
 
 **Example: Negative condition check**
 
 ```yaml
 while:
-    # [optional] whether to share parameters between actions instead of making a clone of parameters.
-    # Default value: false, e.g. make cloned parameters for each action in a sequence.  
-    shareParameters: false  
-    
-    # [required] value to check
-    value: <%- ctx.something %>
-    
-    # [required] if value IS NOT equal to provided one - action will get executed
-    not: true
-    
-    # [required] action to run
-    action:
-      '@': something.yml
+  # [optional] whether to share parameters between actions instead of making a clone of parameters.
+  # Default value: false, e.g. make cloned parameters for each action in a sequence.
+  shareParameters: false
+
+  # [required] value to check
+  value: <%- ctx.something %>
+
+  # [required] if value IS NOT equal to provided one - action will get executed
+  not: true
+
+  # [required] action to run
+  action:
+    '@': something.yml
 ```
 
 ## Action Handler: Sleep
@@ -366,9 +368,9 @@ Sleep for a given amount of seconds.
 
 **Aliases:**
 
-* `fbl.flow.sleep`
-* `flow.sleep`
-* `sleep`
+- `fbl.flow.sleep`
+- `flow.sleep`
+- `sleep`
 
 **Example:**
 
@@ -387,25 +389,25 @@ If catch or finally step block will be failed - this step will also be marked as
 
 **Aliases:**
 
-* `fbl.flow.try`
-* `flow.try`
-* `try`
+- `fbl.flow.try`
+- `flow.try`
+- `try`
 
 **Example:**
 
 ```yaml
 try:
-    # [required] action to run
-    action:
-      @: foo.yml
-    
-    # [optional] call error.yml if foo.yml failed
-    catch:
-      @: error.yml
-    
-    # [optional] call cleanup.yml either after successful execution of foo.yml or error.yml
-    finally:
-      @: cleanup.yml
+  # [required] action to run
+  action:
+    @: foo.yml
+
+  # [optional] call error.yml if foo.yml failed
+  catch:
+    @: error.yml
+
+  # [optional] call cleanup.yml either after successful execution of foo.yml or error.yml
+  finally:
+    @: cleanup.yml
 ```
 
 ## Action Handler: Template
@@ -416,8 +418,7 @@ E.g: following is invalid:
 
 ```yaml
 ctx:
-  something: 
-    <% [1, 2, 3].forEach(item => { %>
+  something: <% [1, 2, 3].forEach(item => { %>
     - <%- item %>
     <% }) %>
 ```
@@ -435,10 +436,10 @@ But there is a template handler that can help you with that.
 
 **Aliases:**
 
-* `fbl.flow.template`
-* `flow.template`
-* `template`
-* `tpl`
+- `fbl.flow.template`
+- `flow.template`
+- `template`
+- `tpl`
 
 **Example:**
 
@@ -466,9 +467,9 @@ Allows to create virtual action handler for another action \(that can be represe
 
 **Aliases:**
 
-* `fbl.flow.virtual`
-* `flow.virtual`
-* `virtual`
+- `fbl.flow.virtual`
+- `flow.virtual`
+- `virtual`
 
 **Example:**
 
@@ -481,27 +482,27 @@ id: handler.id
 aliases:
   - handler.alias
 
-# [optional] JSON Schema of options that can/should be passed to the generated handler     
+# [optional] JSON Schema of options that can/should be passed to the generated handler
 parametersSchema:
   type: object
   properties:
-    test: 
+    test:
       type: string
 
 # [optional] default parameters and merge function
 # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
-# Upon merge arrays will be concatenated.    
+# Upon merge arrays will be concatenated.
 defaults:
   # [required] default values
-  values: 
+  values:
     test: yes
 
   # [optional] merge modification functions for given paths
-  # This is a recommended way of overriding merge behaviour. 
-  # Use "mergeFunction" only when you need to do something really unique.   
-  # "parameters" - represents field state by given path 
+  # This is a recommended way of overriding merge behaviour.
+  # Use "mergeFunction" only when you need to do something really unique.
+  # "parameters" - represents field state by given path
   # "defaults" - its default value if any
-  modifiers: 
+  modifiers:
     $.test: |-
       return parameters + defaults  
 
@@ -515,7 +516,7 @@ defaults:
 # [required] action to invoke
 # Note: upon execution all relative paths for given action will be calculated based on the folder
 # where virtual actually lives. If you need to use relative paths based on the place of invocation
-# use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %> 
+# use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %>
 action:
   # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
   ctx:
@@ -539,9 +540,9 @@ Throw error upon execution with given message.
 
 **Aliases:**
 
-* `fbl.flow.error`
-* `flow.error`
-* `error`
+- `fbl.flow.error`
+- `flow.error`
+- `error`
 
 **Example:**
 
@@ -557,9 +558,9 @@ Print message to console
 
 **Aliases:**
 
-* `fbl.flow.echo`
-* `flow.echo`
-* `echo`
+- `fbl.flow.echo`
+- `flow.echo`
+- `echo`
 
 **Example:**
 
@@ -567,3 +568,22 @@ Print message to console
 echo: 'message'
 ```
 
+## Action Handler: Void
+
+Action handler that does nothing. Main usecase to bypass limitations of other action handlers that require action handler to be provided as an option, but you might not want to do that for some reason.
+
+**ID:** `com.fireblink.fbl.flow.void`
+
+**Aliases:**
+
+- `fbl.flow.void`
+- `flow.void`
+- `void`
+
+**Example:**
+
+```yaml
+pipeline:
+  '--':
+    - void
+```

@@ -1,19 +1,17 @@
-import {suite, test} from 'mocha-typescript';
-import {TempPathsRegistry} from '../../../src/services';
-import {exists, rmdir, unlink} from 'fs';
-import {promisify} from 'util';
+import { suite, test } from 'mocha-typescript';
+import { TempPathsRegistry } from '../../../src/services';
+import { exists, rmdir, unlink } from 'fs';
+import { promisify } from 'util';
 import * as assert from 'assert';
 
 @suite()
 class TempPathsRegistryTestSuite {
-
     @test()
     async testCleanup(): Promise<void> {
         const tempPathsRegistry = new TempPathsRegistry();
         const existsAsync = promisify(exists);
         const unlinkAsync = promisify(unlink);
         const rmdirAsync = promisify(rmdir);
-
 
         // create temp dirs and files with keep option turned on and off
         const keepFalseDir = await tempPathsRegistry.createTempDir(false);

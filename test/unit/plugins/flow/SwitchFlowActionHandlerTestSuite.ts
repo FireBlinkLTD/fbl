@@ -1,11 +1,11 @@
-import {suite, test} from 'mocha-typescript';
-import {SwitchFlowActionHandler} from '../../../../src/plugins/flow/SwitchFlowActionHandler';
-import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {Container} from 'typedi';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
+import { suite, test } from 'mocha-typescript';
+import { SwitchFlowActionHandler } from '../../../../src/plugins/flow/SwitchFlowActionHandler';
+import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
+import { Container } from 'typedi';
+import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IPlugin} from '../../../../src/interfaces';
-import {ContextUtil} from '../../../../src/utils';
+import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
+import { ContextUtil } from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -14,15 +14,13 @@ chai.use(chaiAsPromised);
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
 
-    constructor(
-        private fn: Function
-    ) {
+    constructor(private fn: Function) {
         super();
     }
 
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
-            id: DummyActionHandler.ID
+        return <IActionHandlerMetadata>{
+            id: DummyActionHandler.ID,
         };
     }
 
@@ -35,13 +33,12 @@ const plugin: IPlugin = {
     name: 'test',
     version: '1.0.0',
     requires: {
-        fbl: '>=0.0.0'
-    }
+        fbl: '>=0.0.0',
+    },
 };
 
 @suite()
 export class SwitchFlowActionHandlerTestSuite {
-
     after() {
         Container.reset();
     }
@@ -52,92 +49,143 @@ export class SwitchFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: {},
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: [],
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: {}
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: 123,
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: []
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: 'tst',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: 123
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: 'tst'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    is: 'tst',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'tst'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: 'tst',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                is: 'tst'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: {},
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: 'tst'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: {
+                        tst: [],
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: {}
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: {
+                        tst: 123,
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: {
-                    tst: []
-                }
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: {
-                    tst: 123
-                }
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: {
-                    tst: {
-                        f1: true,
-                        f2: false
-                    }
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: {
+                        tst: {
+                            f1: true,
+                            f2: false,
+                        },
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -148,42 +196,56 @@ export class SwitchFlowActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'tst',
-                is: {
-                    tst: {
-                        f1: true
-                    }
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'tst',
+                    is: {
+                        tst: {
+                            f1: true,
+                        },
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: 0,
-                is: {
-                    0: {
-                        f1: true
-                    }
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 0,
+                    is: {
+                        0: {
+                            f1: true,
+                        },
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                value: true,
-                is: {
-                    false: {
-                        f1: true
-                    }
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: true,
+                    is: {
+                        false: {
+                            f1: true,
+                        },
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
     }
 
     @test()
     async triggerActionHandlerDueToMatchWithString(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
@@ -199,16 +261,16 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 test: {
-                    [DummyActionHandler.ID]: true
-                }
-            }
+                    [DummyActionHandler.ID]: true,
+                },
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
         // validate first to process template inside options
         await actionHandler.validate(options, context, snapshot, {});
@@ -217,13 +279,12 @@ export class SwitchFlowActionHandlerTestSuite {
         assert.strictEqual(actionHandlerOptions, true);
         assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
             value: '{MASKED}st',
-            is: options.is
+            is: options.is,
         });
     }
 
     @test()
     async triggerActionHandlerDueToMatchWithTemplateCondition(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
@@ -238,9 +299,9 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value === ctx.value %>',
             is: {
                 true: {
-                    [DummyActionHandler.ID]: true
-                }
-            }
+                    [DummyActionHandler.ID]: true,
+                },
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -258,7 +319,6 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithNumber(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions: any;
@@ -273,12 +333,12 @@ export class SwitchFlowActionHandlerTestSuite {
             value: 0,
             is: {
                 0: {
-                    [DummyActionHandler.ID]: true
+                    [DummyActionHandler.ID]: true,
                 },
                 1: {
-                    [DummyActionHandler.ID]: false
-                }
-            }
+                    [DummyActionHandler.ID]: false,
+                },
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -293,7 +353,6 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithBoolean(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions: any;
@@ -308,12 +367,12 @@ export class SwitchFlowActionHandlerTestSuite {
             value: true,
             is: {
                 true: {
-                    [DummyActionHandler.ID]: true
+                    [DummyActionHandler.ID]: true,
                 },
                 false: {
-                    [DummyActionHandler.ID]: false
-                }
-            }
+                    [DummyActionHandler.ID]: false,
+                },
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -328,7 +387,6 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async doNotTriggerActionHandlerDueToMismatch(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
@@ -343,12 +401,12 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 stte: {
-                    [DummyActionHandler.ID]: true
-                }
-            }
+                    [DummyActionHandler.ID]: true,
+                },
+            },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
@@ -361,13 +419,12 @@ export class SwitchFlowActionHandlerTestSuite {
 
         assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
             value: '{MASKED}st',
-            is: options.is
+            is: options.is,
         });
     }
 
     @test()
     async elseFlowActionHandler(): Promise<void> {
-        Container.get(FlowService).debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const actionHandlerOptions: number[] = [];
@@ -382,15 +439,15 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 stte: {
-                    [DummyActionHandler.ID]: 1
-                }
+                    [DummyActionHandler.ID]: 1,
+                },
             },
             else: {
-                [DummyActionHandler.ID]: 2
-            }
+                [DummyActionHandler.ID]: 2,
+            },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
@@ -403,7 +460,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
         assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
             value: '{MASKED}st',
-            is: options.is
+            is: options.is,
         });
     }
 }

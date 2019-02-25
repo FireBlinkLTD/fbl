@@ -1,7 +1,0 @@
---timeout 30000
---ui mocha-typescript
---bail
---require source-map-support/register
-dist/test/unit/**/*.js
-dist/test/unit/*.js
---reporter mochawesome

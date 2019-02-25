@@ -1,11 +1,11 @@
-import {test, suite} from 'mocha-typescript';
-import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {Container} from 'typedi';
-import {ContextUtil} from '../../../../src/utils';
-import {WhileActionHandler} from '../../../../src/plugins/flow/WhileActionHandler';
-import {ActionHandlersRegistry, FlowService} from '../../../../src/services';
+import { test, suite } from 'mocha-typescript';
+import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { Container } from 'typedi';
+import { ContextUtil } from '../../../../src/utils';
+import { WhileActionHandler } from '../../../../src/plugins/flow/WhileActionHandler';
+import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IContext, IPlugin, IDelegatedParameters} from '../../../../src/interfaces';
+import { IActionHandlerMetadata, IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,26 +15,29 @@ const plugin: IPlugin = {
     name: 'test',
     version: '1.0.0',
     requires: {
-        fbl: '>=0.0.0'
-    }
+        fbl: '>=0.0.0',
+    },
 };
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'while.handler';
 
-    constructor(
-        private fn: Function
-    ) {
+    constructor(private fn: Function) {
         super();
     }
 
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
-            id: DummyActionHandler.ID
+        return <IActionHandlerMetadata>{
+            id: DummyActionHandler.ID,
         };
     }
 
-    async execute(options: any, context: any, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
+    async execute(
+        options: any,
+        context: any,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<void> {
         await this.fn(options, context, snapshot, parameters);
     }
 }
@@ -51,45 +54,52 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+
         await chai.expect(
-            actionHandler.validate(123, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'test',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'test',
+                    is: 'test',
+                    action: 'test',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('', context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                value: 'test'
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                value: 'test',
-                is: 'test',
-                action: 'test'
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                value: 'test',
-                is: 'test',
-                not: 'test',
-                action: {
-                    'ctx': 'yes'
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'test',
+                    is: 'test',
+                    not: 'test',
+                    action: {
+                        ctx: 'yes',
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -100,20 +110,24 @@ class WhileActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({
-                value: 'test',
-                is: 'test',
-                action: {
-                    'ctx': 'yes'
-                }
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    value: 'test',
+                    is: 'test',
+                    action: {
+                        ctx: 'yes',
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
     }
 
     @test()
     async checkPositiveCondition(): Promise<void> {
         const flowService = Container.get(FlowService);
-        flowService.debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
@@ -130,8 +144,8 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {}
-            }
+                [DummyActionHandler.ID]: {},
+            },
         };
 
         const context = ContextUtil.generateEmptyContext();
@@ -145,7 +159,6 @@ class WhileActionHandlerTestSuite {
     @test()
     async checkNegativeCondition(): Promise<void> {
         const flowService = Container.get(FlowService);
-        flowService.debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
@@ -162,10 +175,9 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             not: true,
             action: {
-                [DummyActionHandler.ID]: {}
-            }
+                [DummyActionHandler.ID]: {},
+            },
         };
-
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
@@ -178,7 +190,6 @@ class WhileActionHandlerTestSuite {
     @test()
     async skipExecution(): Promise<void> {
         const flowService = Container.get(FlowService);
-        flowService.debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
@@ -195,10 +206,9 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {}
-            }
+                [DummyActionHandler.ID]: {},
+            },
         };
-
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
@@ -211,7 +221,6 @@ class WhileActionHandlerTestSuite {
     @test()
     async failedExecution(): Promise<void> {
         const flowService = Container.get(FlowService);
-        flowService.debug = true;
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const dummyActionHandler = new DummyActionHandler(async () => {
@@ -226,10 +235,9 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {}
-            }
+                [DummyActionHandler.ID]: {},
+            },
         };
-
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = true;
@@ -248,18 +256,20 @@ class WhileActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.end = false;
-        const parameters = <IDelegatedParameters> {
+        const parameters = <IDelegatedParameters>{
             parameters: {
-                test: 1
-            }
+                test: 1,
+            },
         };
 
         let count = 1;
-        const dummyActionHandler1 = new DummyActionHandler(async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-            _parameters.parameters.test += _parameters.parameters.test;
-            count++;
-            context.ctx.end = count === 3;
-        });
+        const dummyActionHandler1 = new DummyActionHandler(
+            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
+                _parameters.parameters.test += _parameters.parameters.test;
+                count++;
+                context.ctx.end = count === 3;
+            },
+        );
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const options = {
@@ -267,22 +277,22 @@ class WhileActionHandlerTestSuite {
             value: '$ref:ctx.end',
             is: false,
             action: {
-                [DummyActionHandler.ID]: ''            
-            }
+                [DummyActionHandler.ID]: '',
+            },
         };
 
         const snapshot = await flowService.executeAction(
-            '.', 
-            actionHandler.getMetadata().id, 
-            {}, 
-            options, 
-            context, 
-            parameters
-        );        
+            '.',
+            actionHandler.getMetadata().id,
+            {},
+            options,
+            context,
+            parameters,
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(parameters.parameters, {
-            test: 1 + 1 + 2
-        });        
+            test: 1 + 1 + 2,
+        });
     }
 }
