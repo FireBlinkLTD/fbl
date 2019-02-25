@@ -99,20 +99,6 @@ class RepeatFlowActionHandlerTestSuite {
                 {},
             ),
         ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    times: 0,
-                    action: {
-                        min: 1,
-                    },
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
     }
 
     @test()
@@ -134,6 +120,73 @@ class RepeatFlowActionHandlerTestSuite {
                 {},
             ),
         ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate(
+                {
+                    times: 0,
+                    action: {
+                        min: 1,
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
+        ).to.be.not.rejected;
+    }
+
+    @test()
+    async executeZeroTimesSync(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new RepeatFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            throw new Error('should not be called');
+        });
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const options = {
+            times: 0,
+            action: {
+                [DummyActionHandler.ID]: {
+                    index: '<%- iteration.index %>',
+                },
+            },
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+
+        assert.strictEqual(snapshot.successful, true);
+    }
+
+    @test()
+    async executeZeroTimesAsync(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandler = new RepeatFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+            throw new Error('should not be called');
+        });
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const options = {
+            times: 0,
+            action: {
+                [DummyActionHandler.ID]: {
+                    index: '<%- iteration.index %>',
+                },
+            },
+            async: true,
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+
+        assert.strictEqual(snapshot.successful, true);
     }
 
     @test()

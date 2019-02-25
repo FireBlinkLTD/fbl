@@ -65,8 +65,6 @@ export class ParallelFlowActionHandlerTestSuite {
 
         await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
-
         await chai.expect(actionHandler.validate([{}], context, snapshot, {})).to.be.rejected;
 
         await chai.expect(
@@ -82,6 +80,20 @@ export class ParallelFlowActionHandlerTestSuite {
                 {},
             ),
         ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler.validate(
+                [
+                    {
+                        test1: 123,
+                    },
+                    null,
+                ],
+                context,
+                snapshot,
+                {},
+            ),
+        ).to.be.rejected;
     }
 
     @test()
@@ -90,7 +102,25 @@ export class ParallelFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.not.rejected;
+
         await chai.expect(actionHandler.validate([{ test: 123 }], context, snapshot, {})).to.be.not.rejected;
+    }
+
+    @test()
+    async emptyList(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const actionHandler = new ParallelFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const options = <any>[];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+
+        assert.strictEqual(snapshot.successful, true);
     }
 
     @test()
