@@ -5,7 +5,6 @@ import { Options, render } from 'ejs';
 import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../models';
 import { Inject, Service } from 'typedi';
 import { ContextUtil, FSUtil } from '../utils';
-import { IMetadata } from '../interfaces/IMetadata';
 import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
 import { dirname, join, resolve } from 'path';
 import { x } from 'tar';
@@ -16,6 +15,7 @@ import { TempPathsRegistry } from './TempPathsRegistry';
 import { homedir } from 'os';
 import { LogService } from './LogService';
 import { isMissing } from 'object-collider';
+import { FBLService } from './FBLService';
 
 const ejsLint = require('ejs-lint');
 const uuidv5 = require('uuid/v5');
@@ -62,22 +62,45 @@ export class FlowService {
     /**
      * Execute action
      * @param {string} wd Working Directory
-     * @param {string} idOrAlias
-     * @param {IMetadata} metadata
-     * @param options
+     * @param action
      * @param {IContext} context
      * @param {IDelegatedParameters} parameters
-     * @param [parameters]
+     * @param {ActionSnapshot} parentSnapshot
      * @returns {Promise<void>}
      */
     async executeAction(
         wd: string,
-        idOrAlias: string,
-        metadata: IMetadata,
-        options: any,
+        action: { [key: string]: any } | string,
         context: IContext,
         parameters: IDelegatedParameters,
+        parentSnapshot?: ActionSnapshot,
     ): Promise<ActionSnapshot> {
+        let options: any;
+        let idOrAlias: string;
+        let metadata: { [key: string]: any };
+
+        if (typeof action !== 'string') {
+            if (!parentSnapshot) {
+                parentSnapshot = new ActionSnapshot('void', {}, wd, 0, {});
+            }
+
+            idOrAlias = FBLService.extractIdOrAlias(action);
+            options = action[idOrAlias];
+
+            metadata = FBLService.extractMetadata(action);
+            metadata = await this.resolveOptionsWithNoHandlerCheck(
+                context.ejsTemplateDelimiters.local,
+                metadata,
+                context,
+                parentSnapshot,
+                parameters,
+                false,
+            );
+        } else {
+            idOrAlias = action;
+            metadata = {};
+        }
+
         if (metadata && metadata.$parameters) {
             ContextUtil.assign(parameters.parameters, '$', metadata.$parameters, false);
         }

@@ -74,19 +74,7 @@ class VirtualFlowActionHandlerTestSuite {
             actionHandler.validate(
                 {
                     id: 'test',
-                    action: 'test',
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    id: 'test',
-                    action: 'test',
+                    action: {},
                 },
                 context,
                 snapshot,
@@ -178,7 +166,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_value_');
@@ -229,7 +217,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_val');
@@ -283,7 +271,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 'ue__val');
@@ -335,7 +323,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_value_');
@@ -390,7 +378,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(!snapshot.successful);
         const virtualChildSnapshot: ActionSnapshot = snapshot
@@ -437,7 +425,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', '--', {}, actionOptions, context, {});
+        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 123);
@@ -463,12 +451,12 @@ class VirtualFlowActionHandlerTestSuite {
 
         await flowService.executeAction(
             '/tmp1',
-            virtual.getMetadata().id,
-            {},
             {
-                id: 'virtual.test',
-                action: {
-                    [DummyActionHandler.ID]: '<%- parameters.tst.t %>',
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    action: {
+                        [DummyActionHandler.ID]: '<%- parameters.tst.t %>',
+                    },
                 },
             },
             context,
@@ -477,11 +465,11 @@ class VirtualFlowActionHandlerTestSuite {
 
         const snapshot = await flowService.executeAction(
             '/tmp2',
-            'virtual.test',
-            {},
             {
-                tst: {
-                    t: '<%- $.fs.getAbsolutePath("index.txt") %>',
+                'virtual.test': {
+                    tst: {
+                        t: '<%- $.fs.getAbsolutePath("index.txt") %>',
+                    },
                 },
             },
             context,

@@ -1,15 +1,15 @@
-import {test, suite} from 'mocha-typescript';
-import {SecretValuesAssignmentActionHandler} from '../../../../src/plugins/context/SecretValuesAssignmentActionHandler';
-import {promisify} from 'util';
-import {writeFile} from 'fs';
-import {dump} from 'js-yaml';
+import { test, suite } from 'mocha-typescript';
+import { SecretValuesAssignmentActionHandler } from '../../../../src/plugins/context/SecretValuesAssignmentActionHandler';
+import { promisify } from 'util';
+import { writeFile } from 'fs';
+import { dump } from 'js-yaml';
 import * as assert from 'assert';
-import {basename, dirname} from 'path';
-import {ActionSnapshot} from '../../../../src/models';
-import {Container} from 'typedi';
-import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
-import {ContextUtil} from '../../../../src/utils';
-import {IPlugin} from '../../../../src/interfaces';
+import { basename, dirname } from 'path';
+import { ActionSnapshot } from '../../../../src/models';
+import { Container } from 'typedi';
+import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
+import { ContextUtil } from '../../../../src/utils';
+import { IPlugin } from '../../../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,13 +19,12 @@ const plugin: IPlugin = {
     name: 'test',
     version: '1.0.0',
     requires: {
-        fbl: '>=0.0.0'
-    }
+        fbl: '>=0.0.0',
+    },
 };
 
 @suite()
 export class SecretValuesAssignmentActionHandlerTestSuite {
-
     async after(): Promise<void> {
         await Container.get(TempPathsRegistry).cleanup();
         Container.reset();
@@ -37,36 +36,52 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: {},
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: [],
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: {}
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    test: 123,
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                test: []
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                test: 123
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                '$.test': 'tst'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    '$.test': 'tst',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -77,32 +92,47 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({
-                '$': {
-                    inline: {
-                        test: 'test'
-                    }
-                }
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                '$.test': {
-                    files: ['/tmp/test']
-                }
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                '$': {
-                    inline: {
-                        test: true
+            actionHandler.validate(
+                {
+                    $: {
+                        inline: {
+                            test: 'test',
+                        },
                     },
-                    files: ['/tmp/test']
-                }
-            }, context, snapshot, {})
+                },
+                context,
+                snapshot,
+                {},
+            ),
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate(
+                {
+                    '$.test': {
+                        files: ['/tmp/test'],
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
+        ).to.be.not.rejected;
+
+        await chai.expect(
+            actionHandler.validate(
+                {
+                    $: {
+                        inline: {
+                            test: true,
+                        },
+                        files: ['/tmp/test'],
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
     }
 
@@ -119,11 +149,11 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {
-            value: 'value'
+            value: 'value',
         };
 
         const fileContent = {
-            file_content: 'ftpo'
+            file_content: 'ftpo',
         };
 
         const tmpFile = await tempPathsRegistry.createTempFile();
@@ -132,22 +162,22 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile, dump(fileContent), 'utf8');
 
         const options = {
-            '$': {
+            $: {
                 inline: {
-                    test: 123
-                }
+                    test: 123,
+                },
             },
             '$.existing': {
                 inline: {
-                    other: 'other'
-                }
+                    other: 'other',
+                },
             },
             '$.fromFile': {
-                files: [tmpFile]
-            }
+                files: [tmpFile],
+            },
         };
 
-        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        let snapshot = await flowService.executeAction('.', { [actionHandler.getMetadata().id]: options }, context, {});
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -158,7 +188,12 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         // do the same with relative path
         options['$.fromFile'].files = [basename(tmpFile)];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile), actionHandler.getMetadata().id, {}, options, context, {});
+        snapshot = await flowService.executeAction(
+            dirname(tmpFile),
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -180,15 +215,15 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.secrets.existing = {
-            value: 'value'
+            value: 'value',
         };
 
         const file1Content = {
-            file1_content: 'ftpo1'
+            file1_content: 'ftpo1',
         };
 
         const file2Content = {
-            file2_content: 'ftpo2'
+            file2_content: 'ftpo2',
         };
         const tmpFile1 = await tempPathsRegistry.createTempFile();
         const tmpFile2 = await tempPathsRegistry.createTempFile();
@@ -198,20 +233,17 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         await promisify(writeFile)(tmpFile2, dump(file2Content), 'utf8');
 
         const options = {
-            '$': {
+            $: {
                 inline: {
-                    other: 'other'
-                }
+                    other: 'other',
+                },
             },
             '$.fromFile': {
-                files: [
-                    tmpFile1,
-                    tmpFile2
-                ]
-            }
+                files: [tmpFile1, tmpFile2],
+            },
         };
 
-        let snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        let snapshot = await flowService.executeAction('.', { [actionHandler.getMetadata().id]: options }, context, {});
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
@@ -220,12 +252,14 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
-        options['$.fromFile'].files = [
-            basename(tmpFile1),
-            tmpFile2
-        ];
+        options['$.fromFile'].files = [basename(tmpFile1), tmpFile2];
 
-        snapshot = await flowService.executeAction(dirname(tmpFile1), actionHandler.getMetadata().id, {}, options, context, {});
+        snapshot = await flowService.executeAction(
+            dirname(tmpFile1),
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');

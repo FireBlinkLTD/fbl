@@ -461,6 +461,22 @@ class CliTestSuite {
     }
 
     @test()
+    async failedExecutionAtNoOptionsAndMetadata(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: '$test',
+        };
+
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        const result = await CliTestSuite.exec(['--no-colors', flowFile]);
+        assert.strictEqual(result.code, 1);
+    }
+
+    @test()
     async noParams(): Promise<void> {
         const result = await CliTestSuite.exec([]);
         assert.strictEqual(result.code, 1);

@@ -1,13 +1,35 @@
 import * as Joi from 'joi';
 import { FBLService } from '../services';
 
-const joiStepSchemaExt = Joi.extend({
-    name: 'FBLAction',
+const joiStringActionSchemaExt = Joi.extend({
+    name: 'FBLActionString',
+    base: Joi.string()
+        .min(1)
+        .required(),
+    language: {
+        metadata: 'Action "{{value}}" name could not start with metadata prefix.',
+    },
+    rules: [
+        {
+            name: 'metadata',
+            validate(params, value, state, options) {
+                if (value.startsWith(FBLService.METADATA_PREFIX)) {
+                    return this.createError('FBLActionString.metadata', { value }, state, options);
+                }
+
+                return value;
+            },
+        },
+    ],
+});
+
+const joiObjectActionSchemaExt = Joi.extend({
+    name: 'FBLActionObject',
     base: Joi.object()
         .min(1)
         .required(),
     language: {
-        fields: '',
+        fields: 'Found {{nonAnnotationKeys}} non-annotation field(s), but only one is required.',
     },
     rules: [
         {
@@ -23,12 +45,7 @@ const joiStepSchemaExt = Joi.extend({
                 }
 
                 if (nonAnnotationKeys !== 1) {
-                    return this.createError(
-                        `Found ${nonAnnotationKeys} non-annotation fields, but only one is required.`,
-                        {},
-                        state,
-                        options,
-                    );
+                    return this.createError('FBLActionObject.fields', { nonAnnotationKeys }, state, options);
                 }
 
                 return value;
@@ -37,6 +54,9 @@ const joiStepSchemaExt = Joi.extend({
     ],
 });
 
-const FBL_ACTION_SCHEMA = joiStepSchemaExt.FBLAction().fields();
+const FBL_ACTION_SCHEMA = Joi.alternatives(
+    joiObjectActionSchemaExt.FBLActionObject().fields(),
+    joiStringActionSchemaExt.FBLActionString().metadata(), // actions without options
+).required();
 
 export { FBL_ACTION_SCHEMA };

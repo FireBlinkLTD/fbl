@@ -24,7 +24,7 @@ class VoidActionHandlerTestSuite {
 
         await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
         await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
-        await chai.expect(actionHandler.validate(0, context, snapshot, {})).to.be.rejected;        
+        await chai.expect(actionHandler.validate(0, context, snapshot, {})).to.be.rejected;
     }
 
     @test()
@@ -32,9 +32,8 @@ class VoidActionHandlerTestSuite {
         const actionHandler = new VoidFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        
+
         actionHandler.validate(undefined, context, snapshot, {});
-        actionHandler.validate(null, context, snapshot, {});
     }
 
     @test()
@@ -42,7 +41,7 @@ class VoidActionHandlerTestSuite {
         const actionHandler = new VoidFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        
-        actionHandler.execute(undefined, context, snapshot, {});        
+
+        actionHandler.execute(undefined, context, snapshot, {});
     }
 }

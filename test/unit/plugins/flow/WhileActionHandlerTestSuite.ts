@@ -78,7 +78,7 @@ class WhileActionHandlerTestSuite {
                 {
                     value: 'test',
                     is: 'test',
-                    action: 'test',
+                    action: {},
                 },
                 context,
                 snapshot,
@@ -150,7 +150,12 @@ class WhileActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = true;
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(count, 1);
@@ -181,7 +186,12 @@ class WhileActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(count, 1);
@@ -212,7 +222,12 @@ class WhileActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(count, 0);
@@ -241,7 +256,12 @@ class WhileActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = true;
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
@@ -283,9 +303,7 @@ class WhileActionHandlerTestSuite {
 
         const snapshot = await flowService.executeAction(
             '.',
-            actionHandler.getMetadata().id,
-            {},
-            options,
+            { [actionHandler.getMetadata().id]: options },
             context,
             parameters,
         );

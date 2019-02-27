@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-02-27
+
+### Changed
+
+- [\#330](https://github.com/FireBlinkLTD/fbl/issues/330) - FlowService's executeAction signature changed to make way easier invocation process. That also maked possible to use action handlers without options.
+
+## [1.5.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.5.2) - 2019-02-25
+
+### Added
+
+- [\#324](https://github.com/FireBlinkLTD/fbl/issues/324) - Added new action handler "void" to basically do nothing :)
+
+### Changed
+
+- [\#323](https://github.com/FireBlinkLTD/fbl/issues/324) - sequence and parallel action handlers now support empty arrays of actions and no longer require at least one action to exists inside it.
+
 ## [1.5.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.5.1) - 2019-01-17
 
 ### Fixed

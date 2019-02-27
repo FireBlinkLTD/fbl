@@ -365,19 +365,6 @@ export class FBLService {
 
         await this.validateFlowRequirements(flow, wd);
 
-        const idOrAlias = FBLService.extractIdOrAlias(flow.pipeline);
-        let metadata = FBLService.extractMetadata(flow.pipeline);
-        metadata = await this.flowService.resolveOptionsWithNoHandlerCheck(
-            context.ejsTemplateDelimiters.local,
-            metadata,
-            context,
-            new ActionSnapshot('', {}, wd, 0, {}),
-            parameters,
-            false,
-        );
-
-        const options = flow.pipeline[idOrAlias];
-
-        return await this.flowService.executeAction(wd, idOrAlias, metadata, options, context, parameters);
+        return await this.flowService.executeAction(wd, flow.pipeline, context, parameters);
     }
 }
