@@ -157,7 +157,12 @@ class RepeatFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
     }
@@ -184,7 +189,12 @@ class RepeatFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
     }
@@ -217,7 +227,12 @@ class RepeatFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);
@@ -254,7 +269,14 @@ class RepeatFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
+
+        console.log(snapshot.getSteps());
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);
@@ -296,9 +318,7 @@ class RepeatFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            actionHandler.getMetadata().id,
-            {},
-            options,
+            { [actionHandler.getMetadata().id]: options },
             context,
             parameters,
         );

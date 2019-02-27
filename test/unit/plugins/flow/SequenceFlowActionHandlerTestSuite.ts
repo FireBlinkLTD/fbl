@@ -6,6 +6,7 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
+import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -110,6 +111,28 @@ export class SequenceFlowActionHandlerTestSuite {
     }
 
     @test()
+    async voidAction(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const actionHandler = new SequenceFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+        actionHandlersRegistry.register(new VoidFlowActionHandler(), plugin);
+
+        const options = <any>['void'];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, true);
+    }
+
+    @test()
     async emptyList(): Promise<void> {
         const flowService: FlowService = Container.get<FlowService>(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
@@ -120,7 +143,12 @@ export class SequenceFlowActionHandlerTestSuite {
         const options = <any>[];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
     }
@@ -147,7 +175,12 @@ export class SequenceFlowActionHandlerTestSuite {
         const options = [{ [DummyActionHandler.ID + '.1']: 1 }, { [DummyActionHandler.ID + '.2']: 2 }];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results, [1, 2]);
@@ -175,7 +208,12 @@ export class SequenceFlowActionHandlerTestSuite {
         const options = [{ [DummyActionHandler.ID + '.1']: 1 }, { [DummyActionHandler.ID + '.2']: 2 }];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
@@ -208,7 +246,12 @@ export class SequenceFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results, [0, 1]);
@@ -248,7 +291,12 @@ export class SequenceFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results, [0, 1]);

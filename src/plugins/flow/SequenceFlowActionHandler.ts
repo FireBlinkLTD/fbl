@@ -1,10 +1,9 @@
 import { ActionHandler, ActionSnapshot } from '../../models';
 import * as Joi from 'joi';
 import { Container } from 'typedi';
-import { FBLService, FlowService } from '../../services';
+import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import { IMetadata } from '../../interfaces/IMetadata';
 
 export class SequenceFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata>{
@@ -57,10 +56,9 @@ export class SequenceFlowActionHandler extends ActionHandler {
      */
     private static getParameters(
         shareParameters: boolean,
-        metadata: IMetadata,
         parameters: IDelegatedParameters,
         index: number,
-    ): any {
+    ): IDelegatedParameters {
         const actionParameters: IDelegatedParameters = shareParameters
             ? parameters
             : JSON.parse(JSON.stringify(parameters));
@@ -91,31 +89,14 @@ export class SequenceFlowActionHandler extends ActionHandler {
 
         let index = 0;
         for (const action of actions) {
-            const idOrAlias = FBLService.extractIdOrAlias(action);
-            let metadata = FBLService.extractMetadata(action);
-
-            const actionParameters = SequenceFlowActionHandler.getParameters(
-                shareParameters,
-                snapshot.metadata,
-                parameters,
-                index,
-            );
-            metadata = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                metadata,
-                context,
-                snapshot,
-                actionParameters,
-                false,
-            );
+            const actionParameters = SequenceFlowActionHandler.getParameters(shareParameters, parameters, index);
 
             const childSnapshot = await flowService.executeAction(
                 snapshot.wd,
-                idOrAlias,
-                metadata,
-                action[idOrAlias],
+                action,
                 context,
                 actionParameters,
+                snapshot,
             );
             snapshot.registerChildActionSnapshot(childSnapshot);
 

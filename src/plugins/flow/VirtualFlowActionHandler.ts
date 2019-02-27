@@ -1,7 +1,7 @@
 import { ActionHandler, ActionSnapshot } from '../../models';
 import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import { FBLService, FlowService } from '../../services';
+import { FlowService } from '../../services';
 import { Container } from 'typedi';
 import { Validator } from 'jsonschema';
 import { AnySchema } from 'joi';
@@ -291,28 +291,10 @@ class DynamicFlowHandler extends ActionHandler {
         const flowService = Container.get(FlowService);
 
         snapshot.wd = this.wd;
-        const idOrAlias = FBLService.extractIdOrAlias(this.action);
-        let metadata = FBLService.extractMetadata(this.action);
-        metadata = await flowService.resolveOptionsWithNoHandlerCheck(
-            context.ejsTemplateDelimiters.local,
-            metadata,
-            context,
-            snapshot,
-            parameters,
-            false,
-        );
-
         parameters.parameters = this.getMergedOptions(options);
         parameters.wd = snapshot.wd;
 
-        const childSnapshot = await flowService.executeAction(
-            this.wd,
-            idOrAlias,
-            metadata,
-            this.action[idOrAlias],
-            context,
-            parameters,
-        );
+        const childSnapshot = await flowService.executeAction(this.wd, this.action, context, parameters, snapshot);
         snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

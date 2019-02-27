@@ -1,7 +1,7 @@
 import { ActionHandler, ActionSnapshot } from '../../models';
 import { Container } from 'typedi';
 import * as Joi from 'joi';
-import { FBLService, FlowService } from '../../services';
+import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { IMetadata } from '../../interfaces/IMetadata';
@@ -98,9 +98,6 @@ export class ParallelFlowActionHandler extends ActionHandler {
         const snapshots: ActionSnapshot[] = [];
         const promises = actions.map(
             async (action: any, index: number): Promise<void> => {
-                const idOrAlias = FBLService.extractIdOrAlias(action);
-                let metadata = FBLService.extractMetadata(action);
-
                 const iterationParams = ParallelFlowActionHandler.getParameters(
                     shareParameters,
                     snapshot.metadata,
@@ -108,21 +105,12 @@ export class ParallelFlowActionHandler extends ActionHandler {
                     index,
                 );
 
-                metadata = await flowService.resolveOptionsWithNoHandlerCheck(
-                    context.ejsTemplateDelimiters.local,
-                    metadata,
-                    context,
-                    snapshot,
-                    iterationParams,
-                    false,
-                );
                 snapshots[index] = await flowService.executeAction(
                     snapshot.wd,
-                    idOrAlias,
-                    metadata,
-                    action[idOrAlias],
+                    action,
                     context,
                     iterationParams,
+                    snapshot,
                 );
             },
         );

@@ -221,9 +221,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            tryFlowActionHandler.getMetadata().id,
-            {},
-            options,
+            { [tryFlowActionHandler.getMetadata().id]: options },
             context,
             {},
         );
@@ -273,9 +271,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            tryFlowActionHandler.getMetadata().id,
-            {},
-            options,
+            { [tryFlowActionHandler.getMetadata().id]: options },
             context,
             {},
         );
@@ -326,9 +322,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            tryFlowActionHandler.getMetadata().id,
-            {},
-            options,
+            { [tryFlowActionHandler.getMetadata().id]: options },
             context,
             {},
         );
@@ -378,9 +372,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            tryFlowActionHandler.getMetadata().id,
-            {},
-            options,
+            { [tryFlowActionHandler.getMetadata().id]: options },
             context,
             {},
         );
@@ -431,9 +423,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            tryFlowActionHandler.getMetadata().id,
-            {},
-            options,
+            { [tryFlowActionHandler.getMetadata().id]: options },
             context,
             {},
         );

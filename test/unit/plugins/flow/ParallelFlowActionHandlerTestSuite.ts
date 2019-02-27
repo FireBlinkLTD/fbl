@@ -6,6 +6,7 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ParallelFlowActionHandler } from '../../../../src/plugins/flow/ParallelFlowActionHandler';
 import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
+import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -118,7 +119,34 @@ export class ParallelFlowActionHandlerTestSuite {
         const options = <any>[];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, true);
+    }
+
+    @test()
+    async voidAction(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const actionHandler = new ParallelFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+        actionHandlersRegistry.register(new VoidFlowActionHandler(), plugin);
+
+        const options = <any>['void'];
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
     }
@@ -145,7 +173,12 @@ export class ParallelFlowActionHandlerTestSuite {
         const options = [{ [DummyActionHandler.ID + '.1']: 1 }, { [DummyActionHandler.ID + '.2']: 2 }];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 2);
@@ -183,7 +216,12 @@ export class ParallelFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(snapshot.childFailure, true);
@@ -227,7 +265,12 @@ export class ParallelFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', actionHandler.getMetadata().id, {}, options, context, {});
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 1);
@@ -277,9 +320,7 @@ export class ParallelFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
             '.',
-            actionHandler.getMetadata().id,
-            {},
-            options,
+            { [actionHandler.getMetadata().id]: options },
             context,
             parameters,
         );

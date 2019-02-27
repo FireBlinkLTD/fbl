@@ -1,18 +1,18 @@
-import {suite, test} from 'mocha-typescript';
-import {AttachedFlowActionHandler} from '../../../../src/plugins/flow/AttachedFlowActionHandler';
-import {Container} from 'typedi';
-import {ActionHandlersRegistry, FlowService, TempPathsRegistry} from '../../../../src/services';
-import {ActionHandler, ActionSnapshot} from '../../../../src/models';
-import {unlink, writeFile} from 'fs';
-import {promisify} from 'util';
-import {dump} from 'js-yaml';
+import { suite, test } from 'mocha-typescript';
+import { AttachedFlowActionHandler } from '../../../../src/plugins/flow/AttachedFlowActionHandler';
+import { Container } from 'typedi';
+import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
+import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { unlink, writeFile } from 'fs';
+import { promisify } from 'util';
+import { dump } from 'js-yaml';
 import * as assert from 'assert';
-import {IActionHandlerMetadata, IFlowLocationOptions, IPlugin} from '../../../../src/interfaces';
-import {ContextUtil, FSUtil} from '../../../../src/utils';
-import {dirname, join} from 'path';
-import {c} from 'tar';
-import {DummyServerWrapper} from '../../../assets/dummy.http.server.wrapper';
-import {SequenceFlowActionHandler} from '../../../../src/plugins/flow/SequenceFlowActionHandler';
+import { IActionHandlerMetadata, IFlowLocationOptions, IPlugin } from '../../../../src/interfaces';
+import { ContextUtil, FSUtil } from '../../../../src/utils';
+import { dirname, join } from 'path';
+import { c } from 'tar';
+import { DummyServerWrapper } from '../../../assets/dummy.http.server.wrapper';
+import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -22,22 +22,20 @@ const plugin: IPlugin = {
     name: 'test',
     version: '1.0.0',
     requires: {
-        fbl: '>=0.0.0'
-    }
+        fbl: '>=0.0.0',
+    },
 };
 
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
 
-    constructor(
-        private fn: Function
-    ) {
+    constructor(private fn: Function) {
         super();
     }
 
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
-            id: DummyActionHandler.ID
+        return <IActionHandlerMetadata>{
+            id: DummyActionHandler.ID,
         };
     }
 
@@ -50,7 +48,6 @@ const dummyServerWrappers: DummyServerWrapper[] = [];
 
 @suite()
 class AttachedFlowActionHandlerTestSuite {
-
     private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async after(): Promise<void> {
@@ -60,7 +57,9 @@ class AttachedFlowActionHandlerTestSuite {
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
 
-            const tarballFile = await FlowService.getCachedTarballPathForURL(`http://localhost:${dummyServerWrapper.config.port}`);
+            const tarballFile = await FlowService.getCachedTarballPathForURL(
+                `http://localhost:${dummyServerWrapper.config.port}`,
+            );
             const exists = await FSUtil.exists(tarballFile);
 
             if (exists) {
@@ -76,28 +75,25 @@ class AttachedFlowActionHandlerTestSuite {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        
-        await chai.expect(
-            actionHandler.validate(123, context, snapshot, {})
-        ).to.be.rejected;
+
+        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+
+        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate('', context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                path: '/tmp',
-                target: []
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    path: '/tmp',
+                    target: [],
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -107,32 +103,45 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.validate('/tmp/test.tst', context, snapshot, {})).to.be.not.rejected;
+
         await chai.expect(
-            actionHandler.validate('/tmp/test.tst', context, snapshot, {})
+            actionHandler.validate(
+                {
+                    path: '/tmp',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                path: '/tmp'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    path: '/tmp',
+                    http: {
+                        headers: {
+                            test: 'yes',
+                        },
+                    },
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
 
         await chai.expect(
-            actionHandler.validate({
-                path: '/tmp',
-                http: {
-                    headers: {
-                        test: 'yes'
-                    }
-                }
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                path: '/tmp',
-                target: 'yes'
-            }, context, snapshot, {})
+            actionHandler.validate(
+                {
+                    path: '/tmp',
+                    target: 'yes',
+                },
+                context,
+                snapshot,
+                {},
+            ),
         ).to.be.not.rejected;
     }
 
@@ -153,8 +162,8 @@ class AttachedFlowActionHandlerTestSuite {
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true
-            }
+                [DummyActionHandler.ID]: true,
+            },
         };
 
         const tmpFile = await tempPathsRegistry.createTempFile();
@@ -187,11 +196,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const subFlow = [
-            'pipeline:',
-            `  ${DummyActionHandler.ID}:`,
-            ' test: true'
-        ];
+        const subFlow = ['pipeline:', `  ${DummyActionHandler.ID}:`, ' test: true'];
 
         const tmpFile = await tempPathsRegistry.createTempFile();
 
@@ -203,9 +208,7 @@ class AttachedFlowActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         await actionHandler.validate(tmpFile, context, snapshot, {});
 
-        await chai.expect(
-            actionHandler.execute(tmpFile, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.execute(tmpFile, context, snapshot, {})).to.be.rejected;
     }
 
     @test()
@@ -225,8 +228,8 @@ class AttachedFlowActionHandlerTestSuite {
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true
-            }
+                [DummyActionHandler.ID]: true,
+            },
         };
 
         const tmpFile = await tempPathsRegistry.createTempFile();
@@ -239,17 +242,15 @@ class AttachedFlowActionHandlerTestSuite {
 
         const options = {
             path: tmpFile,
-            target: tmpFile
+            target: tmpFile,
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
         await actionHandler.validate(options, context, snapshot, {});
 
-        await chai.expect(
-            actionHandler.execute(options, context, snapshot, {}),
-        ).to.be.rejectedWith(
-            `Usage of target is not allowed for flow at path: ${tmpFile}`
-        );
+        await chai
+            .expect(actionHandler.execute(options, context, snapshot, {}))
+            .to.be.rejectedWith(`Usage of target is not allowed for flow at path: ${tmpFile}`);
     }
 
     @test()
@@ -269,8 +270,8 @@ class AttachedFlowActionHandlerTestSuite {
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true
-            }
+                [DummyActionHandler.ID]: true,
+            },
         };
 
         const tmpDir = await tempPathsRegistry.createTempDir();
@@ -325,7 +326,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 200,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -354,9 +355,7 @@ class AttachedFlowActionHandlerTestSuite {
         console.log('-> Send request to invalid URL');
         // expect to reject on invalid url
         const url = 'https://localhost:61888';
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
     }
 
     @test()
@@ -367,7 +366,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 404,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -378,9 +377,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
     }
 
     @test()
@@ -392,7 +389,7 @@ class AttachedFlowActionHandlerTestSuite {
             port,
             status: 200,
             ignoreRequest: true,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -402,7 +399,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         setTimeout(() => {
-            server.stop().catch((err) => {
+            server.stop().catch(err => {
                 throw err;
             });
         }, 100);
@@ -410,9 +407,7 @@ class AttachedFlowActionHandlerTestSuite {
         const url = `http://localhost:${port}`;
         await actionHandler.validate(url, context, snapshot, {});
 
-        await chai.expect(
-            actionHandler.execute(url, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
     }
 
     @test()
@@ -424,7 +419,7 @@ class AttachedFlowActionHandlerTestSuite {
             port,
             status: 200,
             file: tarballPath,
-            delay: 100
+            delay: 100,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -440,7 +435,7 @@ class AttachedFlowActionHandlerTestSuite {
         await Promise.all([
             actionHandler.execute(url, context, snapshot, {}),
             actionHandler.execute(url, context, snapshot, {}),
-            actionHandler.execute(url, context, snapshot, {})
+            actionHandler.execute(url, context, snapshot, {}),
         ]);
 
         assert.strictEqual(server.requestCount, 1);
@@ -454,7 +449,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 200,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -489,7 +484,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 200,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -500,13 +495,13 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const url = `http://localhost:${port}`;
-        const options = <IFlowLocationOptions> {
+        const options = <IFlowLocationOptions>{
             path: url,
             http: {
                 headers: {
-                    test: 'yes'
-                }
-            }
+                    test: 'yes',
+                },
+            },
         };
 
         await actionHandler.validate(options, context, snapshot, {});
@@ -533,7 +528,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 200,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -544,14 +539,14 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const url = `http://localhost:${port}`;
-        const options = <IFlowLocationOptions> {
+        const options = <IFlowLocationOptions>{
             path: url,
             http: {
                 headers: {
-                    test: 'first'
-                }
+                    test: 'first',
+                },
             },
-            cache: true
+            cache: true,
         };
 
         await actionHandler.validate(options, context, snapshot, {});
@@ -603,9 +598,9 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const options = <IFlowLocationOptions> {
+        const options = <IFlowLocationOptions>{
             path: tarballPath,
-            target: 'flow.yml'
+            target: 'flow.yml',
         };
 
         await actionHandler.validate(options, context, snapshot, {});
@@ -630,7 +625,7 @@ class AttachedFlowActionHandlerTestSuite {
         const server = new DummyServerWrapper({
             port,
             status: 200,
-            file: tarballPath
+            file: tarballPath,
         });
         this.dummyServerWrappers.push(server);
         await server.start();
@@ -638,7 +633,7 @@ class AttachedFlowActionHandlerTestSuite {
         // redirect server
         const redirectServer = new DummyServerWrapper({
             port: port + 1,
-            redirectTo: `http://localhost:${port}`
+            redirectTo: `http://localhost:${port}`,
         });
         this.dummyServerWrappers.push(redirectServer);
         await redirectServer.start();
@@ -682,20 +677,20 @@ class AttachedFlowActionHandlerTestSuite {
 
         const indexFileContent = {
             pipeline: {
-                '@': 'test.yml'
-            }
+                '@': 'test.yml',
+            },
         };
 
         const testAContent = {
             pipeline: {
-                [DummyActionHandler.ID]: 'a'
-            }
+                [DummyActionHandler.ID]: 'a',
+            },
         };
 
         const testBContent = {
             pipeline: {
-                [DummyActionHandler.ID]: 'b'
-            }
+                [DummyActionHandler.ID]: 'b',
+            },
         };
 
         await promisify(writeFile)(join(dirA, 'index.yml'), dump(indexFileContent));
@@ -705,20 +700,30 @@ class AttachedFlowActionHandlerTestSuite {
         await promisify(writeFile)(join(dirB, 'test.yml'), dump(testBContent));
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction(wd, sequenceActionHandler.getMetadata().id, {}, [
+        const snapshot = await flowService.executeAction(
+            wd,
             {
-                '@': 'a/'
+                [sequenceActionHandler.getMetadata().id]: [
+                    {
+                        '@': 'a/',
+                    },
+                    {
+                        '@': 'b/',
+                    },
+                ],
             },
-            {
-                '@': 'b/'
-            }
-        ], context, {});
+            context,
+            {},
+        );
 
         assert(snapshot.successful);
         assert.deepStrictEqual(tracked, ['a', 'b']);
     }
 
-    private static async prepareForTarballTest(dummyActionHandlerFn?: Function, fileName = 'index.yml'): Promise<string> {
+    private static async prepareForTarballTest(
+        dummyActionHandlerFn?: Function,
+        fileName = 'index.yml',
+    ): Promise<string> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
@@ -733,8 +738,8 @@ class AttachedFlowActionHandlerTestSuite {
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true
-            }
+                [DummyActionHandler.ID]: true,
+            },
         };
 
         const tmpDir = await tempPathsRegistry.createTempDir();
@@ -744,13 +749,14 @@ class AttachedFlowActionHandlerTestSuite {
 
         await promisify(writeFile)(indexYmlPath, dump(subFlow), 'utf8');
 
-        await c({
-            gzip: true,
-            cwd: dirname(tarballPath),
-            file: tarballPath
-        }, [
-            fileName
-        ]);
+        await c(
+            {
+                gzip: true,
+                cwd: dirname(tarballPath),
+                file: tarballPath,
+            },
+            [fileName],
+        );
 
         return tarballPath;
     }
