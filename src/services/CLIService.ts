@@ -361,6 +361,10 @@ export class CLIService {
             commander.option(option.flags, option.description.join(' '), option.fn);
         });
 
+        commander.on('--help', () => {
+            this.printHelp(options);
+        });
+
         // parse environment variables
         commander.parse(process.argv);
 
