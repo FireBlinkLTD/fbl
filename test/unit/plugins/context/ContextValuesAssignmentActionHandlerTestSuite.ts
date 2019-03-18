@@ -27,52 +27,60 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    test: {},
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        test: {},
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    '$.test': [],
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        '$.test': [],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    '$.test': 123,
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        '$.test': 123,
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    '$.test': 'tst',
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        '$.test': 'tst',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -82,8 +90,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     '$.test': {
                         files: ['/tmp/test'],
@@ -92,11 +100,11 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     $: {
                         inline: {
@@ -107,11 +115,11 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     '$.test': {
                         inline: {
@@ -123,8 +131,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -154,24 +162,27 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         let snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        let processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
         assert.strictEqual(context.ctx.content, 'inline');
 
         // explicitly set priority to inline
         options['$'].priority = 'inline';
 
         snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
         assert.strictEqual(context.ctx.content, 'inline');
 
         // change priority to files
         options['$'].priority = 'files';
 
         snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
         assert.strictEqual(context.ctx.content, 'file');
     }
 
@@ -241,9 +252,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        let processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
@@ -261,8 +272,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         options['$.fromFile1'].files = [basename(tmpFile1)];
         snapshot.wd = dirname(tmpFile1);
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, undefined);
@@ -313,9 +325,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        let processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, 'value');
@@ -326,8 +338,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         options['$.fromFile'].files = [basename(tmpFile1), tmpFile2];
         snapshot.wd = dirname(tmpFile1);
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(context.ctx.test, 123);
         assert.strictEqual(context.ctx.existing.value, 'value');
@@ -351,10 +364,10 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
 
-        await actionHandler.validate(options, context, snapshot, {});
-
-        await chai.expect(actionHandler.execute(options, context, snapshot, {})).to.be.rejected;
+        await chai.expect(processor.execute()).to.be.rejected;
     }
 
     @test()
@@ -370,8 +383,8 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-
-        await chai.expect(actionHandler.validate(options, context, snapshot, {})).to.be.rejected;
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await chai.expect(processor.validate()).to.be.rejected;
     }
 
     @test()
@@ -452,9 +465,9 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.deepStrictEqual(context.ctx.children, [1, 2]);
         assert.deepStrictEqual(context.ctx.existing1, [1, 2, [3, 4]]);

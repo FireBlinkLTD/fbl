@@ -19,57 +19,53 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
+            actionHandler.getProcessor({}, context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(1, context, snapshot, {})
+            actionHandler.getProcessor(1, context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate('test', context, snapshot, {})
+            actionHandler.getProcessor('test', context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(true, context, snapshot, {})
+            actionHandler.getProcessor(true, context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
+            actionHandler.getProcessor([], context, snapshot, {}).validate()
+        ).to.be.rejected;
+        
+        await chai.expect(
+            actionHandler.getProcessor([{}], context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate([{}], context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate([{
+            actionHandler.getProcessor([{
                 type: 'test'
-            }], context, snapshot, {})
+            }], context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{
+            actionHandler.getProcessor([{
                 id: 'test'
-            }], context, snapshot, {})
+            }], context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{
+            actionHandler.getProcessor([{
                 type: false,
                 id: 'test'
-            }], context, snapshot, {})
+            }], context, snapshot, {}).validate()
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate([{
+            actionHandler.getProcessor([{
                 type: 'test',
                 id: true
-            }], context, snapshot, {})
+            }], context, snapshot, {}).validate()
         ).to.be.rejected;
     }
 
@@ -79,12 +75,10 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate([{
-                type: 'test',
-                id: 1
-            }], context, snapshot, {})
-        ).to.be.not.rejected;
+        await actionHandler.getProcessor([{
+            type: 'test',
+            id: 1
+        }], context, snapshot, {}).validate();        
     }
 
     @test()
@@ -107,7 +101,7 @@ class MarkEntitiesAsUpdatedActionHandlerTestSuite {
             }
         ];
 
-        actionHandler.execute(options, context, snapshot, {});
+        await actionHandler.getProcessor(options, context, snapshot, {}).execute();
         assert.deepStrictEqual(context.entities.registered, options);
         assert.deepStrictEqual(context.entities.updated, options);
     }

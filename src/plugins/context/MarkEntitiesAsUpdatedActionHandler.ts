@@ -1,15 +1,22 @@
-import {ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
-import {BaseMarkEntityAsActionHandler} from './BaseMarkEntityAsActionHandler';
+import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
+import { BaseMarkEntityAsActionProcessor } from './BaseMarkEntityAsActionProcessor';
 
-export class MarkEntitiesAsUpdatedActionHandler extends BaseMarkEntityAsActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
+export class MarkEntitiesAsUpdatedActionProcessor extends BaseMarkEntityAsActionProcessor {
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        this.context.entities.updated.push(...this.options);
+        this.context.entities.registered.push(...this.options);
+        this.snapshot.setContext(this.context);
+    }
+}
+
+export class MarkEntitiesAsUpdatedActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.context.entities.updated',
-        aliases: [
-            'fbl.context.entities.updated',
-            'context.entities.updated',
-            'entities.updated'
-        ]
+        aliases: ['fbl.context.entities.updated', 'context.entities.updated', 'entities.updated'],
     };
 
     /**
@@ -22,9 +29,12 @@ export class MarkEntitiesAsUpdatedActionHandler extends BaseMarkEntityAsActionHa
     /**
      * @inheritdoc
      */
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        context.entities.updated.push(...options);
-        context.entities.registered.push(...options);
-        snapshot.setContext(context);
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new MarkEntitiesAsUpdatedActionProcessor(options, context, snapshot, parameters);
     }
 }

@@ -36,52 +36,60 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    test: {},
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        test: {},
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    test: [],
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        test: [],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    test: 123,
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        test: 123,
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    '$.test': 'tst',
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        '$.test': 'tst',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -91,8 +99,8 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     $: {
                         inline: {
@@ -103,11 +111,11 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     '$.test': {
                         files: ['/tmp/test'],
@@ -116,11 +124,11 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     $: {
                         inline: {
@@ -132,8 +140,8 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()

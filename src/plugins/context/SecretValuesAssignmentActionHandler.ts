@@ -1,16 +1,21 @@
-import {IActionHandlerMetadata} from '../../interfaces';
-import {BaseValuesAssignmentActionHandler} from './BaseValuesAssignmentActionHandler';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
+import { BaseValuesAssignmentActionProcessor } from './BaseValuesAssignmentActionProcessor';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 
-export class SecretValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
+export class SecretValuesAssignmentActionProcessor extends BaseValuesAssignmentActionProcessor {
+    /**
+     * @inheritdoc
+     */
+    getAssignmentKey(): 'ctx' | 'secrets' {
+        return 'secrets';
+    }
+}
+
+export class SecretValuesAssignmentActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.secret.values',
-        aliases: [
-            'fbl.secret.values',
-            'secret.values',
-            'secrets',
-            'secret'
-        ],
-        considerOptionsAsSecrets: true
+        aliases: ['fbl.secret.values', 'secret.values', 'secrets', 'secret'],
+        considerOptionsAsSecrets: true,
     };
 
     /**
@@ -23,7 +28,12 @@ export class SecretValuesAssignmentActionHandler extends BaseValuesAssignmentAct
     /**
      * @inheritdoc
      */
-    getAssignmentKey(): 'ctx' | 'secrets' {
-        return 'secrets';
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new SecretValuesAssignmentActionProcessor(options, context, snapshot, parameters);
     }
 }
