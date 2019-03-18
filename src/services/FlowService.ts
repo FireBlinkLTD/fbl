@@ -154,13 +154,15 @@ export class FlowService {
             // resolve without masking
             options = await this.resolveOptions(handler, options, context, snapshot, parameters, false);
 
-            await handler.validate(options, context, snapshot, parameters);
+            const processor = handler.getProcessor(options, context, snapshot, parameters);
+
+            await processor.validate();
             snapshot.validated();
 
-            const shouldExecute = await handler.isShouldExecute(options, context, snapshot, parameters);
+            const shouldExecute = await processor.isShouldExecute();
             if (shouldExecute) {
                 snapshot.start();
-                await handler.execute(options, context, snapshot, parameters);
+                await processor.execute();
                 snapshot.success();
 
                 if (snapshot.successful) {

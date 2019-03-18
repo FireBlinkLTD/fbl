@@ -6,7 +6,7 @@ import { dump } from 'js-yaml';
 import * as assert from 'assert';
 import { basename, dirname } from 'path';
 import { ActionSnapshot } from '../../../../src/models';
-import { FlowService, TempPathsRegistry } from '../../../../src/services';
+import { TempPathsRegistry } from '../../../../src/services';
 import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 
