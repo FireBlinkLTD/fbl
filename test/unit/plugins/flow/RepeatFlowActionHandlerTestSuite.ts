@@ -6,6 +6,7 @@ import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,29 +20,6 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'repeat.iteration.handler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(
-        options: any,
-        context: any,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
-        await this.fn(options, context, snapshot, parameters);
-    }
-}
-
 @suite()
 class RepeatFlowActionHandlerTestSuite {
     after() {
@@ -54,50 +32,56 @@ class RepeatFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('test', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('test', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    times: 1,
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    times: 1,
-                    action: [],
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    times: 1,
-                    action: {
-                        min: 1,
-                        max: 2,
+            actionHandler
+                .getProcessor(
+                    {
+                        times: 1,
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        times: 1,
+                        action: [],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        times: 1,
+                        action: {
+                            min: 1,
+                            max: 2,
+                        },
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -107,8 +91,8 @@ class RepeatFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     times: 1,
                     action: {
@@ -118,11 +102,11 @@ class RepeatFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     times: 0,
                     action: {
@@ -132,8 +116,8 @@ class RepeatFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -142,15 +126,16 @@ class RepeatFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             throw new Error('should not be called');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 0,
             action: {
-                [DummyActionHandler.ID]: {
+                [dummyActionHandler.id]: {
                     index: '<%- iteration.index %>',
                 },
             },
@@ -173,15 +158,16 @@ class RepeatFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             throw new Error('should not be called');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 0,
             action: {
-                [DummyActionHandler.ID]: {
+                [dummyActionHandler.id]: {
                     index: '<%- iteration.index %>',
                 },
             },
@@ -208,19 +194,17 @@ class RepeatFlowActionHandlerTestSuite {
 
         const delays = [5, 20, 10];
         const results: number[] = [];
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
-            await new Promise(resolve => {
-                setTimeout(resolve, delays[opts.index]);
-            });
-
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, delays[opts.index]));
             results.push(opts.index);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 3,
             action: {
-                [DummyActionHandler.ID]: {
+                [dummyActionHandler.id]: {
                     index: '<%- iteration.index %>',
                 },
             },
@@ -249,19 +233,17 @@ class RepeatFlowActionHandlerTestSuite {
 
         const delays = [5, 20, 10];
         const results: number[] = [];
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
-            await new Promise(resolve => {
-                setTimeout(resolve, delays[opts.index]);
-            });
-
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, delays[opts.index]));
             results.push(opts.index);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             times: 3,
             action: {
-                [DummyActionHandler.ID]: {
+                [dummyActionHandler.id]: {
                     index: '<%- iteration.index %>',
                 },
             },
@@ -298,19 +280,23 @@ class RepeatFlowActionHandlerTestSuite {
         };
 
         const results: number[] = [];
-        const dummyActionHandler = new DummyActionHandler(
-            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-                results.push(_options);
-                _parameters.parameters.test.push(_options);
-            },
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (
+            _options: any,
+            _context: any,
+            _snapshot: ActionSnapshot,
+            _parameters: IDelegatedParameters,
+        ) => {
+            results.push(_options);
+            _parameters.parameters.test.push(_options);
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const options = {
             shareParameters: true,
             times: 2,
             action: {
-                [DummyActionHandler.ID]: '<%- iteration.index %>',
+                [dummyActionHandler.id]: '<%- iteration.index %>',
             },
             async: true,
         };

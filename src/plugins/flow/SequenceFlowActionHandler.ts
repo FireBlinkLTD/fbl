@@ -1,28 +1,22 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
 import { Container } from 'typedi';
 import { FlowService } from '../../services';
-import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
+import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
-export class SequenceFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.sequence',
-        aliases: ['fbl.flow.sequence', 'flow.sequence', 'sequence', 'sync', '--'],
-        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: true,
-    };
-
+export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
     private static actionsValidationSchema = Joi.array()
         .items(FBL_ACTION_SCHEMA.optional())
         .required()
         .options({ abortEarly: true });
 
     private static validationSchema = Joi.alternatives(
-        SequenceFlowActionHandler.actionsValidationSchema,
+        SequenceFlowActionProcessor.actionsValidationSchema,
         Joi.object()
             .keys({
-                actions: SequenceFlowActionHandler.actionsValidationSchema,
+                actions: SequenceFlowActionProcessor.actionsValidationSchema,
                 shareParameters: Joi.boolean(),
             })
             .requiredKeys('actions')
@@ -36,69 +30,37 @@ export class SequenceFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getMetadata(): IActionHandlerMetadata {
-        return SequenceFlowActionHandler.metadata;
-    }
-
-    /**
-     * @inheritdoc
-     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return SequenceFlowActionHandler.validationSchema;
-    }
-
-    /**
-     * Get parameters for single iteration
-     * @param shareParameters
-     * @param metadata
-     * @param parameters
-     * @param index
-     */
-    private static getParameters(
-        shareParameters: boolean,
-        parameters: IDelegatedParameters,
-        index: number,
-    ): IDelegatedParameters {
-        const actionParameters: IDelegatedParameters = shareParameters
-            ? parameters
-            : JSON.parse(JSON.stringify(parameters));
-        actionParameters.iteration = { index };
-
-        return actionParameters;
+        return SequenceFlowActionProcessor.validationSchema;
     }
 
     /**
      * @inheritdoc
      */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let actions;
         let shareParameters = false;
-        if (Array.isArray(options)) {
-            actions = options;
+        if (Array.isArray(this.options)) {
+            actions = this.options;
         } else {
-            actions = options.actions;
-            shareParameters = options.shareParameters;
+            actions = this.options.actions;
+            shareParameters = this.options.shareParameters;
         }
 
         let index = 0;
         for (const action of actions) {
-            const actionParameters = SequenceFlowActionHandler.getParameters(shareParameters, parameters, index);
+            const actionParameters = this.getParameters(shareParameters, { index });
 
             const childSnapshot = await flowService.executeAction(
-                snapshot.wd,
+                this.snapshot.wd,
                 action,
-                context,
+                this.context,
                 actionParameters,
-                snapshot,
+                this.snapshot,
             );
-            snapshot.registerChildActionSnapshot(childSnapshot);
+            this.snapshot.registerChildActionSnapshot(childSnapshot);
 
             index++;
 
@@ -107,5 +69,33 @@ export class SequenceFlowActionHandler extends ActionHandler {
                 return;
             }
         }
+    }
+}
+
+export class SequenceFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.sequence',
+        aliases: ['fbl.flow.sequence', 'flow.sequence', 'sequence', 'sync', '--'],
+        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return SequenceFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new SequenceFlowActionProcessor(options, context, snapshot, parameters);
     }
 }

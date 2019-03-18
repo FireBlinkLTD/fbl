@@ -7,6 +7,7 @@ import { ParallelFlowActionHandler } from '../../../../src/plugins/flow/Parallel
 import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
 import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -20,34 +21,6 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'parallel.handler';
-
-    constructor(private idx: number, private delay: number, private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID + '.' + this.idx,
-        };
-    }
-
-    async execute(
-        options: any,
-        context: any,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
-        // wait first
-        await new Promise(resolve => {
-            setTimeout(resolve, this.delay);
-        });
-
-        await this.fn(options, context, snapshot, parameters);
-    }
-}
-
 @suite()
 export class ParallelFlowActionHandlerTestSuite {
     after() {
@@ -60,40 +33,44 @@ export class ParallelFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('test', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('test', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([{}], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([{}], context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                [
-                    {
-                        test1: 123,
-                        test2: 321,
-                    },
-                ],
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    [
+                        {
+                            test1: 123,
+                            test2: 321,
+                        },
+                    ],
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                [
-                    {
-                        test1: 123,
-                    },
-                    null,
-                ],
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    [
+                        {
+                            test1: 123,
+                        },
+                        null,
+                    ],
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -103,9 +80,9 @@ export class ParallelFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.not.rejected;
+        await actionHandler.getProcessor([], context, snapshot, {}).validate();
 
-        await chai.expect(actionHandler.validate([{ test: 123 }], context, snapshot, {})).to.be.not.rejected;
+        await actionHandler.getProcessor([{ test: 123 }], context, snapshot, {}).validate();
     }
 
     @test()
@@ -157,20 +134,24 @@ export class ParallelFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
-        const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
+        const dummyActionHandler1 = new DummyActionHandler();
+        dummyActionHandler1.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 20));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
-        const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
+        const dummyActionHandler2 = new DummyActionHandler();
+        dummyActionHandler2.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 5));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
-        const options = [{ [DummyActionHandler.ID + '.1']: 1 }, { [DummyActionHandler.ID + '.2']: 2 }];
+        const options = [{ [dummyActionHandler1.id]: 1 }, { [dummyActionHandler2.id]: 2 }];
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
@@ -191,28 +172,33 @@ export class ParallelFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const results: number[] = [];
-        const dummyActionHandler0 = new DummyActionHandler(0, 0, async (opts: any) => {
+        const dummyActionHandler0 = new DummyActionHandler();
+        dummyActionHandler0.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler0, plugin);
 
-        const dummyActionHandler1 = new DummyActionHandler(1, 20, async (opts: any) => {
+        const dummyActionHandler1 = new DummyActionHandler();
+        dummyActionHandler1.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 20));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
-        const dummyActionHandler2 = new DummyActionHandler(2, 5, async (opts: any) => {
+        const dummyActionHandler2 = new DummyActionHandler();
+        dummyActionHandler2.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 5));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
         const options = [
-            { [DummyActionHandler.ID + '.0']: 0 },
-            { [DummyActionHandler.ID + '.1']: 1 },
-            { [DummyActionHandler.ID + '.2']: 2 },
+            { [dummyActionHandler0.id]: 0 },
+            { [dummyActionHandler1.id]: 1 },
+            { [dummyActionHandler2.id]: 2 },
         ];
 
         const context = ContextUtil.generateEmptyContext();
@@ -239,29 +225,32 @@ export class ParallelFlowActionHandlerTestSuite {
         actionHandlersRegistry.register(actionHandler, plugin);
 
         const results: number[] = [];
-        const dummyActionHandler1 = new DummyActionHandler(0, 20, async (opts: any) => {
+        const dummyActionHandler1 = new DummyActionHandler();
+        dummyActionHandler1.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 20));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
-        const dummyActionHandler2 = new DummyActionHandler(1, 5, async (opts: any) => {
+        const dummyActionHandler2 = new DummyActionHandler();
+        dummyActionHandler2.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 5));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
-        const dummyActionHandler3 = new DummyActionHandler(2, 10, async (opts: any) => {
+        const dummyActionHandler3 = new DummyActionHandler();
+        dummyActionHandler3.executeFn = async (opts: any) => {
+            await new Promise(resolve => setTimeout(resolve, 10));
             results.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler3, plugin);
 
         const options = [
             {
-                '||': [
-                    { [DummyActionHandler.ID + '.0']: 0 },
-                    { [DummyActionHandler.ID + '.1']: '<%- iteration.index %>' },
-                ],
+                '||': [{ [dummyActionHandler1.id]: 0 }, { [dummyActionHandler2.id]: '<%- iteration.index %>' }],
             },
-            { [DummyActionHandler.ID + '.2']: 2 },
+            { [dummyActionHandler3.id]: 2 },
         ];
 
         const context = ContextUtil.generateEmptyContext();
@@ -292,29 +281,33 @@ export class ParallelFlowActionHandlerTestSuite {
         };
 
         const results: number[] = [];
-        const dummyActionHandler1 = new DummyActionHandler(
-            1,
-            0,
-            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-                results.push(_options);
-                _parameters.parameters.test.push(_options);
-            },
-        );
+        const dummyActionHandler1 = new DummyActionHandler();
+        dummyActionHandler1.executeFn = async (
+            _options: any,
+            _context: any,
+            _snapshot: ActionSnapshot,
+            _parameters: IDelegatedParameters,
+        ) => {
+            results.push(_options);
+            _parameters.parameters.test.push(_options);
+        };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
-        const dummyActionHandler2 = new DummyActionHandler(
-            2,
-            0,
-            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-                results.push(_options);
-                _parameters.parameters.test.push(_options);
-            },
-        );
+        const dummyActionHandler2 = new DummyActionHandler();
+        dummyActionHandler2.executeFn = async (
+            _options: any,
+            _context: any,
+            _snapshot: ActionSnapshot,
+            _parameters: IDelegatedParameters,
+        ) => {
+            results.push(_options);
+            _parameters.parameters.test.push(_options);
+        };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const options = {
             shareParameters: true,
-            actions: [{ [DummyActionHandler.ID + '.1']: 0 }, { [DummyActionHandler.ID + '.2']: 1 }],
+            actions: [{ [dummyActionHandler1.id]: 0 }, { [dummyActionHandler2.id]: 1 }],
         };
 
         const context = ContextUtil.generateEmptyContext();

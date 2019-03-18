@@ -1,4 +1,4 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FlowService } from '../../services';
@@ -55,13 +55,7 @@ interface IVirtualDefaults {
     modifiers?: ICollideModifiers;
 }
 
-export class VirtualFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.virtual',
-        aliases: ['fbl.flow.virtual', 'flow.virtual', 'virtual'],
-        skipTemplateProcessing: true,
-    };
-
+export class VirtualFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
         id: Joi.string()
             .min(1)
@@ -78,102 +72,99 @@ export class VirtualFlowActionHandler extends ActionHandler {
         action: FBL_ACTION_SCHEMA,
     }).required();
 
-    getMetadata(): IActionHandlerMetadata {
-        return VirtualFlowActionHandler.metadata;
-    }
-
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return VirtualFlowActionHandler.validationSchema;
+        return VirtualFlowActionProcessor.validationSchema;
     }
 
-    async validate(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    /**
+     * @inheritdoc
+     */
+    async validate(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let unmaskedParametersSchema;
-        if (options.hasOwnProperty('parametersSchema')) {
+        if (this.options.hasOwnProperty('parametersSchema')) {
             const masked = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.parametersSchema,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.parametersSchema,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 true,
             );
 
             unmaskedParametersSchema = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.parametersSchema,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.parametersSchema,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 false,
             );
 
-            options.parametersSchema = masked;
+            this.options.parametersSchema = masked;
         }
 
         let unmaskedDefaults;
-        if (options.hasOwnProperty('defaults')) {
+        if (this.options.hasOwnProperty('defaults')) {
             const masked = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.defaults,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.defaults,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 true,
             );
 
             unmaskedDefaults = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.defaults,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.defaults,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 false,
             );
 
-            options.defaults = masked;
+            this.options.defaults = masked;
         }
-        snapshot.setOptions(options);
+        this.snapshot.setOptions(this.options);
 
-        options.parametersSchema = unmaskedParametersSchema;
-        options.defaults = unmaskedDefaults;
+        this.options.parametersSchema = unmaskedParametersSchema;
+        this.options.defaults = unmaskedDefaults;
 
-        await super.validate(options, context, snapshot, parameters);
+        await super.validate();
     }
 
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
         let virtualDefaults: IVirtualDefaults;
 
-        if (options.defaults) {
+        if (this.options.defaults) {
             virtualDefaults = {
-                values: options.defaults.values,
+                values: this.options.defaults.values,
             };
 
-            if (options.defaults.mergeFunction) {
-                const script = ['return function(defaults, parameters) {', options.defaults.mergeFunction, '}'].join(
-                    '\n',
-                );
+            if (this.options.defaults.mergeFunction) {
+                const script = [
+                    'return function(defaults, parameters) {',
+                    this.options.defaults.mergeFunction,
+                    '}',
+                ].join('\n');
 
                 virtualDefaults.mergeFunction = new Function(script)();
             }
 
-            if (options.defaults.modifiers) {
+            if (this.options.defaults.modifiers) {
                 virtualDefaults.modifiers = {};
-                for (const path of Object.keys(options.defaults.modifiers)) {
+                for (const path of Object.keys(this.options.defaults.modifiers)) {
                     const script = [
                         'return function(defaults, parameters) {',
-                        options.defaults.modifiers[path],
+                        this.options.defaults.modifiers[path],
                         '}',
                     ].join('\n');
 
@@ -183,15 +174,42 @@ export class VirtualFlowActionHandler extends ActionHandler {
         }
 
         const dynamicFlowHandler = new DynamicFlowHandler(
-            snapshot.wd,
-            options.id,
-            options.aliases || [],
-            options.parametersSchema,
-            options.action,
+            this.snapshot.wd,
+            this.options.id,
+            this.options.aliases || [],
+            this.options.parametersSchema,
+            this.options.action,
             virtualDefaults,
         );
 
-        context.dynamicActionHandlers.register(dynamicFlowHandler, require('./index'), snapshot);
+        this.context.dynamicActionHandlers.register(dynamicFlowHandler, require('./index'), this.snapshot);
+    }
+}
+
+export class VirtualFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.virtual',
+        aliases: ['fbl.flow.virtual', 'flow.virtual', 'virtual'],
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return VirtualFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new VirtualFlowActionProcessor(options, context, snapshot, parameters);
     }
 }
 

@@ -1,22 +1,33 @@
-import {ActionHandler, ActionSnapshot} from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
-import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 
-export class SleepFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
-        id: 'com.fireblink.fbl.flow.sleep',
-        aliases: [
-            'fbl.flow.sleep',
-            'flow.sleep',
-            'sleep'
-        ]
-    };
-
+export class SleepFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.alternatives(
         Joi.number().min(0),
-        Joi.string().regex(/^\d+(\.\d+)?$/)
-    )
-        .required();
+        Joi.string().regex(/^\d+(\.\d+)?$/),
+    ).required();
+
+    /**
+     * @inheritdoc
+     */
+    getValidationSchema(): Joi.SchemaLike | null {
+        return SleepFlowActionProcessor.validationSchema;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        await new Promise<void>(resolve => setTimeout(resolve, Number(this.options) * 1000));
+    }
+}
+
+export class SleepFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.sleep',
+        aliases: ['fbl.flow.sleep', 'flow.sleep', 'sleep'],
+    };
 
     /**
      * @inheritdoc
@@ -28,14 +39,12 @@ export class SleepFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
-        return SleepFlowActionHandler.validationSchema;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        await new Promise<void>(resolve => setTimeout(resolve, Number(options) * 1000));
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new SleepFlowActionProcessor(options, context, snapshot, parameters);
     }
 }

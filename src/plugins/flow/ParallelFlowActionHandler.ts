@@ -1,19 +1,12 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
-import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import { IMetadata } from '../../interfaces/IMetadata';
+import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
-export class ParallelFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.parallel',
-        aliases: ['fbl.flow.parallel', 'flow.parallel', 'parallel', 'async', '||'],
-        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: true,
-    };
-
+export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
     private static actionsValidationSchema = Joi.array()
         .items(FBL_ACTION_SCHEMA.optional())
         .options({
@@ -21,10 +14,10 @@ export class ParallelFlowActionHandler extends ActionHandler {
         });
 
     private static validationSchema = Joi.alternatives(
-        ParallelFlowActionHandler.actionsValidationSchema,
+        ParallelFlowActionProcessor.actionsValidationSchema,
         Joi.object()
             .keys({
-                actions: ParallelFlowActionHandler.actionsValidationSchema,
+                actions: ParallelFlowActionProcessor.actionsValidationSchema,
                 shareParameters: Joi.boolean(),
             })
             .requiredKeys('actions')
@@ -38,79 +31,36 @@ export class ParallelFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getMetadata(): IActionHandlerMetadata {
-        return ParallelFlowActionHandler.metadata;
-    }
-
-    /**
-     * @inheritdoc
-     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return ParallelFlowActionHandler.validationSchema;
-    }
-
-    /**
-     * Get parameters for single iteration
-     * @param shareParameters
-     * @param metadata
-     * @param parameters
-     * @param index
-     */
-    private static getParameters(
-        shareParameters: boolean,
-        metadata: IMetadata,
-        parameters: IDelegatedParameters,
-        index: number,
-    ): any {
-        const result = <IDelegatedParameters>{
-            iteration: { index },
-        };
-
-        if (parameters && parameters.parameters !== undefined) {
-            result.parameters = shareParameters
-                ? parameters.parameters
-                : JSON.parse(JSON.stringify(parameters.parameters));
-        }
-
-        return result;
+        return ParallelFlowActionProcessor.validationSchema;
     }
 
     /**
      * @inheritdoc
      */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let actions;
         let shareParameters = false;
-        if (Array.isArray(options)) {
-            actions = options;
+        if (Array.isArray(this.options)) {
+            actions = this.options;
         } else {
-            actions = options.actions;
-            shareParameters = options.shareParameters;
+            actions = this.options.actions;
+            shareParameters = this.options.shareParameters;
         }
 
         const snapshots: ActionSnapshot[] = [];
         const promises = actions.map(
             async (action: any, index: number): Promise<void> => {
-                const iterationParams = ParallelFlowActionHandler.getParameters(
-                    shareParameters,
-                    snapshot.metadata,
-                    parameters,
-                    index,
-                );
+                const iterationParams = this.getParameters(shareParameters, { index });
 
                 snapshots[index] = await flowService.executeAction(
-                    snapshot.wd,
+                    this.snapshot.wd,
                     action,
-                    context,
+                    this.context,
                     iterationParams,
-                    snapshot,
+                    this.snapshot,
                 );
             },
         );
@@ -119,7 +69,35 @@ export class ParallelFlowActionHandler extends ActionHandler {
 
         // register snapshots in the order of their presence
         snapshots.forEach(childSnapshot => {
-            snapshot.registerChildActionSnapshot(childSnapshot);
+            this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
+    }
+}
+
+export class ParallelFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.parallel',
+        aliases: ['fbl.flow.parallel', 'flow.parallel', 'parallel', 'async', '||'],
+        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return ParallelFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new ParallelFlowActionProcessor(options, context, snapshot, parameters);
     }
 }
