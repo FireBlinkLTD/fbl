@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Under Development
+
+### Fixed
+
+- [\#336](https://github.com/FireBlinkLTD/fbl/issues/330) - Help output no longer prints `-h` option twice.
+
 ## [1.6.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-02-27
 
 ### Changed
