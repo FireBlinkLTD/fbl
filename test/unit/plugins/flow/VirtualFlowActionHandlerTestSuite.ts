@@ -8,6 +8,7 @@ import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -21,24 +22,6 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'virtual.dummy.handler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
-    }
-}
-
 @suite()
 class VirtualFlowActionHandlerTestSuite {
     after() {
@@ -51,54 +34,60 @@ class VirtualFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    id: 'test',
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        id: 'test',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    id: 'test',
-                    action: {},
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        id: 'test',
+                        action: {},
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    id: 'test',
-                    parametersSchema: {
-                        type: {
-                            blue: 'green',
+            actionHandler
+                .getProcessor(
+                    {
+                        id: 'test',
+                        parametersSchema: {
+                            type: {
+                                blue: 'green',
+                            },
+                        },
+                        action: {
+                            ctx: 'yes',
                         },
                     },
-                    action: {
-                        ctx: 'yes',
-                    },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -108,8 +97,8 @@ class VirtualFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     id: 'test',
                     parametersSchema: {
@@ -122,8 +111,8 @@ class VirtualFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -134,12 +123,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -154,7 +142,7 @@ class VirtualFlowActionHandlerTestSuite {
                         },
                     },
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst %>',
                     },
                 },
             },
@@ -180,12 +168,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -205,7 +192,7 @@ class VirtualFlowActionHandlerTestSuite {
                         },
                     },
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst %>',
                     },
                 },
             },
@@ -231,12 +218,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -259,7 +245,7 @@ class VirtualFlowActionHandlerTestSuite {
                         },
                     },
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst %>',
                     },
                 },
             },
@@ -285,12 +271,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -311,7 +296,7 @@ class VirtualFlowActionHandlerTestSuite {
                         mergeFunction: 'return { tst: parameters.tst + defaults.tst };',
                     },
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst %>',
                     },
                 },
             },
@@ -339,12 +324,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -364,7 +348,7 @@ class VirtualFlowActionHandlerTestSuite {
                         },
                     },
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst %>',
                     },
                 },
             },
@@ -399,19 +383,18 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
                 [virtual.getMetadata().id]: {
                     id: 'virtual.test',
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst.t %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst.t %>',
                     },
                 },
             },
@@ -440,12 +423,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.templateUtilityRegistry.register(new FSTemplateUtility());
 
         let opts;
-        flowService.actionHandlersRegistry.register(
-            new DummyActionHandler((options: any) => {
-                opts = options;
-            }),
-            plugin,
-        );
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const context = ContextUtil.generateEmptyContext();
 
@@ -455,7 +437,7 @@ class VirtualFlowActionHandlerTestSuite {
                 [virtual.getMetadata().id]: {
                     id: 'virtual.test',
                     action: {
-                        [DummyActionHandler.ID]: '<%- parameters.tst.t %>',
+                        [dummyActionHandler.id]: '<%- parameters.tst.t %>',
                     },
                 },
             },

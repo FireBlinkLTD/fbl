@@ -22,9 +22,9 @@ class VoidActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
-        await chai.expect(actionHandler.validate(0, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(0, context, snapshot, {}).validate()).to.be.rejected;
     }
 
     @test()
@@ -33,7 +33,7 @@ class VoidActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        actionHandler.validate(undefined, context, snapshot, {});
+        actionHandler.getProcessor(undefined, context, snapshot, {}).validate();
     }
 
     @test()
@@ -42,6 +42,6 @@ class VoidActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        actionHandler.execute(undefined, context, snapshot, {});
+        await actionHandler.getProcessor(undefined, context, snapshot, {}).execute();
     }
 }

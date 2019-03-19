@@ -6,6 +6,7 @@ import { WhileActionHandler } from '../../../../src/plugins/flow/WhileActionHand
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IActionHandlerMetadata, IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,29 +20,6 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'while.handler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(
-        options: any,
-        context: any,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
-        await this.fn(options, context, snapshot, parameters);
-    }
-}
-
 @suite()
 class WhileActionHandlerTestSuite {
     after() {
@@ -54,52 +32,58 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    value: 'test',
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    value: 'test',
-                    is: 'test',
-                    action: {},
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    value: 'test',
-                    is: 'test',
-                    not: 'test',
-                    action: {
-                        ctx: 'yes',
+            actionHandler
+                .getProcessor(
+                    {
+                        value: 'test',
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        value: 'test',
+                        is: 'test',
+                        action: {},
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        value: 'test',
+                        is: 'test',
+                        not: 'test',
+                        action: {
+                            ctx: 'yes',
+                        },
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -109,8 +93,8 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     value: 'test',
                     is: 'test',
@@ -121,8 +105,8 @@ class WhileActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -131,10 +115,11 @@ class WhileActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
-        const dummyActionHandler = new DummyActionHandler(async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             count++;
             context.ctx.test = false;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
@@ -144,7 +129,7 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {},
+                [dummyActionHandler.id]: {},
             },
         };
 
@@ -167,10 +152,11 @@ class WhileActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
-        const dummyActionHandler = new DummyActionHandler(async (_options: any, _context: IContext) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (_options: any, _context: IContext) => {
             count++;
             _context.ctx.test = true;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
@@ -180,7 +166,7 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             not: true,
             action: {
-                [DummyActionHandler.ID]: {},
+                [dummyActionHandler.id]: {},
             },
         };
 
@@ -203,10 +189,11 @@ class WhileActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let count = 0;
-        const dummyActionHandler = new DummyActionHandler(async (_options: any, _context: IContext) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (_options: any, _context: IContext) => {
             count++;
             _context.ctx.test = false;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
@@ -216,7 +203,7 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {},
+                [dummyActionHandler.id]: {},
             },
         };
 
@@ -238,9 +225,10 @@ class WhileActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler(async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new WhileActionHandler();
@@ -250,7 +238,7 @@ class WhileActionHandlerTestSuite {
             value: '<%- ctx.test %>',
             is: true,
             action: {
-                [DummyActionHandler.ID]: {},
+                [dummyActionHandler.id]: {},
             },
         };
 
@@ -283,13 +271,17 @@ class WhileActionHandlerTestSuite {
         };
 
         let count = 1;
-        const dummyActionHandler1 = new DummyActionHandler(
-            async (_options: any, _context: any, _snapshot: ActionSnapshot, _parameters: IDelegatedParameters) => {
-                _parameters.parameters.test += _parameters.parameters.test;
-                count++;
-                context.ctx.end = count === 3;
-            },
-        );
+        const dummyActionHandler1 = new DummyActionHandler();
+        dummyActionHandler1.executeFn = async (
+            _options: any,
+            _context: any,
+            _snapshot: ActionSnapshot,
+            _parameters: IDelegatedParameters,
+        ) => {
+            _parameters.parameters.test += _parameters.parameters.test;
+            count++;
+            context.ctx.end = count === 3;
+        };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const options = {
@@ -297,7 +289,7 @@ class WhileActionHandlerTestSuite {
             value: '$ref:ctx.end',
             is: false,
             action: {
-                [DummyActionHandler.ID]: '',
+                [dummyActionHandler1.id]: '',
             },
         };
 
