@@ -1,10 +1,10 @@
 import { suite, test } from 'mocha-typescript';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
-import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
 import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
 import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
@@ -23,10 +23,6 @@ const plugin: IPlugin = {
 
 @suite
 export class SequenceFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SequenceFlowActionHandler();

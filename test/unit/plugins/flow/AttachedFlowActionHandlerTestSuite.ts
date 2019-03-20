@@ -32,9 +32,6 @@ class AttachedFlowActionHandlerTestSuite {
     private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
 

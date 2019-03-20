@@ -1,13 +1,13 @@
-import {suite, test} from 'mocha-typescript';
-import {ActionSnapshot} from '../../../../src/models';
-import {join} from 'path';
-import {exists, mkdir, writeFile} from 'fs';
+import { suite, test } from 'mocha-typescript';
+import { ActionSnapshot } from '../../../../src/models';
+import { join } from 'path';
+import { exists, mkdir, writeFile } from 'fs';
 import * as assert from 'assert';
-import {RemovePathActionHandler} from '../../../../src/plugins/fs/RemovePathActionHandler';
-import {promisify} from 'util';
-import {ContextUtil} from '../../../../src/utils';
-import {TempPathsRegistry} from '../../../../src/services';
-import {Container} from 'typedi';
+import { RemovePathActionHandler } from '../../../../src/plugins/fs/RemovePathActionHandler';
+import { promisify } from 'util';
+import { ContextUtil } from '../../../../src/utils';
+import { TempPathsRegistry } from '../../../../src/services';
+import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,32 +15,19 @@ chai.use(chaiAsPromised);
 
 @suite
 class MakeDirActionHandlerTestSuite {
-    async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(
-            actionHandler.validate(true, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(true, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(
-            actionHandler.validate(1234.124124, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(1234.124124, context, snapshot, {}).validate()).to.be.rejected;
     }
 
     @test()
@@ -49,9 +36,7 @@ class MakeDirActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate('/tmp/test', context, snapshot, {})
-        ).to.be.not.rejected;
+        await chai.expect(actionHandler.getProcessor('/tmp/test', context, snapshot, {}).validate()).to.be.not.rejected;
     }
 
     @test()
@@ -74,7 +59,10 @@ class MakeDirActionHandlerTestSuite {
         await promisify(writeFile)(join(path_l1, 'test2.txt'), '', 'utf8');
         await promisify(writeFile)(join(path_l2, 'test3.txt'), '', 'utf8');
 
-        await actionHandler.execute(tmpdir, context, snapshot, {});
+        const processor = await actionHandler.getProcessor(tmpdir, context, snapshot, {});
+
+        await processor.validate();
+        await processor.execute();
 
         const exist = await promisify(exists)(tmpdir);
         assert(!exist);
@@ -92,8 +80,6 @@ class MakeDirActionHandlerTestSuite {
 
         const path_l1 = join(tmpdir, 'l1');
 
-        await chai.expect(
-            actionHandler.execute(path_l1, context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(path_l1, context, snapshot, {}).execute()).to.be.rejected;
     }
 }

@@ -27,10 +27,6 @@ class DummyActionHandler extends ActionHandler {
 
 @suite()
 export class ActionHandlersRegistryTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async lifecycle() {
         const registry = new ActionHandlersRegistry();

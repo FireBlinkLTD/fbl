@@ -1,11 +1,11 @@
 import { test, suite } from 'mocha-typescript';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 import { WhileActionHandler } from '../../../../src/plugins/flow/WhileActionHandler';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
-import { IActionHandlerMetadata, IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
@@ -22,10 +22,6 @@ const plugin: IPlugin = {
 
 @suite()
 class WhileActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WhileActionHandler();

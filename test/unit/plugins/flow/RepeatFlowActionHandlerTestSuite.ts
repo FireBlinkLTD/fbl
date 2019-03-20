@@ -1,8 +1,8 @@
 import { suite, test } from 'mocha-typescript';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { RepeatFlowActionHandler } from '../../../../src/plugins/flow/RepeatFlowActionHandler';
-import { IActionHandlerMetadata, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
@@ -22,10 +22,6 @@ const plugin: IPlugin = {
 
 @suite()
 class RepeatFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new RepeatFlowActionHandler();

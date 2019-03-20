@@ -1,6 +1,5 @@
 import { suite, test } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 import { SleepFlowActionHandler } from '../../../../src/plugins/flow/SleepFlowActionHandler';
 import * as assert from 'assert';
@@ -11,10 +10,6 @@ chai.use(chaiAsPromised);
 
 @suite()
 class SleepActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SleepFlowActionHandler();

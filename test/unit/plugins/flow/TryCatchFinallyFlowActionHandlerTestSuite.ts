@@ -1,8 +1,8 @@
 import { suite, test } from 'mocha-typescript';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { TryCatchFinallyFlowActionHandler } from '../../../../src/plugins/flow/TryCatchFinallyFlowActionHandler';
-import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
+import { IPlugin } from '../../../../src/interfaces';
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
@@ -22,10 +22,6 @@ const plugin: IPlugin = {
 
 @suite()
 class TryCatchFinallyFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();

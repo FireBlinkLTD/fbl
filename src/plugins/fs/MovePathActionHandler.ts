@@ -1,26 +1,49 @@
-import {ActionHandler, ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import * as Joi from 'joi';
-import {FSUtil} from '../../utils';
-import {sep} from 'path';
+import { FSUtil } from '../../utils';
+import { sep } from 'path';
+
+export class MovePathActionProcessor extends ActionProcessor {
+    private static validationSchema = Joi.object({
+        from: Joi.string()
+            .min(1)
+            .required(),
+        to: Joi.string()
+            .min(1)
+            .required(),
+    }).required();
+
+    /**
+     * @inheritdoc
+     */
+    getValidationSchema(): Joi.SchemaLike | null {
+        return MovePathActionProcessor.validationSchema;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        let from = FSUtil.getAbsolutePath(this.options.from, this.snapshot.wd);
+        if (this.options.from.endsWith(sep)) {
+            from += sep;
+        }
+
+        let to = FSUtil.getAbsolutePath(this.options.to, this.snapshot.wd);
+        if (this.options.to.endsWith(sep)) {
+            to += sep;
+        }
+
+        await FSUtil.move(from, to);
+    }
+}
 
 export class MovePathActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
+    private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.fs.move',
-        aliases: [
-            'fbl.fs.move',
-            'fbl.fs.mv',
-            'fs.mv',
-            'fs.move',
-            'move',
-            'mv'
-        ]
+        aliases: ['fbl.fs.move', 'fbl.fs.mv', 'fs.mv', 'fs.move', 'move', 'mv'],
     };
-
-    private static validationSchema = Joi.object({
-        from: Joi.string().min(1).required(),
-        to: Joi.string().min(1).required()
-    }).required();
 
     /**
      * @inheritdoc
@@ -32,24 +55,12 @@ export class MovePathActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
-        return MovePathActionHandler.validationSchema;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        let from = FSUtil.getAbsolutePath(options.from, snapshot.wd);
-        if (options.from.endsWith(sep)) {
-            from += sep;
-        }
-
-        let to = FSUtil.getAbsolutePath(options.to, snapshot.wd);
-        if (options.to.endsWith(sep)) {
-            to += sep;
-        }
-
-        await FSUtil.move(from, to);
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new MovePathActionProcessor(options, context, snapshot, parameters);
     }
 }

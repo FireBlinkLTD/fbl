@@ -13,10 +13,6 @@ chai.use(chaiAsPromised);
 
 @suite()
 class ExecActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();

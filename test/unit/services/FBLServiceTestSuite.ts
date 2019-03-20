@@ -1,11 +1,11 @@
-import {suite, test} from 'mocha-typescript';
-import {Container} from 'typedi';
-import {IActionHandlerMetadata, IFlow, IPlugin} from '../../../src/interfaces';
-import {ActionHandler, ActionSnapshot} from '../../../src/models';
+import { suite, test } from 'mocha-typescript';
+import { Container } from 'typedi';
+import { IActionHandlerMetadata, IFlow, IPlugin } from '../../../src/interfaces';
+import { ActionHandler, ActionSnapshot } from '../../../src/models';
 import * as assert from 'assert';
-import {FBLService} from '../../../src/services';
-import {ContextUtil} from '../../../src/utils';
-import {join} from 'path';
+import { FBLService } from '../../../src/services';
+import { ContextUtil } from '../../../src/utils';
+import { join } from 'path';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -16,17 +16,14 @@ const version = require('../../../../package.json').version;
 class DummyActionHandler extends ActionHandler {
     static ID = 'testHandler';
 
-    constructor(
-        private fn: Function,
-        private skipExecution: boolean
-    ) {
+    constructor(private fn: Function, private skipExecution: boolean) {
         super();
     }
 
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
+        return <IActionHandlerMetadata>{
             id: DummyActionHandler.ID,
-            version: '1.0.0'
+            version: '1.0.0',
         };
     }
 
@@ -41,9 +38,9 @@ class DummyActionHandler extends ActionHandler {
 
 class InvalidIdActionHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
+        return <IActionHandlerMetadata>{
             id: FBLService.METADATA_PREFIX + 'invalid',
-            version: '1.0.0'
+            version: '1.0.0',
         };
     }
 
@@ -54,12 +51,10 @@ class InvalidIdActionHandler extends ActionHandler {
 
 class InvalidAliasActionHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
-        return  <IActionHandlerMetadata> {
+        return <IActionHandlerMetadata>{
             id: 'valid',
             version: '1.0.0',
-            aliases: [
-                FBLService.METADATA_PREFIX + 'invalid.alias'
-            ]
+            aliases: [FBLService.METADATA_PREFIX + 'invalid.alias'],
         };
     }
 
@@ -70,24 +65,23 @@ class InvalidAliasActionHandler extends ActionHandler {
 
 @suite()
 export class FBLServiceTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async pluginAutoInclude(): Promise<void> {
         const fbl = Container.get<FBLService>(FBLService);
-        await fbl.validateFlowRequirements(<IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: 'tst'
+        await fbl.validateFlowRequirements(
+            <IFlow>{
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: 'tst',
+                },
+                requires: {
+                    plugins: {
+                        [join(__dirname, '../../../src/plugins/context')]: version,
+                    },
+                },
             },
-            requires: {
-                plugins: {
-                    [join(__dirname, '../../../src/plugins/context')]: version
-                }
-            }
-        }, '.');
+            '.',
+        );
 
         const plugin = fbl.getPlugin('flb.core.context');
         assert(plugin);
@@ -96,17 +90,20 @@ export class FBLServiceTestSuite {
     @test()
     async pluginAutoIncludeWithWD(): Promise<void> {
         const fbl = Container.get<FBLService>(FBLService);
-        await fbl.validateFlowRequirements(<IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                [DummyActionHandler.ID]: 'tst'
+        await fbl.validateFlowRequirements(
+            <IFlow>{
+                version: '1.0.0',
+                pipeline: {
+                    [DummyActionHandler.ID]: 'tst',
+                },
+                requires: {
+                    plugins: {
+                        ['context']: version,
+                    },
+                },
             },
-            requires: {
-                plugins: {
-                    ['context']: version
-                }
-            }
-        }, join(__dirname, '../../../src/plugins'));
+            join(__dirname, '../../../src/plugins'),
+        );
 
         const plugin = fbl.getPlugin('flb.core.context');
         assert(plugin);
@@ -117,7 +114,7 @@ export class FBLServiceTestSuite {
         let error;
         try {
             FBLService.extractIdOrAlias({
-                $title: 'test'
+                $title: 'test',
             });
         } catch (e) {
             error = e;
@@ -141,35 +138,42 @@ export class FBLServiceTestSuite {
                 name: 'test',
                 version: '1.0.0',
                 requires: {
-                    fbl: '>=0.0.0'
-                }
-            }
+                    fbl: '>=0.0.0',
+                },
+            },
         );
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.var = 'test';
         context.secrets.var = '123';
 
-        const snapshot = await fbl.execute('.', <IFlow> {
-            version: '1.0.0',
-            pipeline: {
-                $title: 'Dummy Action Handler',
-                [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>'
-            }
-        }, context, {});
+        const snapshot = await fbl.execute(
+            '.',
+            <IFlow>{
+                version: '1.0.0',
+                pipeline: {
+                    $title: 'Dummy Action Handler',
+                    [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>',
+                },
+            },
+            context,
+            {},
+        );
 
         const snapshotOptionsSteps = snapshot.getSteps().filter(s => s.type === 'options');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
         assert.strictEqual(result, 'test123');
 
-        await chai.expect(fbl.execute(
-            '.',
-            <IFlow> {
-                version: '1.0.0',
-                pipeline: {}
-            },
-            ContextUtil.generateEmptyContext(),
-            {})
+        await chai.expect(
+            fbl.execute(
+                '.',
+                <IFlow>{
+                    version: '1.0.0',
+                    pipeline: {},
+                },
+                ContextUtil.generateEmptyContext(),
+                {},
+            ),
         ).to.be.rejected;
     }
 
@@ -188,21 +192,21 @@ export class FBLServiceTestSuite {
                 name: 'test',
                 version: '1.0.0',
                 requires: {
-                    fbl: '>=0.0.0'
-                }
-            }
+                    fbl: '>=0.0.0',
+                },
+            },
         );
 
         await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst'
-                }
+                    [DummyActionHandler.ID]: 'tst',
+                },
             },
             ContextUtil.generateEmptyContext(),
-            {}
+            {},
         );
 
         assert.strictEqual(result, null);
@@ -222,21 +226,21 @@ export class FBLServiceTestSuite {
                 name: 'test',
                 version: '1.0.0',
                 requires: {
-                    fbl: '>=0.0.0'
-                }
-            }
+                    fbl: '>=0.0.0',
+                },
+            },
         );
 
         const snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst'
-                }
+                    [DummyActionHandler.ID]: 'tst',
+                },
             },
             ContextUtil.generateEmptyContext(),
-            {}
+            {},
         );
 
         assert.strictEqual(snapshot.successful, false);
@@ -257,28 +261,30 @@ export class FBLServiceTestSuite {
                 name: 'test',
                 version: '1.0.0',
                 requires: {
-                    fbl: '>=0.0.0'
-                }
-            }
+                    fbl: '>=0.0.0',
+                },
+            },
         );
 
         const snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: `<%- ctx.t1`
-                }
+                    [DummyActionHandler.ID]: `<%- ctx.t1`,
+                },
             },
             ContextUtil.generateEmptyContext(),
-            {}
+            {},
         );
 
         assert.strictEqual(snapshot.successful, false);
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'failure').payload, 'Error: Could not find matching close tag for "<%-".');
+        assert.strictEqual(
+            snapshot.getSteps().find(s => s.type === 'failure').payload,
+            'Error: Could not find matching close tag for "<%-".',
+        );
         assert.strictEqual(result, null);
     }
-
 
     @test()
     async failActionIdAndAliasValidation() {
@@ -289,42 +295,48 @@ export class FBLServiceTestSuite {
         let error;
         try {
             fbl.registerPlugins([
-                <IPlugin> {
+                <IPlugin>{
                     name: 'invalid_id',
                     version: '1.0.0',
                     requires: {
-                        fbl: require('../../../../package.json').version
+                        fbl: require('../../../../package.json').version,
                     },
-                    actionHandlers: [
-                        new InvalidIdActionHandler()
-                    ]
-                }
+                    actionHandlers: [new InvalidIdActionHandler()],
+                },
             ]);
         } catch (e) {
             error = e;
         }
 
-        assert.strictEqual(error.message, `Unable to register action handler with id "${new InvalidIdActionHandler().getMetadata().id}". It can not start with ${FBLService.METADATA_PREFIX}`);
+        assert.strictEqual(
+            error.message,
+            `Unable to register action handler with id "${
+                new InvalidIdActionHandler().getMetadata().id
+            }". It can not start with ${FBLService.METADATA_PREFIX}`,
+        );
 
         error = undefined;
         try {
             fbl.registerPlugins([
-                <IPlugin> {
+                <IPlugin>{
                     name: 'invalid_alias',
                     version: '1.0.0',
                     requires: {
-                        fbl: version
+                        fbl: version,
                     },
-                    actionHandlers: [
-                        new InvalidAliasActionHandler()
-                    ]
-                }
+                    actionHandlers: [new InvalidAliasActionHandler()],
+                },
             ]);
         } catch (e) {
             error = e;
         }
 
-        assert.strictEqual(error.message, `Unable to register action handler with alias "${new InvalidAliasActionHandler().getMetadata().aliases[0]}". It can not start with ${FBLService.METADATA_PREFIX}`);
+        assert.strictEqual(
+            error.message,
+            `Unable to register action handler with alias "${
+                new InvalidAliasActionHandler().getMetadata().aliases[0]
+            }". It can not start with ${FBLService.METADATA_PREFIX}`,
+        );
     }
 
     @test()
@@ -342,28 +354,28 @@ export class FBLServiceTestSuite {
                 name: 'test',
                 version: '1.0.0',
                 requires: {
-                    fbl: '>=0.0.0'
-                }
-            }
+                    fbl: '>=0.0.0',
+                },
+            },
         );
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.t1 = {
             t2: {
-                value: 'tst'
-            }
+                value: 'tst',
+            },
         };
 
         const snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`
-                }
+                    [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`,
+                },
             },
             context,
-            {}
+            {},
         );
 
         assert.strictEqual(snapshot.successful, true);
@@ -374,19 +386,22 @@ export class FBLServiceTestSuite {
     async missingApplicationRequirement() {
         const fbl = Container.get<FBLService>(FBLService);
 
-        await chai.expect(
-            fbl.validatePlugin(<IPlugin> {
-                    name: 'test',
-                    version: '0.0.0',
-                    requires: {
-                        fbl: version,
-                        applications: [
-                            'missing_app_1234'
-                        ]
-                    }
-                }, '.')
-        ).to.be.rejectedWith(
-            'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable'
-        );
+        await chai
+            .expect(
+                fbl.validatePlugin(
+                    <IPlugin>{
+                        name: 'test',
+                        version: '0.0.0',
+                        requires: {
+                            fbl: version,
+                            applications: ['missing_app_1234'],
+                        },
+                    },
+                    '.',
+                ),
+            )
+            .to.be.rejectedWith(
+                'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable',
+            );
     }
 }

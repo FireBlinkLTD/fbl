@@ -6,28 +6,11 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
-
-class DummyActionHandler extends ActionHandler {
-    static ID = 'testHandler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
-    }
-}
 
 const plugin: IPlugin = {
     name: 'test',
@@ -271,9 +254,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
@@ -283,7 +267,7 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 test: {
-                    [DummyActionHandler.ID]: true,
+                    [dummyActionHandler.id]: true,
                 },
             },
         };
@@ -310,9 +294,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
@@ -321,7 +306,7 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value === ctx.value %>',
             is: {
                 true: {
-                    [DummyActionHandler.ID]: true,
+                    [dummyActionHandler.id]: true,
                 },
             },
         };
@@ -344,9 +329,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions: any;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
@@ -355,10 +341,10 @@ export class SwitchFlowActionHandlerTestSuite {
             value: 0,
             is: {
                 0: {
-                    [DummyActionHandler.ID]: true,
+                    [dummyActionHandler.id]: true,
                 },
                 1: {
-                    [DummyActionHandler.ID]: false,
+                    [dummyActionHandler.id]: false,
                 },
             },
         };
@@ -378,9 +364,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
 
         let actionHandlerOptions: any;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
@@ -389,10 +376,10 @@ export class SwitchFlowActionHandlerTestSuite {
             value: true,
             is: {
                 true: {
-                    [DummyActionHandler.ID]: true,
+                    [dummyActionHandler.id]: true,
                 },
                 false: {
-                    [DummyActionHandler.ID]: false,
+                    [dummyActionHandler.id]: false,
                 },
             },
         };
@@ -412,9 +399,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         let actionHandlerOptions = false;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
@@ -423,7 +411,7 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 stte: {
-                    [DummyActionHandler.ID]: true,
+                    [dummyActionHandler.id]: true,
                 },
             },
         };
@@ -450,9 +438,10 @@ export class SwitchFlowActionHandlerTestSuite {
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
         const actionHandlerOptions: number[] = [];
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions.push(opts);
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const actionHandler = new SwitchFlowActionHandler();
@@ -461,11 +450,11 @@ export class SwitchFlowActionHandlerTestSuite {
             value: '<%- secrets.value %><%- ctx.value %>',
             is: {
                 stte: {
-                    [DummyActionHandler.ID]: 1,
+                    [dummyActionHandler.id]: 1,
                 },
             },
             else: {
-                [DummyActionHandler.ID]: 2,
+                [dummyActionHandler.id]: 2,
             },
         };
 

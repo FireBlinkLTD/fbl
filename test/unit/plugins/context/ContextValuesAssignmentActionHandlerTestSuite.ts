@@ -16,11 +16,6 @@ chai.use(chaiAsPromised);
 
 @suite()
 export class ContextValuesAssignmentActionHandlerTestSuite {
-    async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();

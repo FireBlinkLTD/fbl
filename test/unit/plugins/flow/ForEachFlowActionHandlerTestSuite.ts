@@ -23,10 +23,6 @@ const plugin: IPlugin = {
 
 @suite()
 class ForEachFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ForEachFlowActionHandler();

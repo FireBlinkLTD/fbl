@@ -1,13 +1,6 @@
 import { test, suite } from 'mocha-typescript';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
-import { FlowService } from '../../../../src/services';
-import { VirtualFlowActionHandler } from '../../../../src/plugins/flow/VirtualFlowActionHandler';
-import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
-import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
-import * as assert from 'assert';
+import { ActionSnapshot } from '../../../../src/models';
 import { ContextUtil } from '../../../../src/utils';
-import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
 import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
 
 const chai = require('chai');

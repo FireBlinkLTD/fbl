@@ -15,10 +15,6 @@ chai.use(chaiAsPromised);
 
 @suite()
 class ShellActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ShellActionHandler();
