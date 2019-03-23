@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "CLI tool to manage routine automation tasks.",
   "keywords": [
     "fireblink",
@@ -43,10 +43,10 @@
     "got": "9.6.0",
     "humanize-duration": "3.18.0",
     "joi": "14.3.1",
-    "js-yaml": "3.12.2",
+    "js-yaml": "3.13.0",
     "jsonschema": "1.2.4",
     "object-collider": "1.0.3",
-    "prompts": "2.0.3",
+    "prompts": "2.0.4",
     "requireg": "0.2.1",
     "semver": "5.6.0",
     "shelljs": "0.8.3",
@@ -64,7 +64,7 @@
     "@types/got": "9.4.1",
     "@types/joi": "14.3.2",
     "@types/js-yaml": "3.12.0",
-    "@types/node": "11.11.3",
+    "@types/node": "11.11.6",
     "@types/semver": "5.5.0",
     "@types/shelljs": "0.8.3",
     "@types/table": "4.0.5",
@@ -87,7 +87,7 @@
     "source-map-support": "0.5.11",
     "tslint": "5.14.0",
     "tslint-config-prettier": "1.18.0",
-    "typescript": "3.3.3333"
+    "typescript": "3.3.4000"
   },
   "nyc": {
     "check-coverage": true,
