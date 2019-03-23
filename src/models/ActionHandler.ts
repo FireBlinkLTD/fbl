@@ -49,16 +49,17 @@ export abstract class ActionHandler {
      * @param parameters
      * @returns {Promise<void>}
      * Get action processor (should create new instance upon call)
-     * @return {ActionProcessor}
      * @deprecated
      */
+
     async validate(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void> {
+    ): Promise<void> /** istanbul ignore next  */ {
         const schema = this.getValidationSchema();
+        /* istanbul ignore next */
         if (schema) {
             const result = Joi.validate(options, schema);
             if (result.error) {
@@ -71,7 +72,7 @@ export abstract class ActionHandler {
      * Get Joi schema to validate options with
      * @deprecated
      */
-    public getValidationSchema(): Joi.SchemaLike | null {
+    public getValidationSchema(): Joi.SchemaLike | null /** istanbul ignore next  */ {
         return null;
     }
 
@@ -81,7 +82,7 @@ export abstract class ActionHandler {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
-     * @returns {Promise<boolean>}
+     * @deprecated
      */
     async isShouldExecute(
         options: any,
@@ -98,7 +99,6 @@ export abstract class ActionHandler {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
-     * @returns {Promise<void>}
      * @deprecated
      */
     async execute(
@@ -107,6 +107,6 @@ export abstract class ActionHandler {
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
     ): Promise<void> {
-        throw new Error('ActionHandler.execute(...) method is deprecated.');
+        throw new Error('ActionHandler.execute() method is deprecated.');
     }
 }

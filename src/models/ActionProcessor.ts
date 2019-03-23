@@ -14,7 +14,6 @@ export abstract class ActionProcessor {
     /**
      * Validate options before processing.
      * Should throw exception on error.
-     * @returns {Promise<void>}
      */
     async validate(): Promise<void> {
         const schema = this.getValidationSchema();
@@ -28,6 +27,7 @@ export abstract class ActionProcessor {
 
     /**
      * Get Joi schema to validate options with
+     * Return null if no validation should be applied, though it is not recommended.
      */
     protected getValidationSchema(): Joi.SchemaLike | null {
         return null;
@@ -35,7 +35,6 @@ export abstract class ActionProcessor {
 
     /**
      * Check if action should be actually executed
-     * @returns {Promise<boolean>}
      */
     async isShouldExecute(): Promise<boolean> {
         return true;
@@ -43,7 +42,6 @@ export abstract class ActionProcessor {
 
     /**
      * Execute action
-     * @returns {Promise<void>}
      */
     abstract async execute(): Promise<void>;
 }

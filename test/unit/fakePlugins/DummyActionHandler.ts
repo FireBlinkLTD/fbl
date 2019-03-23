@@ -7,16 +7,10 @@ import {
 } from '../../../src';
 import { DummyActionProcessor } from './DummyActionProcessor';
 
-const uuidv4 = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = (Math.random() * 16) | 0,
-            v = c === 'x' ? r : (r & 0x3) | 0x8;
-
-        return v.toString(16);
-    });
-};
+const uuidv4 = require('uuid/v4');
 
 export class DummyActionHandler extends ActionHandler {
+    public shouldSkipExecution = false;
     public executeFn: Function;
     public validateFn: Function;
 
@@ -42,6 +36,7 @@ export class DummyActionHandler extends ActionHandler {
         const processor = new DummyActionProcessor(options, context, snapshot, parameters);
         processor.executeFn = this.executeFn;
         processor.validateFn = this.validateFn;
+        processor.shouldSkipExecution = this.shouldSkipExecution;
 
         return processor;
     }

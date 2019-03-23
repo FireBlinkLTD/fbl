@@ -3,6 +3,11 @@ import { ActionProcessor } from '../../../src';
 export class DummyActionProcessor extends ActionProcessor {
     public executeFn: Function;
     public validateFn: Function;
+    public shouldSkipExecution = false;
+
+    async isShouldExecute(): Promise<boolean> {
+        return !this.shouldSkipExecution;
+    }
 
     async validate(): Promise<void> {
         if (this.validateFn) {

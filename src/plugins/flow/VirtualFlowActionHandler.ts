@@ -173,7 +173,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
             }
         }
 
-        const dynamicFlowHandler = new DynamicFlowHandler(
+        const dynamicFlowHandler = new DynamicFlowActionHandler(
             this.snapshot.wd,
             this.options.id,
             this.options.aliases || [],
@@ -213,10 +213,92 @@ export class VirtualFlowActionHandler extends ActionHandler {
     }
 }
 
+class DynamicFlowActionProcessor extends ActionProcessor {
+    constructor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+        private wd: string,
+        private validationSchema: any | null,
+        private action: { [key: string]: any },
+        private virtualDefaults?: IVirtualDefaults,
+    ) {
+        super(options, context, snapshot, parameters);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async validate(): Promise<void> {
+        this.snapshot.wd = this.wd;
+        if (this.validationSchema) {
+            const mergedOptions = this.getMergedOptions(this.options);
+
+            const result = new Validator().validate(mergedOptions, this.validationSchema);
+            if (!result.valid) {
+                throw new Error(
+                    result.errors
+                        .map(e => {
+                            let key = 'value';
+
+                            /* istanbul ignore else */
+                            if (e.property !== 'instance') {
+                                key = e.property.substring('instance.'.length);
+                            }
+
+                            return `${key} ${e.message}`;
+                        })
+                        .join('\n'),
+                );
+            }
+        }
+    }
+
+    /**
+     * Merge passed options with default values
+     * @param options
+     */
+    private getMergedOptions(options: any): any {
+        let mergedOptions = options;
+
+        if (this.virtualDefaults) {
+            if (this.virtualDefaults.mergeFunction) {
+                const clonedDefaults = JSON.parse(JSON.stringify(this.virtualDefaults.values));
+                mergedOptions = this.virtualDefaults.mergeFunction(clonedDefaults, options);
+            } else {
+                mergedOptions = collide(this.virtualDefaults.values, options, this.virtualDefaults.modifiers);
+            }
+        }
+
+        return mergedOptions;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        this.snapshot.wd = this.wd;
+        this.parameters.parameters = this.getMergedOptions(this.options);
+        this.parameters.wd = this.snapshot.wd;
+
+        const childSnapshot = await flowService.executeAction(
+            this.wd,
+            this.action,
+            this.context,
+            this.parameters,
+            this.snapshot,
+        );
+        this.snapshot.registerChildActionSnapshot(childSnapshot);
+    }
+}
+
 /**
  * Dynamic flow handler that is being created dynamically by VirtualFlowHandler
  */
-class DynamicFlowHandler extends ActionHandler {
+class DynamicFlowActionHandler extends ActionHandler {
     constructor(
         private wd: string,
         private id: string,
@@ -246,73 +328,24 @@ class DynamicFlowHandler extends ActionHandler {
     }
 
     /**
-     * Merge passed options with default values
-     * @param options
-     */
-    private getMergedOptions(options: any): any {
-        let mergedOptions = options;
-
-        if (this.virtualDefaults) {
-            if (this.virtualDefaults.mergeFunction) {
-                const clonedDefaults = JSON.parse(JSON.stringify(this.virtualDefaults.values));
-                mergedOptions = this.virtualDefaults.mergeFunction(clonedDefaults, options);
-            } else {
-                mergedOptions = collide(this.virtualDefaults.values, options, this.virtualDefaults.modifiers);
-            }
-        }
-
-        return mergedOptions;
-    }
-
-    /**
      * @inheritdoc
      */
-    async validate(
+    getProcessor(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void> {
-        snapshot.wd = this.wd;
-        if (this.validationSchema) {
-            const mergedOptions = this.getMergedOptions(options);
+    ): ActionProcessor {
+        return new DynamicFlowActionProcessor(
+            options,
+            context,
+            snapshot,
+            parameters,
 
-            const result = new Validator().validate(mergedOptions, this.validationSchema);
-            if (!result.valid) {
-                throw new Error(
-                    result.errors
-                        .map(e => {
-                            let key = 'value';
-
-                            /* istanbul ignore else */
-                            if (e.property !== 'instance') {
-                                key = e.property.substring('instance.'.length);
-                            }
-
-                            return `${key} ${e.message}`;
-                        })
-                        .join('\n'),
-                );
-            }
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
-        const flowService = Container.get(FlowService);
-
-        snapshot.wd = this.wd;
-        parameters.parameters = this.getMergedOptions(options);
-        parameters.wd = snapshot.wd;
-
-        const childSnapshot = await flowService.executeAction(this.wd, this.action, context, parameters, snapshot);
-        snapshot.registerChildActionSnapshot(childSnapshot);
+            this.wd,
+            this.validationSchema,
+            this.action,
+            this.virtualDefaults,
+        );
     }
 }

@@ -54,8 +54,7 @@ class ContextTemplateUtilityTestSuite {
 
         const dynamicActionHandler = context.dynamicActionHandlers.find('test');
         assert(dynamicActionHandler);
-
-        await dynamicActionHandler.execute(
+        const processor = dynamicActionHandler.getProcessor(
             {
                 assignTo: '$.ctx.a',
                 pushTo: '$.ctx.p',
@@ -64,6 +63,8 @@ class ContextTemplateUtilityTestSuite {
             snapshot,
             {},
         );
+
+        await processor.execute();
 
         assert.deepStrictEqual(context.ctx, {
             a: 'assignToValue',

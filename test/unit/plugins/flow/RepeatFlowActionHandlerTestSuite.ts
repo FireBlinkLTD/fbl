@@ -254,8 +254,6 @@ class RepeatFlowActionHandlerTestSuite {
             {},
         );
 
-        console.log(snapshot.getSteps());
-
         assert.strictEqual(snapshot.successful, true);
         assert.strictEqual(results[0], 0);
         assert.strictEqual(results[1], 2);

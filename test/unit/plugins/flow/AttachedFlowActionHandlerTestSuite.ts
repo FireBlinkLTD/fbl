@@ -391,9 +391,10 @@ class AttachedFlowActionHandlerTestSuite {
         }, 100);
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot, {});
+        const processor = actionHandler.getProcessor(url, context, snapshot, {});
+        await processor.validate();
 
-        await chai.expect(actionHandler.getProcessor(url, context, snapshot, {}).execute()).to.be.rejected;
+        await chai.expect(processor.execute()).to.be.rejected;
     }
 
     @test()

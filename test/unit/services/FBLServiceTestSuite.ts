@@ -6,35 +6,13 @@ import * as assert from 'assert';
 import { FBLService } from '../../../src/services';
 import { ContextUtil } from '../../../src/utils';
 import { join } from 'path';
+import { DummyActionHandler } from '../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 const version = require('../../../../package.json').version;
-
-class DummyActionHandler extends ActionHandler {
-    static ID = 'testHandler';
-
-    constructor(private fn: Function, private skipExecution: boolean) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-            version: '1.0.0',
-        };
-    }
-
-    async isShouldExecute(options: any, context: any): Promise<boolean> {
-        return !this.skipExecution;
-    }
-
-    async execute(options: any, context: any): Promise<void> {
-        await this.fn(options, context);
-    }
-}
 
 class InvalidIdActionHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
@@ -72,7 +50,7 @@ export class FBLServiceTestSuite {
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst',
+                    test: 'tst',
                 },
                 requires: {
                     plugins: {
@@ -94,7 +72,7 @@ export class FBLServiceTestSuite {
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst',
+                    test: 'tst',
                 },
                 requires: {
                     plugins: {
@@ -130,18 +108,18 @@ export class FBLServiceTestSuite {
         fbl.flowService.debug = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(
-            new DummyActionHandler(async (opt: any) => {
-                result = opt;
-            }, false),
-            {
-                name: 'test',
-                version: '1.0.0',
-                requires: {
-                    fbl: '>=0.0.0',
-                },
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            result = opt;
+        };
+
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
             },
-        );
+        });
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.var = 'test';
@@ -153,7 +131,7 @@ export class FBLServiceTestSuite {
                 version: '1.0.0',
                 pipeline: {
                     $title: 'Dummy Action Handler',
-                    [DummyActionHandler.ID]: '<%- ctx.var %><%- secrets.var %>',
+                    [actionHandler.id]: '<%- ctx.var %><%- secrets.var %>',
                 },
             },
             context,
@@ -183,26 +161,27 @@ export class FBLServiceTestSuite {
 
         fbl.flowService.debug = true;
 
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            result = opt;
+        };
+        actionHandler.shouldSkipExecution = true;
+
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(
-            new DummyActionHandler(async (opt: any) => {
-                result = opt;
-            }, true),
-            {
-                name: 'test',
-                version: '1.0.0',
-                requires: {
-                    fbl: '>=0.0.0',
-                },
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
             },
-        );
+        });
 
         await fbl.execute(
             '.',
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst',
+                    [actionHandler.id]: 'tst',
                 },
             },
             ContextUtil.generateEmptyContext(),
@@ -218,25 +197,25 @@ export class FBLServiceTestSuite {
 
         fbl.flowService.debug = true;
 
-        fbl.flowService.actionHandlersRegistry.register(
-            new DummyActionHandler(async (opt: any) => {
-                throw new Error('test');
-            }, false),
-            {
-                name: 'test',
-                version: '1.0.0',
-                requires: {
-                    fbl: '>=0.0.0',
-                },
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            throw new Error('test');
+        };
+
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
             },
-        );
+        });
 
         const snapshot = await fbl.execute(
             '.',
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: 'tst',
+                    [actionHandler.id]: 'tst',
                 },
             },
             ContextUtil.generateEmptyContext(),
@@ -252,26 +231,26 @@ export class FBLServiceTestSuite {
 
         fbl.flowService.debug = true;
 
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            result = opt;
+        };
+
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(
-            new DummyActionHandler(async (opt: any) => {
-                result = opt;
-            }, false),
-            {
-                name: 'test',
-                version: '1.0.0',
-                requires: {
-                    fbl: '>=0.0.0',
-                },
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
             },
-        );
+        });
 
         const snapshot = await fbl.execute(
             '.',
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: `<%- ctx.t1`,
+                    [actionHandler.id]: `<%- ctx.t1`,
                 },
             },
             ContextUtil.generateEmptyContext(),
@@ -345,19 +324,19 @@ export class FBLServiceTestSuite {
 
         fbl.flowService.debug = true;
 
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            result = opt;
+        };
+
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(
-            new DummyActionHandler(async (opt: any) => {
-                result = opt;
-            }, false),
-            {
-                name: 'test',
-                version: '1.0.0',
-                requires: {
-                    fbl: '>=0.0.0',
-                },
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
             },
-        );
+        });
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.t1 = {
@@ -371,7 +350,7 @@ export class FBLServiceTestSuite {
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [DummyActionHandler.ID]: `<%- ctx['t1']["t2"].value %>`,
+                    [actionHandler.id]: `<%- ctx['t1']["t2"].value %>`,
                 },
             },
             context,
