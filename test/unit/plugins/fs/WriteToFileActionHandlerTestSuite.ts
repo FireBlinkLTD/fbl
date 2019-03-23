@@ -1,13 +1,13 @@
-import {suite, test} from 'mocha-typescript';
-import {WriteToFileActionHandler} from '../../../../src/plugins/fs/WriteToFileActionHandler';
-import {promisify} from 'util';
-import {mkdir, readFile, unlinkSync, writeFile, writeFileSync} from 'fs';
+import { suite, test } from 'mocha-typescript';
+import { WriteToFileActionHandler } from '../../../../src/plugins/fs/WriteToFileActionHandler';
+import { promisify } from 'util';
+import { mkdir, readFile, unlinkSync, writeFile, writeFileSync } from 'fs';
 import * as assert from 'assert';
-import {ActionSnapshot} from '../../../../src/models';
-import {resolve} from 'path';
-import {ContextUtil} from '../../../../src/utils';
-import {TempPathsRegistry} from '../../../../src/services';
-import {Container} from 'typedi';
+import { ActionSnapshot } from '../../../../src/models';
+import { resolve } from 'path';
+import { ContextUtil } from '../../../../src/utils';
+import { TempPathsRegistry } from '../../../../src/services';
+import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,53 +15,60 @@ chai.use(chaiAsPromised);
 
 @suite()
 class WriteToFileTestSuite {
-    async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor('test', context, snapshot, {}).validate()).to.be.rejected;
+
         await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        path: 'test',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        content: 'test',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(123, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate('test', context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                path: 'test'
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                path: '',
-                content: 'test'
-            }, context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        path: '',
+                        content: 'test',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
-
 
     @test()
     async passValidation(): Promise<void> {
@@ -69,51 +76,76 @@ class WriteToFileTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate({
-                path: '/tmp',
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                path: '/tmp',
-                assignPathTo: {
-                    ctx: '$.test',
-                    secrets: '$.test'
+        await actionHandler
+            .getProcessor(
+                {
+                    path: '/tmp',
+                    content: 'test',
                 },
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate({
-                assignPathTo: {
-                    ctx: '$.test',
-                    secrets: '$.test'
+        await actionHandler
+            .getProcessor(
+                {
+                    path: '/tmp',
+                    assignPathTo: {
+                        ctx: '$.test',
+                        secrets: '$.test',
+                    },
+                    content: 'test',
                 },
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate({
-                assignPathTo: {
-                    secrets: '$.test'
+        await actionHandler
+            .getProcessor(
+                {
+                    assignPathTo: {
+                        ctx: '$.test',
+                        secrets: '$.test',
+                    },
+                    content: 'test',
                 },
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate({
-                assignPathTo: {
-                    ctx: '$.test'
+        await actionHandler
+            .getProcessor(
+                {
+                    assignPathTo: {
+                        secrets: '$.test',
+                    },
+                    content: 'test',
                 },
-                content: 'test'
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
+
+        await actionHandler
+            .getProcessor(
+                {
+                    assignPathTo: {
+                        ctx: '$.test',
+                    },
+                    content: 'test',
+                },
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
     }
 
     @test()
@@ -128,16 +160,22 @@ class WriteToFileTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
-        await chai.expect(
-            actionHandler.execute({
+        const processor = await actionHandler.getProcessor(
+            {
                 path: tmpFile,
                 assignPathTo: {
                     ctx: '$.ct',
-                    secrets: '$.st'
+                    secrets: '$.st',
                 },
-                content: content
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                content: content,
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await processor.validate();
+        await processor.execute();
 
         const result = await promisify(readFile)(tmpFile, 'utf8');
         assert.strictEqual(result, content);
@@ -163,10 +201,18 @@ class WriteToFileTestSuite {
         context.ctx.global = 'g';
         context.ctx.local = 'l';
 
-        await actionHandler.execute({
-            path: destinationFile,
-            contentFromFile: templateFile,
-        }, context, snapshot, {});
+        const processor = await actionHandler.getProcessor(
+            {
+                path: destinationFile,
+                contentFromFile: templateFile,
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await processor.validate();
+        await processor.execute();
 
         const result = await promisify(readFile)(destinationFile, 'utf8');
         assert.strictEqual(result, 'g-l');
@@ -181,16 +227,24 @@ class WriteToFileTestSuite {
 
         const content = 'test';
 
-        await actionHandler.execute({
-            assignPathTo: {
-                ctx: '$.ct',
-                secrets: '$.st'
+        const processor = await actionHandler.getProcessor(
+            {
+                assignPathTo: {
+                    ctx: '$.ct',
+                    secrets: '$.st',
+                },
+                pushPathTo: {
+                    ctx: '$.psh',
+                },
+                content: content,
             },
-            pushPathTo: {
-                ctx: '$.psh'
-            },
-            content: content
-        }, context, snapshot, {});
+            context,
+            snapshot,
+            {},
+        );
+
+        await processor.validate();
+        await processor.execute();
 
         const result = await promisify(readFile)(context.ctx.ct, 'utf8');
         assert.strictEqual(result, content);
@@ -214,10 +268,18 @@ class WriteToFileTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         const content = 'test';
-        await actionHandler.execute({
-            path: path,
-            content: content
-        }, context, snapshot, {});
+        const processor = await actionHandler.getProcessor(
+            {
+                path: path,
+                content: content,
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await processor.validate();
+        await processor.execute();
 
         const result = await promisify(readFile)(path, 'utf8');
         assert.strictEqual(result, content);
@@ -240,10 +302,17 @@ class WriteToFileTestSuite {
 
         const content = 'test';
         await chai.expect(
-            actionHandler.execute({
-                path: path,
-                content: content
-            }, context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        path: path,
+                        content: content,
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
 
         path = resolve(tmpdir, 't1', 't2', 'test.txt');
@@ -252,10 +321,17 @@ class WriteToFileTestSuite {
         writeFileSync(resolve(tmpdir, 't1', 't2'), '', 'utf8');
 
         await chai.expect(
-            actionHandler.execute({
-                path: path,
-                content: content
-            }, context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        path: path,
+                        content: content,
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
     }
 }

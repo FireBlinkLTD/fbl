@@ -1,7 +1,9 @@
 import * as Joi from 'joi';
-import { IActionHandlerMetadata, IContext } from '../interfaces';
+
+import { IContext, IActionHandlerMetadata, IDelegatedParameters } from '../interfaces';
 import { ActionSnapshot } from './ActionSnapshot';
-import { IDelegatedParameters } from '../interfaces/IDelegatedParameters';
+import { ActionProcessor } from './ActionProcessor';
+import { CompatibilityActionProcessor } from './CompatibilityActionProcessor';
 
 /**
  * Context variables resolver
@@ -14,6 +16,31 @@ export abstract class ActionHandler {
     abstract getMetadata(): IActionHandlerMetadata;
 
     /**
+     * Get working directory
+     * @returns {string} with alternative wd to use
+     * @returns {null} when original working directory should be used
+     */
+    getWorkingDirectory(): string | null {
+        return null;
+    }
+
+    /**
+     * Get action processor (should create new instance upon call)
+     * @return {ActionProcessor}
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        const compatibilityProcessor = new CompatibilityActionProcessor(options, context, snapshot, parameters);
+        compatibilityProcessor.actionHandler = this;
+
+        return compatibilityProcessor;
+    }
+
+    /**
      * Validate options before processing.
      * Should throw exception on error.
      * @param options
@@ -21,14 +48,18 @@ export abstract class ActionHandler {
      * @param {ActionSnapshot} snapshot
      * @param parameters
      * @returns {Promise<void>}
+     * Get action processor (should create new instance upon call)
+     * @deprecated
      */
+
     async validate(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void> {
+    ): Promise<void> /** istanbul ignore next  */ {
         const schema = this.getValidationSchema();
+        /* istanbul ignore next */
         if (schema) {
             const result = Joi.validate(options, schema);
             if (result.error) {
@@ -39,17 +70,9 @@ export abstract class ActionHandler {
 
     /**
      * Get Joi schema to validate options with
+     * @deprecated
      */
-    protected getValidationSchema(): Joi.SchemaLike | null {
-        return null;
-    }
-
-    /**
-     * Get working directory
-     * @returns {string} with alternative wd to use
-     * @returns {null} when original working directory should be used
-     */
-    getWorkingDirectory(): string | null {
+    public getValidationSchema(): Joi.SchemaLike | null /** istanbul ignore next  */ {
         return null;
     }
 
@@ -59,7 +82,7 @@ export abstract class ActionHandler {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
-     * @returns {Promise<boolean>}
+     * @deprecated
      */
     async isShouldExecute(
         options: any,
@@ -76,12 +99,14 @@ export abstract class ActionHandler {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
-     * @returns {Promise<void>}
+     * @deprecated
      */
-    abstract async execute(
+    async execute(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void>;
+    ): Promise<void> {
+        throw new Error('ActionHandler.execute() method is deprecated.');
+    }
 }

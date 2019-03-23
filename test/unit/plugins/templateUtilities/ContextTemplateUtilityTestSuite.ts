@@ -2,14 +2,7 @@ import { suite, test } from 'mocha-typescript';
 import * as assert from 'assert';
 import { VirtualFlowActionHandler } from '../../../../src/plugins/flow/VirtualFlowActionHandler';
 import Container from 'typedi';
-import {
-    ActionHandlersRegistry,
-    IPlugin,
-    TemplateUtilitiesRegistry,
-    ContextUtil,
-    ActionSnapshot,
-    FlowService,
-} from '../../../../src';
+import { ActionHandlersRegistry, IPlugin, TemplateUtilitiesRegistry, ContextUtil, FlowService } from '../../../../src';
 import { ContextTemplateUtility } from '../../../../src/plugins/templateUtilities/ContextTemplateUtility';
 import { FunctionActionHandler } from '../../../../src/plugins/exec/FunctionActionHandler';
 
@@ -19,10 +12,6 @@ chai.use(chaiAsPromised);
 
 @suite()
 class ContextTemplateUtilityTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async defineVirtual() {
         const virtualDefinitionFlow = {
@@ -65,8 +54,7 @@ class ContextTemplateUtilityTestSuite {
 
         const dynamicActionHandler = context.dynamicActionHandlers.find('test');
         assert(dynamicActionHandler);
-
-        await dynamicActionHandler.execute(
+        const processor = dynamicActionHandler.getProcessor(
             {
                 assignTo: '$.ctx.a',
                 pushTo: '$.ctx.p',
@@ -75,6 +63,8 @@ class ContextTemplateUtilityTestSuite {
             snapshot,
             {},
         );
+
+        await processor.execute();
 
         assert.deepStrictEqual(context.ctx, {
             a: 'assignToValue',

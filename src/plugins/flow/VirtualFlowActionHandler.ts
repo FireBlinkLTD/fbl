@@ -1,4 +1,4 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FlowService } from '../../services';
@@ -55,13 +55,7 @@ interface IVirtualDefaults {
     modifiers?: ICollideModifiers;
 }
 
-export class VirtualFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.virtual',
-        aliases: ['fbl.flow.virtual', 'flow.virtual', 'virtual'],
-        skipTemplateProcessing: true,
-    };
-
+export class VirtualFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
         id: Joi.string()
             .min(1)
@@ -78,102 +72,99 @@ export class VirtualFlowActionHandler extends ActionHandler {
         action: FBL_ACTION_SCHEMA,
     }).required();
 
-    getMetadata(): IActionHandlerMetadata {
-        return VirtualFlowActionHandler.metadata;
-    }
-
+    /**
+     * @inheritdoc
+     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return VirtualFlowActionHandler.validationSchema;
+        return VirtualFlowActionProcessor.validationSchema;
     }
 
-    async validate(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    /**
+     * @inheritdoc
+     */
+    async validate(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         let unmaskedParametersSchema;
-        if (options.hasOwnProperty('parametersSchema')) {
+        if (this.options.hasOwnProperty('parametersSchema')) {
             const masked = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.parametersSchema,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.parametersSchema,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 true,
             );
 
             unmaskedParametersSchema = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.parametersSchema,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.parametersSchema,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 false,
             );
 
-            options.parametersSchema = masked;
+            this.options.parametersSchema = masked;
         }
 
         let unmaskedDefaults;
-        if (options.hasOwnProperty('defaults')) {
+        if (this.options.hasOwnProperty('defaults')) {
             const masked = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.defaults,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.defaults,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 true,
             );
 
             unmaskedDefaults = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.defaults,
-                context,
-                snapshot,
-                parameters,
+                this.context.ejsTemplateDelimiters.local,
+                this.options.defaults,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 false,
             );
 
-            options.defaults = masked;
+            this.options.defaults = masked;
         }
-        snapshot.setOptions(options);
+        this.snapshot.setOptions(this.options);
 
-        options.parametersSchema = unmaskedParametersSchema;
-        options.defaults = unmaskedDefaults;
+        this.options.parametersSchema = unmaskedParametersSchema;
+        this.options.defaults = unmaskedDefaults;
 
-        await super.validate(options, context, snapshot, parameters);
+        await super.validate();
     }
 
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
         let virtualDefaults: IVirtualDefaults;
 
-        if (options.defaults) {
+        if (this.options.defaults) {
             virtualDefaults = {
-                values: options.defaults.values,
+                values: this.options.defaults.values,
             };
 
-            if (options.defaults.mergeFunction) {
-                const script = ['return function(defaults, parameters) {', options.defaults.mergeFunction, '}'].join(
-                    '\n',
-                );
+            if (this.options.defaults.mergeFunction) {
+                const script = [
+                    'return function(defaults, parameters) {',
+                    this.options.defaults.mergeFunction,
+                    '}',
+                ].join('\n');
 
                 virtualDefaults.mergeFunction = new Function(script)();
             }
 
-            if (options.defaults.modifiers) {
+            if (this.options.defaults.modifiers) {
                 virtualDefaults.modifiers = {};
-                for (const path of Object.keys(options.defaults.modifiers)) {
+                for (const path of Object.keys(this.options.defaults.modifiers)) {
                     const script = [
                         'return function(defaults, parameters) {',
-                        options.defaults.modifiers[path],
+                        this.options.defaults.modifiers[path],
                         '}',
                     ].join('\n');
 
@@ -182,23 +173,132 @@ export class VirtualFlowActionHandler extends ActionHandler {
             }
         }
 
-        const dynamicFlowHandler = new DynamicFlowHandler(
-            snapshot.wd,
-            options.id,
-            options.aliases || [],
-            options.parametersSchema,
-            options.action,
+        const dynamicFlowHandler = new DynamicFlowActionHandler(
+            this.snapshot.wd,
+            this.options.id,
+            this.options.aliases || [],
+            this.options.parametersSchema,
+            this.options.action,
             virtualDefaults,
         );
 
-        context.dynamicActionHandlers.register(dynamicFlowHandler, require('./index'), snapshot);
+        this.context.dynamicActionHandlers.register(dynamicFlowHandler, require('./index'), this.snapshot);
+    }
+}
+
+export class VirtualFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.virtual',
+        aliases: ['fbl.flow.virtual', 'flow.virtual', 'virtual'],
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return VirtualFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new VirtualFlowActionProcessor(options, context, snapshot, parameters);
+    }
+}
+
+class DynamicFlowActionProcessor extends ActionProcessor {
+    constructor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+        private wd: string,
+        private validationSchema: any | null,
+        private action: { [key: string]: any },
+        private virtualDefaults?: IVirtualDefaults,
+    ) {
+        super(options, context, snapshot, parameters);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async validate(): Promise<void> {
+        this.snapshot.wd = this.wd;
+        if (this.validationSchema) {
+            const mergedOptions = this.getMergedOptions(this.options);
+
+            const result = new Validator().validate(mergedOptions, this.validationSchema);
+            if (!result.valid) {
+                throw new Error(
+                    result.errors
+                        .map(e => {
+                            let key = 'value';
+
+                            /* istanbul ignore else */
+                            if (e.property !== 'instance') {
+                                key = e.property.substring('instance.'.length);
+                            }
+
+                            return `${key} ${e.message}`;
+                        })
+                        .join('\n'),
+                );
+            }
+        }
+    }
+
+    /**
+     * Merge passed options with default values
+     * @param options
+     */
+    private getMergedOptions(options: any): any {
+        let mergedOptions = options;
+
+        if (this.virtualDefaults) {
+            if (this.virtualDefaults.mergeFunction) {
+                const clonedDefaults = JSON.parse(JSON.stringify(this.virtualDefaults.values));
+                mergedOptions = this.virtualDefaults.mergeFunction(clonedDefaults, options);
+            } else {
+                mergedOptions = collide(this.virtualDefaults.values, options, this.virtualDefaults.modifiers);
+            }
+        }
+
+        return mergedOptions;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        this.snapshot.wd = this.wd;
+        this.parameters.parameters = this.getMergedOptions(this.options);
+        this.parameters.wd = this.snapshot.wd;
+
+        const childSnapshot = await flowService.executeAction(
+            this.wd,
+            this.action,
+            this.context,
+            this.parameters,
+            this.snapshot,
+        );
+        this.snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }
 
 /**
  * Dynamic flow handler that is being created dynamically by VirtualFlowHandler
  */
-class DynamicFlowHandler extends ActionHandler {
+class DynamicFlowActionHandler extends ActionHandler {
     constructor(
         private wd: string,
         private id: string,
@@ -228,73 +328,24 @@ class DynamicFlowHandler extends ActionHandler {
     }
 
     /**
-     * Merge passed options with default values
-     * @param options
-     */
-    private getMergedOptions(options: any): any {
-        let mergedOptions = options;
-
-        if (this.virtualDefaults) {
-            if (this.virtualDefaults.mergeFunction) {
-                const clonedDefaults = JSON.parse(JSON.stringify(this.virtualDefaults.values));
-                mergedOptions = this.virtualDefaults.mergeFunction(clonedDefaults, options);
-            } else {
-                mergedOptions = collide(this.virtualDefaults.values, options, this.virtualDefaults.modifiers);
-            }
-        }
-
-        return mergedOptions;
-    }
-
-    /**
      * @inheritdoc
      */
-    async validate(
+    getProcessor(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void> {
-        snapshot.wd = this.wd;
-        if (this.validationSchema) {
-            const mergedOptions = this.getMergedOptions(options);
+    ): ActionProcessor {
+        return new DynamicFlowActionProcessor(
+            options,
+            context,
+            snapshot,
+            parameters,
 
-            const result = new Validator().validate(mergedOptions, this.validationSchema);
-            if (!result.valid) {
-                throw new Error(
-                    result.errors
-                        .map(e => {
-                            let key = 'value';
-
-                            /* istanbul ignore else */
-                            if (e.property !== 'instance') {
-                                key = e.property.substring('instance.'.length);
-                            }
-
-                            return `${key} ${e.message}`;
-                        })
-                        .join('\n'),
-                );
-            }
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
-        const flowService = Container.get(FlowService);
-
-        snapshot.wd = this.wd;
-        parameters.parameters = this.getMergedOptions(options);
-        parameters.wd = snapshot.wd;
-
-        const childSnapshot = await flowService.executeAction(this.wd, this.action, context, parameters, snapshot);
-        snapshot.registerChildActionSnapshot(childSnapshot);
+            this.wd,
+            this.validationSchema,
+            this.action,
+            this.virtualDefaults,
+        );
     }
 }

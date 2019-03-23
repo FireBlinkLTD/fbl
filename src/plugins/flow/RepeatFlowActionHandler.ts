@@ -1,18 +1,12 @@
 import * as Joi from 'joi';
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { FlowService } from '../../services';
 import { Container } from 'typedi';
-import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
+import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
-export class RepeatFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.repeat',
-        aliases: ['fbl.flow.repeat', 'flow.repeat', 'repeat'],
-        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: true,
-    };
-
+export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
     private static validationSchema = Joi.object({
         shareParameters: Joi.boolean(),
         times: Joi.number()
@@ -27,78 +21,41 @@ export class RepeatFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getMetadata(): IActionHandlerMetadata {
-        return RepeatFlowActionHandler.metadata;
-    }
-
-    /**
-     * @inheritdoc
-     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return RepeatFlowActionHandler.validationSchema;
-    }
-
-    /**
-     * Get parameters for single iteration
-     * @param shareParameters
-     * @param metadata
-     * @param parameters
-     * @param index
-     */
-    private static getParameters(
-        shareParameters: boolean,
-        parameters: IDelegatedParameters,
-        index: number,
-    ): IDelegatedParameters {
-        const result = <IDelegatedParameters>{
-            iteration: { index },
-        };
-
-        if (parameters && parameters.parameters !== undefined) {
-            result.parameters = shareParameters
-                ? parameters.parameters
-                : JSON.parse(JSON.stringify(parameters.parameters));
-        }
-
-        return result;
+        return RepeatFlowActionProcessor.validationSchema;
     }
 
     /**
      * @inheritdoc
      */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
-        for (let i = 0; i < options.times; i++) {
-            const iterationParams = RepeatFlowActionHandler.getParameters(options.shareParameters, parameters, i);
+        for (let i = 0; i < this.options.times; i++) {
+            const iterationParams = this.getParameters(this.options.shareParameters, { index: i });
 
-            if (options.async) {
+            if (this.options.async) {
                 promises.push(
                     (async (p): Promise<void> => {
                         snapshots[p.iteration.index] = await flowService.executeAction(
-                            snapshot.wd,
-                            options.action,
-                            context,
+                            this.snapshot.wd,
+                            this.options.action,
+                            this.context,
                             p,
-                            snapshot,
+                            this.snapshot,
                         );
                     })(iterationParams),
                 );
             } else {
                 snapshots[i] = await flowService.executeAction(
-                    snapshot.wd,
-                    options.action,
-                    context,
+                    this.snapshot.wd,
+                    this.options.action,
+                    this.context,
                     iterationParams,
-                    snapshot,
+                    this.snapshot,
                 );
             }
         }
@@ -107,7 +64,35 @@ export class RepeatFlowActionHandler extends ActionHandler {
 
         // register snapshots in the order of their presence
         snapshots.forEach(childSnapshot => {
-            snapshot.registerChildActionSnapshot(childSnapshot);
+            this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
+    }
+}
+
+export class RepeatFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.repeat',
+        aliases: ['fbl.flow.repeat', 'flow.repeat', 'repeat'],
+        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return RepeatFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new RepeatFlowActionProcessor(options, context, snapshot, parameters);
     }
 }

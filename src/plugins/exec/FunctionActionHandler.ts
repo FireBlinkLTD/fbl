@@ -1,17 +1,11 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import * as Joi from 'joi';
-import { ContextUtil } from '../../utils';
 import Container from 'typedi';
 import { TemplateUtilitiesRegistry } from '../../services';
 import { isMissing } from 'object-collider';
 
-export class FunctionActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.function',
-        aliases: ['fbl.function', 'function', 'function()', 'fn', 'fn()'],
-    };
-
+export class FunctionActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.string()
         .min(1)
         .required()
@@ -36,11 +30,11 @@ export class FunctionActionHandler extends ActionHandler {
         secrets: Joi.object(),
         entities: Joi.object()
             .keys({
-                registered: Joi.array().items(FunctionActionHandler.entityValidationSchema),
-                unregistered: Joi.array().items(FunctionActionHandler.entityValidationSchema),
-                created: Joi.array().items(FunctionActionHandler.entityValidationSchema),
-                updated: Joi.array().items(FunctionActionHandler.entityValidationSchema),
-                deleted: Joi.array().items(FunctionActionHandler.entityValidationSchema),
+                registered: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
+                unregistered: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
+                created: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
+                updated: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
+                deleted: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
             })
             .options({
                 allowUnknown: false,
@@ -58,48 +52,36 @@ export class FunctionActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getMetadata(): IActionHandlerMetadata {
-        return FunctionActionHandler.metadata;
-    }
-
-    /**
-     * @inheritdoc
-     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return FunctionActionHandler.validationSchema;
+        return FunctionActionProcessor.validationSchema;
     }
 
     /**
      * @inheritdoc
      */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async execute(): Promise<void> {
         const script = [
             'return async function($, env, require, cwd, ctx, secrets, entities, parameters, iteration) {',
-            options,
+            this.options,
             '}',
         ].join('\n');
 
         const fn = new Function(script)();
 
         const result = await fn(
-            Container.get(TemplateUtilitiesRegistry).generateUtilities(context, snapshot, parameters),
+            Container.get(TemplateUtilitiesRegistry).generateUtilities(this.context, this.snapshot, this.parameters),
             process.env,
             require,
-            context.cwd,
-            context.ctx,
-            context.secrets,
-            context.entities,
-            parameters.parameters,
-            parameters.iteration,
+            this.context.cwd,
+            this.context.ctx,
+            this.context.secrets,
+            this.context.entities,
+            this.parameters.parameters,
+            this.parameters.iteration,
         );
 
         if (result) {
-            const validationResult = Joi.validate(result, FunctionActionHandler.functionResultValidationSchema);
+            const validationResult = Joi.validate(result, FunctionActionProcessor.functionResultValidationSchema);
             if (validationResult.error) {
                 throw new Error(validationResult.error.details.map(d => d.message).join('\n'));
             }
@@ -107,17 +89,43 @@ export class FunctionActionHandler extends ActionHandler {
             ['cwd', 'ctx', 'secrets', 'entities'].forEach((field: 'cwd' | 'ctx' | 'secrets' | 'entities') => {
                 /* istanbul ignore else */
                 if (!isMissing(result[field])) {
-                    context[field] = result[field];
+                    this.context[field] = result[field];
                 }
             });
-            snapshot.setContext(context);
+            this.snapshot.setContext(this.context);
 
             ['parameters', 'iteration'].forEach((field: 'parameters' | 'iteration') => {
                 /* istanbul ignore else */
                 if (!isMissing(result[field])) {
-                    parameters[field] = result[field];
+                    this.parameters[field] = result[field];
                 }
             });
         }
+    }
+}
+
+export class FunctionActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.function',
+        aliases: ['fbl.function', 'function', 'function()', 'fn', 'fn()'],
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return FunctionActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new FunctionActionProcessor(options, context, snapshot, parameters);
     }
 }

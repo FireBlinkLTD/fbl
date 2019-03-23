@@ -58,13 +58,13 @@ createServer(async (request, response) => {
     } else {
         response.end();
     }
-}).listen(commander.port, (err: any) => {
-    if (err) {
+})
+    .on('error', err => {
         processSend('failed');
         console.error(err);
         process.exit(1);
-    }
-
-    console.log('Server is running on port: ' + commander.port);
-    processSend('started');
-});
+    })
+    .listen(commander.port, () => {
+        console.log('Server is running on port: ' + commander.port);
+        processSend('started');
+    });

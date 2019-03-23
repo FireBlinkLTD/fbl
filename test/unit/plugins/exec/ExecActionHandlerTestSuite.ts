@@ -13,34 +13,31 @@ chai.use(chaiAsPromised);
 
 @suite()
 class ExecActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
-
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    command: 'test',
-                    args: '-t no',
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        command: 'test',
+                        args: '-t no',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -50,31 +47,30 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     command: 'test',
                 },
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate(),
+            await actionHandler
+                .getProcessor(
+                    {
+                        command: 'test',
+                        args: ['-t', 'no'],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate();
 
-        await chai.expect(
-            actionHandler.validate(
-                {
-                    command: 'test',
-                    args: ['-t', 'no'],
-                },
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     command: 'test',
                     args: ['-t', 'no'],
@@ -85,11 +81,11 @@ class ExecActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     command: 'test',
                     assignResultTo: {
@@ -99,11 +95,11 @@ class ExecActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     command: 'test',
                     assignResultTo: {
@@ -113,8 +109,8 @@ class ExecActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -123,24 +119,26 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'echo',
-                args: ['test'],
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'echo',
+                    args: ['test'],
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
@@ -159,26 +157,28 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'echo',
-                args: ['test'],
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'echo',
+                    args: ['test'],
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                    },
+                    pushResultTo: {
+                        ctx: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                },
-                pushResultTo: {
-                    ctx: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         const expectedResult = {
             code: 0,
@@ -198,23 +198,25 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'echo',
-                args: ['test'],
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'echo',
+                    args: ['test'],
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.secrets.tst2.code, 0);
         assert.strictEqual(context.secrets.tst2.stdout, 'test\n');
@@ -229,24 +231,26 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'echo',
-                args: ['test'],
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'echo',
+                    args: ['test'],
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'test\n');
@@ -265,24 +269,26 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'bash',
-                args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'bash',
+                    args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -302,18 +308,20 @@ class ExecActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.execute(
-                {
-                    command: 'return',
-                    args: ['1'],
-                    assignResultTo: {
-                        ctx: '$.tst1',
+            actionHandler
+                .getProcessor(
+                    {
+                        command: 'return',
+                        args: ['1'],
+                        assignResultTo: {
+                            ctx: '$.tst1',
+                        },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, 1);
@@ -325,22 +333,24 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                command: 'bash',
-                args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
-                options: {
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    command: 'bash',
+                    args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
+                    options: {
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -354,17 +364,19 @@ class ExecActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.execute(
-                {
-                    command: 'missing_executable',
-                    assignResultTo: {
-                        ctx: '$.tst1',
+            actionHandler
+                .getProcessor(
+                    {
+                        command: 'missing_executable',
+                        assignResultTo: {
+                            ctx: '$.tst1',
+                        },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, -1);
@@ -377,15 +389,17 @@ class ExecActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.execute(
-                {
-                    command: 'echo',
-                    args: ['test'],
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        command: 'echo',
+                        args: ['test'],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.not.rejected;
     }
 
@@ -395,8 +409,8 @@ class ExecActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.execute(
+        await actionHandler
+            .getProcessor(
                 {
                     command: 'bash',
                     args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
@@ -407,7 +421,7 @@ class ExecActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .execute();
     }
 }
