@@ -1,8 +1,8 @@
-import {ActionHandler} from '../../models';
+import { ActionProcessor } from '../../models';
 
 const prompts = require('prompts');
 
-export abstract class BasePromptActionHandler extends ActionHandler {
+export abstract class BasePromptActionProcessor extends ActionProcessor {
     /**
      * Prompt user
      * @param config
@@ -16,7 +16,7 @@ export abstract class BasePromptActionHandler extends ActionHandler {
                 canceled = true;
 
                 return false;
-            }
+            },
         })).value;
 
         if (canceled) {

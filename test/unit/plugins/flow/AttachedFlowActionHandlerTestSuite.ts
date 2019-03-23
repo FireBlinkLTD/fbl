@@ -2,7 +2,7 @@ import { suite, test } from 'mocha-typescript';
 import { AttachedFlowActionHandler } from '../../../../src/plugins/flow/AttachedFlowActionHandler';
 import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../../../src/models';
 import { unlink, writeFile } from 'fs';
 import { promisify } from 'util';
 import { dump } from 'js-yaml';
@@ -13,6 +13,7 @@ import { dirname, join } from 'path';
 import { c } from 'tar';
 import { DummyServerWrapper } from '../../../assets/dummy.http.server.wrapper';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -26,34 +27,11 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'testHandler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
-    }
-}
-
-const dummyServerWrappers: DummyServerWrapper[] = [];
-
 @suite()
 class AttachedFlowActionHandlerTestSuite {
     private dummyServerWrappers: DummyServerWrapper[] = [];
 
     async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
 
@@ -76,24 +54,26 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    path: '/tmp',
-                    target: [],
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        path: '/tmp',
+                        target: [],
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -103,21 +83,21 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate('/tmp/test.tst', context, snapshot, {})).to.be.not.rejected;
+        await actionHandler.getProcessor('/tmp/test.tst', context, snapshot, {}).validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     path: '/tmp',
                 },
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     path: '/tmp',
                     http: {
@@ -129,11 +109,11 @@ class AttachedFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     path: '/tmp',
                     target: 'yes',
@@ -141,8 +121,8 @@ class AttachedFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -152,17 +132,19 @@ class AttachedFlowActionHandlerTestSuite {
 
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any, ctx: any) => {
             actionHandlerOptions = opts;
             actionHandlerContext = ctx;
-        });
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true,
+                [dummyActionHandler.id]: true,
             },
         };
 
@@ -175,8 +157,9 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(tmpFile, context, snapshot, {});
-        await actionHandler.execute(tmpFile, context, snapshot, {});
+        const processor = actionHandler.getProcessor(tmpFile, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -187,16 +170,14 @@ class AttachedFlowActionHandlerTestSuite {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        let actionHandlerOptions: any = null;
-        let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
-            actionHandlerOptions = opts;
-            actionHandlerContext = ctx;
-        });
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
+            // tslint:disable-next-line
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const subFlow = ['pipeline:', `  ${DummyActionHandler.ID}:`, ' test: true'];
+        const subFlow = ['pipeline:', `  ${dummyActionHandler.id}:`, ' test: true'];
 
         const tmpFile = await tempPathsRegistry.createTempFile();
 
@@ -206,9 +187,10 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(tmpFile, context, snapshot, {});
+        const processor = await actionHandler.getProcessor(tmpFile, context, snapshot, {});
 
-        await chai.expect(actionHandler.execute(tmpFile, context, snapshot, {})).to.be.rejected;
+        await processor.validate();
+        await chai.expect(processor.execute()).to.be.rejected;
     }
 
     @test()
@@ -216,19 +198,17 @@ class AttachedFlowActionHandlerTestSuite {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        let actionHandlerOptions: any = null;
-        let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
-            actionHandlerOptions = opts;
-            actionHandlerContext = ctx;
-        });
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
+            // tslint:disable-next-line
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true,
+                [dummyActionHandler.id]: true,
             },
         };
 
@@ -246,10 +226,11 @@ class AttachedFlowActionHandlerTestSuite {
         };
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(options, context, snapshot, {});
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
 
         await chai
-            .expect(actionHandler.execute(options, context, snapshot, {}))
+            .expect(processor.execute())
             .to.be.rejectedWith(`Usage of target is not allowed for flow at path: ${tmpFile}`);
     }
 
@@ -260,17 +241,18 @@ class AttachedFlowActionHandlerTestSuite {
 
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any, ctx: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any, ctx: any) => {
             actionHandlerOptions = opts;
             actionHandlerContext = ctx;
-        });
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true,
+                [dummyActionHandler.id]: true,
             },
         };
 
@@ -283,8 +265,9 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(tmpDir, context, snapshot, {});
-        await actionHandler.execute(tmpDir, context, snapshot, {});
+        const processor = actionHandler.getProcessor(tmpDir, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -305,8 +288,9 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
-        await actionHandler.validate(tarballPath, context, snapshot, {});
-        await actionHandler.execute(tarballPath, context, snapshot, {});
+        const processor = actionHandler.getProcessor(tarballPath, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -338,8 +322,10 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 123;
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot, {});
-        await actionHandler.execute(url, context, snapshot, {});
+
+        const processor = actionHandler.getProcessor(url, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -355,7 +341,7 @@ class AttachedFlowActionHandlerTestSuite {
         console.log('-> Send request to invalid URL');
         // expect to reject on invalid url
         const url = 'https://localhost:61888';
-        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(url, context, snapshot, {}).execute()).to.be.rejected;
     }
 
     @test()
@@ -377,7 +363,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(url, context, snapshot, {}).execute()).to.be.rejected;
     }
 
     @test()
@@ -405,9 +391,10 @@ class AttachedFlowActionHandlerTestSuite {
         }, 100);
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot, {});
+        const processor = actionHandler.getProcessor(url, context, snapshot, {});
+        await processor.validate();
 
-        await chai.expect(actionHandler.execute(url, context, snapshot, {})).to.be.rejected;
+        await chai.expect(processor.execute()).to.be.rejected;
     }
 
     @test()
@@ -430,12 +417,12 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot, {});
+        await actionHandler.getProcessor(url, context, snapshot, {}).validate();
 
         await Promise.all([
-            actionHandler.execute(url, context, snapshot, {}),
-            actionHandler.execute(url, context, snapshot, {}),
-            actionHandler.execute(url, context, snapshot, {}),
+            actionHandler.getProcessor(url, context, snapshot, {}).execute(),
+            actionHandler.getProcessor(url, context, snapshot, {}).execute(),
+            actionHandler.getProcessor(url, context, snapshot, {}).execute(),
         ]);
 
         assert.strictEqual(server.requestCount, 1);
@@ -460,11 +447,11 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
-        await actionHandler.validate(url, context, snapshot, {});
+        await actionHandler.getProcessor(url, context, snapshot, {}).validate();
 
-        await actionHandler.execute(url, context, snapshot, {});
-        await actionHandler.execute(url, context, snapshot, {});
-        await actionHandler.execute(url, context, snapshot, {});
+        await actionHandler.getProcessor(url, context, snapshot, {}).execute();
+        await actionHandler.getProcessor(url, context, snapshot, {}).execute();
+        await actionHandler.getProcessor(url, context, snapshot, {}).execute();
 
         assert.strictEqual(server.requestCount, 1);
     }
@@ -504,8 +491,9 @@ class AttachedFlowActionHandlerTestSuite {
             },
         };
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -518,10 +506,14 @@ class AttachedFlowActionHandlerTestSuite {
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
 
-        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest((opts: any, ctx: any) => {
-            actionHandlerOptions = opts;
-            actionHandlerContext = ctx;
-        });
+        const tarballPath = await AttachedFlowActionHandlerTestSuite.prepareForTarballTest(
+            (opts: any, ctx: any) => {
+                actionHandlerOptions = opts;
+                actionHandlerContext = ctx;
+            },
+            'index.yml',
+            'test',
+        );
 
         // file server
         const port = 61222;
@@ -549,8 +541,9 @@ class AttachedFlowActionHandlerTestSuite {
             cache: true,
         };
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        let processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -568,14 +561,17 @@ class AttachedFlowActionHandlerTestSuite {
         options.http.headers.test = 'second';
 
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
-        const dummyActionHandler = new DummyActionHandler((opts: any, ctx: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.id = 'test';
+        dummyActionHandler.executeFn = async (opts: any, ctx: any) => {
             actionHandlerOptions = opts;
             actionHandlerContext = ctx;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 124);
@@ -603,8 +599,9 @@ class AttachedFlowActionHandlerTestSuite {
             target: 'flow.yml',
         };
 
-        await actionHandler.validate(options, context, snapshot, {});
-        await actionHandler.execute(options, context, snapshot, {});
+        const processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -645,8 +642,9 @@ class AttachedFlowActionHandlerTestSuite {
 
         const url = `http://localhost:${port + 1}`;
 
-        await actionHandler.validate(url, context, snapshot, {});
-        await actionHandler.execute(url, context, snapshot, {});
+        const processor = actionHandler.getProcessor(url, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
         assert.strictEqual(actionHandlerContext.ctx.tst, 123);
@@ -659,9 +657,10 @@ class AttachedFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
 
         const tracked: any[] = [];
-        const dummyActionHandler = new DummyActionHandler((opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any, ctx: any) => {
             tracked.push(opts);
-        });
+        };
 
         const sequenceActionHandler = new SequenceFlowActionHandler();
 
@@ -683,13 +682,13 @@ class AttachedFlowActionHandlerTestSuite {
 
         const testAContent = {
             pipeline: {
-                [DummyActionHandler.ID]: 'a',
+                [dummyActionHandler.id]: 'a',
             },
         };
 
         const testBContent = {
             pipeline: {
-                [DummyActionHandler.ID]: 'b',
+                [dummyActionHandler.id]: 'b',
             },
         };
 
@@ -723,22 +722,25 @@ class AttachedFlowActionHandlerTestSuite {
     private static async prepareForTarballTest(
         dummyActionHandlerFn?: Function,
         fileName = 'index.yml',
+        id = 'test',
     ): Promise<string> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler((opts: any, ctx: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.id = id;
+        dummyActionHandler.executeFn = (opts: any, ctx: any) => {
             if (dummyActionHandlerFn) {
                 dummyActionHandlerFn(opts, ctx);
             }
-        });
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         const subFlow = {
             version: '1.0.0',
             pipeline: {
-                [DummyActionHandler.ID]: true,
+                [dummyActionHandler.id]: true,
             },
         };
 

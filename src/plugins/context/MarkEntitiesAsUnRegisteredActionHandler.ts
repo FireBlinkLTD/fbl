@@ -1,15 +1,21 @@
-import {ActionSnapshot} from '../../models';
-import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
-import {BaseMarkEntityAsActionHandler} from './BaseMarkEntityAsActionHandler';
+import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
+import { BaseMarkEntityAsActionProcessor } from './BaseMarkEntityAsActionProcessor';
 
-export class MarkEntitiesAsUnRegisteredActionHandler extends BaseMarkEntityAsActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
+export class MarkEntitiesAsUnRegisteredActionProcessor extends BaseMarkEntityAsActionProcessor {
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        this.context.entities.unregistered.push(...this.options);
+        this.snapshot.setContext(this.context);
+    }
+}
+
+export class MarkEntitiesAsUnRegisteredActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.context.entities.unregistered',
-        aliases: [
-            'fbl.context.entities.unregistered',
-            'context.entities.unregistered',
-            'entities.unregistered'
-        ]
+        aliases: ['fbl.context.entities.unregistered', 'context.entities.unregistered', 'entities.unregistered'],
     };
 
     /**
@@ -22,8 +28,12 @@ export class MarkEntitiesAsUnRegisteredActionHandler extends BaseMarkEntityAsAct
     /**
      * @inheritdoc
      */
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        context.entities.unregistered.push(...options);
-        snapshot.setContext(context);
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new MarkEntitiesAsUnRegisteredActionProcessor(options, context, snapshot, parameters);
     }
 }

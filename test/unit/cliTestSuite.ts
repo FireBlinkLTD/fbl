@@ -55,9 +55,6 @@ class CliTestSuite {
             promises.push(promisify(writeFile)(globalConfigPath, CliTestSuite.existingGlobalConfig, 'utf8'));
         }
 
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-
         for (const dummyServerWrapper of this.dummyServerWrappers) {
             await dummyServerWrapper.stop();
 

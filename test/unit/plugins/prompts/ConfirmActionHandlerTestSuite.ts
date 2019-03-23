@@ -1,8 +1,8 @@
-import {suite, test} from 'mocha-typescript';
-import {ConfirmActionHandler} from '../../../../src/plugins/prompts/ConfirmActionHandler';
-import {ActionSnapshot} from '../../../../src/models';
+import { suite, test } from 'mocha-typescript';
+import { ConfirmActionHandler } from '../../../../src/plugins/prompts/ConfirmActionHandler';
+import { ActionSnapshot } from '../../../../src/models';
 import * as assert from 'assert';
-import {ContextUtil} from '../../../../src/utils';
+import { ContextUtil } from '../../../../src/utils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -16,7 +16,7 @@ chai.use(chaiAsPromised);
 const printChar = (char: string, name: string): void => {
     process.stdin.emit('keypress', char, {
         ctrl: false,
-        name: name
+        name: name,
     });
 };
 
@@ -44,30 +44,29 @@ class ConfirmActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate([], context, snapshot, {})
-        ).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor(true, context, snapshot, {}).validate()).to.be.rejected;
+
+        await chai.expect(actionHandler.getProcessor(1234.124124, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate({}, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(true, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate(1234.124124, context, snapshot, {})
-        ).to.be.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                message: 'test',
-                assignResponseTo: {
-                    ctx: '$.test'
-                },
-                default: 'str'
-            }, context, snapshot, {})
+            actionHandler
+                .getProcessor(
+                    {
+                        message: 'test',
+                        assignResponseTo: {
+                            ctx: '$.test',
+                        },
+                        default: 'str',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -77,24 +76,34 @@ class ConfirmActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate({
-                message: 'test',
-                assignResponseTo: {
-                    ctx: '$.test'
-                }
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
-
-        await chai.expect(
-            actionHandler.validate({
-                message: 'test',
-                assignResponseTo: {
-                    ctx: '$.test'
+        await actionHandler
+            .getProcessor(
+                {
+                    message: 'test',
+                    assignResponseTo: {
+                        ctx: '$.test',
+                    },
                 },
-                default: true
-            }, context, snapshot, {})
-        ).to.be.not.rejected;
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
+
+        await actionHandler
+            .getProcessor(
+                {
+                    message: 'test',
+                    assignResponseTo: {
+                        ctx: '$.test',
+                    },
+                    default: true,
+                },
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
     }
 
     @test()
@@ -103,23 +112,31 @@ class ConfirmActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await Promise.all([
-            actionHandler.execute({
+        const processor = actionHandler.getProcessor(
+            {
                 message: 'test',
                 assignResponseTo: {
                     ctx: '$.test',
-                    secrets: '$.tst'
+                    secrets: '$.tst',
                 },
                 pushResponseTo: {
-                    ctx: '$.psh'
-                }
-            }, context, snapshot, {}),
+                    ctx: '$.psh',
+                },
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await Promise.all([
+            processor.validate(),
+            processor.execute(),
             new Promise<void>(resolve => {
                 setTimeout(() => {
                     printLine('y');
                     resolve();
                 }, 50);
-            })
+            }),
         ]);
 
         assert.strictEqual(context.ctx.test, true);

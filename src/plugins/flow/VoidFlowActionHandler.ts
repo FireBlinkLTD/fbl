@@ -1,14 +1,30 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
+
+export class VoidFlowActionProcessor extends ActionProcessor {
+    private static validationSchema = Joi.any().forbidden();
+
+    /**
+     * @inheritdoc
+     */
+    getValidationSchema(): Joi.SchemaLike | null {
+        return VoidFlowActionProcessor.validationSchema;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        /* tslint:disable:no-empty */
+    }
+}
 
 export class VoidFlowActionHandler extends ActionHandler {
     private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.flow.void',
         aliases: ['fbl.flow.void', 'flow.void', 'void'],
     };
-
-    private static validationSchema = Joi.any().forbidden();
 
     /**
      * @inheritdoc
@@ -20,19 +36,12 @@ export class VoidFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
-        return VoidFlowActionHandler.validationSchema;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(
+    getProcessor(
         options: any,
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-    ): Promise<void> {
-        /* tslint:disable:no-empty */
+    ): ActionProcessor {
+        return new VoidFlowActionProcessor(options, context, snapshot, parameters);
     }
 }

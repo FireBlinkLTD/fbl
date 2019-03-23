@@ -1,11 +1,12 @@
 import { suite, test } from 'mocha-typescript';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
-import { ActionHandlersRegistry, FlowService, TemplateUtilitiesRegistry } from '../../../../src/services';
-import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
+import { ActionSnapshot } from '../../../../src/models';
+import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
+import { IPlugin } from '../../../../src/interfaces';
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { TemplateFlowActionHandler } from '../../../../src/plugins/flow/TemplateFlowActionHandler';
 import { ContextUtil } from '../../../../src/utils';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,41 +20,19 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'repeat.foreach.handler';
-
-    constructor(private fn: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID,
-        };
-    }
-
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        await this.fn(options, context, snapshot, {});
-    }
-}
-
 @suite()
 class TemplateFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new TemplateFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate(`{}`, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(`{}`, context, snapshot, {}).validate()).to.be.rejected;
     }
 
     @test()
@@ -62,17 +41,7 @@ class TemplateFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
-                `
-              test:
-                param: true 
-            `,
-                context,
-                snapshot,
-                {},
-            ),
-        ).to.be.not.rejected;
+        await actionHandler.getProcessor('test:' + '\n  param: true', context, snapshot, {}).validate();
     }
 
     @test()
@@ -84,12 +53,13 @@ class TemplateFlowActionHandlerTestSuite {
         actionHandlersRegistry.register(actionHandler, plugin);
 
         let actionHandlerOptions: any;
-        const dummyActionHandler = new DummyActionHandler(async (opts: any) => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
             actionHandlerOptions = opts;
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const options = `${DummyActionHandler.ID}: $ref:ctx.test`;
+        const options = `${dummyActionHandler.id}: $ref:ctx.test`;
 
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = [

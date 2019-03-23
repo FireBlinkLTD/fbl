@@ -1,5 +1,5 @@
 import { suite, test } from 'mocha-typescript';
-import { FlowService, TempPathsRegistry } from '../../../../src/services';
+import { TempPathsRegistry } from '../../../../src/services';
 import { ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
 import { ShellActionHandler } from '../../../../src/plugins/exec/ShellActionHandler';
 import * as assert from 'assert';
@@ -15,33 +15,31 @@ chai.use(chaiAsPromised);
 
 @suite()
 class ShellActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new ShellActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    executable: 'test',
-                },
-                context,
-                snapshot,
-                {},
-            ),
+            actionHandler
+                .getProcessor(
+                    {
+                        executable: 'test',
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -51,8 +49,8 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: 'test',
                     script: 'echo "hello!"',
@@ -60,11 +58,11 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: 'test',
                     script: 'echo "hello!"',
@@ -75,11 +73,11 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: 'test',
                     script: 'echo "hello!"',
@@ -90,11 +88,11 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: 'test',
                     script: 'echo "hello!"',
@@ -105,8 +103,8 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -115,24 +113,26 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!"',
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!"',
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'hello!\n');
@@ -151,23 +151,25 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!"',
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!"',
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'hello!\n');
@@ -182,23 +184,25 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!"',
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!"',
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.secrets.tst2.code, 0);
         assert.strictEqual(context.secrets.tst2.stdout, 'hello!\n');
@@ -213,24 +217,26 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!"',
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!"',
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, 'hello!\n');
@@ -249,24 +255,26 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!" >&2',
-                options: {
-                    stdout: true,
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!" >&2',
+                    options: {
+                        stdout: true,
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                        secrets: '$.tst2',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                    secrets: '$.tst2',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -286,18 +294,20 @@ class ShellActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.execute(
-                {
-                    executable: '/bin/bash',
-                    script: 'return 1',
-                    assignResultTo: {
-                        ctx: '$.tst1',
+            actionHandler
+                .getProcessor(
+                    {
+                        executable: '/bin/bash',
+                        script: 'return 1',
+                        assignResultTo: {
+                            ctx: '$.tst1',
+                        },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, 1);
@@ -309,22 +319,24 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'echo "hello!" >&2',
-                options: {
-                    stderr: true,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'echo "hello!" >&2',
+                    options: {
+                        stderr: true,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                    },
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                },
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout, '');
@@ -338,18 +350,20 @@ class ShellActionHandlerTestSuite {
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
         await chai.expect(
-            actionHandler.execute(
-                {
-                    executable: 'missing_executable',
-                    script: 'echo "hello!"',
-                    assignResultTo: {
-                        ctx: '$.tst1',
+            actionHandler
+                .getProcessor(
+                    {
+                        executable: 'missing_executable',
+                        script: 'echo "hello!"',
+                        assignResultTo: {
+                            ctx: '$.tst1',
+                        },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .execute(),
         ).to.be.rejected;
 
         assert.strictEqual(context.ctx.tst1.code, 127);
@@ -361,8 +375,8 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.execute(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: '/bin/bash',
                     script: 'echo "hello!"',
@@ -370,8 +384,8 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .execute();
     }
 
     @test()
@@ -380,8 +394,8 @@ class ShellActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.execute(
+        await actionHandler
+            .getProcessor(
                 {
                     executable: '/bin/bash',
                     script: 'echo "hello!" >&2',
@@ -392,8 +406,8 @@ class ShellActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .execute();
     }
 
     @test()
@@ -407,24 +421,26 @@ class ShellActionHandlerTestSuite {
         const dir = await tempPathRegistry.createTempDir();
         await promisify(writeFile)(join(dir, 'a.txt'), '', 'utf8');
 
-        await actionHandler.execute(
-            {
-                executable: '/bin/bash',
-                script: 'ls .',
-                options: {
-                    stdout: true,
-                    stderr: false,
-                    verbose: true,
+        await actionHandler
+            .getProcessor(
+                {
+                    executable: '/bin/bash',
+                    script: 'ls .',
+                    options: {
+                        stdout: true,
+                        stderr: false,
+                        verbose: true,
+                    },
+                    assignResultTo: {
+                        ctx: '$.tst1',
+                    },
+                    wd: dir,
                 },
-                assignResultTo: {
-                    ctx: '$.tst1',
-                },
-                wd: dir,
-            },
-            context,
-            snapshot,
-            {},
-        );
+                context,
+                snapshot,
+                {},
+            )
+            .execute();
 
         assert.strictEqual(context.ctx.tst1.code, 0);
         assert.strictEqual(context.ctx.tst1.stdout.trim(), 'a.txt');

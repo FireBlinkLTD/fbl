@@ -1,19 +1,12 @@
-import { ActionHandler, ActionSnapshot } from '../../models';
+import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
 import { Container } from 'typedi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import { IMetadata } from '../../interfaces/IMetadata';
+import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
-export class ForEachFlowActionHandler extends ActionHandler {
-    private static metadata = <IActionHandlerMetadata>{
-        id: 'com.fireblink.fbl.flow.foreach',
-        aliases: ['fbl.flow.foreach', 'flow.foreach', 'foreach', 'each'],
-        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
-        skipTemplateProcessing: true,
-    };
-
+export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
     private static validationSchema = Joi.object({
         shareParameters: Joi.boolean(),
         of: Joi.alternatives(Joi.object(), Joi.array()).required(),
@@ -26,92 +19,49 @@ export class ForEachFlowActionHandler extends ActionHandler {
     /**
      * @inheritdoc
      */
-    getMetadata(): IActionHandlerMetadata {
-        return ForEachFlowActionHandler.metadata;
-    }
-
-    /**
-     * @inheritdoc
-     */
     getValidationSchema(): Joi.SchemaLike | null {
-        return ForEachFlowActionHandler.validationSchema;
+        return ForEachFlowActionProcessor.validationSchema;
     }
 
     /**
      * @inheritdoc
      */
-    async validate(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async validate(): Promise<void> {
         const flowService = Container.get(FlowService);
-        options.of = await flowService.resolveOptionsWithNoHandlerCheck(
-            context.ejsTemplateDelimiters.local,
-            options.of,
-            context,
-            snapshot,
-            parameters,
+        this.options.of = await flowService.resolveOptionsWithNoHandlerCheck(
+            this.context.ejsTemplateDelimiters.local,
+            this.options.of,
+            this.context,
+            this.snapshot,
+            this.parameters,
             false,
         );
 
-        if (options.async) {
-            options.async = await flowService.resolveOptionsWithNoHandlerCheck(
-                context.ejsTemplateDelimiters.local,
-                options.async,
-                context,
-                snapshot,
-                parameters,
+        if (this.options.async) {
+            this.options.async = await flowService.resolveOptionsWithNoHandlerCheck(
+                this.context.ejsTemplateDelimiters.local,
+                this.options.async,
+                this.context,
+                this.snapshot,
+                this.parameters,
                 false,
             );
         }
 
-        await super.validate(options, context, snapshot, parameters);
-    }
-
-    /**
-     * Get parameters for single iteration
-     * @param shareParameters
-     * @param metadata
-     * @param parameters
-     * @param iteration
-     */
-    private static getParameters(
-        shareParameters: boolean,
-        metadata: IMetadata,
-        parameters: IDelegatedParameters,
-        iteration: IIteration,
-    ): any {
-        const result = <IDelegatedParameters>{
-            iteration: iteration,
-        };
-
-        if (parameters && parameters.parameters !== undefined) {
-            result.parameters = shareParameters
-                ? parameters.parameters
-                : JSON.parse(JSON.stringify(parameters.parameters));
-        }
-
-        return result;
+        await super.validate();
     }
 
     /**
      * @inheritdoc
      */
-    async execute(
-        options: any,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<void> {
+    async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
-        const isArray = Array.isArray(options.of);
-        const iterable = isArray ? options.of : Object.keys(options.of);
+        const isArray = Array.isArray(this.options.of);
+        const iterable = isArray ? this.options.of : Object.keys(this.options.of);
 
         for (let i = 0; i < iterable.length; i++) {
             const iteration = <IIteration>{
@@ -121,35 +71,31 @@ export class ForEachFlowActionHandler extends ActionHandler {
             if (isArray) {
                 iteration.value = iterable[i];
             } else {
-                iteration.value = options.of[iterable[i]];
+                iteration.value = this.options.of[iterable[i]];
                 iteration.key = iterable[i];
             }
 
-            const actionParameters = ForEachFlowActionHandler.getParameters(
-                options.shareParameters,
-                snapshot.metadata,
-                parameters,
-                iteration,
-            );
-            if (options.async) {
+            const actionParameters = this.getParameters(this.options.shareParameters, iteration);
+
+            if (this.options.async) {
                 promises.push(
                     (async (p): Promise<void> => {
                         snapshots[p.iteration.index] = await flowService.executeAction(
-                            snapshot.wd,
-                            options.action,
-                            context,
+                            this.snapshot.wd,
+                            this.options.action,
+                            this.context,
                             p,
-                            snapshot,
+                            this.snapshot,
                         );
                     })(actionParameters),
                 );
             } else {
                 snapshots[i] = await flowService.executeAction(
-                    snapshot.wd,
-                    options.action,
-                    context,
+                    this.snapshot.wd,
+                    this.options.action,
+                    this.context,
                     actionParameters,
-                    snapshot,
+                    this.snapshot,
                 );
             }
         }
@@ -158,7 +104,35 @@ export class ForEachFlowActionHandler extends ActionHandler {
 
         // register snapshots in the order of their presence
         snapshots.forEach(childSnapshot => {
-            snapshot.registerChildActionSnapshot(childSnapshot);
+            this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
+    }
+}
+
+export class ForEachFlowActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
+        id: 'com.fireblink.fbl.flow.foreach',
+        aliases: ['fbl.flow.foreach', 'flow.foreach', 'foreach', 'each'],
+        // We don't want to process options as a template to avoid unexpected behaviour inside nested actions
+        skipTemplateProcessing: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    getMetadata(): IActionHandlerMetadata {
+        return ForEachFlowActionHandler.metadata;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new ForEachFlowActionProcessor(options, context, snapshot, parameters);
     }
 }

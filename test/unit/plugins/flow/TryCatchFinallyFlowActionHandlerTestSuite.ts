@@ -1,11 +1,12 @@
 import { suite, test } from 'mocha-typescript';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { TryCatchFinallyFlowActionHandler } from '../../../../src/plugins/flow/TryCatchFinallyFlowActionHandler';
-import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
+import { IPlugin } from '../../../../src/interfaces';
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
+import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -19,95 +20,76 @@ const plugin: IPlugin = {
     },
 };
 
-class DummyActionHandler extends ActionHandler {
-    static ID = 'try.handler';
-
-    constructor(private name: string, private fn?: Function) {
-        super();
-    }
-
-    getMetadata(): IActionHandlerMetadata {
-        return <IActionHandlerMetadata>{
-            id: DummyActionHandler.ID + '.' + this.name,
-            version: '1.0.0',
-        };
-    }
-
-    async execute(options: any, context: any, snapshot: ActionSnapshot): Promise<void> {
-        if (this.fn) {
-            await this.fn(options, context, snapshot, {});
-        }
-    }
-}
-
 @suite()
 class TryCatchFinallyFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(actionHandler.validate(123, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate([], context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate('', context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor('', context, snapshot, {}).validate()).to.be.rejected;
 
-        await chai.expect(actionHandler.validate({}, context, snapshot, {})).to.be.rejected;
+        await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    catch: {
-                        ctx: {
-                            inline: true,
+            actionHandler
+                .getProcessor(
+                    {
+                        catch: {
+                            ctx: {
+                                inline: true,
+                            },
                         },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    catch: {
-                        ctx: {
-                            inline: true,
+            actionHandler
+                .getProcessor(
+                    {
+                        catch: {
+                            ctx: {
+                                inline: true,
+                            },
+                        },
+                        finally: {
+                            ctx: {
+                                inline: true,
+                            },
                         },
                     },
-                    finally: {
-                        ctx: {
-                            inline: true,
-                        },
-                    },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
 
         await chai.expect(
-            actionHandler.validate(
-                {
-                    finally: {
-                        ctx: {
-                            inline: true,
+            actionHandler
+                .getProcessor(
+                    {
+                        finally: {
+                            ctx: {
+                                inline: true,
+                            },
                         },
                     },
-                },
-                context,
-                snapshot,
-                {},
-            ),
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
         ).to.be.rejected;
     }
 
@@ -117,8 +99,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     action: {
                         ctx: {
@@ -129,11 +111,11 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     action: {
                         ctx: {
@@ -149,11 +131,11 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     action: {
                         ctx: {
@@ -174,11 +156,11 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
 
-        await chai.expect(
-            actionHandler.validate(
+        await actionHandler
+            .getProcessor(
                 {
                     action: {
                         ctx: {
@@ -194,8 +176,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
                 context,
                 snapshot,
                 {},
-            ),
-        ).to.be.not.rejected;
+            )
+            .validate();
     }
 
     @test()
@@ -203,9 +185,10 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler('action', async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
 
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
@@ -214,7 +197,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const options = {
             action: {
-                [DummyActionHandler.ID + '.action']: {},
+                [dummyActionHandler.id]: {},
             },
         };
 
@@ -236,21 +219,24 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler('action', async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         let catchCalled = false;
-        const dummyCatchHandler = new DummyActionHandler('catch', async () => {
+        const dummyCatchHandler = new DummyActionHandler();
+        dummyCatchHandler.executeFn = async () => {
             catchCalled = true;
-        });
+        };
         actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         let finallyCalled = false;
-        const finallyCatchHandler = new DummyActionHandler('finally', async () => {
+        const finallyCatchHandler = new DummyActionHandler();
+        finallyCatchHandler.executeFn = async () => {
             finallyCalled = true;
-        });
+        };
         actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
@@ -258,13 +244,13 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const options = {
             action: {
-                [DummyActionHandler.ID + '.action']: {},
+                [dummyActionHandler.id]: {},
             },
             catch: {
-                [DummyActionHandler.ID + '.catch']: {},
+                [dummyCatchHandler.id]: {},
             },
             finally: {
-                [DummyActionHandler.ID + '.finally']: {},
+                [finallyCatchHandler.id]: {},
             },
         };
 
@@ -289,19 +275,21 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler('action');
+        const dummyActionHandler = new DummyActionHandler();
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         let catchCalled = false;
-        const dummyCatchHandler = new DummyActionHandler('catch', async () => {
+        const dummyCatchHandler = new DummyActionHandler();
+        dummyCatchHandler.executeFn = async () => {
             catchCalled = true;
-        });
+        };
         actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         let finallyCalled = false;
-        const finallyCatchHandler = new DummyActionHandler('finally', async () => {
+        const finallyCatchHandler = new DummyActionHandler();
+        finallyCatchHandler.executeFn = async () => {
             finallyCalled = true;
-        });
+        };
         actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
@@ -309,13 +297,13 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const options = {
             action: {
-                [DummyActionHandler.ID + '.action']: {},
+                [dummyActionHandler.id]: {},
             },
             catch: {
-                [DummyActionHandler.ID + '.catch']: {},
+                [dummyCatchHandler.id]: {},
             },
             finally: {
-                [DummyActionHandler.ID + '.finally']: {},
+                [finallyCatchHandler.id]: {},
             },
         };
 
@@ -338,20 +326,23 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler('action', async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
-        const dummyCatchHandler = new DummyActionHandler('catch', async () => {
+        const dummyCatchHandler = new DummyActionHandler();
+        dummyCatchHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
         let finallyCalled = false;
-        const finallyCatchHandler = new DummyActionHandler('finally', async () => {
+        const finallyCatchHandler = new DummyActionHandler();
+        finallyCatchHandler.executeFn = async () => {
             finallyCalled = true;
-        });
+        };
         actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
@@ -359,13 +350,13 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const options = {
             action: {
-                [DummyActionHandler.ID + '.action']: {},
+                [dummyActionHandler.id]: {},
             },
             catch: {
-                [DummyActionHandler.ID + '.catch']: {},
+                [dummyCatchHandler.id]: {},
             },
             finally: {
-                [DummyActionHandler.ID + '.finally']: {},
+                [finallyCatchHandler.id]: {},
             },
         };
 
@@ -389,20 +380,23 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
         const flowService = Container.get(FlowService);
         const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
 
-        const dummyActionHandler = new DummyActionHandler('action', async () => {
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
 
         let catchCalled = false;
-        const dummyCatchHandler = new DummyActionHandler('catch', async () => {
+        const dummyCatchHandler = new DummyActionHandler();
+        dummyCatchHandler.executeFn = async () => {
             catchCalled = true;
-        });
+        };
         actionHandlersRegistry.register(dummyCatchHandler, plugin);
 
-        const finallyCatchHandler = new DummyActionHandler('finally', async () => {
+        const finallyCatchHandler = new DummyActionHandler();
+        finallyCatchHandler.executeFn = async () => {
             throw new Error('Test');
-        });
+        };
         actionHandlersRegistry.register(finallyCatchHandler, plugin);
 
         const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
@@ -410,13 +404,13 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const options = {
             action: {
-                [DummyActionHandler.ID + '.action']: {},
+                [dummyActionHandler.id]: {},
             },
             catch: {
-                [DummyActionHandler.ID + '.catch']: {},
+                [dummyCatchHandler.id]: {},
             },
             finally: {
-                [DummyActionHandler.ID + '.finally']: {},
+                [finallyCatchHandler.id]: {},
             },
         };
 

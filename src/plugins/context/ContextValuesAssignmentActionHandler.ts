@@ -1,15 +1,28 @@
-import {IActionHandlerMetadata, IContext, IDelegatedParameters} from '../../interfaces';
-import {BaseValuesAssignmentActionHandler} from './BaseValuesAssignmentActionHandler';
-import {ActionSnapshot} from '../../models';
+import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
+import { BaseValuesAssignmentActionProcessor } from './BaseValuesAssignmentActionProcessor';
+import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 
-export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentActionHandler {
-    private static metadata = <IActionHandlerMetadata> {
+export class ContextValuesAssignmentActionProcessor extends BaseValuesAssignmentActionProcessor {
+    /**
+     * @inheritdoc
+     */
+    getAssignmentKey(): 'ctx' | 'secrets' {
+        return 'ctx';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async execute(): Promise<void> {
+        await super.execute();
+        this.snapshot.setContext(this.context);
+    }
+}
+
+export class ContextValuesAssignmentActionHandler extends ActionHandler {
+    private static metadata = <IActionHandlerMetadata>{
         id: 'com.fireblink.fbl.context.ctx',
-        aliases: [
-            'fbl.context.ctx',
-            'context.ctx',
-            'ctx',
-        ]
+        aliases: ['fbl.context.ctx', 'context.ctx', 'ctx'],
     };
 
     /**
@@ -22,15 +35,12 @@ export class ContextValuesAssignmentActionHandler extends BaseValuesAssignmentAc
     /**
      * @inheritdoc
      */
-    getAssignmentKey(): 'ctx' | 'secrets' {
-        return 'ctx';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(options: any, context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): Promise<void> {
-        await super.execute(options, context, snapshot, parameters);
-        snapshot.setContext(context);
+    getProcessor(
+        options: any,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): ActionProcessor {
+        return new ContextValuesAssignmentActionProcessor(options, context, snapshot, parameters);
     }
 }

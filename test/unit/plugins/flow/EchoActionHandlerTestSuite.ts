@@ -1,7 +1,7 @@
-import {test, suite} from 'mocha-typescript';
-import {ActionSnapshot} from '../../../../src/models';
-import {ContextUtil} from '../../../../src/utils';
-import {EchoActionHandler} from '../../../../src/plugins/flow/EchoActionHandler';
+import { test, suite } from 'mocha-typescript';
+import { ActionSnapshot } from '../../../../src/models';
+import { ContextUtil } from '../../../../src/utils';
+import { EchoActionHandler } from '../../../../src/plugins/flow/EchoActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -15,7 +15,8 @@ class EchoActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        actionHandler.validate('test', context, snapshot, {});
-        actionHandler.execute('test', context, snapshot, {});        
+        const processor = actionHandler.getProcessor('test', context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
     }
 }

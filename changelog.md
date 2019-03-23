@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-03-23
+
+### Fixed
+
+- [\#336](https://github.com/FireBlinkLTD/fbl/issues/330) - Help output no longer prints `-h` option twice.
+
+### Changed
+
+- [\#229](https://github.com/FireBlinkLTD/fbl/issues/229) - ActionHandler changed to return ActionProcessor instance instead of handling `validate`, `execute` methods directly.
+
+### Added
+
+- [\#210](https://github.com/FireBlinkLTD/fbl/issues/210) - Backward compatibility test coverage for changes introduced by [\#229](https://github.com/FireBlinkLTD/fbl/issues/229)
+
 ## [1.6.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-02-27
 
 ### Changed
