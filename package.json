@@ -82,7 +82,7 @@
     "mocha-typescript": "1.1.17",
     "mochawesome": "3.1.1",
     "nyc": "13.3.0",
-    "prettier": "1.16.4",
+    "prettier": "1.17.0",
     "rimraf": "2.6.3",
     "source-map-support": "0.5.11",
     "tslint": "5.14.0",
