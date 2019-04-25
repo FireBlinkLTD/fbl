@@ -14,7 +14,7 @@ export class HashTemplateUtility implements ITemplateUtility {
         parameters: IDelegatedParameters,
     ): { [key: string]: any } {
         return {
-            hash: (str: string, algorithm = 'sha256', encoding: 'hex' | 'base64' = 'hex'): string => {
+            hash: (str: string, algorithm: string = 'sha256', encoding: 'hex' | 'base64' = 'hex'): string => {
                 if (isMissing(str)) {
                     throw new Error('Unable to calculate hash of missing value');
                 }
