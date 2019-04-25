@@ -13,7 +13,7 @@ import { dirname, join } from 'path';
 import { c } from 'tar';
 import { DummyServerWrapper } from '../../../assets/dummy.http.server.wrapper';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
-import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

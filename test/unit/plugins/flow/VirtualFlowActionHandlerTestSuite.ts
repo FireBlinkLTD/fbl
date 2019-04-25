@@ -8,7 +8,7 @@ import { IPlugin } from '../../../../src/interfaces';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
-import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

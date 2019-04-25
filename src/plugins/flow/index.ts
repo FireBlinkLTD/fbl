@@ -14,7 +14,8 @@ import { WhileActionHandler } from './WhileActionHandler';
 import { SleepFlowActionHandler } from './SleepFlowActionHandler';
 import { VoidFlowActionHandler } from './VoidFlowActionHandler';
 
-const version: string = require('../../../../package.json').version;
+const version: string = require(process.env.FBL_ENV === 'test' ? '../../../package.json' : '../../../../package.json')
+    .version;
 
 module.exports = <IPlugin>{
     name: 'fbl.core.flow',

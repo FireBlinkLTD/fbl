@@ -273,7 +273,7 @@ class ExecActionHandlerTestSuite {
             .getProcessor(
                 {
                     command: 'bash',
-                    args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
+                    args: [resolve(process.cwd(), 'test/assets/echo_to_stderr.sh'), 'test'],
                     options: {
                         stdout: true,
                         stderr: true,
@@ -337,7 +337,7 @@ class ExecActionHandlerTestSuite {
             .getProcessor(
                 {
                     command: 'bash',
-                    args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
+                    args: [resolve(process.cwd(), 'test/assets/echo_to_stderr.sh'), 'test'],
                     options: {
                         stderr: true,
                         verbose: true,
@@ -413,7 +413,7 @@ class ExecActionHandlerTestSuite {
             .getProcessor(
                 {
                     command: 'bash',
-                    args: [resolve(__dirname, '../../../../../test/assets/echo_to_stderr.sh'), 'test'],
+                    args: [resolve(process.cwd(), 'test/assets/echo_to_stderr.sh'), 'test'],
                     options: {
                         stdout: true,
                     },

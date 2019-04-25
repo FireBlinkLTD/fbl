@@ -1,7 +1,9 @@
 bail: true
-timeout: 30000
-require: source-map-support/register
+timeout: 300000
+require: 
+  - source-map-support/register
+  - ts-node/register  
 reporter: mochawesome  
 spec:
- - dist/test/unit/**/*.js
- - dist/test/unit/*.js
+ - test/unit/**/*.ts
+ - test/unit/*.ts

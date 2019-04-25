@@ -16,7 +16,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const fblVersion = require('../../../package.json').version;
+const fblVersion = require('../../package.json').version;
 
 @suite()
 class CliTestSuite {
@@ -92,34 +92,46 @@ class CliTestSuite {
         const stdout: string[] = [];
         const stderr: string[] = [];
 
-        const nodeArgs = [join(__dirname, '../../src/cli.js'), ...args];
+        const nodeArgs = [join(__dirname, '../../dist/src/cli.js'), ...args];
 
-        const code = await Container.get(ChildProcessService).exec('node', nodeArgs, wd || '.', {
-            stdout: data => {
-                stdout.push(data.toString().trim());
-            },
+        delete process.env.FBL_ENV;
+        try {
+            const code = await Container.get(ChildProcessService).exec(
+                'node',
+                nodeArgs,
+                wd || join(__dirname, '../../'),
+                {
+                    stdout: data => {
+                        // console.log('stdout:', data.toString().trim());
+                        stdout.push(data.toString().trim());
+                    },
 
-            stderr: data => {
-                stderr.push(data.toString().trim());
-            },
+                    stderr: data => {
+                        // console.log('stderr:', data.toString().trim());
+                        stderr.push(data.toString().trim());
+                    },
 
-            process: process => {
-                if (answer) {
-                    setTimeout(function() {
-                        process.stdin.write(answer);
-                        process.stdin.end();
-                    }, 100);
-                }
-            },
-        });
-        const end = Date.now();
-        console.log(`Test -> Execution of command took: ${end - start}ms`);
+                    process: process => {
+                        if (answer) {
+                            setTimeout(function() {
+                                process.stdin.write(answer);
+                                process.stdin.end();
+                            }, 100);
+                        }
+                    },
+                },
+            );
+            const end = Date.now();
+            console.log(`Test -> Execution of command took: ${end - start}ms`);
 
-        return {
-            code,
-            stdout: stdout.join('\n'),
-            stderr: stderr.join('\n'),
-        };
+            return {
+                code,
+                stdout: stdout.join('\n'),
+                stderr: stderr.join('\n'),
+            };
+        } finally {
+            process.env.FBL_ENV = 'test';
+        }
     }
 
     @test()
@@ -186,7 +198,7 @@ class CliTestSuite {
                 '-a',
                 '$.secrets.st=yes',
                 '-p',
-                `${__dirname}/../../src/plugins/flow`,
+                `${__dirname}/../../dist/src/plugins/flow`,
                 '-a',
                 `$.secrets=@${secretsFile}`,
                 '-o',
@@ -391,7 +403,7 @@ class CliTestSuite {
         await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
 
         const globalConfig = <IFBLGlobalConfig>{
-            plugins: [`${__dirname}/../../src/plugins/flow`],
+            plugins: [`${__dirname}/../../dist/src/plugins/flow`],
             context: {
                 ctx: {
                     ct: 'yes',
@@ -549,9 +561,9 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/incompatibleWithFBL', '--no-colors', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/incompatibleWithFBL', '--no-colors', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(
@@ -560,9 +572,9 @@ class CliTestSuite {
         );
 
         result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/incompatibleWithFBL.js', '--no-colors', '--unsafe-plugins', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/incompatibleWithFBL.js', '--no-colors', '--unsafe-plugins', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
 
         if (result.code !== 0) {
@@ -758,7 +770,7 @@ class CliTestSuite {
                 fbl: `>=${fblVersion}`,
                 plugins: {
                     [plugin.name]: `~${plugin.version}`,
-                    [join(__dirname, '../../src/plugins/flow')]: `~${plugin.version}`,
+                    [join(__dirname, '../../dist/src/plugins/flow')]: `~${plugin.version}`,
                 },
                 applications: ['echo'],
             },
@@ -804,9 +816,9 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/incompatibleWithOtherPlugin', '--no-colors', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/incompatibleWithOtherPlugin', '--no-colors', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(
@@ -815,9 +827,15 @@ class CliTestSuite {
         );
 
         result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/incompatibleWithOtherPlugin', '--no-colors', '--unsafe-plugins', flowFile],
+            [
+                '-p',
+                'dist/test/assets/fakePlugins/incompatibleWithOtherPlugin',
+                '--no-colors',
+                '--unsafe-plugins',
+                flowFile,
+            ],
             null,
-            __dirname,
+            process.cwd(),
         );
 
         if (result.code !== 0) {
@@ -851,9 +869,9 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         let result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/missingPluginDependency', '--no-colors', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/missingPluginDependency', '--no-colors', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
         assert.strictEqual(result.code, 1);
         assert.strictEqual(
@@ -862,9 +880,9 @@ class CliTestSuite {
         );
 
         result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/missingPluginDependency', '--no-colors', '--unsafe-plugins', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/missingPluginDependency', '--no-colors', '--unsafe-plugins', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
 
         if (result.code !== 0) {
@@ -898,12 +916,43 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(
-            ['-p', 'fakePlugins/satisfiesDependencies', '--no-colors', flowFile],
+            ['-p', 'dist/test/assets/fakePlugins/satisfiesDependencies', '--no-colors', flowFile],
             null,
-            __dirname,
+            process.cwd(),
         );
 
         if (result.code !== 0) {
+            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
+        }
+    }
+
+    @test()
+    async brokenPlugin(): Promise<void> {
+        const tempPathsRegistry = Container.get(TempPathsRegistry);
+
+        const flow: any = {
+            version: '1.0.0',
+            pipeline: {
+                ctx: {
+                    '$.test': {
+                        inline: {
+                            tst: true,
+                        },
+                    },
+                },
+            },
+        };
+
+        const flowFile = await tempPathsRegistry.createTempFile();
+        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
+
+        const result = await CliTestSuite.exec(
+            ['-p', 'dist/test/assets/fakePlugins/broken', '--no-colors', flowFile],
+            null,
+            process.cwd(),
+        );
+
+        if (result.code !== 1) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
     }

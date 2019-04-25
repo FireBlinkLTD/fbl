@@ -6,7 +6,7 @@ import { WhileActionHandler } from '../../../../src/plugins/flow/WhileActionHand
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
-import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

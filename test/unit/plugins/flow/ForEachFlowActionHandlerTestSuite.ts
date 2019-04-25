@@ -7,7 +7,7 @@ import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
-import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

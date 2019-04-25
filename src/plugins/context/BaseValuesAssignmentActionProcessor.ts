@@ -1,6 +1,5 @@
-import { ActionSnapshot, ActionProcessor } from '../../models';
+import { ActionProcessor } from '../../models';
 import * as Joi from 'joi';
-import { IContext, IDelegatedParameters } from '../../interfaces';
 import { ContextUtil, FSUtil } from '../../utils';
 import { Container } from 'typedi';
 import { FlowService } from '../../services';

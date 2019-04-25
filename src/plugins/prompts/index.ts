@@ -1,12 +1,13 @@
-import {IPlugin} from '../../interfaces';
-import {PromptActionHandler} from './PromptActionHandler';
-import {ConfirmActionHandler} from './ConfirmActionHandler';
-import {MultiSelectActionHandler} from './MultiSelectActionHandler';
-import {SelectActionHandler} from './SelectActionHandler';
+import { IPlugin } from '../../interfaces';
+import { PromptActionHandler } from './PromptActionHandler';
+import { ConfirmActionHandler } from './ConfirmActionHandler';
+import { MultiSelectActionHandler } from './MultiSelectActionHandler';
+import { SelectActionHandler } from './SelectActionHandler';
 
-const version: string = require('../../../../package.json').version;
+const version: string = require(process.env.FBL_ENV === 'test' ? '../../../package.json' : '../../../../package.json')
+    .version;
 
-module.exports = <IPlugin> {
+module.exports = <IPlugin>{
     name: 'fbl.core.fs',
     version: version,
 
@@ -14,10 +15,10 @@ module.exports = <IPlugin> {
         new ConfirmActionHandler(),
         new MultiSelectActionHandler(),
         new PromptActionHandler(),
-        new SelectActionHandler()
+        new SelectActionHandler(),
     ],
 
     requires: {
-        fbl: version
-    }
+        fbl: version,
+    },
 };
