@@ -1,10 +1,10 @@
+import * as Joi from 'joi';
+import { Container } from 'typedi';
+
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { FlowService } from '../../services';
-import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import { Container } from 'typedi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import { IMetadata } from '../../interfaces/IMetadata';
 import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
 export class WhileActionProcessor extends BaseFlowActionProcessor {

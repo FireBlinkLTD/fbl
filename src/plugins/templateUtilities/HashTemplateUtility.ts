@@ -1,8 +1,8 @@
-import { ITemplateUtility, IContext, IDelegatedParameters } from '../../interfaces';
 import { createHash } from 'crypto';
-import { ContextUtil } from '../../utils';
-import { ActionSnapshot } from '../../models';
 import { isMissing } from 'object-collider';
+
+import { ITemplateUtility, IContext, IDelegatedParameters } from '../../interfaces';
+import { ActionSnapshot } from '../../models';
 
 export class HashTemplateUtility implements ITemplateUtility {
     /**
