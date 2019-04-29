@@ -6,13 +6,13 @@ import * as assert from 'assert';
 import { FBLService } from '../../../src/services';
 import { ContextUtil } from '../../../src/utils';
 import { join } from 'path';
-import { DummyActionHandler } from '../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
-const version = require('../../../../package.json').version;
+const version = require('../../../package.json').version;
 
 class InvalidIdActionHandler extends ActionHandler {
     getMetadata(): IActionHandlerMetadata {
@@ -278,7 +278,7 @@ export class FBLServiceTestSuite {
                     name: 'invalid_id',
                     version: '1.0.0',
                     requires: {
-                        fbl: require('../../../../package.json').version,
+                        fbl: require('../../../package.json').version,
                     },
                     actionHandlers: [new InvalidIdActionHandler()],
                 },

@@ -1,4 +1,3 @@
-import { ActionSnapshot } from '../models';
 import { IReport } from './index';
 
 export interface IReporter {

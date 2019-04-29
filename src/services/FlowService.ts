@@ -453,7 +453,7 @@ export class FlowService {
                 }
 
                 if (typeof value === 'string') {
-                    return `"${value.replace(/"/g, '\\"')}"`;
+                    return JSON.stringify(value);
                 }
 
                 if (isMissing(value)) {

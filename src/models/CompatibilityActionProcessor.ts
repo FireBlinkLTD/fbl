@@ -1,5 +1,3 @@
-import * as Joi from 'joi';
-
 import { ActionProcessor } from './ActionProcessor';
 import { ActionHandler } from './ActionHandler';
 

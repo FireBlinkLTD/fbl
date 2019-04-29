@@ -14,7 +14,8 @@ import { FBL_FLOW_SCHEMA } from '../schemas';
 
 const requireg = require('requireg');
 
-const fblVersion: string = require('../../../package.json').version;
+const fblVersion: string = require(process.env.FBL_ENV === 'test' ? '../../package.json' : '../../../package.json')
+    .version;
 
 @Service()
 export class FBLService {
@@ -137,12 +138,12 @@ export class FBLService {
      */
     static async requirePluginSafe(pluginNameOrPath: string, name: boolean): Promise<IPlugin | null> {
         let plugin: IPlugin | null = null;
-
+        let exists = false;
         try {
             if (name) {
                 plugin = requireg(pluginNameOrPath);
             } else {
-                let exists = await FSUtil.exists(pluginNameOrPath);
+                exists = await FSUtil.exists(pluginNameOrPath);
                 if (exists) {
                     plugin = require(pluginNameOrPath);
                 } else {
@@ -153,6 +154,10 @@ export class FBLService {
                 }
             }
         } catch (e) {
+            if (exists) {
+                throw e;
+            }
+
             // ignore this
         }
 

@@ -51,6 +51,6 @@ class SleepActionHandlerTestSuite {
         await actionHandler.getProcessor(0.1, context, snapshot, {}).execute();
         const end = Date.now();
 
-        assert(end - start >= 100, `Action took took ${end - start}ms, but expected to run in about 100ms.`);
+        assert(end - start >= 99, `Action took took ${end - start}ms, but expected to run in about 100ms.`);
     }
 }

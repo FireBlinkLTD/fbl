@@ -56,8 +56,8 @@ export class DummyServerWrapper {
 
         const options = this.prepareOptions();
 
-        this.server = fork('dummy.http.server', options, {
-            cwd: __dirname,
+        this.server = fork('dist/test/assets/dummy.http.server', options, {
+            cwd: process.cwd(),
             silent: true,
         });
 

@@ -6,7 +6,7 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
-import { DummyActionHandler } from '../../fakePlugins/DummyActionHandler';
+import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
