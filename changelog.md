@@ -2,14 +2,14 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# 1.7.1 - Under development
+# [1.7.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.1) - 2019-04-29
 
 ### Fixed
 
 - [\#365](https://github.com/FireBlinkLTD/fbl/issues/365) - Incomplete string escaping of EJS template values.
 - [\#355](https://github.com/FireBlinkLTD/fbl/issues/355) - BaseValuesAssignmentActionProcessor now also processed reference syntax inside files.
 
-## [1.7.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-03-23
+## [1.7.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.0) - 2019-03-23
 
 ### Fixed
 
