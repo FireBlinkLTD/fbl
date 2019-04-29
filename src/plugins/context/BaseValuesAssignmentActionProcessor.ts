@@ -1,9 +1,10 @@
-import { ActionProcessor } from '../../models';
 import * as Joi from 'joi';
-import { ContextUtil, FSUtil } from '../../utils';
 import { Container } from 'typedi';
-import { FlowService } from '../../services';
 import { safeLoad } from 'js-yaml';
+
+import { ActionProcessor } from '../../models';
+import { ContextUtil, FSUtil } from '../../utils';
+import { FlowService } from '../../services';
 
 export abstract class BaseValuesAssignmentActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object()
@@ -115,6 +116,13 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
                             this.snapshot,
                             this.parameters,
                             false,
+                        );
+
+                        // resolve references
+                        fileContentObject = ContextUtil.resolveReferences(
+                            fileContentObject,
+                            this.context,
+                            this.parameters,
                         );
 
                         if (option.push) {
