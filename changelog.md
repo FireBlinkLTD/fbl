@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# 1.7.1 - Under development
+
+### Fixed
+
+- [\#365](https://github.com/FireBlinkLTD/fbl/issues/365) - Incomplete string escaping of EJS template values.
+
 ## [1.7.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.6.0) - 2019-03-23
 
 ### Fixed
 
-- [\#336](https://github.com/FireBlinkLTD/fbl/issues/330) - Help output no longer prints `-h` option twice.
+- [\#336](https://github.com/FireBlinkLTD/fbl/issues/336) - Help output no longer prints `-h` option twice.
 
 ### Changed
 
