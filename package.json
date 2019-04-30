@@ -61,7 +61,7 @@
     "@commitlint/config-conventional": "7.5.0",
     "@types/chai": "4.1.7",
     "@types/ejs": "2.6.3",
-    "@types/got": "9.4.3",
+    "@types/got": "9.4.4",
     "@types/joi": "14.3.3",
     "@types/js-yaml": "3.12.1",
     "@types/node": "11.13.8",
