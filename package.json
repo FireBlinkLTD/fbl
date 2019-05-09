@@ -50,7 +50,7 @@
     "requireg": "0.2.1",
     "semver": "6.0.0",
     "shelljs": "0.8.3",
-    "table": "5.2.3",
+    "table": "5.3.0",
     "tar": "4.4.8",
     "tmp-promise": "1.0.5",
     "typedi": "0.8.0",
