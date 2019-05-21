@@ -46,7 +46,7 @@
     "js-yaml": "3.13.1",
     "jsonschema": "1.2.4",
     "object-collider": "1.0.3",
-    "prompts": "2.0.4",
+    "prompts": "2.1.0",
     "requireg": "0.2.1",
     "semver": "6.0.0",
     "shelljs": "0.8.3",
