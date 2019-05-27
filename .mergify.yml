@@ -3,7 +3,7 @@ pull_request_rules:
     conditions:
       - 'status-success=ci/circleci: build'    
       - 'base=develop'
-      - 'author=app/greenkeeper'
+      - 'author=greenkeeper[bot]'
     actions:
       merge:
         method: merge
