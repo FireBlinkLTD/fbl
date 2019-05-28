@@ -47,7 +47,7 @@
     "jsonschema": "1.2.4",
     "object-collider": "1.0.3",
     "prompts": "2.0.4",
-    "requireg": "0.2.1",
+    "requireg": "0.2.2",
     "semver": "6.0.0",
     "shelljs": "0.8.3",
     "table": "5.2.3",
