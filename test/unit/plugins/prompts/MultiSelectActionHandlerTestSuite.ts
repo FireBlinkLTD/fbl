@@ -51,6 +51,27 @@ class SelectActionHandlerTestSuite {
                 )
                 .validate(),
         ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        message: 'test',
+                        options: [
+                            {
+                                title: 'Test',
+                            },
+                        ],
+                        assignResponseTo: {
+                            ctx: '$.test',
+                        },
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
     }
 
     @test()
@@ -89,10 +110,31 @@ class SelectActionHandlerTestSuite {
                 {},
             )
             .validate();
+
+        await actionHandler
+            .getProcessor(
+                {
+                    message: 'test',
+                    options: [
+                        {
+                            title: 'Test',
+                            value: 'tst',
+                        },
+                    ],
+                    assignResponseTo: {
+                        ctx: '$.test',
+                    },
+                    default: ['Test'],
+                },
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
     }
 
     @test()
-    async confirm(): Promise<void> {
+    async multiselectTitlesOnly(): Promise<void> {
         const actionHandler = new MultiSelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
@@ -160,5 +202,76 @@ class SelectActionHandlerTestSuite {
         assert.deepStrictEqual(context.ctx.test, ['Test1', 'Test2']);
         assert.deepStrictEqual(context.secrets.tst, ['Test1', 'Test2']);
         assert.deepStrictEqual(context.ctx.psh, ['Test1', 'Test2']);
+    }
+
+    @test()
+    async multiselectTitlesAndValues(): Promise<void> {
+        const actionHandler = new MultiSelectActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+
+        let processor = actionHandler.getProcessor(
+            {
+                message: 'test',
+                options: [{ title: 'Test1', value: 't1' }, { title: 'Test2', value: 't2' }],
+                assignResponseTo: {
+                    ctx: '$.test',
+                    secrets: '$.tst',
+                },
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await Promise.all([
+            processor.validate(),
+            processor.execute(),
+            new Promise<void>(resolve => {
+                setTimeout(() => {
+                    printChar(' ', 'space');
+                    printChar('\n', 'return');
+                    resolve();
+                }, 50);
+            }),
+        ]);
+
+        assert.deepStrictEqual(context.ctx.test, ['t1']);
+        assert.deepStrictEqual(context.secrets.tst, ['t1']);
+
+        processor = actionHandler.getProcessor(
+            {
+                message: 'test',
+                options: [{ title: 'Test1', value: 't1' }, { title: 'Test2', value: 't2' }],
+                assignResponseTo: {
+                    ctx: '$.test',
+                    secrets: '$.tst',
+                },
+                pushResponseTo: {
+                    ctx: '$.psh',
+                    children: true,
+                },
+                default: ['t2'],
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await Promise.all([
+            processor.validate(),
+            processor.execute(),
+            new Promise<void>(resolve => {
+                setTimeout(() => {
+                    printChar(' ', 'space');
+                    printChar('\n', 'return');
+                    resolve();
+                }, 50);
+            }),
+        ]);
+
+        assert.deepStrictEqual(context.ctx.test, ['t1', 't2']);
+        assert.deepStrictEqual(context.secrets.tst, ['t1', 't2']);
+        assert.deepStrictEqual(context.ctx.psh, ['t1', 't2']);
     }
 }

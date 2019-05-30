@@ -184,6 +184,7 @@ export class EnabledActionSnapshot extends ActionSnapshot {
             Object.keys(diff.added).length + Object.keys(diff.deleted).length + Object.keys(diff.updated).length;
 
         // store diff
+        /* istanbul ignore else */
         if (changes > 0) {
             this.registerStep('context', diff);
         }
