@@ -12,13 +12,14 @@ export class MultiSelectActionProcessor extends BasePromptActionProcessor {
             .min(1),
 
         options: Joi.array()
-            .items(Joi.alternatives(
-                Joi.string(), 
-                Joi.number()),
+            .items(
+                Joi.alternatives(Joi.string(), Joi.number()),
                 Joi.object({
-                    title: Joi.string().required().min(1),
-                    value: Joi.any().required()
-                })
+                    title: Joi.string()
+                        .required()
+                        .min(1),
+                    value: Joi.any().required(),
+                }),
             )
             .min(1)
             .required(),
@@ -46,30 +47,26 @@ export class MultiSelectActionProcessor extends BasePromptActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const choices = this.options.options.map((o: string | number | {title: string, value: any}) => {
+        const choices = this.options.options.map((o: string | number | { title: string; value: any }) => {
             let result: {
-                title: string,
-                value: any,
-                selected: boolean
-            } = {
-                title: '',
-                value: null,
-                selected: false
+                title: string;
+                value: any;
+                selected: boolean;
             };
 
             if (typeof o === 'string' || typeof o === 'number') {
                 result = {
                     title: o.toString(),
                     value: o,
-                    selected: false
+                    selected: false,
                 };
             } else {
-                const obj = <{title: string, value: any}> o;
+                const obj = <{ title: string; value: any }>o;
                 result = {
                     title: obj.title,
                     value: obj.value,
-                    selected: false
-                };    
+                    selected: false,
+                };
             }
 
             let selected = false;
@@ -81,7 +78,7 @@ export class MultiSelectActionProcessor extends BasePromptActionProcessor {
 
             return result;
         });
-                
+
         const value = await this.prompt({
             type: 'multiselect',
             choices: choices,
