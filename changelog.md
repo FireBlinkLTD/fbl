@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.7.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.2) - 2019-05-30
+
+### Changed
+
+- [\#367](https://github.com/FireBlinkLTD/fbl/issues/367) - Select Action Handler now allows to specify title and value as separate options
+- [\#368](https://github.com/FireBlinkLTD/fbl/issues/368) - Multiselect Action Handler now allows to specify title and value as separate options
+
 # [1.7.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.1) - 2019-04-29
 
 ### Fixed
