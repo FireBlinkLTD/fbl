@@ -12,7 +12,14 @@ export class MultiSelectActionProcessor extends BasePromptActionProcessor {
             .min(1),
 
         options: Joi.array()
-            .items(Joi.alternatives(Joi.string(), Joi.number()))
+            .items(Joi.alternatives(
+                Joi.string(), 
+                Joi.number()),
+                Joi.object({
+                    title: Joi.string().required().min(1),
+                    value: Joi.any().required()
+                })
+            )
             .min(1)
             .required(),
 
@@ -39,15 +46,45 @@ export class MultiSelectActionProcessor extends BasePromptActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const value = await this.prompt({
-            type: 'multiselect',
-            choices: this.options.options.map((o: string | number) => {
-                return {
+        const choices = this.options.options.map((o: string | number | {title: string, value: any}) => {
+            let result: {
+                title: string,
+                value: any,
+                selected: boolean
+            } = {
+                title: '',
+                value: null,
+                selected: false
+            };
+
+            if (typeof o === 'string' || typeof o === 'number') {
+                result = {
                     title: o.toString(),
                     value: o,
-                    selected: this.options.default && this.options.default.indexOf(o) >= 0,
+                    selected: false
                 };
-            }),
+            } else {
+                const obj = <{title: string, value: any}> o;
+                result = {
+                    title: obj.title,
+                    value: obj.value,
+                    selected: false
+                };    
+            }
+
+            let selected = false;
+            if (this.options.default) {
+                selected = this.options.default.indexOf(result.value) >= 0;
+            }
+
+            result.selected = selected;
+
+            return result;
+        });
+                
+        const value = await this.prompt({
+            type: 'multiselect',
+            choices: choices,
             message: this.options.message,
             max: this.options.max,
             hint: this.options.hint || '- Space to select. Return to submit',

@@ -51,6 +51,27 @@ class SelectActionHandlerTestSuite {
                 )
                 .validate(),
         ).to.be.rejected;
+
+        await chai.expect(
+            actionHandler
+                .getProcessor(
+                    {
+                        message: 'test',
+                        options: [
+                            {
+                                title: 'Test',
+                            },
+                        ],
+                        assignResponseTo: {
+                            ctx: '$.test',
+                        },
+                    },
+                    context,
+                    snapshot,
+                    {},
+                )
+                .validate(),
+        ).to.be.rejected;
     }
 
     @test()
@@ -89,10 +110,31 @@ class SelectActionHandlerTestSuite {
                 {},
             )
             .validate();
+
+        await actionHandler
+            .getProcessor(
+                {
+                    message: 'test',
+                    options: [
+                        {
+                            title: 'Test',
+                            value: 'test',
+                        },
+                    ],
+                    assignResponseTo: {
+                        ctx: '$.test',
+                    },
+                    default: 'Test',
+                },
+                context,
+                snapshot,
+                {},
+            )
+            .validate();
     }
 
     @test()
-    async confirm(): Promise<void> {
+    async selectWithTitlesOnly(): Promise<void> {
         const actionHandler = new SelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
@@ -157,5 +199,73 @@ class SelectActionHandlerTestSuite {
         assert.strictEqual(context.ctx.test, 'Test2');
         assert.strictEqual(context.secrets.tst, 'Test2');
         assert.deepStrictEqual(context.ctx.psh, ['Test2']);
+    }
+
+    @test()
+    async selectWithTitlesAndValues(): Promise<void> {
+        const actionHandler = new SelectActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+
+        let processor = actionHandler.getProcessor(
+            {
+                message: 'test',
+                options: [{ title: 'Test1', value: 't1' }, { title: 'Test2', value: 't2' }],
+                assignResponseTo: {
+                    ctx: '$.test',
+                    secrets: '$.tst',
+                },
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await Promise.all([
+            processor.validate(),
+            processor.execute(),
+            new Promise<void>(resolve => {
+                setTimeout(() => {
+                    printChar('\n', 'return');
+                    resolve();
+                }, 50);
+            }),
+        ]);
+
+        assert.strictEqual(context.ctx.test, 't1');
+        assert.strictEqual(context.secrets.tst, 't1');
+
+        processor = actionHandler.getProcessor(
+            {
+                message: 'test2',
+                options: [{ title: 'Test3', value: 't3' }, { title: 'Test4', value: 't4' }],
+                assignResponseTo: {
+                    ctx: '$.test',
+                    secrets: '$.tst',
+                },
+                pushResponseTo: {
+                    ctx: '$.psh',
+                },
+                default: 't4',
+            },
+            context,
+            snapshot,
+            {},
+        );
+
+        await Promise.all([
+            processor.validate(),
+            processor.execute(),
+            new Promise<void>(resolve => {
+                setTimeout(() => {
+                    printChar('\n', 'return');
+                    resolve();
+                }, 50);
+            }),
+        ]);
+
+        assert.strictEqual(context.ctx.test, 't4');
+        assert.strictEqual(context.secrets.tst, 't4');
+        assert.deepStrictEqual(context.ctx.psh, ['t4']);
     }
 }

@@ -12,7 +12,14 @@ export class SelectActionProcessor extends BasePromptActionProcessor {
             .min(1),
 
         options: Joi.array()
-            .items(Joi.alternatives(Joi.string(), Joi.number()))
+            .items(Joi.alternatives(
+                Joi.string(), 
+                Joi.number()),
+                Joi.object({
+                    title: Joi.string().required().min(1),
+                    value: Joi.any().required()
+                })
+            )
             .min(1)
             .required(),
 
@@ -35,15 +42,32 @@ export class SelectActionProcessor extends BasePromptActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const value = await this.prompt({
-            type: 'select',
-            initial: this.options.default ? this.options.options.indexOf(this.options.default) : undefined,
-            choices: this.options.options.map((o: string | number) => {
+        const choices = this.options.options.map((o: string | number | {title: string, value: any}) => {
+            if (typeof o === 'string' || typeof o === 'number') {
                 return {
                     title: o.toString(),
                     value: o,
                 };
-            }),
+            }
+
+            const obj = <{title: string, value: any}> o;
+
+            return {
+                title: obj.title,
+                value: obj.value,
+            };                                
+        });
+
+        let initial: number | undefined;
+        if (this.options.default !== undefined) {
+            const match = choices.find((c: {title: string, value: any}) => c.value === this.options.default);
+            initial = choices.indexOf(match);
+        }
+
+        const value = await this.prompt({
+            type: 'select',
+            initial: initial,
+            choices: choices,
             message: this.options.message,
         });
 
