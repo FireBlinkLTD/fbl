@@ -23,7 +23,7 @@ Available steps:
 
 Run steps one by one, if any of steps fail - chain of execution will stop on it.
 
-Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Meaning each action will start its own `branch` unless `sharedParameters` option is used.
+Note: [parameters](../GLOSSARY.md#parameters) for each action will be cloned. Meaning each action will start its own `branch` unless `shareParameters` option is used.
 
 **ID:** `com.fireblink.fbl.flow.sequence`
 
