@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "7.6.1",
-    "@commitlint/config-conventional": "7.6.0",
+    "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
     "@types/ejs": "2.6.3",
     "@types/got": "9.4.4",
