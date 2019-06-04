@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.7.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-06-04
+
+### Added
+
+- [\#390](https://github.com/FireBlinkLTD/fbl/issues/390) - CLI now allows to assign JSON value inline (from the command argument value)
+- [\#391](https://github.com/FireBlinkLTD/fbl/issues/391) - CLI now allows to provide escape sequence for inline values to assign ones that start with either `@` or `%`
+
 # [1.7.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.2) - 2019-05-30
 
 ### Changed
