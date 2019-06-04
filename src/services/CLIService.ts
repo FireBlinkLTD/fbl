@@ -249,7 +249,9 @@ export class CLIService {
                 description: [
                     'Assign key value pair as default values for cxt, secrets or parameters.',
                     'Expected key format: $.<ctx | secrets | parameters>[.<parent>][.child][...]',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
+                    'Note: ',
+                    ' - if value is started with "@" it will be treated as YAML file and content will be loaded from it; use @@ to escape first character to avoid this behavior',
+                    ' - if value is started with "%" it will be treated as JSON string and content will be loaded from it; use %% to escape first character to avoid this behavior',
                 ],
                 fn: (val: string) => {
                     assign.push(val);
@@ -275,7 +277,9 @@ export class CLIService {
                 flags: '--report-option <key=value>',
                 description: [
                     'Key value pair of report option',
-                    'Note: if value is started with "@" it will be treated as YAML file and content will be loaded from it.',
+                    'Note: ',
+                    ' - if value is started with "@" it will be treated as YAML file and content will be loaded from it; use @@ to escape first character to avoid this behavior',
+                    ' - if value is started with "%" it will be treated as JSON string and content will be loaded from it; use %% to escape first character to avoid this behavior',
                 ],
                 fn: (val: string) => {
                     reportOptions.push(val);
@@ -506,30 +510,43 @@ export class CLIService {
         let value;
         let isObj = false;
         const path = chunks[0];
-        if (chunks[1][0] === '@') {
-            const file = chunks[1].substring(1);
-            value = await FSUtil.readYamlFromFile(file);
 
-            // validate file content to be object
-            isObj = isObject(value);
-        } else {
-            value = chunks[1];
-        }
+        try {
+            if (chunks[1][0] === '@' && chunks[1][1] !== '@') {
+                const file = chunks[1].substring(1);
+                value = await FSUtil.readYamlFromFile(file);
 
-        if (path === '$') {
-            if (isObj) {
-                collide(target, value);
+                // validate file content to be object
+                isObj = isObject(value);
             } else {
-                throw new Error('Unable to assign non-object value to root path "$"');
-            }
-        } else {
-            const parentPath = ContextUtil.getParentPath(path);
-            if (parentPath !== '$') {
-                ContextUtil.instantiateObjectPath(target, parentPath);
+                value = chunks[1];
+
+                if ((value[0] === '@' || value[0] === '%') && value[0] === value[1]) {
+                    value = value.substring(1);
+                } else if (value[0] === '%') {
+                    value = JSON.parse(value.substring(1));
+                    isObj = isObject(value);
+                }
             }
 
-            const parent = ContextUtil.getValueAtPath(target, parentPath);
-            collideUnsafe(parent, { [path.split('.').pop()]: value });
+            if (path === '$') {
+                if (isObj) {
+                    collide(target, value);
+                } else {
+                    throw new Error('Unable to assign non-object value to root path "$"');
+                }
+            } else {
+                const parentPath = ContextUtil.getParentPath(path);
+                if (parentPath !== '$') {
+                    ContextUtil.instantiateObjectPath(target, parentPath);
+                }
+
+                const parent = ContextUtil.getValueAtPath(target, parentPath);
+                collideUnsafe(parent, { [path.split('.').pop()]: value });
+            }
+        } catch (e) {
+            console.error(`Unable to assign value for path "${path}" based on string: ${kv}`);
+            throw e;
         }
     }
 }

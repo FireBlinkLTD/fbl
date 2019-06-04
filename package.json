@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "CLI tool to manage routine automation tasks.",
   "keywords": [
     "fireblink",
@@ -51,20 +51,20 @@
     "semver": "6.1.1",
     "shelljs": "0.8.3",
     "table": "5.4.0",
-    "tar": "4.4.8",
+    "tar": "4.4.9",
     "tmp-promise": "2.0.1",
     "typedi": "0.8.0",
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "7.6.1",
-    "@commitlint/config-conventional": "7.6.0",
+    "@commitlint/cli": "8.0.0",
+    "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
     "@types/ejs": "2.6.3",
     "@types/got": "9.4.4",
     "@types/joi": "14.3.3",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "12.0.3",
+    "@types/node": "12.0.4",
     "@types/semver": "6.0.0",
     "@types/shelljs": "0.8.5",
     "@types/table": "4.0.5",
@@ -87,9 +87,9 @@
     "rimraf": "2.6.3",
     "source-map-support": "0.5.12",
     "ts-node": "8.2.0",
-    "tslint": "5.16.0",
+    "tslint": "5.17.0",
     "tslint-config-prettier": "1.18.0",
-    "typescript": "3.4.5"
+    "typescript": "3.5.1"
   },
   "nyc": {
     "cache": false,
