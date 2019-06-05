@@ -42,12 +42,7 @@ export class SheelActionProcessor extends BaseExecutableActionProcessor {
         const file = await Container.get(TempPathsRegistry).createTempFile();
         await promisify(writeFile)(file, this.options.script, 'utf8');
 
-        const result: any = await this.exec(
-            this.options.executable,
-            [file],
-            this.options.wd || this.snapshot.wd,
-            this.options.options,
-        );
+        const result: any = await this.exec(this.options.executable, [file], this.options.wd, this.options.options);
 
         await this.storeResult(this.options.assignResultTo, this.options.pushResultTo, result);
     }

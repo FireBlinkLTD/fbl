@@ -44,15 +44,19 @@ export class ActionSnapshot {
     /**
      * Register log message
      * @param {string} message
-     * @param {boolean} [error]
+     * @param {boolean} [error] indicated that log message is error
+     * @param {boolean} [silent] if provided LogService will not be invoked
      */
-    log(message: string, error = false) {
+    log(message: string, error = false, silent = false) {
         const logMessage =
             ` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message;
-        if (error) {
-            Container.get(LogService).error(logMessage);
-        } else {
-            Container.get(LogService).info(logMessage);
+
+        if (!silent) {
+            if (error) {
+                Container.get(LogService).error(logMessage);
+            } else {
+                Container.get(LogService).info(logMessage);
+            }
         }
 
         this.registerStep('log', message);

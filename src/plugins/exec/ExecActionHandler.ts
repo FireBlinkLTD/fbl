@@ -33,12 +33,7 @@ export class ExecActionProcessor extends BaseExecutableActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const result = await this.exec(
-            this.options.command,
-            this.options.args,
-            this.options.wd || this.snapshot.wd,
-            this.options.options,
-        );
+        const result = await this.exec(this.options.command, this.options.args, this.options.wd, this.options.options);
 
         await this.storeResult(this.options.assignResultTo, this.options.pushResultTo, result);
     }

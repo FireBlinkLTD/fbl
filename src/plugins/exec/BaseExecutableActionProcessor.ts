@@ -1,5 +1,5 @@
 import { ActionProcessor } from '../../models';
-import { ContextUtil } from '../../utils';
+import { ContextUtil, FSUtil } from '../../utils';
 import { Container } from 'typedi';
 import { ChildProcessService } from '../../services';
 
@@ -14,7 +14,7 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
     async exec(
         executable: string,
         args: any[],
-        wd: string,
+        wd?: string,
         options?: {
             stdout?: boolean;
             stderr?: boolean;
@@ -36,7 +36,8 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
                     on.stdout = (chunk: any) => {
                         /* istanbul ignore else */
                         if (options.verbose) {
-                            this.snapshot.log(`stdout: ${chunk}`);
+                            console.log(chunk.toString().trim());
+                            this.snapshot.log(`stdout: ${chunk}`, false, true);
                         }
 
                         /* istanbul ignore else */
@@ -51,7 +52,8 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
                     on.stderr = (chunk: any) => {
                         /* istanbul ignore else */
                         if (options.verbose) {
-                            this.snapshot.log(`stderr: ${chunk}`);
+                            console.error(chunk.toString().trim());
+                            this.snapshot.log(`stderr: ${chunk}`, false, true);
                         }
 
                         /* istanbul ignore else */
@@ -62,6 +64,7 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
                 }
             }
 
+            wd = wd ? FSUtil.getAbsolutePath(wd, this.snapshot.wd) : this.snapshot.wd;
             result.code = await Container.get(ChildProcessService).exec(executable, args, wd, on);
 
             if (result.code !== 0) {
