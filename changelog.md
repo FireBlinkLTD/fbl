@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.7.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-06-05
+
+### Changed
+
+- [\#394](https://github.com/FireBlinkLTD/fbl/issues/394) - `exec` and `shell` action handlers now print verbose output even when `--verbose` cli attribute isn't provided
+
+### Fixed
+
+- [\#393](https://github.com/FireBlinkLTD/fbl/issues/393) - `exec` and `shell` action handlers now support relative paths for `wd` (working directory) option
+
 # [1.7.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-06-04
 
 ### Added
