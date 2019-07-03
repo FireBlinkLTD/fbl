@@ -7,10 +7,11 @@ import { ActionHandlersRegistry } from './ActionHandlersRegistry';
 import * as semver from 'semver';
 import { IMetadata } from '../interfaces/IMetadata';
 import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
-import { which } from 'shelljs';
 import { resolve } from 'path';
 import { FSUtil } from '../utils';
 import { FBL_FLOW_SCHEMA } from '../schemas';
+
+const commandExists = require('command-exists');
 
 const requireg = require('requireg');
 
@@ -235,9 +236,7 @@ export class FBLService {
 
         if (version && !semver.satisfies(version, pluginExpectedVersion)) {
             errors.push(
-                `Actual plugin ${pluginName.red} version ${version.red} doesn't satisfy required ${
-                    pluginExpectedVersion.red
-                }`,
+                `Actual plugin ${pluginName.red} version ${version.red} doesn't satisfy required ${pluginExpectedVersion.red}`,
             );
         }
     }
@@ -272,12 +271,16 @@ export class FBLService {
 
         if (plugin.requires.applications) {
             for (const application of plugin.requires.applications) {
-                /* istanbul ignore else */
-                if (!which(application)) {
+                let exists = false;
+                try {
+                    exists = await commandExists(application);
+                } catch (e) {
+                    exists = false;
+                }
+
+                if (!exists) {
                     errors.push(
-                        `Application ${application.red} required by plugin ${
-                            plugin.name.red
-                        } not found, make sure it is installed and its location presents in the PATH environment variable`,
+                        `Application ${application.red} required by plugin ${plugin.name.red} not found, make sure it is installed and its location presents in the PATH environment variable`,
                     );
                 }
             }
@@ -329,11 +332,16 @@ export class FBLService {
 
             if (flow.requires.applications) {
                 for (const application of flow.requires.applications) {
-                    if (!which(application)) {
+                    let exists = false;
+                    try {
+                        exists = await commandExists(application);
+                    } catch (e) {
+                        exists = false;
+                    }
+
+                    if (!exists) {
                         errors.push(
-                            `Application ${
-                                application.red
-                            } required by flow not found, make sure it is installed and its location presents in the PATH environment variable`,
+                            `Application ${application.red} required by flow not found, make sure it is installed and its location presents in the PATH environment variable`,
                         );
                     }
                 }

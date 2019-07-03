@@ -3,9 +3,6 @@ import { ActionHandler, EnabledActionSnapshot } from '../../../src/models';
 import { ActionHandlersRegistry } from '../../../src/services';
 import * as assert from 'assert';
 import { IActionHandlerMetadata, IPlugin } from '../../../src/interfaces';
-import { Container } from 'typedi';
-
-const chai = require('chai');
 
 class DummyActionHandler extends ActionHandler {
     constructor(private id: string) {

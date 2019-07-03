@@ -1,12 +1,19 @@
 import { suite, test } from 'mocha-typescript';
 import { Container } from 'typedi';
-import { IActionHandlerMetadata, IFlow, IPlugin } from '../../../src/interfaces';
+import {
+    IActionHandlerMetadata,
+    IFlow,
+    IPlugin,
+    ITemplateUtility,
+    IDelegatedParameters,
+} from '../../../src/interfaces';
 import { ActionHandler, ActionSnapshot } from '../../../src/models';
 import * as assert from 'assert';
 import { FBLService } from '../../../src/services';
 import { ContextUtil } from '../../../src/utils';
 import { join } from 'path';
 import { DummyActionHandler } from '../../assets/fakePlugins/DummyActionHandler';
+import { IContext } from 'mocha';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -319,6 +326,51 @@ export class FBLServiceTestSuite {
     }
 
     @test()
+    async escapingOfUtilityResult() {
+        const fbl = Container.get<FBLService>(FBLService);
+
+        fbl.flowService.debug = true;
+
+        const actionHandler = new DummyActionHandler();
+        actionHandler.executeFn = async (opt: any) => {
+            result = opt;
+        };
+
+        let result = null;
+        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+            name: 'test',
+            version: '1.0.0',
+            requires: {
+                fbl: '>=0.0.0',
+            },
+        });
+
+        fbl.registerPlugin(require('../../../src/plugins/templateUtilities'));
+
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.t1 = {
+            t2: {
+                value: '@tst',
+            },
+        };
+
+        const snapshot = await fbl.execute(
+            '.',
+            <IFlow>{
+                version: '1.0.0',
+                pipeline: {
+                    [actionHandler.id]: '<%= $.require("path").dirname("@tst/something") %>',
+                },
+            },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.strictEqual(result, '@tst');
+    }
+
+    @test()
     async templateProcessingStringEscape() {
         const fbl = Container.get<FBLService>(FBLService);
 
@@ -341,11 +393,11 @@ export class FBLServiceTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.t1 = {
             t2: {
-                value: 'tst',
+                value: '@tst',
             },
         };
 
-        const snapshot = await fbl.execute(
+        let snapshot = await fbl.execute(
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -358,7 +410,22 @@ export class FBLServiceTestSuite {
         );
 
         assert.strictEqual(snapshot.successful, true);
-        assert.strictEqual(result, 'tst');
+        assert.strictEqual(result, '@tst');
+
+        snapshot = await fbl.execute(
+            '.',
+            <IFlow>{
+                version: '1.0.0',
+                pipeline: {
+                    [actionHandler.id]: '$ref:ctx.t1.t2.value',
+                },
+            },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.strictEqual(result, '@tst');
     }
 
     @test()
@@ -382,5 +449,22 @@ export class FBLServiceTestSuite {
             .to.be.rejectedWith(
                 'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable',
             );
+    }
+
+    @test()
+    async satisfiesApplicationRequirement() {
+        const fbl = Container.get<FBLService>(FBLService);
+
+        await fbl.validatePlugin(
+            <IPlugin>{
+                name: 'test',
+                version: '0.0.0',
+                requires: {
+                    fbl: version,
+                    applications: ['mkdir'],
+                },
+            },
+            '.',
+        );
     }
 }
