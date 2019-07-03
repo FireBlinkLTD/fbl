@@ -1,6 +1,12 @@
 import { suite, test } from 'mocha-typescript';
 import { Container } from 'typedi';
-import { IActionHandlerMetadata, IFlow, IPlugin, ITemplateUtility, IDelegatedParameters } from '../../../src/interfaces';
+import {
+    IActionHandlerMetadata,
+    IFlow,
+    IPlugin,
+    ITemplateUtility,
+    IDelegatedParameters,
+} from '../../../src/interfaces';
 import { ActionHandler, ActionSnapshot } from '../../../src/models';
 import * as assert from 'assert';
 import { FBLService } from '../../../src/services';
@@ -350,7 +356,7 @@ export class FBLServiceTestSuite {
 
         const snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
                     [actionHandler.id]: '<%= $.require("path").dirname("@tst/something") %>',
@@ -393,7 +399,7 @@ export class FBLServiceTestSuite {
 
         let snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
                     [actionHandler.id]: `<%- ctx['t1']["t2"].value %>`,
@@ -408,7 +414,7 @@ export class FBLServiceTestSuite {
 
         snapshot = await fbl.execute(
             '.',
-            <IFlow> {
+            <IFlow>{
                 version: '1.0.0',
                 pipeline: {
                     [actionHandler.id]: '$ref:ctx.t1.t2.value',
@@ -443,5 +449,22 @@ export class FBLServiceTestSuite {
             .to.be.rejectedWith(
                 'Application missing_app_1234 required by plugin test not found, make sure it is installed and its location presents in the PATH environment variable',
             );
+    }
+
+    @test()
+    async satisfiesApplicationRequirement() {
+        const fbl = Container.get<FBLService>(FBLService);
+
+        await fbl.validatePlugin(
+            <IPlugin>{
+                name: 'test',
+                version: '0.0.0',
+                requires: {
+                    fbl: version,
+                    applications: ['mkdir'],
+                },
+            },
+            '.',
+        );
     }
 }
