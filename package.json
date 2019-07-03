@@ -68,7 +68,7 @@
     "@types/semver": "6.0.0",
     "@types/shelljs": "0.8.5",
     "@types/table": "4.0.5",
-    "@types/tar": "4.0.1",
+    "@types/tar": "4.0.2",
     "@types/tmp": "0.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
