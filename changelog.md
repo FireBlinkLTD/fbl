@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.7.5](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-07-03
+
+### Changed
+
+- [\#431](https://github.com/FireBlinkLTD/fbl/issues/431) - `shelljs` module was replaced with `command-exists` to find installed apps (specified in flow requirements)
+
 # [1.7.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-06-05
 
 ### Changed
