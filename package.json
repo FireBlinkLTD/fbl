@@ -66,7 +66,7 @@
     "@types/js-yaml": "3.12.1",
     "@types/node": "12.6.0",
     "@types/semver": "6.0.1",
-    "@types/table": "4.0.5",
+    "@types/table": "4.0.6",
     "@types/tar": "4.0.2",
     "@types/tmp": "0.1.0",
     "chai": "4.2.0",
