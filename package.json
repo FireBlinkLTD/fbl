@@ -67,7 +67,7 @@
     "@types/node": "12.6.2",
     "@types/semver": "6.0.1",
     "@types/table": "4.0.6",
-    "@types/tar": "4.0.2",
+    "@types/tar": "4.0.3",
     "@types/tmp": "0.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
