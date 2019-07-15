@@ -57,7 +57,7 @@
     "uuid": "3.3.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "8.0.0",
+    "@commitlint/cli": "8.1.0",
     "@commitlint/config-conventional": "8.0.0",
     "@types/chai": "4.1.7",
     "@types/ejs": "2.6.3",
