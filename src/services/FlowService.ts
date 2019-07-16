@@ -402,6 +402,7 @@ export class FlowService {
             context,
             snapshot,
             parameters,
+            dirname(absolutePath),
         );
 
         let flow;
@@ -433,6 +434,7 @@ export class FlowService {
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
+        root: string,
     ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
@@ -445,7 +447,10 @@ export class FlowService {
         Object.assign(data, parameters);
         Object.assign(data, context);
 
+        tpl = await this.resolveIncludes(delimiter, tpl, root, context, snapshot, parameters);
+
         const options = <Options>{
+            root,
             delimiter,
             escape: (value: any) => {
                 if (typeof value === 'number' || typeof value === 'boolean') {
@@ -466,6 +471,59 @@ export class FlowService {
         };
 
         return await render(tpl, data, options);
+    }
+
+    /**
+     * Resolve EJS template include directive
+     * @param delimiter
+     * @param tpl
+     * @param root
+     * @param context
+     * @param snapshot
+     * @param parameters
+     */
+    async resolveIncludes(
+        delimiter: string,
+        tpl: string,
+        root: string,
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): Promise<string> {
+        const pattern = `<\\${delimiter}\\s+include\\s+([^\\${delimiter}>]+)\\s+\\${delimiter}>`;
+        const regex = new RegExp(pattern, 'g');
+        let res = regex.exec(tpl);
+
+        while (res) {
+            const fullPath = join(root, res[1]);
+            let content = await FSUtil.readTextFile(fullPath);
+
+            content = await this.resolveTemplate(
+                context.ejsTemplateDelimiters.global,
+                content,
+                context,
+                snapshot,
+                parameters,
+                root,
+            );
+
+            if (delimiter === context.ejsTemplateDelimiters.local) {
+                content = await this.resolveTemplate(
+                    context.ejsTemplateDelimiters.local,
+                    content,
+                    context,
+                    snapshot,
+                    parameters,
+                    root,
+                );
+            }
+
+            tpl = tpl.substring(0, res.index) + content + tpl.substring(res.index + res[0].length);
+
+            res = regex.exec(tpl);
+        }
+
+        return tpl;
     }
 
     /**
@@ -520,7 +578,7 @@ export class FlowService {
         });
 
         tpl = lines.join('\n');
-        const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters);
+        const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters, snapshot.wd);
         options = safeLoad(yaml);
 
         // resolve references

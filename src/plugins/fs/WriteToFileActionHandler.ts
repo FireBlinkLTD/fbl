@@ -49,7 +49,9 @@ export class WriteToFileActionProcessor extends ActionProcessor {
         if (this.options.contentFromFile) {
             const flowService = Container.get(FlowService);
 
-            content = await FSUtil.readTextFile(FSUtil.getAbsolutePath(this.options.contentFromFile, this.snapshot.wd));
+            const absolutePath = FSUtil.getAbsolutePath(this.options.contentFromFile, this.snapshot.wd);
+            const rootDir = dirname(absolutePath);
+            content = await FSUtil.readTextFile(absolutePath);
 
             // resolve with global template delimiter first
             content = await flowService.resolveTemplate(
@@ -58,6 +60,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
                 this.context,
                 this.snapshot,
                 this.parameters,
+                rootDir,
             );
 
             // resolve local template delimiter
@@ -67,6 +70,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
                 this.context,
                 this.snapshot,
                 this.parameters,
+                rootDir,
             );
         }
 

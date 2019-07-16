@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import { mkdir, readFile, unlinkSync, writeFile, writeFileSync } from 'fs';
 import * as assert from 'assert';
 import { ActionSnapshot } from '../../../../src/models';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { ContextUtil } from '../../../../src/utils';
 import { TempPathsRegistry } from '../../../../src/services';
 import { Container } from 'typedi';
@@ -14,7 +14,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 @suite()
-class WriteToFileTestSuite {
+class WriteToFileActionHandlerTestSuite {
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
@@ -189,14 +189,21 @@ class WriteToFileTestSuite {
 
         const actionHandler = new WriteToFileActionHandler();
 
-        const templateFile = await tempPathsRegistry.createTempFile();
+        const templateDir = await tempPathsRegistry.createTempDir();
+        const templateFile = join(templateDir, 'main.yml');
+        const includeLocalFile = join(templateDir, '_includeLocal.ejs');
+        const includeGlobalFile = join(templateDir, '_includeGlobal.ejs');
         const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', {}, '', 0, {});
 
-        const content = '<$- ctx.global $>-<%- ctx.local %>';
+        const includeLocalContent = '<%- ctx.local %>';
+        const includeGlobalContent = '<$- ctx.global $>';
+        const content = '<$ include _includeGlobal.ejs $>-<% include _includeLocal.ejs %>';
         await promisify(writeFile)(templateFile, content, 'utf8');
+        await promisify(writeFile)(includeLocalFile, includeLocalContent, 'utf8');
+        await promisify(writeFile)(includeGlobalFile, includeGlobalContent, 'utf8');
 
         context.ctx.global = 'g';
         context.ctx.local = 'l';
