@@ -408,17 +408,13 @@ export class ContextUtil {
                         for (const subPath of chunks) {
                             if (!isObject(target)) {
                                 throw new Error(
-                                    `Unable to find reference match for "$.${match[1]}${
-                                        match[2]
-                                    }". Non-object value found upon traveling the path at "${subPath}".`,
+                                    `Unable to find reference match for "$.${match[1]}${match[2]}". Non-object value found upon traveling the path at "${subPath}".`,
                                 );
                             }
 
                             if (!target.hasOwnProperty(subPath)) {
                                 throw new Error(
-                                    `Unable to find reference match for "$.${match[1]}${
-                                        match[2]
-                                    }". Missing value found upon traveling the path at "${subPath}".`,
+                                    `Unable to find reference match for "$.${match[1]}${match[2]}". Missing value found upon traveling the path at "${subPath}".`,
                                 );
                             }
 

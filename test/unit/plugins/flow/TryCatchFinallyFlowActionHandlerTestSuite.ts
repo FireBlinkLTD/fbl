@@ -7,6 +7,7 @@ import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
+import { ActionError, UNEXPECTED } from '../../../../src';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -221,6 +222,68 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
+            throw new ActionError('Test', 'TEST');
+        };
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        let catchCalled = false;
+        const dummyCatchHandler = new DummyActionHandler();
+        dummyCatchHandler.executeFn = async () => {
+            catchCalled = context.ctx.errorCode === 'TEST';
+        };
+        actionHandlersRegistry.register(dummyCatchHandler, plugin);
+
+        let finallyCalled = false;
+        const finallyCatchHandler = new DummyActionHandler();
+        finallyCatchHandler.executeFn = async () => {
+            finallyCalled = context.ctx.errorCode === 'TEST';
+        };
+        actionHandlersRegistry.register(finallyCatchHandler, plugin);
+
+        const tryFlowActionHandler = new TryCatchFinallyFlowActionHandler();
+        actionHandlersRegistry.register(tryFlowActionHandler, plugin);
+
+        const options = {
+            action: {
+                [dummyActionHandler.id]: {},
+            },
+            errorCode: {
+                assignTo: '$.ctx.errorCode',
+                pushTo: '$.ctx.errorCodes',
+            },
+            catch: {
+                [dummyCatchHandler.id]: {},
+            },
+            finally: {
+                [finallyCatchHandler.id]: {},
+            },
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction(
+            '.',
+            { [tryFlowActionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, true);
+        assert.strictEqual(snapshot.childFailure, true);
+        assert.strictEqual(snapshot.ignoreChildFailure, true);
+
+        assert.strictEqual(catchCalled, true);
+        assert.strictEqual(finallyCalled, true);
+        assert.strictEqual(context.ctx.errorCode, 'TEST');
+        assert.deepStrictEqual(context.ctx.errorCodes, ['TEST']);
+    }
+
+    @test()
+    async executeWithCatchAndFinallyBlocksAndRegularError(): Promise<void> {
+        const flowService = Container.get(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async () => {
             throw new Error('Test');
         };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
@@ -246,6 +309,10 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
             action: {
                 [dummyActionHandler.id]: {},
             },
+            errorCode: {
+                assignTo: '$.ctx.errorCode',
+                pushTo: '$.ctx.errorCodes',
+            },
             catch: {
                 [dummyCatchHandler.id]: {},
             },
@@ -268,6 +335,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         assert.strictEqual(catchCalled, true);
         assert.strictEqual(finallyCalled, true);
+        assert.strictEqual(context.ctx.errorCode, UNEXPECTED);
+        assert.deepStrictEqual(context.ctx.errorCodes, [UNEXPECTED]);
     }
 
     @test()

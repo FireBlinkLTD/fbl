@@ -405,6 +405,16 @@ try:
   catch:
     @: error.yml
 
+  # [optional] error code assignment, can be used to better handle error processing inside catch/final actions
+  errorCode:
+    # [optional] assign error code to context field
+    # Follows common assignment logic practicies https://fbl.fireblink.com/plugins/common#assign-to
+    assignTo: '$.ctx.errorCode'
+
+    # [optional] push error code to context field
+    # Follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to
+    pushTo: '$.ctx.errorCode'
+
   # [optional] call cleanup.yml either after successful execution of foo.yml or error.yml
   finally:
     @: cleanup.yml

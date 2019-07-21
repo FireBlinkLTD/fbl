@@ -315,7 +315,7 @@ class CliTestSuite {
         assert.strictEqual(result.code, 1);
         assert.strictEqual(
             result.stderr,
-            'Unable to assign value for path "test" based on string: test=@missing.file\nENOENT: no such file or directory, open \'missing.file\'',
+            'Unable to assign value for path "test" based on string: test=@missing.file\nUnable to find file at path: missing.file',
         );
     }
 

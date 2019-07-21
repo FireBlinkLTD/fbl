@@ -365,8 +365,8 @@ class VirtualFlowActionHandlerTestSuite {
             .getSteps()
             .find(s => s.type === 'child' && s.payload.idOrAlias === 'virtual.test').payload;
         assert.strictEqual(
-            virtualChildSnapshot.getSteps().find(s => s.type === 'failure').payload,
-            'Error: tst.t is not of a type(s) string',
+            virtualChildSnapshot.getSteps().find(s => s.type === 'failure').payload.message,
+            'tst.t is not of a type(s) string',
         );
     }
 

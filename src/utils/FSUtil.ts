@@ -4,6 +4,7 @@ import { basename, dirname, isAbsolute, normalize, resolve, sep } from 'path';
 import { safeLoad } from 'js-yaml';
 import { promisify } from 'util';
 import { copyFile, exists, mkdir, readdir, readFile, rename, rmdir, stat, unlink } from 'fs';
+import { ActionError, CORRUPTED_FILE, PATH_ALREADY_EXISTS, NOT_FOUND } from '../errors';
 
 const unlinkAsync = promisify(unlink);
 const existsAsync = promisify(exists);
@@ -93,6 +94,11 @@ export class FSUtil {
     }
 
     static async readFile(file: string): Promise<Buffer> {
+        const fileExists = await FSUtil.exists(file);
+        if (!fileExists) {
+            throw new ActionError(`Unable to read file at path: ${file}. File is missing`, NOT_FOUND);
+        }
+
         return await readFileAsync(file);
     }
 
@@ -103,7 +109,9 @@ export class FSUtil {
      * @return {Promise<string>}
      */
     static async readTextFile(file: string, encoding: BufferEncoding = 'utf8'): Promise<string> {
-        return (await FSUtil.readFile(file)).toString(encoding);
+        const data = await FSUtil.readFile(file);
+
+        return data.toString(encoding);
     }
 
     /**
@@ -125,8 +133,9 @@ export class FSUtil {
         } else {
             const directory = await FSUtil.isDirectory(path);
             if (!directory) {
-                throw new Error(
+                throw new ActionError(
                     `Unable to create folder at path: ${path}. Path already exists and it is not a folder.`,
+                    PATH_ALREADY_EXISTS,
                 );
             }
         }
@@ -144,7 +153,7 @@ export class FSUtil {
                 return;
             }
 
-            throw new Error(`Unable to find file or folder at path: ${path}`);
+            throw new ActionError(`Unable to find file or folder at path: ${path}`, NOT_FOUND);
         }
 
         const directory = await FSUtil.isDirectory(path);
@@ -178,7 +187,7 @@ export class FSUtil {
      */
     static async move(from: string, to: string): Promise<void> {
         if (!(await existsAsync(from))) {
-            throw new Error(`Unable to find file or folder at path: ${from}`);
+            throw new ActionError(`Unable to find file or folder at path: ${from}`, NOT_FOUND);
         }
 
         const directory = await FSUtil.isDirectory(from);
@@ -232,7 +241,7 @@ export class FSUtil {
      */
     static async copy(from: string, to: string): Promise<void> {
         if (!(await existsAsync(from))) {
-            throw new Error(`Unable to find file or folder at path: ${from}`);
+            throw new ActionError(`Unable to find file or folder at path: ${from}`, NOT_FOUND);
         }
 
         const directory = await FSUtil.isDirectory(from);
@@ -286,8 +295,17 @@ export class FSUtil {
      * @returns {Promise<any>}
      */
     static async readYamlFromFile(file: string): Promise<any> {
+        const fileExists = await FSUtil.exists(file);
+        if (!fileExists) {
+            throw new ActionError(`Unable to find file at path: ${file}`, NOT_FOUND);
+        }
+
         const source = await FSUtil.readTextFile(file);
 
-        return safeLoad(source);
+        try {
+            return safeLoad(source);
+        } catch (e) {
+            throw new ActionError(`Unable to parse YAML: ${e.message}`, CORRUPTED_FILE);
+        }
     }
 }

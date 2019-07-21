@@ -5,6 +5,7 @@ import { FlowService } from '../../services';
 import { Container } from 'typedi';
 import { safeLoad } from 'js-yaml';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
+import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export class TemplateFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.string()
@@ -29,7 +30,7 @@ export class TemplateFlowActionProcessor extends ActionProcessor {
         const result = Joi.validate(action, FBL_ACTION_SCHEMA);
 
         if (result.error) {
-            throw new Error(result.error.details.map(d => d.message).join('\n'));
+            throw new ActionError(result.error.details.map(d => d.message).join('\n'), INVALID_CONFIGURATION);
         }
     }
 

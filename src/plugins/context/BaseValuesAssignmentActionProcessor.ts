@@ -6,6 +6,7 @@ import { ActionProcessor } from '../../models';
 import { ContextUtil, FSUtil } from '../../utils';
 import { FlowService } from '../../services';
 import { dirname } from 'path';
+import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export abstract class BaseValuesAssignmentActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object()
@@ -61,7 +62,10 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
         if (this.options.$ && this.options.$.inline) {
             const validationResult = Joi.validate(this.options.$.inline, Joi.object().required());
             if (validationResult.error) {
-                throw new Error(validationResult.error.details.map(d => d.message).join('\n'));
+                throw new ActionError(
+                    validationResult.error.details.map(d => d.message).join('\n'),
+                    INVALID_CONFIGURATION,
+                );
             }
         }
     }

@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 import Container from 'typedi';
 import { TemplateUtilitiesRegistry } from '../../services';
 import { isMissing } from 'object-collider';
+import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export class FunctionActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.string()
@@ -83,7 +84,10 @@ export class FunctionActionProcessor extends ActionProcessor {
         if (result) {
             const validationResult = Joi.validate(result, FunctionActionProcessor.functionResultValidationSchema);
             if (validationResult.error) {
-                throw new Error(validationResult.error.details.map(d => d.message).join('\n'));
+                throw new ActionError(
+                    validationResult.error.details.map(d => d.message).join('\n'),
+                    INVALID_CONFIGURATION,
+                );
             }
 
             ['cwd', 'ctx', 'secrets', 'entities'].forEach((field: 'cwd' | 'ctx' | 'secrets' | 'entities') => {
