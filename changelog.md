@@ -2,13 +2,21 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# [1.7.5](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-07-03
+# [1.8.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.8.0) - 2019-07-23
+
+### Added
+
+- [\#434](https://github.com/FireBlinkLTD/fbl/issues/434) - added `ActionError` that can be used to report custom error codes by Action Handlers that later can be caught by `try` Action Handler to behave differently on different kinds of errors.
+
+- [\#446](https://github.com/FireBlinkLTD/fbl/issues/446) - added support of `include` EJS directive for both local and global template processors.
+
+# [1.7.5](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.5) - 2019-07-03
 
 ### Changed
 
 - [\#431](https://github.com/FireBlinkLTD/fbl/issues/431) - `shelljs` module was replaced with `command-exists` to find installed apps (specified in flow requirements)
 
-# [1.7.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.3) - 2019-06-05
+# [1.7.4](https://github.com/FireBlinkLTD/fbl/releases/tag/1.7.4) - 2019-06-05
 
 ### Changed
 
