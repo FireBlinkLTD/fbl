@@ -16,6 +16,7 @@ export class ActionSnapshot {
     steps: IActionStep[];
 
     successful: boolean;
+    errorCode: any;
     childFailure: boolean;
     ignoreChildFailure = false;
     duration = 0;
@@ -109,9 +110,17 @@ export class ActionSnapshot {
      * @param error
      */
     failure(error: any) {
-        this.registerStep('failure', error && error.toString());
+        this.registerStep('failure', {
+            message: (error && error.message) || /* istanbul ignore next */ error.toString(),
+            code: error && error.code,
+        });
         this.completedAt = new Date();
         this.duration = this.completedAt.getTime() - this.createdAt.getTime();
+        this.successful = false;
+
+        if (error && error.code) {
+            this.errorCode = error.code;
+        }
     }
 
     /**

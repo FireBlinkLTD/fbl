@@ -28,9 +28,7 @@ export class ActionHandlersRegistry {
             for (const alias of handler.getMetadata().aliases) {
                 if (alias.startsWith(FBLService.METADATA_PREFIX)) {
                     throw new Error(
-                        `Unable to register action handler with alias "${alias}". It can not start with ${
-                            FBLService.METADATA_PREFIX
-                        }`,
+                        `Unable to register action handler with alias "${alias}". It can not start with ${FBLService.METADATA_PREFIX}`,
                     );
                 }
             }
@@ -70,9 +68,7 @@ export class ActionHandlersRegistry {
                     /* istanbul ignore else */
                     if (snapshot) {
                         snapshot.log(
-                            `Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${
-                                plugin.version
-                            }`,
+                            `Action handler with alias ${alias} was overridden by plugin ${plugin.name}@${plugin.version}`,
                             true,
                         );
                     } else {

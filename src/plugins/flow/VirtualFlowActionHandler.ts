@@ -7,6 +7,7 @@ import { Validator } from 'jsonschema';
 import { AnySchema } from 'joi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { collide, ICollideModifiers } from 'object-collider';
+import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 const createJsonSchema = (): AnySchema => {
     return Joi.object({
@@ -237,7 +238,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
 
             const result = new Validator().validate(mergedOptions, this.validationSchema);
             if (!result.valid) {
-                throw new Error(
+                throw new ActionError(
                     result.errors
                         .map(e => {
                             let key = 'value';
@@ -250,6 +251,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
                             return `${key} ${e.message}`;
                         })
                         .join('\n'),
+                    INVALID_CONFIGURATION,
                 );
             }
         }

@@ -1,4 +1,5 @@
 import { ActionProcessor } from '../../models';
+import { ActionError } from '../../errors';
 
 const prompts = require('prompts');
 
@@ -20,7 +21,7 @@ export abstract class BasePromptActionProcessor extends ActionProcessor {
         })).value;
 
         if (canceled) {
-            throw new Error('Prompt canceled by user');
+            throw new ActionError('Prompt canceled by user', 'USER_INTERUPTION');
         }
 
         return value;

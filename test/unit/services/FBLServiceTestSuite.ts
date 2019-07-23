@@ -266,8 +266,8 @@ export class FBLServiceTestSuite {
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(
-            snapshot.getSteps().find(s => s.type === 'failure').payload,
-            'Error: Could not find matching close tag for "<%-".',
+            snapshot.getSteps().find(s => s.type === 'failure').payload.message,
+            'Could not find matching close tag for "<%-".',
         );
         assert.strictEqual(result, null);
     }
