@@ -46,6 +46,8 @@ You can read more about the default flows by following this [link](plugins/READM
 
 #### Others
 
+- [@fbl-plugins/keycloak-admin-client](https://www.npmjs.com/package/@fbl-plugins/keycloak-admin-client) - Keycloak admin client integration to manage realm(s) from the FBL flow (clients, roles, etc).
+
 Some of the plugins may not be listed here, but you can generally search NPM registry by following the [link](https://www.npmjs.com/search?q=fbl%20plugins).
 
 ## Packaging
