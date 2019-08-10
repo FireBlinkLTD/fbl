@@ -5,7 +5,6 @@ import { safeLoad } from 'js-yaml';
 import { ActionProcessor } from '../../models';
 import { ContextUtil, FSUtil } from '../../utils';
 import { FlowService } from '../../services';
-import { dirname } from 'path';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export abstract class BaseValuesAssignmentActionProcessor extends ActionProcessor {

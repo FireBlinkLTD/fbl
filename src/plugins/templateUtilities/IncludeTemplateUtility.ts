@@ -5,9 +5,8 @@ import { ActionSnapshot } from '../../models';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 import { FSUtil } from '../../utils';
 import { readFileSync } from 'fs';
-import { render } from 'ejs';
 import Container from 'typedi';
-import { TemplateUtilitiesRegistry, FlowService } from '../../services';
+import { FlowService } from '../../services';
 
 export class IncludeTemplateUtility implements ITemplateUtility {
     /**
