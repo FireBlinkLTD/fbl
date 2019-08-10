@@ -1,6 +1,7 @@
 import { IPlugin } from '../../interfaces';
 import { FSTemplateUtility } from './FSTemplateUtility';
 import { HashTemplateUtility } from './HashTemplateUtility';
+import { IncludeTemplateUtility } from './IncludeTemplateUtility';
 import { UUIDTemplateUtility } from './UUIDTemplateUtility';
 import { NodeRequireTemplateUtility } from './NodeRequireTemplateUtility';
 import { DurationTemplateUtility } from './DurationTemplateUtility';
@@ -22,6 +23,7 @@ module.exports = <IPlugin>{
         new DurationTemplateUtility(),
         new FSTemplateUtility(),
         new HashTemplateUtility(),
+        new IncludeTemplateUtility(),
         new NodeRequireTemplateUtility(),
         new UUIDTemplateUtility(),
     ],

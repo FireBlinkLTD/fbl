@@ -60,7 +60,6 @@ export class WriteToFileActionProcessor extends ActionProcessor {
                 this.context,
                 this.snapshot,
                 this.parameters,
-                rootDir,
             );
 
             // resolve local template delimiter
@@ -70,7 +69,6 @@ export class WriteToFileActionProcessor extends ActionProcessor {
                 this.context,
                 this.snapshot,
                 this.parameters,
-                rootDir,
             );
         }
 

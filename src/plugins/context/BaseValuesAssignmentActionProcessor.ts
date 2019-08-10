@@ -109,7 +109,6 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
                             this.context,
                             this.snapshot,
                             this.parameters,
-                            dirname(path),
                         );
 
                         let fileContentObject = safeLoad(fileContent);
