@@ -1,6 +1,6 @@
 # Template Utilities
 
-FBL also provides few handy utility functions (JavaScript) you can use inside the template. They all assigned to '$' variable, so you can use them like this:
+FBL also provides few handy utility functions (JavaScript) you can use inside the template. They all assigned to '\$' variable, so you can use them like this:
 
 ```yaml
 value: <%- $.hash(ctx.string_field) %>
@@ -13,7 +13,7 @@ Template utilities just like action handlers are part of plugins. Some plugins m
 ### File System
 
 All the default action handlers are treating paths as relative to the directory where flow file is located. However in rare
-cases 3rd party plugins may not handle this right, to bypass that limitation just use following function to convert path: 
+cases 3rd party plugins may not handle this right, to bypass that limitation just use following function to convert path:
 
 ```js
 // get absolute path
@@ -73,7 +73,7 @@ $.hash('test', 'md5', 'base64');
 
 ### Assign To
 
-Assign value to context.  
+Assign value to context.
 
 ```js
 // Assing 'value' string to ctx.test field
@@ -81,11 +81,11 @@ $.assignTo('$.ctx.test', 'value');
 
 // Assign 'value' to both ctx.c1 and secrets.s2 fields
 $.assignTo(
-    {
-        ctx: '$.c1',
-        secrets: '$.s2'
-    }, 
-    'value'
+  {
+    ctx: '$.c1',
+    secrets: '$.s2',
+  },
+  'value',
 );
 ```
 
@@ -93,7 +93,7 @@ $.assignTo(
 
 ### Push To
 
-Assign value to context.  
+Assign value to context.
 
 ```js
 // Push 'value' string to ctx.test field
@@ -101,11 +101,11 @@ $.pushTo('$.ctx.test', 'value');
 
 // Push 'value' to both ctx.c1 and secrets.s2 fields
 $.pushTo(
-    {
-        ctx: '$.c1',
-        secrets: '$.s2'
-    }, 
-    'value'
+  {
+    ctx: '$.c1',
+    secrets: '$.s2',
+  },
+  'value',
 );
 ```
 
@@ -113,7 +113,7 @@ $.pushTo(
 
 ### Assign To / Push To - JSON Schema generation
 
-It might be handy to use `$.assignTo()`/`$.pushTo()` in pair with `$.assignToSchema()`/`$.pushToSchema()` function inside virtual. To generate action like virtual. 
+It might be handy to use `$.assignTo()`/`$.pushTo()` in pair with `$.assignToSchema()`/`$.pushToSchema()` function inside virtual. To generate action like virtual.
 
 ```js
 $.assignToSchema();
@@ -127,7 +127,7 @@ pipeline:
   virtual:
     id: 'ftpo'
     # define parameters schema with generates assignTo and pushTo properties
-    parametersSchema: 
+    parametersSchema:
       type: object
       properties:
         assignTo: <$- JSON.stringify($.assignToSchema()) $>
@@ -136,4 +136,38 @@ pipeline:
       fn: |-
         $.assignTo(parameters.assignTo, 'some value');
         $.pushTo(parameters.pushTo, 'some value');
+```
+
+### Include another template
+
+Include another file as a template inside the flow.
+
+```js
+await $.include('relative/path.ejs');
+await $.include('relative/path.ejs', {
+  extraParameter: 'value',
+});
+```
+
+**Example:**
+
+Write to file based on the template that includes another file.
+
+```yaml
+pipeline:
+  '->':
+    path: /tmp/test.txt
+    contentFromFile: /tmp/template.ejs
+```
+
+_/tmp/template.ejs:_
+
+```
+Include: <%- await $.include('fixture.ejs') %>
+```
+
+_/tmp/fixture.ejs:_
+
+```
+<%- ctx.test %>
 ```

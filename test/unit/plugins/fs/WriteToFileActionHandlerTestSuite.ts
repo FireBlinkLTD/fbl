@@ -6,8 +6,10 @@ import * as assert from 'assert';
 import { ActionSnapshot } from '../../../../src/models';
 import { resolve, join } from 'path';
 import { ContextUtil } from '../../../../src/utils';
-import { TempPathsRegistry } from '../../../../src/services';
+import { TempPathsRegistry, FlowService, FBLService } from '../../../../src/services';
 import { Container } from 'typedi';
+import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
+import { IncludeTemplateUtility } from '../../../../src/plugins/templateUtilities/IncludeTemplateUtility';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -186,6 +188,10 @@ class WriteToFileActionHandlerTestSuite {
     @test()
     async saveToFileBasedOnTemplate(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const utils = new IncludeTemplateUtility();
+
+        const fblService = Container.get(FBLService);
+        fblService.templateUtilityRegistry.register(utils);
 
         const actionHandler = new WriteToFileActionHandler();
 
@@ -196,11 +202,12 @@ class WriteToFileActionHandlerTestSuite {
         const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', {}, templateDir, 0, {});
 
-        const includeLocalContent = '<%- ctx.local %>';
-        const includeGlobalContent = '<$- ctx.global $>';
-        const content = '<$ include _includeGlobal.ejs $>-<% include _includeLocal.ejs %>';
+        const includeLocalContent = '<%- ctx.local %>a<%- test %>';
+        const includeGlobalContent = '<$- ctx.global $>b<%- test %>';
+        const content =
+            '<$- await $.include("_includeGlobal.ejs", {test: "1"}) $>-<%- await $.include("_includeLocal.ejs", {test: "2"}) %>';
         await promisify(writeFile)(templateFile, content, 'utf8');
         await promisify(writeFile)(includeLocalFile, includeLocalContent, 'utf8');
         await promisify(writeFile)(includeGlobalFile, includeGlobalContent, 'utf8');
@@ -222,7 +229,7 @@ class WriteToFileActionHandlerTestSuite {
         await processor.execute();
 
         const result = await promisify(readFile)(destinationFile, 'utf8');
-        assert.strictEqual(result, 'g-l');
+        assert.strictEqual(result, 'gb1-la2');
     }
 
     @test()

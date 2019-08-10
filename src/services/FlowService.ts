@@ -1,7 +1,7 @@
 import { ActionHandlersRegistry } from './ActionHandlersRegistry';
 import { IContext, IDelegatedParameters, IFlow, IFlowLocationOptions } from '../interfaces';
 import { safeLoad, dump } from 'js-yaml';
-import { Options, render } from 'ejs';
+import * as ejs from 'ejs';
 import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../models';
 import { Inject, Service } from 'typedi';
 import { ContextUtil, FSUtil } from '../utils';
@@ -402,7 +402,6 @@ export class FlowService {
             context,
             snapshot,
             parameters,
-            dirname(absolutePath),
         );
 
         let flow;
@@ -426,6 +425,7 @@ export class FlowService {
      * @param {IContext} context
      * @param {ActionSnapshot} snapshot
      * @param {IDelegatedParameters} parameters
+     * @param [extraVariables] additional varialbes to be presented in EJS data
      * @return {string}
      */
     async resolveTemplate(
@@ -434,7 +434,7 @@ export class FlowService {
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-        root: string,
+        extraVariables?: { [key: string]: any },
     ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
@@ -442,15 +442,15 @@ export class FlowService {
         const data: any = {
             $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters),
             env: process.env,
+            ...parameters,
+            ...context,
         };
 
-        Object.assign(data, parameters);
-        Object.assign(data, context);
+        if (extraVariables) {
+            Object.assign(data, extraVariables);
+        }
 
-        tpl = await this.resolveIncludes(delimiter, tpl, root, context, snapshot, parameters);
-
-        const options = <Options>{
-            root,
+        const options = <ejs.Options>{
             delimiter,
             escape: (value: any) => {
                 if (typeof value === 'number' || typeof value === 'boolean') {
@@ -470,60 +470,9 @@ export class FlowService {
             async: true,
         };
 
-        return await render(tpl, data, options);
-    }
+        const result = await ejs.render(tpl, data, options);
 
-    /**
-     * Resolve EJS template include directive
-     * @param delimiter
-     * @param tpl
-     * @param root
-     * @param context
-     * @param snapshot
-     * @param parameters
-     */
-    async resolveIncludes(
-        delimiter: string,
-        tpl: string,
-        root: string,
-        context: IContext,
-        snapshot: ActionSnapshot,
-        parameters: IDelegatedParameters,
-    ): Promise<string> {
-        const pattern = `<\\${delimiter}\\s+include\\s+([^\\${delimiter}>]+)\\s+\\${delimiter}>`;
-        const regex = new RegExp(pattern, 'g');
-        let res = regex.exec(tpl);
-
-        while (res) {
-            const fullPath = join(root, res[1]);
-            let content = await FSUtil.readTextFile(fullPath);
-
-            content = await this.resolveTemplate(
-                context.ejsTemplateDelimiters.global,
-                content,
-                context,
-                snapshot,
-                parameters,
-                root,
-            );
-
-            if (delimiter === context.ejsTemplateDelimiters.local) {
-                content = await this.resolveTemplate(
-                    context.ejsTemplateDelimiters.local,
-                    content,
-                    context,
-                    snapshot,
-                    parameters,
-                    root,
-                );
-            }
-
-            tpl = tpl.substring(0, res.index) + content + tpl.substring(res.index + res[0].length);
-
-            res = regex.exec(tpl);
-        }
-
-        return tpl;
+        return result;
     }
 
     /**
@@ -578,7 +527,7 @@ export class FlowService {
         });
 
         tpl = lines.join('\n');
-        const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters, snapshot.wd);
+        const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters);
         options = safeLoad(yaml);
 
         // resolve references

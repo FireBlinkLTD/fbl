@@ -5,7 +5,6 @@ import { safeLoad } from 'js-yaml';
 import { ActionProcessor } from '../../models';
 import { ContextUtil, FSUtil } from '../../utils';
 import { FlowService } from '../../services';
-import { dirname } from 'path';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export abstract class BaseValuesAssignmentActionProcessor extends ActionProcessor {
@@ -109,7 +108,6 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
                             this.context,
                             this.snapshot,
                             this.parameters,
-                            dirname(path),
                         );
 
                         let fileContentObject = safeLoad(fileContent);

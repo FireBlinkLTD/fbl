@@ -63,7 +63,6 @@ class FlowServiceTestSuite {
             context,
             snapshot,
             {},
-            '.',
         );
 
         assert.strictEqual(
@@ -99,7 +98,6 @@ class FlowServiceTestSuite {
             context,
             snapshot,
             {},
-            '.',
         );
 
         assert.strictEqual(
