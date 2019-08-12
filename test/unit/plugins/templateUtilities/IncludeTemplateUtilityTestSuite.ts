@@ -15,6 +15,7 @@ class IncludeTemplateUtilityTestSuite {
             ContextUtil.generateEmptyContext(),
             new ActionSnapshot('', {}, '.', 0, {}),
             {},
+            '.',
         ).include;
         assert(include);
 

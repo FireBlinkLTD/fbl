@@ -17,6 +17,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
+        wd: string,
     ): { [key: string]: any } {
         return {
             include: async (path: string, extra?: any): Promise<string> => {
@@ -27,11 +28,12 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     );
                 }
 
-                const abolutePath = FSUtil.getAbsolutePath(path, snapshot.wd);
-                const wd = dirname(abolutePath);
+                const abolutePath = FSUtil.getAbsolutePath(path, wd);
 
                 let template = readFileSync(abolutePath, 'utf8');
                 const flowService = Container.get(FlowService);
+
+                const templateWD = dirname(abolutePath);
 
                 template = await flowService.resolveTemplate(
                     context.ejsTemplateDelimiters.global,
@@ -40,7 +42,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     snapshot,
                     parameters,
                     extra,
-                    wd,
+                    templateWD,
                 );
 
                 return await flowService.resolveTemplate(
@@ -50,7 +52,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     snapshot,
                     parameters,
                     extra,
-                    wd,
+                    templateWD,
                 );
             },
         };
