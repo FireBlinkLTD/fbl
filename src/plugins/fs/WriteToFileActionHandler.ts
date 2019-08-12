@@ -59,6 +59,8 @@ export class WriteToFileActionProcessor extends ActionProcessor {
                 this.context,
                 this.snapshot,
                 this.parameters,
+                {},
+                dirname(absolutePath),
             );
 
             // resolve local template delimiter

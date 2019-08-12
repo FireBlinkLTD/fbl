@@ -435,12 +435,13 @@ export class FlowService {
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
         extraVariables?: { [key: string]: any },
+        wd?: string,
     ): Promise<string> {
         // validate template
         ejsLint(tpl, { delimiter });
 
         const data: any = {
-            $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters),
+            $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters, wd || snapshot.wd),
             env: process.env,
             ...parameters,
             ...context,

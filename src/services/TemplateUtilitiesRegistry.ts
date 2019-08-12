@@ -39,17 +39,19 @@ export class TemplateUtilitiesRegistry {
      * @param {IContext} context action context
      * @param {ActionSnapshot} snapshot action snapshot
      * @param {IDelegatedParameters} parameters action parameters
+     * @param {string} wd working directory
      * @return {{[key: string]: any}}
      */
     public generateUtilities(
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
+        wd: string,
     ): { [key: string]: any } {
         const result: { [key: string]: any } = {};
 
         for (const utility of this.registry) {
-            Object.assign(result, utility.getUtilities(context, snapshot, parameters));
+            Object.assign(result, utility.getUtilities(context, snapshot, parameters, wd));
         }
 
         return result;

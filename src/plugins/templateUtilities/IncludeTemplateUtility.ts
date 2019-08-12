@@ -7,6 +7,7 @@ import { FSUtil } from '../../utils';
 import { readFileSync } from 'fs';
 import Container from 'typedi';
 import { FlowService } from '../../services';
+import { dirname } from 'path';
 
 export class IncludeTemplateUtility implements ITemplateUtility {
     /**
@@ -27,6 +28,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                 }
 
                 const abolutePath = FSUtil.getAbsolutePath(path, snapshot.wd);
+                const wd = dirname(abolutePath);
 
                 let template = readFileSync(abolutePath, 'utf8');
                 const flowService = Container.get(FlowService);
@@ -38,6 +40,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     snapshot,
                     parameters,
                     extra,
+                    wd,
                 );
 
                 return await flowService.resolveTemplate(
@@ -47,6 +50,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     snapshot,
                     parameters,
                     extra,
+                    wd,
                 );
             },
         };
