@@ -5,7 +5,7 @@ import { mkdir, readFile, unlinkSync, writeFile, writeFileSync } from 'fs';
 import * as assert from 'assert';
 import { ActionSnapshot } from '../../../../src/models';
 import { resolve, join } from 'path';
-import { ContextUtil } from '../../../../src/utils';
+import { ContextUtil, FSUtil } from '../../../../src/utils';
 import { TempPathsRegistry, FlowService, FBLService } from '../../../../src/services';
 import { Container } from 'typedi';
 import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
@@ -195,14 +195,16 @@ class WriteToFileActionHandlerTestSuite {
 
         const actionHandler = new WriteToFileActionHandler();
 
-        const templateDir = await tempPathsRegistry.createTempDir();
+        const templateDirParent = await tempPathsRegistry.createTempDir();
+        const templateDir = join(templateDirParent, 'inner');
+        await FSUtil.mkdirp(templateDir);
         const templateFile = join(templateDir, 'main.yml');
         const includeLocalFile = join(templateDir, '_includeLocal.ejs');
         const includeGlobalFile = join(templateDir, '_includeGlobal.ejs');
         const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, templateDir, 0, {});
+        const snapshot = new ActionSnapshot('.', {}, templateDirParent, 0, {});
 
         const includeLocalContent = '<%- ctx.local %>a<%- test %>';
         const includeGlobalContent = '<$- ctx.global $>b<%- test %>';
