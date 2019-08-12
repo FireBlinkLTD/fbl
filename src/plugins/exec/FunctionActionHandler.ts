@@ -70,7 +70,12 @@ export class FunctionActionProcessor extends ActionProcessor {
         const fn = new Function(script)();
 
         const result = await fn(
-            Container.get(TemplateUtilitiesRegistry).generateUtilities(this.context, this.snapshot, this.parameters),
+            Container.get(TemplateUtilitiesRegistry).generateUtilities(
+                this.context,
+                this.snapshot,
+                this.parameters,
+                this.snapshot.wd,
+            ),
             process.env,
             require,
             this.context.cwd,
