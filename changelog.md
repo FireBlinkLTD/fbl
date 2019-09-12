@@ -2,13 +2,23 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# [1.9.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.9.0) - 2019-08-12
+# [1.10.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.0) - 2019-09-12
+
+### Changed
+
+- [\#490](https://github.com/FireBlinkLTD/fbl/issues/490) - log messages now included full path to the flow file.
+
+### Fixed
+
+- [#501](https://github.com/FireBlinkLTD/fbl/issues/501) - \$ref syntax is now supporting environment variables, e.g. `$ref:env.VAR_NAME`
+
+# [1.9.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.9.2) - 2019-08-12
 
 ### Fixed
 
 - `$.include` incorrect behavior; unit tests added.
 
-# [1.9.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.9.0) - 2019-08-12
+# [1.9.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.9.1) - 2019-08-12
 
 ### Fixed
 
