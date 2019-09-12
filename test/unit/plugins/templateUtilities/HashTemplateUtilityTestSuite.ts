@@ -1,5 +1,5 @@
-import {suite, test} from 'mocha-typescript';
-import {HashTemplateUtility} from '../../../../src/plugins/templateUtilities/HashTemplateUtility';
+import { suite, test } from 'mocha-typescript';
+import { HashTemplateUtility } from '../../../../src/plugins/templateUtilities/HashTemplateUtility';
 import * as assert from 'assert';
 import { ContextUtil, ActionSnapshot } from '../../../../src';
 
@@ -13,8 +13,8 @@ class HashTemplateUtilityTestSuite {
     async makeHash(): Promise<void> {
         const hash = new HashTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).hash;
         assert(hash);
 
@@ -32,8 +32,8 @@ class HashTemplateUtilityTestSuite {
     async validation(): Promise<void> {
         const hash = new HashTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).hash;
         assert(hash);
 

@@ -141,7 +141,7 @@ class ContextUtilTestSuite {
     async assignToByString(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.assignTo(context, parameters, snapshot, '$.ctx.test', 'test');
         assert.deepStrictEqual(context.ctx, {
@@ -153,7 +153,7 @@ class ContextUtilTestSuite {
     async pushToByString(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.pushTo(context, parameters, snapshot, '$.ctx.test', 'test');
         assert.deepStrictEqual(context.ctx, {
@@ -165,7 +165,7 @@ class ContextUtilTestSuite {
     async assignTo(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.assignTo(
             context,
@@ -198,7 +198,7 @@ class ContextUtilTestSuite {
     async pushTo(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.pushTo(
             context,

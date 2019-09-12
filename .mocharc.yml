@@ -1,4 +1,4 @@
-bail: true
+bail: false
 timeout: 300000
 require: 
   - source-map-support/register

@@ -54,6 +54,7 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
             const actionParameters = this.getParameters(shareParameters, { index });
 
             const childSnapshot = await flowService.executeAction(
+                this.snapshot.source,
                 this.snapshot.wd,
                 action,
                 this.context,

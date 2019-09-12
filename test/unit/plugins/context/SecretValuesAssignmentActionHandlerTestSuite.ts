@@ -29,7 +29,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -92,7 +92,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SecretValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -180,7 +180,13 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        let snapshot = await flowService.executeAction('.', { [actionHandler.getMetadata().id]: options }, context, {});
+        let snapshot = await flowService.executeAction(
+            'index.yml',
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(context.secrets.test, 123);
         assert.strictEqual(context.secrets.existing.value, 'value');
@@ -192,6 +198,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         options['$.fromFile'].files = [basename(tmpFile)];
 
         snapshot = await flowService.executeAction(
+            'index.yml',
             dirname(tmpFile),
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -246,7 +253,13 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        let snapshot = await flowService.executeAction('.', { [actionHandler.getMetadata().id]: options }, context, {});
+        let snapshot = await flowService.executeAction(
+            'index.yml',
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
 
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.other, 'other');
@@ -258,6 +271,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         options['$.fromFile'].files = [basename(tmpFile1), tmpFile2];
 
         snapshot = await flowService.executeAction(
+            'index.yml',
             dirname(tmpFile1),
             { [actionHandler.getMetadata().id]: options },
             context,

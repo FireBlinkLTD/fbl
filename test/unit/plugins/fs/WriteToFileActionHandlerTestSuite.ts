@@ -21,7 +21,7 @@ class WriteToFileActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -76,7 +76,7 @@ class WriteToFileActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -159,7 +159,7 @@ class WriteToFileActionHandlerTestSuite {
         const tmpFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const content = 'test';
         const processor = await actionHandler.getProcessor(
@@ -204,7 +204,7 @@ class WriteToFileActionHandlerTestSuite {
         const destinationFile = await tempPathsRegistry.createTempFile();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, templateDirParent, 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, templateDirParent, 0, {});
 
         const includeLocalContent = '<%- ctx.local %>a<%- test %>';
         const includeGlobalContent = '<$- ctx.global $>b<%- test %>';
@@ -239,7 +239,7 @@ class WriteToFileActionHandlerTestSuite {
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const content = 'test';
 
@@ -281,7 +281,7 @@ class WriteToFileActionHandlerTestSuite {
         const tmpdir = await tempPathsRegistry.createTempDir();
         const path = resolve(tmpdir, 'l1', 'l2', 'l3', 'test.txt');
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const content = 'test';
         const processor = await actionHandler.getProcessor(
@@ -314,7 +314,7 @@ class WriteToFileActionHandlerTestSuite {
         // write file on the folder level
         writeFileSync(resolve(tmpdir, 'l1'), '', 'utf8');
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const content = 'test';
         await chai.expect(

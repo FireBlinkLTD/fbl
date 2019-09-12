@@ -27,7 +27,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -98,7 +98,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new TryCatchFinallyFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -204,6 +204,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,
@@ -261,6 +262,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,
@@ -323,6 +325,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,
@@ -378,6 +381,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,
@@ -431,6 +435,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,
@@ -485,6 +490,7 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [tryFlowActionHandler.getMetadata().id]: options },
             context,

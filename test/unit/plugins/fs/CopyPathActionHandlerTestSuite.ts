@@ -20,7 +20,7 @@ class CopyPathActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -61,7 +61,7 @@ class CopyPathActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler
@@ -100,7 +100,7 @@ class CopyPathActionHandlerTestSuite {
 
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, tmpdir, 0, {});
         const processor = actionHandler.getProcessor(
             {
                 from: 'l1/l2/1.txt',
@@ -124,7 +124,7 @@ class CopyPathActionHandlerTestSuite {
 
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, tmpdir, 0, {});
 
         const processor = actionHandler.getProcessor(
             {
@@ -149,7 +149,7 @@ class CopyPathActionHandlerTestSuite {
 
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, tmpdir, 0, {});
 
         const processor = actionHandler.getProcessor(
             {
@@ -174,7 +174,7 @@ class CopyPathActionHandlerTestSuite {
 
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, tmpdir, 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, tmpdir, 0, {});
 
         const processor = actionHandler.getProcessor(
             {
@@ -197,7 +197,7 @@ class CopyPathActionHandlerTestSuite {
     async copyMissingPath(): Promise<void> {
         const actionHandler = new CopyPathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler

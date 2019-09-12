@@ -15,7 +15,7 @@ class MarkEntitiesAsUnRegisteredActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUnRegisteredActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -96,7 +96,7 @@ class MarkEntitiesAsUnRegisteredActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUnRegisteredActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -117,7 +117,7 @@ class MarkEntitiesAsUnRegisteredActionHandlerTestSuite {
     async execution(): Promise<void> {
         const actionHandler = new MarkEntitiesAsUnRegisteredActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const options = [
             <IContextEntity>{

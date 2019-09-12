@@ -30,7 +30,7 @@ export class SwitchFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -198,7 +198,7 @@ export class SwitchFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -276,7 +276,7 @@ export class SwitchFlowActionHandlerTestSuite {
         context.ctx.value = 'st';
         context.secrets.value = 'te';
 
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
@@ -315,7 +315,7 @@ export class SwitchFlowActionHandlerTestSuite {
         context.ctx.value = 'test';
         context.secrets.value = 'test';
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
@@ -350,7 +350,7 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
@@ -385,7 +385,7 @@ export class SwitchFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
@@ -416,7 +416,7 @@ export class SwitchFlowActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';
@@ -458,7 +458,7 @@ export class SwitchFlowActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.value = 'st';
         context.secrets.value = 'te';

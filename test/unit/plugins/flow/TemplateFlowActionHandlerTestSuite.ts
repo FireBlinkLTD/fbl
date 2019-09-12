@@ -26,7 +26,7 @@ class TemplateFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new TemplateFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -39,7 +39,7 @@ class TemplateFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new TemplateFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor('test:' + '\n  param: true', context, snapshot, {}).validate();
     }
@@ -70,6 +70,7 @@ class TemplateFlowActionHandlerTestSuite {
             },
         ];
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,

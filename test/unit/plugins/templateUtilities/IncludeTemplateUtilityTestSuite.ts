@@ -13,7 +13,7 @@ class IncludeTemplateUtilityTestSuite {
     async failOnInvalidArgLength(): Promise<void> {
         const include = new IncludeTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
             {},
             '.',
         ).include;

@@ -49,7 +49,13 @@ class ContextTemplateUtilityTestSuite {
         templateUtilitiesRegistry.register(new ContextTemplateUtility());
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { virtual: virtualDefinitionFlow }, context, {});
+        const snapshot = await flowService.executeAction(
+            'index.yml',
+            '.',
+            { virtual: virtualDefinitionFlow },
+            context,
+            {},
+        );
         assert(snapshot.successful);
 
         const dynamicActionHandler = context.dynamicActionHandlers.find('test');

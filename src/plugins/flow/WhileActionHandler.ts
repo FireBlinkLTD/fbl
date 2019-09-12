@@ -88,6 +88,7 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
         let execute = await this.isShouldExecuteWithParameters(actionParameters);
         while (execute) {
             const childSnapshot = await flowService.executeAction(
+                this.snapshot.source,
                 this.snapshot.wd,
                 this.options.action,
                 this.context,

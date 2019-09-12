@@ -20,7 +20,7 @@ class CopyPathActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new FindActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -57,7 +57,7 @@ class CopyPathActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new FindActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -93,7 +93,7 @@ class CopyPathActionHandlerTestSuite {
     async execute(): Promise<void> {
         const actionHandler = new FindActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const tmpDir = await Container.get(TempPathsRegistry).createTempDir();
         await FSUtil.mkdirp(join(tmpDir, 'a/b/c'));

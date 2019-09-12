@@ -69,7 +69,7 @@ export class ActionHandlersRegistryTestSuite {
         assert.strictEqual(actionHandler2, registry.find(id2 + '.2'));
 
         // make sure override logs are created
-        const snapshot = new EnabledActionSnapshot('id', {}, '.', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', 'id', {}, '.', 0, {});
         registry.register(actionHandler2, plugin, snapshot);
 
         const logs = snapshot.getSteps().filter(step => step.type === 'log');

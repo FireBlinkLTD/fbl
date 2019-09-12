@@ -43,7 +43,7 @@ class PromptActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -94,7 +94,7 @@ class PromptActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -150,7 +150,7 @@ class PromptActionHandlerTestSuite {
     async testDefaults(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const line = 'l1n3';
 
@@ -184,7 +184,7 @@ class PromptActionHandlerTestSuite {
     async testNumber(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const line = '344.53';
 
@@ -225,7 +225,7 @@ class PromptActionHandlerTestSuite {
     async testInteger(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const line = '344';
 
@@ -266,7 +266,7 @@ class PromptActionHandlerTestSuite {
     async testStringWithValidation(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const invalid = 'test';
         const correct = 'tst';
@@ -316,7 +316,7 @@ class PromptActionHandlerTestSuite {
     async cancelled(): Promise<void> {
         const actionHandler = new PromptActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor(
             {

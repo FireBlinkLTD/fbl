@@ -20,7 +20,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -83,7 +83,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -156,7 +156,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        let snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        let snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         let processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -165,7 +165,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         // explicitly set priority to inline
         options['$'].priority = 'inline';
 
-        snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -174,7 +174,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         // change priority to files
         options['$'].priority = 'files';
 
-        snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -246,7 +246,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         let processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -319,7 +319,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         let processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -358,7 +358,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
 
@@ -377,7 +377,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await chai.expect(processor.validate()).to.be.rejected;
     }
@@ -459,7 +459,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
             },
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
         await processor.execute();

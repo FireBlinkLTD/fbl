@@ -54,7 +54,7 @@ class FlowServiceTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = 'tst';
 
-        const snapshot = new ActionSnapshot('', {}, '.', 0, {});
+        const snapshot = new ActionSnapshot('.', '', {}, '.', 0, {});
 
         const flowService = Container.get(FlowService);
         let resolved = await flowService.resolveTemplate(

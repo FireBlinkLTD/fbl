@@ -38,6 +38,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
 
         // run try
         let childSnapshot = await flowService.executeAction(
+            this.snapshot.source,
             this.snapshot.wd,
             this.options.action,
             this.context,
@@ -56,6 +57,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
         // run catch
         if (this.snapshot.childFailure && this.options.catch) {
             childSnapshot = await flowService.executeAction(
+                this.snapshot.source,
                 this.snapshot.wd,
                 this.options.catch,
                 this.context,
@@ -69,6 +71,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
         // run finally
         if (this.options.finally) {
             childSnapshot = await flowService.executeAction(
+                this.snapshot.source,
                 this.snapshot.wd,
                 this.options.finally,
                 this.context,

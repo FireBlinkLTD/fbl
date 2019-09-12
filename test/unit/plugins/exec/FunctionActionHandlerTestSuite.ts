@@ -14,7 +14,7 @@ class FunctionActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -29,7 +29,7 @@ class FunctionActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor('console.log(1);', context, snapshot, {}).validate();
     }
@@ -38,7 +38,7 @@ class FunctionActionHandlerTestSuite {
     async exec(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor('ctx.test = parameters.t1 + iteration.value;', context, snapshot, {
@@ -59,7 +59,7 @@ class FunctionActionHandlerTestSuite {
     async execResultOverride(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const fn = [
             'return {',
@@ -96,7 +96,7 @@ class FunctionActionHandlerTestSuite {
     async failValidationOfResultOverride(): Promise<void> {
         const actionHandler = new FunctionActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const fn = ['return {', '  ctx: true,', '}'].join('\n');
 

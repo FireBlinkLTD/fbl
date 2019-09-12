@@ -100,7 +100,7 @@ export class CompatibilityActionProcessorTestSuite {
     async compatibilityActionProcessorCreation(): Promise<void> {
         const options = 'test';
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const parameters = <IDelegatedParameters>{
             parameters: {
                 test: 'yes',
@@ -130,7 +130,7 @@ export class CompatibilityActionProcessorTestSuite {
     async invokeDeprecatedMethods(): Promise<void> {
         const options = 'test';
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const parameters = <IDelegatedParameters>{
             parameters: {
                 test: 'yes',

@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "CLI tool to manage routine automation tasks.",
   "keywords": [
     "fireblink",

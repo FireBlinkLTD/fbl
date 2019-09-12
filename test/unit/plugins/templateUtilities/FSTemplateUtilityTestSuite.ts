@@ -13,7 +13,7 @@ class FSTemplateUtilityTestSuite {
     async getAbsolutePath(): Promise<void> {
         const fs = new FSTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            new ActionSnapshot('.', '', {}, '/tmp', 0, {}),
             {},
         ).fs;
 
@@ -36,7 +36,7 @@ class FSTemplateUtilityTestSuite {
 
         const readText = new FSTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            new ActionSnapshot('.', '', {}, '/tmp', 0, {}),
             {},
         ).fs.read.text;
         const txt = readText(file);
@@ -53,7 +53,7 @@ class FSTemplateUtilityTestSuite {
 
         const readBase64 = new FSTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '/tmp', 0, {}),
+            new ActionSnapshot('.', '', {}, '/tmp', 0, {}),
             {},
         ).fs.read.base64;
         const base64 = readBase64(file);

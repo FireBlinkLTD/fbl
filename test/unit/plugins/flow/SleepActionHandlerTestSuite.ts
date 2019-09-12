@@ -15,7 +15,7 @@ class SleepActionHandlerTestSuite {
         const actionHandler = new SleepFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor('355.23.23', context, snapshot, {}).validate()).to.be.rejected;
 
@@ -31,7 +31,7 @@ class SleepActionHandlerTestSuite {
         const actionHandler = new SleepFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor(1, context, snapshot, {}).validate();
 
@@ -45,7 +45,7 @@ class SleepActionHandlerTestSuite {
         const actionHandler = new SleepFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const start = Date.now();
         await actionHandler.getProcessor(0.1, context, snapshot, {}).execute();

@@ -42,7 +42,13 @@ export class TemplateFlowActionProcessor extends ActionProcessor {
 
         const action = safeLoad(this.options);
 
-        const childSnapshot = await flowService.executeAction(this.snapshot.wd, action, this.context, this.parameters);
+        const childSnapshot = await flowService.executeAction(
+            this.snapshot.source,
+            this.snapshot.wd,
+            action,
+            this.context,
+            this.parameters,
+        );
         this.snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

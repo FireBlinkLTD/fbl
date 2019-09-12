@@ -287,6 +287,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
         this.parameters.wd = this.snapshot.wd;
 
         const childSnapshot = await flowService.executeAction(
+            this.snapshot.source,
             this.wd,
             this.action,
             this.context,

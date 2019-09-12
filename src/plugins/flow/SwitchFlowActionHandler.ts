@@ -80,6 +80,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
         if (action) {
             this.snapshot.log(`Based on value: ${this.options.value} invoking handler.`);
             const childSnapshot = await flowService.executeAction(
+                this.snapshot.source,
                 this.snapshot.wd,
                 action,
                 this.context,

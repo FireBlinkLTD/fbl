@@ -41,6 +41,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
                 promises.push(
                     (async (p): Promise<void> => {
                         snapshots[p.iteration.index] = await flowService.executeAction(
+                            this.snapshot.source,
                             this.snapshot.wd,
                             this.options.action,
                             this.context,
@@ -51,6 +52,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
                 );
             } else {
                 snapshots[i] = await flowService.executeAction(
+                    this.snapshot.source,
                     this.snapshot.wd,
                     this.options.action,
                     this.context,

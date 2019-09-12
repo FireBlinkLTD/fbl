@@ -26,7 +26,7 @@ class SelectActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new SelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -78,7 +78,7 @@ class SelectActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new SelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -137,7 +137,7 @@ class SelectActionHandlerTestSuite {
     async selectWithTitlesOnly(): Promise<void> {
         const actionHandler = new SelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         let processor = actionHandler.getProcessor(
             {
@@ -205,7 +205,7 @@ class SelectActionHandlerTestSuite {
     async selectWithTitlesAndValues(): Promise<void> {
         const actionHandler = new SelectActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         let processor = actionHandler.getProcessor(
             {
