@@ -249,12 +249,15 @@ class ContextUtilTestSuite {
             test_secrets: 's',
         };
 
+        process.env.TEST = 'yes';
+
         const result = ContextUtil.resolveReferences(
             {
                 ctx: '$ref:ctx.test_ctx',
                 secrets: '$ref:secrets.test_secrets',
                 parameters: '$ref:parameters.test_parameters',
                 iteration: '$ref:iteration ',
+                env: '$ref:env.TEST',
                 cwd: ' $ref:cwd',
                 array: [
                     {
@@ -271,6 +274,7 @@ class ContextUtilTestSuite {
             ctx: 'c',
             secrets: 's',
             parameters: 'p',
+            env: 'yes',
             iteration: {
                 index: 0,
                 value: 'value',

@@ -6,7 +6,7 @@ import { isObject, isBasicType, isMissing } from 'object-collider';
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
-    private static REFERENCE_REGEX = /^\s*\$ref:(cwd|ctx|secrets|entities|parameters|iteration)((\.[^.]+)+)?\s*$/;
+    private static REFERENCE_REGEX = /^\s*\$ref:(env|cwd|ctx|secrets|entities|parameters|iteration)((\.[^.]+)+)?\s*$/;
 
     /**
      * Assign value based on paths
@@ -393,6 +393,8 @@ export class ContextUtil {
                         target = context.cwd;
                     } else if (match[1] === 'ctx') {
                         target = context.ctx;
+                    } else if (match[1] === 'env') {
+                        target = process.env;
                     } else if (match[1] === 'secrets') {
                         target = context.secrets;
                     } else if (match[1] === 'entities') {
