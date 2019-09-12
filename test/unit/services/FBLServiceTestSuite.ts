@@ -133,6 +133,7 @@ export class FBLServiceTestSuite {
         context.secrets.var = '123';
 
         const snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -151,6 +152,7 @@ export class FBLServiceTestSuite {
 
         await chai.expect(
             fbl.execute(
+                'index.yml',
                 '.',
                 <IFlow>{
                     version: '1.0.0',
@@ -184,6 +186,7 @@ export class FBLServiceTestSuite {
         });
 
         await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -218,6 +221,7 @@ export class FBLServiceTestSuite {
         });
 
         const snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -253,6 +257,7 @@ export class FBLServiceTestSuite {
         });
 
         const snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -355,6 +360,7 @@ export class FBLServiceTestSuite {
         };
 
         const snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -398,6 +404,7 @@ export class FBLServiceTestSuite {
         };
 
         let snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',
@@ -413,6 +420,7 @@ export class FBLServiceTestSuite {
         assert.strictEqual(result, '@tst');
 
         snapshot = await fbl.execute(
+            'index.yml',
             '.',
             <IFlow>{
                 version: '1.0.0',

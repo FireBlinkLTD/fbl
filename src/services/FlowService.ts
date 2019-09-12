@@ -69,6 +69,7 @@ export class FlowService {
      * @returns {Promise<void>}
      */
     async executeAction(
+        source: string,
         wd: string,
         action: { [key: string]: any } | string,
         context: IContext,
@@ -81,7 +82,7 @@ export class FlowService {
 
         if (typeof action !== 'string') {
             if (!parentSnapshot) {
-                parentSnapshot = new ActionSnapshot('void', {}, wd, 0, {});
+                parentSnapshot = new ActionSnapshot(source, 'void', {}, wd, 0, {});
             }
 
             idOrAlias = FBLService.extractIdOrAlias(action);
@@ -106,13 +107,15 @@ export class FlowService {
         }
 
         const idx = ++this.index;
-        this.logService.info(` -> [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.');
+        this.logService.info(
+            ` -> [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.',
+        );
 
         let snapshot: ActionSnapshot;
         if (this.debug) {
-            snapshot = new EnabledActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
+            snapshot = new EnabledActionSnapshot(source, idOrAlias, metadata, wd, idx, parameters);
         } else {
-            snapshot = new ActionSnapshot(idOrAlias, metadata, wd, idx, parameters);
+            snapshot = new ActionSnapshot(source, idOrAlias, metadata, wd, idx, parameters);
         }
 
         try {
@@ -167,26 +170,26 @@ export class FlowService {
 
                 if (snapshot.successful) {
                     this.logService.info(
-                        ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.blue +
+                        ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.blue +
                             ' Completed successfully withing ' +
                             snapshot.getHumanReadableDuration().blue,
                     );
                 } else {
                     this.logService.info(
-                        ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow +
+                        ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow +
                             ' Marked as failed. Took ' +
                             snapshot.getHumanReadableDuration().yellow,
                     );
                 }
             } else {
                 this.logService.info(
-                    ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped',
+                    ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped',
                 );
                 snapshot.skipped();
             }
         } catch (e) {
             this.logService.error(
-                ` <- [${idx}] [${(metadata && metadata.$title) || idOrAlias}]`.red +
+                ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.red +
                     ` Failed with: ${e.toString().red}`,
             );
             snapshot.failure(e);

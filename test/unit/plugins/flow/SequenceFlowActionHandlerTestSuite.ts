@@ -28,7 +28,7 @@ export class SequenceFlowActionHandlerTestSuite {
         const actionHandler = new SequenceFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -76,7 +76,7 @@ export class SequenceFlowActionHandlerTestSuite {
         const actionHandler = new SequenceFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor([{ test: 123 }], context, snapshot, {}).validate();
 
@@ -96,6 +96,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -117,6 +118,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -153,6 +155,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -189,6 +192,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -231,6 +235,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -273,9 +278,15 @@ export class SequenceFlowActionHandlerTestSuite {
         };
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { [actionHandler.getMetadata().id]: options }, context, {
-            parameters: {},
-        });
+        const snapshot = await flowService.executeAction(
+            'index.yml',
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {
+                parameters: {},
+            },
+        );
 
         assert.strictEqual(snapshot.successful, true);
         assert.deepStrictEqual(results, [0, 1]);

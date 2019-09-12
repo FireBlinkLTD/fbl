@@ -1,5 +1,5 @@
-import {suite, test} from 'mocha-typescript';
-import {UUIDTemplateUtility} from '../../../../src/plugins/templateUtilities/UUIDTemplateUtility';
+import { suite, test } from 'mocha-typescript';
+import { UUIDTemplateUtility } from '../../../../src/plugins/templateUtilities/UUIDTemplateUtility';
 import * as assert from 'assert';
 import { ContextUtil, ActionSnapshot } from '../../../../src';
 
@@ -11,8 +11,8 @@ class UUIDTemplateUtilityTestSuite {
     async v4(): Promise<void> {
         const UUID = new UUIDTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).UUID;
         assert(UUID);
         assert(UUID.v4);
@@ -29,8 +29,8 @@ class UUIDTemplateUtilityTestSuite {
     async v5DNS(): Promise<void> {
         const UUID = new UUIDTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).UUID;
         assert(UUID);
         assert(UUID.v5);
@@ -47,8 +47,8 @@ class UUIDTemplateUtilityTestSuite {
     async v5URL(): Promise<void> {
         const UUID = new UUIDTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).UUID;
         assert(UUID);
         assert(UUID.v5);
@@ -65,8 +65,8 @@ class UUIDTemplateUtilityTestSuite {
     async v5custom(): Promise<void> {
         const UUID = new UUIDTemplateUtility().getUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
-            {}
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
+            {},
         ).UUID;
         assert(UUID);
         assert(UUID.v5);

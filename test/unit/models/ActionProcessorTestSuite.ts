@@ -26,7 +26,7 @@ export class ActionProcessorTestSuite {
     async testNoValidation(): Promise<void> {
         const options = 'test';
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const parameters = <IDelegatedParameters>{
             parameters: {
                 test: 'yes',

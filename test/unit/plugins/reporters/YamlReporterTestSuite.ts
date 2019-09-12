@@ -35,7 +35,7 @@ class YamlReporterTestSuite {
                 initial: ContextUtil.toBase(context),
                 final: ContextUtil.toBase(context),
             },
-            snapshot: new ActionSnapshot('test', {}, '.', 0, parameters),
+            snapshot: new ActionSnapshot('index.yml', 'test', {}, '.', 0, parameters),
         };
 
         await reporter.generate(file, {}, reportSrc);
@@ -60,6 +60,7 @@ class YamlReporterTestSuite {
                 },
             },
             snapshot: {
+                source: 'index.yml',
                 idOrAlias: 'test',
                 metadata: {},
                 parameters: parameters,

@@ -2,12 +2,12 @@ import { suite, test } from 'mocha-typescript';
 import { AttachedFlowActionHandler } from '../../../../src/plugins/flow/AttachedFlowActionHandler';
 import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
-import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { unlink, writeFile } from 'fs';
 import { promisify } from 'util';
 import { dump } from 'js-yaml';
 import * as assert from 'assert';
-import { IActionHandlerMetadata, IFlowLocationOptions, IPlugin } from '../../../../src/interfaces';
+import { IFlowLocationOptions, IPlugin } from '../../../../src/interfaces';
 import { ContextUtil, FSUtil } from '../../../../src/utils';
 import { dirname, join } from 'path';
 import { c } from 'tar';
@@ -52,7 +52,7 @@ class AttachedFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -81,7 +81,7 @@ class AttachedFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor('/tmp/test.tst', context, snapshot, {}).validate();
 
@@ -156,7 +156,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(tmpFile, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -186,7 +186,7 @@ class AttachedFlowActionHandlerTestSuite {
         const actionHandler = new AttachedFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = await actionHandler.getProcessor(tmpFile, context, snapshot, {});
 
         await processor.validate();
@@ -225,7 +225,7 @@ class AttachedFlowActionHandlerTestSuite {
             target: tmpFile,
         };
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(options, context, snapshot, {});
         await processor.validate();
 
@@ -264,7 +264,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(tmpDir, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -287,7 +287,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const processor = actionHandler.getProcessor(tarballPath, context, snapshot, {});
         await processor.validate();
         await processor.execute();
@@ -317,7 +317,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -336,7 +336,7 @@ class AttachedFlowActionHandlerTestSuite {
         const actionHandler = new AttachedFlowActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         console.log('-> Send request to invalid URL');
         // expect to reject on invalid url
@@ -359,7 +359,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
@@ -381,7 +381,7 @@ class AttachedFlowActionHandlerTestSuite {
         await server.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         setTimeout(() => {
@@ -413,7 +413,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
@@ -443,7 +443,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         const actionHandler = new AttachedFlowActionHandler();
 
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
 
         const url = `http://localhost:${port}`;
@@ -477,7 +477,7 @@ class AttachedFlowActionHandlerTestSuite {
         await server.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -526,7 +526,7 @@ class AttachedFlowActionHandlerTestSuite {
         await server.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -590,7 +590,7 @@ class AttachedFlowActionHandlerTestSuite {
         }, 'flow.yml');
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -636,7 +636,7 @@ class AttachedFlowActionHandlerTestSuite {
         await redirectServer.start();
 
         const actionHandler = new AttachedFlowActionHandler();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         const context = ContextUtil.generateEmptyContext();
         context.ctx.tst = 123;
 
@@ -700,6 +700,7 @@ class AttachedFlowActionHandlerTestSuite {
 
         const context = ContextUtil.generateEmptyContext();
         const snapshot = await flowService.executeAction(
+            'index.yml',
             wd,
             {
                 [sequenceActionHandler.getMetadata().id]: [

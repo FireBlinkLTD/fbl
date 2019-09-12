@@ -22,6 +22,7 @@ export class ActionSnapshot {
     duration = 0;
 
     constructor(
+        public source: string,
         public idOrAlias: string,
         public metadata: IMetadata,
         public wd: string,
@@ -49,8 +50,16 @@ export class ActionSnapshot {
      * @param {boolean} [silent] if provided LogService will not be invoked
      */
     log(message: string, error = false, silent = false) {
-        const logMessage =
-            ` -> [${this.idx}] [${(this.metadata && this.metadata.$title) || this.idOrAlias}]`.green + ' ' + message;
+        let prefix = ` -> [${this.idx}] [${this.source}] [${(this.metadata && this.metadata.$title) ||
+            this.idOrAlias}]`;
+
+        if (error) {
+            prefix = prefix.red;
+        } else {
+            prefix = prefix.green;
+        }
+
+        const logMessage = `${prefix} ${message}`;
 
         if (!silent) {
             if (error) {
@@ -170,8 +179,15 @@ export class ActionSnapshot {
 }
 
 export class EnabledActionSnapshot extends ActionSnapshot {
-    constructor(idOrAlias: string, metadata: IMetadata, wd: string, idx: number, parameters: IDelegatedParameters) {
-        super(idOrAlias, metadata, wd, idx, parameters);
+    constructor(
+        source: string,
+        idOrAlias: string,
+        metadata: IMetadata,
+        wd: string,
+        idx: number,
+        parameters: IDelegatedParameters,
+    ) {
+        super(source, idOrAlias, metadata, wd, idx, parameters);
     }
 
     /**

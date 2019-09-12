@@ -13,7 +13,7 @@ class ErrorActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ErrorActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -26,7 +26,7 @@ class ErrorActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ErrorActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         actionHandler.getProcessor('message', context, snapshot, {}).validate();
     }
@@ -35,7 +35,7 @@ class ErrorActionHandlerTestSuite {
     async execution(): Promise<void> {
         const actionHandler = new ErrorActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor('test', context, snapshot, {});
         await processor.validate();

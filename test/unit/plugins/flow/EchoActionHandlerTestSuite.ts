@@ -13,7 +13,7 @@ class EchoActionHandlerTestSuite {
     async execution(): Promise<void> {
         const actionHandler = new EchoActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const processor = actionHandler.getProcessor('test', context, snapshot, {});
         await processor.validate();

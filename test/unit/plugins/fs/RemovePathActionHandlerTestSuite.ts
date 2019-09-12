@@ -19,7 +19,7 @@ class MakeDirActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
 
@@ -34,7 +34,7 @@ class MakeDirActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor('/tmp/test', context, snapshot, {}).validate()).to.be.not.rejected;
     }
@@ -45,7 +45,7 @@ class MakeDirActionHandlerTestSuite {
 
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const tmpdir = await tempPathsRegistry.createTempDir();
 
@@ -74,7 +74,7 @@ class MakeDirActionHandlerTestSuite {
 
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         const tmpdir = await tempPathsRegistry.createTempDir();
 

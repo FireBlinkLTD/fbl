@@ -28,7 +28,7 @@ class VirtualFlowActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -91,7 +91,7 @@ class VirtualFlowActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new VirtualFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -150,7 +150,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_value_');
@@ -200,7 +200,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_val');
@@ -253,7 +253,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 'ue__val');
@@ -304,7 +304,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '_value_');
@@ -358,7 +358,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(!snapshot.successful);
         const virtualChildSnapshot: ActionSnapshot = snapshot
@@ -404,7 +404,7 @@ class VirtualFlowActionHandlerTestSuite {
         ];
 
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = await flowService.executeAction('.', { '--': actionOptions }, context, {});
+        const snapshot = await flowService.executeAction('index.yml', '.', { '--': actionOptions }, context, {});
 
         assert(snapshot.successful);
         assert.strictEqual(opts, 123);
@@ -428,6 +428,7 @@ class VirtualFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         await flowService.executeAction(
+            'index.yml',
             '/tmp1',
             {
                 [virtual.getMetadata().id]: {
@@ -442,6 +443,7 @@ class VirtualFlowActionHandlerTestSuite {
         );
 
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '/tmp2',
             {
                 'virtual.test': {

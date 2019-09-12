@@ -56,6 +56,7 @@ export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
                 const iterationParams = this.getParameters(shareParameters, { index });
 
                 snapshots[index] = await flowService.executeAction(
+                    this.snapshot.source,
                     this.snapshot.wd,
                     action,
                     this.context,

@@ -366,6 +366,7 @@ export class FBLService {
      * @returns {Promise<ActionSnapshot>}
      */
     async execute(
+        source: string,
         wd: string,
         flow: IFlow,
         context: IContext,
@@ -378,6 +379,6 @@ export class FBLService {
 
         await this.validateFlowRequirements(flow, wd);
 
-        return await this.flowService.executeAction(wd, flow.pipeline, context, parameters);
+        return await this.flowService.executeAction(source, wd, flow.pipeline, context, parameters);
     }
 }

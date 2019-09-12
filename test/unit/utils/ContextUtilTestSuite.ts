@@ -141,7 +141,7 @@ class ContextUtilTestSuite {
     async assignToByString(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.assignTo(context, parameters, snapshot, '$.ctx.test', 'test');
         assert.deepStrictEqual(context.ctx, {
@@ -153,7 +153,7 @@ class ContextUtilTestSuite {
     async pushToByString(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.pushTo(context, parameters, snapshot, '$.ctx.test', 'test');
         assert.deepStrictEqual(context.ctx, {
@@ -165,7 +165,7 @@ class ContextUtilTestSuite {
     async assignTo(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.assignTo(
             context,
@@ -198,7 +198,7 @@ class ContextUtilTestSuite {
     async pushTo(): Promise<void> {
         const context = ContextUtil.generateEmptyContext();
         const parameters = {};
-        const snapshot = new ActionSnapshot('test', {}, '.', 0, parameters);
+        const snapshot = new ActionSnapshot('.', 'test', {}, '.', 0, parameters);
 
         await ContextUtil.pushTo(
             context,
@@ -249,12 +249,15 @@ class ContextUtilTestSuite {
             test_secrets: 's',
         };
 
+        process.env.TEST = 'yes';
+
         const result = ContextUtil.resolveReferences(
             {
                 ctx: '$ref:ctx.test_ctx',
                 secrets: '$ref:secrets.test_secrets',
                 parameters: '$ref:parameters.test_parameters',
                 iteration: '$ref:iteration ',
+                env: '$ref:env.TEST',
                 cwd: ' $ref:cwd',
                 array: [
                     {
@@ -271,6 +274,7 @@ class ContextUtilTestSuite {
             ctx: 'c',
             secrets: 's',
             parameters: 'p',
+            env: 'yes',
             iteration: {
                 index: 0,
                 value: 'value',

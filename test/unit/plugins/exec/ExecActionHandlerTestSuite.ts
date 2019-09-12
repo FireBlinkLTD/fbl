@@ -17,7 +17,7 @@ class ExecActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
@@ -45,7 +45,7 @@ class ExecActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -117,7 +117,7 @@ class ExecActionHandlerTestSuite {
     async assignResultToBoth(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -155,7 +155,7 @@ class ExecActionHandlerTestSuite {
     async assignResultToCtx(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -196,7 +196,7 @@ class ExecActionHandlerTestSuite {
     async assignResultToSecrets(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new EnabledActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -229,7 +229,7 @@ class ExecActionHandlerTestSuite {
     async checkSilentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -267,7 +267,7 @@ class ExecActionHandlerTestSuite {
     async checkSilentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -305,7 +305,7 @@ class ExecActionHandlerTestSuite {
     async checkFailure(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler
@@ -331,7 +331,7 @@ class ExecActionHandlerTestSuite {
     async stderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -361,7 +361,7 @@ class ExecActionHandlerTestSuite {
     async missingExecutable(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler
@@ -386,7 +386,7 @@ class ExecActionHandlerTestSuite {
     async noAssignmentStdout(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(
             actionHandler
@@ -407,7 +407,7 @@ class ExecActionHandlerTestSuite {
     async noAssignmentStderr(): Promise<void> {
         const actionHandler = new ExecActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(

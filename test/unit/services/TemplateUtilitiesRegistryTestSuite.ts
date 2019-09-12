@@ -18,7 +18,7 @@ class TemplateUtilitiesRegistryTestSuite {
 
         const utils = registry.generateUtilities(
             ContextUtil.generateEmptyContext(),
-            new ActionSnapshot('', {}, '.', 0, {}),
+            new ActionSnapshot('.', '', {}, '.', 0, {}),
             {},
             '.',
         );

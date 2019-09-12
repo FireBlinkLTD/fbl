@@ -13,7 +13,7 @@ class VoidActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new VoidFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor({}, context, snapshot, {}).validate()).to.be.rejected;
         await chai.expect(actionHandler.getProcessor([], context, snapshot, {}).validate()).to.be.rejected;
@@ -24,7 +24,7 @@ class VoidActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new VoidFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         actionHandler.getProcessor(undefined, context, snapshot, {}).validate();
     }
@@ -33,7 +33,7 @@ class VoidActionHandlerTestSuite {
     async execute(): Promise<void> {
         const actionHandler = new VoidFlowActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler.getProcessor(undefined, context, snapshot, {}).execute();
     }

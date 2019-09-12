@@ -26,7 +26,7 @@ class WhileActionHandlerTestSuite {
     async failValidation(): Promise<void> {
         const actionHandler = new WhileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await chai.expect(actionHandler.getProcessor(123, context, snapshot, {}).validate()).to.be.rejected;
 
@@ -87,7 +87,7 @@ class WhileActionHandlerTestSuite {
     async passValidation(): Promise<void> {
         const actionHandler = new WhileActionHandler();
         const context = ContextUtil.generateEmptyContext();
-        const snapshot = new ActionSnapshot('.', {}, '', 0, {});
+        const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
         await actionHandler
             .getProcessor(
@@ -132,6 +132,7 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = true;
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -169,6 +170,7 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -206,6 +208,7 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = false;
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -241,6 +244,7 @@ class WhileActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         context.ctx.test = true;
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,
@@ -290,6 +294,7 @@ class WhileActionHandlerTestSuite {
         };
 
         const snapshot = await flowService.executeAction(
+            'index.yml',
             '.',
             { [actionHandler.getMetadata().id]: options },
             context,

@@ -101,9 +101,10 @@ export class CLIService {
             context.ejsTemplateDelimiters.local = this.globalConfig.other.localTemplateDelimiter;
         }
 
+        const source = FSUtil.getAbsolutePath(this.flowFilePath, process.cwd());
         const flow = await this.flowService.readFlowFromFile(
             <IFlowLocationOptions>{
-                path: FSUtil.getAbsolutePath(this.flowFilePath, process.cwd()),
+                path: source,
                 http: {
                     headers: this.globalConfig.http && this.globalConfig.http.headers,
                 },
@@ -111,7 +112,7 @@ export class CLIService {
                 cache: this.globalConfig.other.useCache,
             },
             context,
-            new ActionSnapshot('', {}, process.cwd(), 0, {}),
+            new ActionSnapshot(source, '', {}, process.cwd(), 0, {}),
             parameters,
         );
 
@@ -122,7 +123,7 @@ export class CLIService {
             initialContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
         }
 
-        const snapshot = await this.fbl.execute(flow.wd, flow.flow, context, parameters);
+        const snapshot = await this.fbl.execute(source, flow.wd, flow.flow, context, parameters);
 
         if (this.globalConfig.report.output) {
             finalContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));

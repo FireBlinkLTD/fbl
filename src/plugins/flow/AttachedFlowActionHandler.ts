@@ -48,7 +48,7 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
         this.snapshot.log(`Attaching flow at path ${this.options.path}.`);
         const flow = await flowService.readFlowFromFile(this.options, this.context, this.snapshot, this.parameters);
 
-        const childSnapshot = await fbl.execute(flow.wd, flow.flow, this.context, this.parameters);
+        const childSnapshot = await fbl.execute(this.options.path, flow.wd, flow.flow, this.context, this.parameters);
         this.snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }
