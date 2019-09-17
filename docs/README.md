@@ -38,6 +38,8 @@ You can read more about the default flows by following this [link](plugins/READM
 
 - [@fbl-plugins/html-to-pdf](https://www.npmjs.com/package/@fbl-plugins/html-to-pdf) - Generate PDF file based on HTML template. You can use it to generate reports, invoices, etc.
 
+- [@fbl-plugins/html-to-img](https://www.npmjs.com/package/@fbl-plugins/html-to-img) - Generate PNG/JPEG image based on HTML template.
+
 #### K8s (Kubernetes) Plugins
 
 - [@fbl-plugins/k8s-helm](https://www.npmjs.com/package/@fbl-plugins/k8s-helm) - Allows to manage helm releases.
