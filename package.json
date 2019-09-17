@@ -57,8 +57,8 @@
     "uuid": "3.3.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "8.1.0",
-    "@commitlint/config-conventional": "8.1.0",
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
     "@types/chai": "4.2.2",
     "@types/ejs": "2.6.3",
     "@types/got": "9.6.7",
@@ -85,7 +85,7 @@
     "prettier": "1.18.2",
     "rimraf": "3.0.0",
     "source-map-support": "0.5.13",
-    "ts-node": "8.3.0",
+    "ts-node": "8.4.1",
     "tslint": "5.18.0",
     "tslint-config-prettier": "1.18.0",
     "typescript": "3.5.3"
