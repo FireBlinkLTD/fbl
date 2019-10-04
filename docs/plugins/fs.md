@@ -8,26 +8,26 @@ File System plugin.
 
 **Aliases:**
 
-* `fbl.fs.file.write`
-* `fs.file.write`
-* `file.write`
-* `->`
+- `fbl.fs.file.write`
+- `fs.file.write`
+- `file.write`
+- `->`
 
 **Example 1: Define File Content Inline**
 
 ```yaml
-->: 
+->:
   # [optional] file path, if not provided content will be written to temporary location directory.
   # Note: all missing parent directories will be automatically created
   path: /tmp/test.txt
 
-  # [optional] 
+  # [optional]
   # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
-  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#assign-to     
+  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#assign-to
 
-  # [optional] 
+  # [optional]
   # Note: required if "path" and "assignPathTo" (above) is not provided
-  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to
 
   # [required] content of the file
   content: |-
@@ -37,18 +37,18 @@ File System plugin.
 **Example 2: Define File Content From Other File**
 
 ```yaml
-->: 
+->:
   # [optional] file path, if not provided content will be written to temporary location directory.
   # Note: all missing parent directories will be automatically created
   path: /tmp/test.txt
 
-  # [optional] 
+  # [optional]
   # Note: required if "path" (above) and "assignPathTo" (below) is not provided.
-  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+  assignPathTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to
 
-  # [optional] 
+  # [optional]
   # Note: required if "path" and "assignPathTo" (above) is not provided
-  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+  pushPathTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to
 
   # [required] template file
   # Note: global and then local EJS template processing will be applied to the template before writing
@@ -63,11 +63,11 @@ Create directory \(and all parent ones if missing\).
 
 **Aliases:**
 
-* `fbl.fs.dir.create`
-* `fs.dir.create`
-* `dir.create`
-* `mkdir -p`
-* `mkdir`
+- `fbl.fs.dir.create`
+- `fs.dir.create`
+- `dir.create`
+- `mkdir -p`
+- `mkdir`
 
 **Example:**
 
@@ -85,13 +85,13 @@ Removes file or folder for given path.
 
 **Aliases:**
 
-* `fbl.fs.remove`
-* `fbl.fs.rm`
-* `fs.remove`
-* `fs.rm`
-* `rm -rf`
-* `remove`
-* `rm`
+- `fbl.fs.remove`
+- `fbl.fs.rm`
+- `fs.remove`
+- `fs.rm`
+- `rm -rf`
+- `remove`
+- `rm`
 
 ```yaml
 # remove "child"
@@ -106,17 +106,17 @@ Allows to move/rename file or entire folder.
 
 **Aliases:**
 
-* `fbl.fs.move`
-* `fbl.fs.mv`
-* `fs.move`
-* `fs.mv`
-* `move`
-* `mv`
+- `fbl.fs.move`
+- `fbl.fs.mv`
+- `fs.move`
+- `fs.mv`
+- `move`
+- `mv`
 
 **Example 1: Move file to other folder**
 
 ```yaml
-mv: 
+mv:
   # move file.txt
   from: /tmp/source/file.txt
 
@@ -128,7 +128,7 @@ mv:
 **Example 2: Move file to other folder and rename it**
 
 ```yaml
-mv: 
+mv:
   # move file.txt
   from: /tmp/source/file.txt
 
@@ -139,7 +139,7 @@ mv:
 **Example 3: Move folder contents to other folder**
 
 ```yaml
-mv: 
+mv:
   # move everything from "source" folder
   # note: slash in the end is required if you want to move folder contents rather then the folder itself
   from: /tmp/source/
@@ -156,17 +156,17 @@ Allows to copy file or entire folder.
 
 **Aliases:**
 
-* `fbl.fs.copy`
-* `fbl.fs.cp`
-* `fs.copy`
-* `fs.cp`
-* `copy`
-* `cp`
+- `fbl.fs.copy`
+- `fbl.fs.cp`
+- `fs.copy`
+- `fs.cp`
+- `copy`
+- `cp`
 
 **Example 1: Copy file to other folder**
 
 ```yaml
-cp: 
+cp:
   # copy file.txt
   from: /tmp/source/file.txt
 
@@ -178,7 +178,7 @@ cp:
 **Example 2: Copy file to other folder with different name**
 
 ```yaml
-cp: 
+cp:
   # copy file.txt
   from: /tmp/source/file.txt
 
@@ -189,7 +189,7 @@ cp:
 **Example 3: Copy folder contents to other folder**
 
 ```yaml
-cp: 
+cp:
   # copy everything from "source" folder
   # note: slash in the end is required if you want to copy folder contents rather then the folder itself
   from: /tmp/source/
@@ -206,9 +206,9 @@ Find files by mask.
 
 **Aliases:**
 
-* `fbl.fs.find`
-* `fs.find`
-* `find`
+- `fbl.fs.find`
+- `fs.find`
+- `find`
 
 **Example:**
 
@@ -217,20 +217,21 @@ find:
   # [required] list of masks to find files
   include:
     - /tmp/**/*.txt
-    - ./**/*
 
   # [optional] list of masks to exclude
   exclude:
-    - ./**/.*
+    - /tmp/**/*.tmp.txt
 
   # [required] result storage configuration
   result:
-    # [optional] 
-    # Note: either `assignTo` or `pushTo` is requred
-    assignTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+    # [optional] if provided all paths will be relative to give base directory
+    baseDir: /tmp
 
-    # [optional] 
+    # [optional]
     # Note: either `assignTo` or `pushTo` is requred
-    pushTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to 
+    assignTo: # follows common assign logic practicies https://fbl.fireblink.com/plugins/common#push-to
 
+    # [optional]
+    # Note: either `assignTo` or `pushTo` is requred
+    pushTo: # follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to
 ```

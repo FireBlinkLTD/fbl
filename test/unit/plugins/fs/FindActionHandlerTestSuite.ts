@@ -1,6 +1,6 @@
 import { suite, test } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
-import { join } from 'path';
+import { join, basename, dirname } from 'path';
 import { writeFile } from 'fs';
 import * as assert from 'assert';
 import { promisify } from 'util';
@@ -135,6 +135,7 @@ class CopyPathActionHandlerTestSuite {
                 include: ['**/*'],
                 exclude: ['**/*.ign'],
                 result: {
+                    baseDir: tmpDir,
                     assignTo: '$.parameters.test2A',
                     pushTo: '$.parameters.test2B',
                 },
@@ -147,12 +148,42 @@ class CopyPathActionHandlerTestSuite {
         await processor.validate();
         await processor.execute();
 
-        assert.deepStrictEqual(
-            parameters.parameters.test2A,
-            files.filter(f => f.endsWith('.txt')).map(f => join(tmpDir, f)),
+        assert.deepStrictEqual(parameters.parameters.test2A, files.filter(f => f.endsWith('.txt')));
+        assert.deepStrictEqual(parameters.parameters.test2B, [files.filter(f => f.endsWith('.txt'))]);
+    }
+
+    @test()
+    async wrongBaseDir(): Promise<void> {
+        const actionHandler = new FindActionHandler();
+        const context = ContextUtil.generateEmptyContext();
+
+        const tmpFile = await Container.get(TempPathsRegistry).createTempFile();
+        const writeFileAsync = promisify(writeFile);
+        const snapshot = new ActionSnapshot('.', '.', {}, dirname(tmpFile), 0, {});
+
+        await writeFileAsync(tmpFile, '', 'utf8');
+
+        const parameters: IDelegatedParameters = {
+            parameters: {},
+        };
+
+        const processor = actionHandler.getProcessor(
+            {
+                include: [basename(tmpFile)],
+                result: {
+                    baseDir: '/somethingwrong',
+                    assignTo: '$.parameters.test1A',
+                    pushTo: '$.parameters.test1B',
+                },
+            },
+            context,
+            snapshot,
+            parameters,
         );
-        assert.deepStrictEqual(parameters.parameters.test2B, [
-            files.filter(f => f.endsWith('.txt')).map(f => join(tmpDir, f)),
-        ]);
+
+        await processor.validate();
+        await chai
+            .expect(processor.execute())
+            .to.be.rejectedWith(`Unable to find baseDir "/somethingwrong" in path "${tmpFile}"`);
     }
 }
