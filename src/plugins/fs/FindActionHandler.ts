@@ -3,6 +3,7 @@ import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../in
 import * as Joi from 'joi';
 import { FSUtil, ContextUtil } from '../../utils';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
+import { ActionError } from '../../errors';
 
 export class FindActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
@@ -22,6 +23,7 @@ export class FindActionProcessor extends ActionProcessor {
         ),
 
         result: Joi.object({
+            baseDir: Joi.string().min(1),
             assignTo: FBL_ASSIGN_TO_SCHEMA,
             pushTo: FBL_PUSH_TO_SCHEMA,
         })
@@ -44,11 +46,22 @@ export class FindActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const result = await FSUtil.findFilesByMasks(
-            this.options.include,
-            this.options.exclude || [],
-            this.snapshot.wd,
-        );
+        let result = await FSUtil.findFilesByMasks(this.options.include, this.options.exclude || [], this.snapshot.wd);
+
+        if (this.options.result.baseDir) {
+            const baseDir = FSUtil.getAbsolutePath(this.options.result.baseDir, this.snapshot.wd);
+
+            result = result.map(p => {
+                if (!p.startsWith(baseDir)) {
+                    throw new ActionError(
+                        `Unable to find baseDir "${this.options.result.baseDir}" in path "${p}"`,
+                        '500',
+                    );
+                }
+
+                return p.substring(baseDir.length + 1);
+            });
+        }
 
         /* istanbul ignore else */
         if (this.options.result.assignTo) {
