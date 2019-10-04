@@ -49,14 +49,14 @@ Ask user to type the response.
 
 ```yaml
 prompt:
-  # [required] confirm message
-  message: 'Are you sure you want to proceed?'
+  # [required] message to print for user
+  message: 'What is your name?'
 
   # [optional] whether answer should be masked
   password: false
 
   # [optional] default response
-  default: 'not sure'
+  default: 'anonymous'
 
   # [optional] json schema validation schema
   # note: only "string", "integer" and "number" types are supported
@@ -87,7 +87,7 @@ Ask user to select one given answer from provided options.
 
 ```yaml
 select:
-  # [required] confirm message
+  # [required] message to print for user
   message: 'Pick your age:'
 
   # [optional] default selected option
@@ -127,10 +127,10 @@ Aks user to pick one or more options.
 
 ```yaml
 multiselect:
-  # [required] confirm message
+  # [required] message to print for user
   message: 'Select tags:'
 
-  # [optional] default selected option
+  # [optional] default selected options
   default: ['music']
 
   # [required] list of options user needs to pick answer from
