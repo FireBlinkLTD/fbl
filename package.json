@@ -77,7 +77,7 @@
     "cz-conventional-changelog": "3.0.2",
     "husky": "3.0.8",
     "jsonlint": "1.6.3",
-    "lint-staged": "9.4.1",
+    "lint-staged": "9.4.2",
     "mocha": "6.2.1",
     "mocha-typescript": "1.1.17",
     "mochawesome": "4.1.0",
