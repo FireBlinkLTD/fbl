@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { IContext, IDelegatedParameters, IFlow, IPlugin, IReporter } from '../interfaces';
 import * as Joi from 'joi';
 import { FlowService } from './index';
@@ -33,14 +33,17 @@ export class FBLService {
     // if flow requirements are not satisfied instead of throwing error log statements will be printed only
     public allowUnsafeFlows = false;
 
-    @Inject(() => FlowService)
-    flowService: FlowService;
+    get flowService(): FlowService {
+        return Container.get(FlowService);
+    }
 
-    @Inject(() => ActionHandlersRegistry)
-    actionHandlersRegistry: ActionHandlersRegistry;
+    get actionHandlersRegistry(): ActionHandlersRegistry {
+        return Container.get(ActionHandlersRegistry);
+    }
 
-    @Inject(() => TemplateUtilitiesRegistry)
-    templateUtilityRegistry: TemplateUtilitiesRegistry;
+    get templateUtilityRegistry(): TemplateUtilitiesRegistry {
+        return Container.get(TemplateUtilitiesRegistry);
+    }
 
     /**
      * Extract idOrAlias from step object

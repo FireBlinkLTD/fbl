@@ -4,6 +4,10 @@ import { Container } from 'typedi';
 import { ChildProcessService } from '../../services';
 
 export abstract class BaseExecutableActionProcessor extends ActionProcessor {
+    get childProcessService(): ChildProcessService {
+        return Container.get(ChildProcessService);
+    }
+
     /**
      * Execute shell command
      * @param executable
@@ -65,13 +69,15 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
             }
 
             wd = wd ? FSUtil.getAbsolutePath(wd, this.snapshot.wd) : this.snapshot.wd;
-            result.code = await Container.get(ChildProcessService).exec(executable, args, wd, on);
+            result.code = await this.childProcessService.exec(executable, args, wd, on);
 
             if (result.code !== 0) {
                 result.error = new Error(`Command ${executable} exited with non-zero code.`);
             }
         } catch (e) {
+            /* istanbul ignore next */
             result.code = -1;
+            /* istanbul ignore next */
             result.error = e;
         }
 

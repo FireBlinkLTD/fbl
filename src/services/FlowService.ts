@@ -3,7 +3,7 @@ import { IContext, IDelegatedParameters, IFlow, IFlowLocationOptions } from '../
 import { safeLoad, dump } from 'js-yaml';
 import * as ejs from 'ejs';
 import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../models';
-import { Inject, Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { ContextUtil, FSUtil } from '../utils';
 import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
 import { dirname, join, resolve } from 'path';
@@ -47,17 +47,21 @@ export class FlowService {
      */
     public debug = false;
 
-    @Inject(() => ActionHandlersRegistry)
-    actionHandlersRegistry: ActionHandlersRegistry;
+    get actionHandlersRegistry(): ActionHandlersRegistry {
+        return Container.get(ActionHandlersRegistry);
+    }
 
-    @Inject(() => TemplateUtilitiesRegistry)
-    templateUtilityRegistry: TemplateUtilitiesRegistry;
+    get templateUtilityRegistry(): TemplateUtilitiesRegistry {
+        return Container.get(TemplateUtilitiesRegistry);
+    }
 
-    @Inject(() => TempPathsRegistry)
-    tempPathsRegistry: TempPathsRegistry;
+    get tempPathsRegistry(): TempPathsRegistry {
+        return Container.get(TempPathsRegistry);
+    }
 
-    @Inject(() => LogService)
-    logService: LogService;
+    get logService(): LogService {
+        return Container.get(LogService);
+    }
 
     /**
      * Execute action

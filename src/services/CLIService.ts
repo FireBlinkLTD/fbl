@@ -1,4 +1,4 @@
-import { Inject, Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import * as commander from 'commander';
 import { collideUnsafe, isObject, collide } from 'object-collider';
 import * as colors from 'colors';
@@ -39,17 +39,21 @@ export class CLIService {
         __dirname + '/../plugins/templateUtilities',
     ];
 
-    @Inject(() => FBLService)
-    fbl: FBLService;
+    get fbl(): FBLService {
+        return Container.get(FBLService);
+    }
 
-    @Inject(() => FlowService)
-    flowService: FlowService;
+    get flowService(): FlowService {
+        return Container.get(FlowService);
+    }
 
-    @Inject(() => TempPathsRegistry)
-    tempPathsRegistry: TempPathsRegistry;
+    get tempPathsRegistry(): TempPathsRegistry {
+        return Container.get(TempPathsRegistry);
+    }
 
-    @Inject(() => LogService)
-    logService: LogService;
+    get logService(): LogService {
+        return Container.get(LogService);
+    }
 
     async run(): Promise<void> {
         this.globalConfig = {};

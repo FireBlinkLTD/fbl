@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot } from '../models';
-import { Inject, Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { FBLService } from './FBLService';
 import { IPlugin } from '../interfaces';
 import { LogService } from './LogService';
@@ -13,8 +13,9 @@ export class ActionHandlersRegistry {
         this.cleanup();
     }
 
-    @Inject(() => LogService)
-    logService: LogService;
+    get logService(): LogService {
+        return Container.get(LogService);
+    }
 
     /**
      * Register new entity

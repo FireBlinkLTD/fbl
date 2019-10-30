@@ -46,6 +46,7 @@ export class ChildProcessService {
             }
 
             let error: Error;
+            /* istanbul ignore next */
             process.on('error', e => {
                 error = e;
             });
@@ -53,6 +54,7 @@ export class ChildProcessService {
             process.on('close', code => {
                 exitCode = code;
 
+                /* istanbul ignore next */
                 if (error) {
                     exitCode = -1;
 
