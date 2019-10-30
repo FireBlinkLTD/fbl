@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# [1.10.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.0) - 2019-10-04
+# [1.10.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.2) - 2019-10-30
+
+### Fixed
+
+- `@Inject()` annotation didn't work in second level nested injections for plugins.
+
+# [1.10.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.1) - 2019-10-04
 
 ### Added
 

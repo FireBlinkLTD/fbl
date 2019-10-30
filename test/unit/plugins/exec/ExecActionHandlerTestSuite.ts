@@ -1,9 +1,7 @@
 import { suite, test } from 'mocha-typescript';
-import { FlowService } from '../../../../src/services';
 import { ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
 import { ExecActionHandler } from '../../../../src/plugins/exec/ExecActionHandler';
 import * as assert from 'assert';
-import { Container } from 'typedi';
 import { resolve } from 'path';
 import { ContextUtil } from '../../../../src/utils';
 
@@ -379,7 +377,7 @@ class ExecActionHandlerTestSuite {
                 .execute(),
         ).to.be.rejected;
 
-        assert.strictEqual(context.ctx.tst1.code, -1);
+        assert.notStrictEqual(context.ctx.tst1.code, 0);
     }
 
     @test()
