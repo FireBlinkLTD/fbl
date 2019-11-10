@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.10.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.3) - 2019-11-10
+
+### Fixed
+
+- [\#546](https://github.com/FireBlinkLTD/fbl/issues/546) - `foreach` action handler now stops of first failed iteration (if not using `async` mode).
+
 # [1.10.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.2) - 2019-10-30
 
 ### Fixed
