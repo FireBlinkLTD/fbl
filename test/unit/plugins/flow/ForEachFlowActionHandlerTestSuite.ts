@@ -562,4 +562,43 @@ class ForEachFlowActionHandlerTestSuite {
             test: 2 + 2 * 2 + 6 * 3,
         });
     }
+
+    @test()
+    async shouldStopAfterFirstError(): Promise<void> {
+        const flowService: FlowService = Container.get<FlowService>(FlowService);
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const results: number[] = [];
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
+            results.push(opts);
+            if (opts) {
+                throw new Error('test');
+            }
+        };
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const actionHandler = new ForEachFlowActionHandler();
+        actionHandlersRegistry.register(actionHandler, plugin);
+
+        const options = {
+            of: [false, true, false],
+            action: {
+                [dummyActionHandler.id]: '$ref:iteration.value',
+            },
+        };
+
+        const context = ContextUtil.generateEmptyContext();
+        const snapshot = await flowService.executeAction(
+            'index.yml',
+            '.',
+            { [actionHandler.getMetadata().id]: options },
+            context,
+            {},
+        );
+
+        assert.strictEqual(snapshot.successful, false);
+        assert.strictEqual(snapshot.childFailure, true);
+        assert.deepStrictEqual(results, [false, true]);
+    }
 }

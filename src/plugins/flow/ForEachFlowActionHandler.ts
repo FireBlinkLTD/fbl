@@ -91,14 +91,18 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
                     })(actionParameters),
                 );
             } else {
-                snapshots[i] = await flowService.executeAction(
+                const result = (snapshots[i] = await flowService.executeAction(
                     this.snapshot.source,
                     this.snapshot.wd,
                     this.options.action,
                     this.context,
                     actionParameters,
                     this.snapshot,
-                );
+                ));
+
+                if (!result.successful) {
+                    break;
+                }
             }
         }
 
