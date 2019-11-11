@@ -95,7 +95,7 @@ Removes file or folder for given path.
 
 ```yaml
 # remove "child"
-mkdir: /tmp/parent/child
+rm: /tmp/parent/child
 ```
 
 ## Action Handler: Move File or Folder
