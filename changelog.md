@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.11.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.11.0) - 2019-11-20
+
+### Fixed
+
+- [\#559](https://github.com/FireBlinkLTD/fbl/issues/559) - allow to use `$ref` syntax in object keys, not simply values
+
+### Added
+
+- [\#519](https://github.com/FireBlinkLTD/fbl/issues/519) - documentation related to ability use file masks with `ctx` and `secrets` action handlers
+
 # [1.10.3](https://github.com/FireBlinkLTD/fbl/releases/tag/1.10.3) - 2019-11-10
 
 ### Fixed
