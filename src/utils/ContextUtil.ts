@@ -443,7 +443,8 @@ export class ContextUtil {
         // resolve object field values
         const obj: any = {};
         for (const key of Object.keys(options)) {
-            obj[key] = ContextUtil.resolveReferences(options[key], context, parameters);
+            const resolvedKey = ContextUtil.resolveReferences(key, context, parameters);
+            obj[resolvedKey] = ContextUtil.resolveReferences(options[key], context, parameters);
         }
 
         return obj;

@@ -243,6 +243,10 @@ class ContextUtilTestSuite {
         context.cwd = '/cwd';
         context.ctx = {
             test_ctx: 'c',
+            field: {
+                name: 'field_name',
+                value: 'field_value',
+            },
         };
 
         context.secrets = {
@@ -264,6 +268,7 @@ class ContextUtilTestSuite {
                         arr1: '$ref:ctx.test_ctx',
                     },
                 ],
+                '$ref:ctx.field.name': '$ref:ctx.field.value',
             },
             context,
             parameters,
@@ -284,6 +289,7 @@ class ContextUtilTestSuite {
                     arr1: 'c',
                 },
             ],
+            field_name: 'field_value',
         });
 
         // check missing
