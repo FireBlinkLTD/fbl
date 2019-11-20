@@ -2,7 +2,7 @@
 
 Upon flow execution each action handler gets access to shared [context](../GLOSSARY.md#context).
 
-[EJS](http://ejs.co/) template can be used inside options to pass values from shared context. 
+[EJS](http://ejs.co/) template can be used inside options to pass values from shared context.
 Please refer to plugin documentation if this feature supported and what options are required.
 
 Example:
@@ -11,7 +11,7 @@ Example:
 version: 1.0.0
 pipeline:
   plugin:
-    # Pass "something" from "ctx" 
+    # Pass "something" from "ctx"
     contextValue: <%- ctx.something  %>
     # Pass "password" from "secrets"
     secretValue: <%- secrets.password %>
@@ -25,17 +25,17 @@ Assign non-secret values to context `ctx` field or its child properties by [path
 
 **Aliases:**
 
-* `fbl.context.values`
-* `context.values`
-* `context`
-* `ctx`
+- `fbl.context.values`
+- `context.values`
+- `context`
+- `ctx`
 
 **Example 1: Assign values to context root directly:**
 
 ```yaml
 ctx:
-  # assign to "ctx" directly 
-  '$': 
+  # assign to "ctx" directly
+  '$':
     inline:
       something: true
       else: false
@@ -44,22 +44,22 @@ ctx:
 **Example 2: Assign values from file "vars.yml" to field "vars -&gt; files":**
 
 ```yaml
-ctx: 
+ctx:
   # create hierarchy of objects: "files" inside "vars" that is inside "ctx"
-  $.vars: 
-    files: 
-     - vars.yml
+  $.vars:
+    files:
+      - vars.yml
 ```
 
 **Example 3: Assign values from file "vars.yml" after inline ones:**
 
 ```yaml
-ctx: 
+ctx:
   '$':
-    inline: 
-      test: true 
-    files: 
-     - vars.yml 
+    inline:
+      test: true
+    files:
+      - vars.yml
     # specify that files have a priority over inline vars
     # if not provided inline vars will have priority over files
     priority: 'files'
@@ -68,9 +68,9 @@ ctx:
 **Example 4: Override instead of assigning**
 
 ```yaml
-ctx: 
+ctx:
   '$.test':
-    inline: 
+    inline:
       test: true
     # [optional] override everything tha tis inside "test" object with { test: true }
     # use with caution
@@ -82,14 +82,23 @@ ctx:
 ```yaml
 ctx:
   '$.test':
-    inline: 1      
+    inline: 1
     # [optional] override everything tha tis inside "test" object with { test: true }
     # use with caution
     override: true
     # [required] if you want to push inline or value(s) from file(s) to targets array
-    push: true 
+    push: true
     # [optional] if enambled and value is array its child items will be pushed instead of array itself
     children: false
+```
+
+**Example 6: Find files by mask:**
+
+```yaml
+ctx:
+  '$':
+    files:
+      - vars/*.yml
 ```
 
 ## Action Handler: Secret Values Assignment
@@ -100,70 +109,79 @@ Same as above, but for secrets. All the options will me masked in report to prev
 
 **Aliases:**
 
-* `fbl.secret.values`
-* `secret.values`
-* `secrets`
-* `secret`
+- `fbl.secret.values`
+- `secret.values`
+- `secrets`
+- `secret`
 
 **Example 1: Assign values to secrets root directly:**
 
 ```yaml
- secrets: 
-   '$': 
-     inline:
-       something: true
-       else: false
+secrets:
+  '$':
+    inline:
+      something: true
+      else: false
 ```
 
 **Example 2: Assign values from file "vars.yml" to field "vars -&gt; files":**
 
 ```yaml
- secrets: 
-   $.vars: 
-     files: 
+secrets:
+  $.vars:
+    files:
       - vars.yml
 ```
 
 **Example 3: Assign values from file "vars.yml" after inline ones:**
 
 ```yaml
- secrets: 
-   '.':
-     inline: 
-       test: true 
-     files: 
-      - vars.yml 
+secrets:
+  '.':
+    inline:
+      test: true
+    files:
+      - vars.yml
 
-     # [optional] specify that files have a priority over inline vars
-     # if not provided inline vars will have priority over files
-     priority: 'files'
+    # [optional] specify that files have a priority over inline vars
+    # if not provided inline vars will have priority over files
+    priority: 'files'
 ```
 
 **Example 4: Override instead of assigning**
 
 ```yaml
- secrets: 
-   '$.test':
-     inline: 
-       test: true
-     # [optional] override everything tha tis inside "test" object with { test: true }
-     # use with caution
-     override: true
+secrets:
+  '$.test':
+    inline:
+      test: true
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true
 ```
 
 **Example 5: Push to array**
 
 ```yaml
- secrets:
-   '$.test':
-     inline: 1      
-     # [optional] override everything tha tis inside "test" object with { test: true }
-     # use with caution
-     override: true
-     # [required] if you want to push inline or value(s) from file(s) to target's array
-     push: true 
-     # [optional] if enambled and value is array its child items will be pushed instead of array itself
-     children: false
+secrets:
+  '$.test':
+    inline: 1
+    # [optional] override everything tha tis inside "test" object with { test: true }
+    # use with caution
+    override: true
+    # [required] if you want to push inline or value(s) from file(s) to target's array
+    push: true
+    # [optional] if enambled and value is array its child items will be pushed instead of array itself
+    children: false
+```
+
+**Example 6: Find files by mask:**
+
+```yaml
+secrets:
+  '$':
+    files:
+      - vars/*.yml
 ```
 
 ## Action Handler: Mark entities as registered
@@ -176,15 +194,15 @@ Example use case: you want to keep some default entity upon cleanup that is not 
 
 **Aliases:**
 
-* `fbl.context.entities.registered`
-* `context.entities.registered`
-* `entities.registered`
+- `fbl.context.entities.registered`
+- `context.entities.registered`
+- `entities.registered`
 
 **Example:**
 
 ```yaml
-entities.registered: 
-    # Object type/class/etc
+entities.registered:
+  # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
@@ -201,15 +219,15 @@ Opposite to one above. Mark some entity to no longer exist.
 
 **Aliases:**
 
-* `fbl.context.entities.unregistered`
-* `context.entities.unregistered`
-* `entities.unregistered`
+- `fbl.context.entities.unregistered`
+- `context.entities.unregistered`
+- `entities.unregistered`
 
 **Example:**
 
 ```yaml
-entities.unregistered: 
-    # Object type/class/etc
+entities.unregistered:
+  # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
@@ -226,15 +244,15 @@ Mark some entity as just created. Will also register entity, so it will be prese
 
 Aliases:
 
-* `fbl.context.entities.created`
-* `context.entities.created`
-* `entities.created`
+- `fbl.context.entities.created`
+- `context.entities.created`
+- `entities.created`
 
 **Example:**
 
 ```yaml
-entities.created: 
-    # Object type/class/etc
+entities.created:
+  # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
@@ -251,15 +269,15 @@ Mark some entity as just updated. Will also register entity, so it will be prese
 
 **Aliases:**
 
-* `fbl.context.entities.updated`
-* `context.entities.updated`
-* `entities.updated`
+- `fbl.context.entities.updated`
+- `context.entities.updated`
+- `entities.updated`
 
 **Example:**
 
 ```yaml
-entities.created: 
-    # Object type/class/etc
+entities.created:
+  # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
@@ -276,15 +294,15 @@ Mark some entity as just deleted. Will also un-register entity, so it will be pr
 
 **Aliases:**
 
-* `fbl.context.entities.deleted`
-* `context.entities.deleted`
-* `entities.deleted`
+- `fbl.context.entities.deleted`
+- `context.entities.deleted`
+- `entities.deleted`
 
 **Example:**
 
 ```yaml
-entities.deleted: 
-    # Object type/class/etc
+entities.deleted:
+  # Object type/class/etc
   - type: User
     # Entity Identity, can be a string or number
     id: 1002
@@ -301,9 +319,9 @@ Add summary record. All summary records will be printed once the main flow ends.
 
 **Aliases:**
 
-* `fbl.context.summary`
-* `context.summary`
-* `summary`
+- `fbl.context.summary`
+- `context.summary`
+- `summary`
 
 **Example:**
 
@@ -312,7 +330,7 @@ summary:
   # summary record title
   title: Step Title
   # summary record status
-  # statuses (ignoring case): 
+  # statuses (ignoring case):
   # - 'created', 'updated', 'passed', 'success', 'ok', 'yes' will be colored in green
   # - 'deleted', 'failed', 'failure', 'error', 'no' - in red
   # - 'ignored', 'skipped', 'none' - in yellow

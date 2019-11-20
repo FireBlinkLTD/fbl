@@ -29,7 +29,7 @@ const joiObjectActionSchemaExt = Joi.extend({
         .min(1)
         .required(),
     language: {
-        fields: 'Found {{nonAnnotationKeys}} non-annotation field(s), but only one is required.',
+        fields: 'Found {{nonAnnotationKeys}} non-annotation field(s), but only one is allowed.',
     },
     rules: [
         {
