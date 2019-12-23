@@ -81,7 +81,7 @@
     "mocha": "6.2.2",
     "mocha-typescript": "1.1.17",
     "mochawesome": "4.1.0",
-    "nyc": "14.1.1",
+    "nyc": "15.0.0",
     "prettier": "1.19.1",
     "rimraf": "3.0.0",
     "source-map-support": "0.5.16",
