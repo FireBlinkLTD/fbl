@@ -64,7 +64,7 @@
     "@types/got": "9.6.9",
     "@types/joi": "14.3.4",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "13.1.0",
+    "@types/node": "13.1.1",
     "@types/semver": "6.2.0",
     "@types/table": "4.0.7",
     "@types/tar": "4.0.3",
