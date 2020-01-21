@@ -75,7 +75,7 @@
     "conventional-changelog-cli": "2.0.31",
     "cross-env": "6.0.3",
     "cz-conventional-changelog": "3.0.2",
-    "husky": "4.1.0",
+    "husky": "4.2.0",
     "jsonlint": "1.6.3",
     "lint-staged": "9.5.0",
     "mocha": "6.2.2",
