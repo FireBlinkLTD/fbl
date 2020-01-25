@@ -63,7 +63,7 @@
     "@types/ejs": "2.6.3",
     "@types/got": "9.6.9",
     "@types/joi": "14.3.4",
-    "@types/js-yaml": "3.12.1",
+    "@types/js-yaml": "3.12.2",
     "@types/node": "13.1.7",
     "@types/semver": "6.2.0",
     "@types/table": "4.0.7",
