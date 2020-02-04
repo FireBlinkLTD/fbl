@@ -17,7 +17,7 @@ export class LogService {
      */
     info(message: string) {
         if (this.infoEnabled) {
-            console.log(message);
+            console.log(`${this.getTime()}: ${message}`);
         }
     }
 
@@ -26,6 +26,12 @@ export class LogService {
      * @param message
      */
     error(message: string) {
-        console.error(message);
+        console.error(`${this.getTime()}: ${message}`);
+    }
+
+    private getTime(): string {
+        const now = new Date();
+
+        return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}.${now.getMilliseconds()}`;
     }
 }

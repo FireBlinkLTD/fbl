@@ -10,7 +10,7 @@ import { dirname, join, resolve } from 'path';
 import { x } from 'tar';
 import { createWriteStream, readdir, unlink } from 'fs';
 import { promisify } from 'util';
-import * as got from 'got';
+import got from 'got';
 import { TempPathsRegistry } from './TempPathsRegistry';
 import { homedir } from 'os';
 import { LogService } from './LogService';
@@ -239,6 +239,7 @@ export class FlowService {
         try {
             await new Promise((res, rej) => {
                 const stream = got.stream(location.path, {
+                    isStream: true,
                     timeout: 120 * 1000,
                     headers: location.http && location.http.headers,
                 });
