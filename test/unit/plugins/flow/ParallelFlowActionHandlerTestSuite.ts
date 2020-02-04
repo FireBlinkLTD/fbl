@@ -227,7 +227,7 @@ export class ParallelFlowActionHandlerTestSuite {
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise(resolve => setTimeout(resolve, 50));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
@@ -241,7 +241,7 @@ export class ParallelFlowActionHandlerTestSuite {
 
         const dummyActionHandler3 = new DummyActionHandler();
         dummyActionHandler3.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise(resolve => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler3, plugin);

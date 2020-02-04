@@ -8,6 +8,7 @@ Available steps:
 - [parallel \(async\)](flow.md#action-handler-parallel-steps-execution)
 - [attachment](flow.md#action-handler-attached-flow)
 - [repeat](flow.md#action-handler-repeat-flow)
+- [retry](flow.md#action-handler-retry-flow)
 - [for each of](flow.md#action-handler-for-each)
 - [while](flow.md#action-handler-while)
 - [switch \(conditional\)](flow.md#action-handler-switch-flow)
@@ -208,7 +209,7 @@ repeat:
   # Default value: false, e.g. make cloned parameters for each action in a sequence.
   shareParameters: false
 
-  # [required] number of iteration
+  # [required] number of iterations
   times: 2
 
   # [optional] whether each iteration should wait previous to complete or run in parallel
@@ -219,6 +220,41 @@ repeat:
   action:
     # run flow_0.yml and flow_1.yml flows
     @: flow_<%- iteration.index %>.yml
+```
+
+## Action Handler: Retry flow
+
+Retry action multiple times till it passes or reach max failure attempts.
+
+**ID:** `com.fireblink.fbl.flow.retry`
+
+**Aliases:**
+
+- `fbl.flow.retry`
+- `flow.retry`
+- `retry`
+
+**Example:**
+
+```yaml
+retry:
+  # [required] number of attempts to run the action
+  attempts: 2
+
+  # [required] action to run
+  action:
+    sleep: 1
+
+  # [optional] allows to record last error code from last failed attempt
+  # Note: will only be executed if all attempts are failed
+  errorCode:
+    # [optional] assign error code to context field
+    # Follows common assignment logic practicies https://fbl.fireblink.com/plugins/common#assign-to
+    assignTo: '$.ctx.errorCode'
+
+    # [optional] push error code to context field
+    # Follows common push logic practicies https://fbl.fireblink.com/plugins/common#push-to
+    pushTo: '$.ctx.errorCode'
 ```
 
 ## Action Handler: For Each
@@ -514,14 +550,14 @@ defaults:
   # "defaults" - its default value if any
   modifiers:
     $.test: |-
-      return parameters + defaults  
+      return parameters + defaults
 
   # [optional] custom merge function
   # Use it only when "modifiers" functionality isn't enough
   # "parameters" - represents provided parameters
   # "defaults" - defaults by itself
   mergeFunction: |-
-    return parameters.test + defaults.test      
+    return parameters.test + defaults.test
 
 # [required] action to invoke
 # Note: upon execution all relative paths for given action will be calculated based on the folder
