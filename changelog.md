@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.12.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.11.0) - 2020-02-04
+
+### Added
+
+- New action handler `retry` that allows to retry failed action till it passes or reaches maximum retry attempts.
+
 # [1.11.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.11.0) - 2019-11-20
 
 ### Fixed
