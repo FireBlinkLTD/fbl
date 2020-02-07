@@ -2380,10 +2380,10 @@ globby@^11.0.0:
     merge2 "^1.3.0"
     slash "^3.0.0"
 
-got@10.5.0:
-  version "10.5.0"
-  resolved "https://registry.yarnpkg.com/got/-/got-10.5.0.tgz#8335299ca0b69b8564971837a455c87ace4779a4"
-  integrity sha512-khBPRcs/TspRdC7O7bEJdlIaEHhzhKr5kosYrDbKoLto+2goepOodis6JsVGBAIHo7ZNbarflf+/kH4ySJFrsA==
+got@10.5.1:
+  version "10.5.1"
+  resolved "https://registry.yarnpkg.com/got/-/got-10.5.1.tgz#8680f6366db65b14ee41717d509dedc4d46f225d"
+  integrity sha512-Bxx/GV/6PKHj2YS4ksj37ku/FtwHypjmuCeFTQpEJSM1D36pVAijb2h0jOFVDh7q0sISoIOQE0OwnYfk5pWYhQ==
   dependencies:
     "@sindresorhus/is" "^1.0.0"
     "@szmarczak/http-timer" "^4.0.0"
