@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.13.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.0) - 2020-02-24
+
+### Added
+
+- New action handler `invoke` that allows to execute action handler passed as parameter value. Can be used in pair with `virtual` to create reach flow experiences.
+
 # [1.12.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.12.1) - 2020-02-24
 
 ### Fixed
