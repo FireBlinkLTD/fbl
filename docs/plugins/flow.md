@@ -327,7 +327,7 @@ Allows to run action based on some condition
 **Example:**
 
 ```yaml
-?:
+'?':
   # [required] value to check
   value: <% ctx.test %>
 

@@ -75,14 +75,14 @@ export class FlowService {
     async executeAction(
         source: string,
         wd: string,
-        action: { [key: string]: any } | string,
+        action: Record<string, any> | string,
         context: IContext,
         parameters: IDelegatedParameters,
         parentSnapshot?: ActionSnapshot,
     ): Promise<ActionSnapshot> {
         let options: any;
         let idOrAlias: string;
-        let metadata: { [key: string]: any };
+        let metadata: Record<string, any>;
 
         if (typeof action !== 'string') {
             if (!parentSnapshot) {

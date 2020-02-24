@@ -474,4 +474,55 @@ export class SwitchFlowActionHandlerTestSuite {
             is: options.is,
         });
     }
+
+    @test()
+    async repeatTwice(): Promise<void> {
+        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+
+        const actionHandlerOptions: number[] = [];
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (opts: any) => {
+            actionHandlerOptions.push(opts);
+        };
+        actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const actionHandler = new SwitchFlowActionHandler();
+
+        const options = {
+            value: '<%- secrets.value %><%- ctx.value %>',
+            is: {
+                stte: {
+                    [dummyActionHandler.id]: 1,
+                },
+            },
+            else: {
+                [dummyActionHandler.id]: 2,
+            },
+        };
+
+        const snapshot = new EnabledActionSnapshot('.', '.', {}, '', 0, {});
+        const context = ContextUtil.generateEmptyContext();
+        context.ctx.value = 'st';
+        context.secrets.value = 'te';
+
+        let processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
+
+        assert.deepStrictEqual(actionHandlerOptions, [2]);
+
+        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+            value: '{MASKED}st',
+            is: options.is,
+        });
+
+        context.ctx.value = 'te';
+        context.secrets.value = 'st';
+
+        processor = actionHandler.getProcessor(options, context, snapshot, {});
+        await processor.validate();
+        await processor.execute();
+
+        assert.deepStrictEqual(actionHandlerOptions, [2, 1]);
+    }
 }
