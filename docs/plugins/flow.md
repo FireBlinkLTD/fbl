@@ -521,54 +521,54 @@ Allows to create virtual action handler for another action \(that can be represe
 
 ```yaml
 virtual:
-# [required] virtual handler ID
-id: handler.id
+  # [required] virtual handler ID
+  id: handler.id
 
-# [optional] aliases for the handler to reference
-aliases:
-  - handler.alias
+  # [optional] aliases for the handler to reference
+  aliases:
+    - handler.alias
 
-# [optional] JSON Schema of options that can/should be passed to the generated handler
-parametersSchema:
-  type: object
-  properties:
-    test:
-      type: string
+  # [optional] JSON Schema of options that can/should be passed to the generated handler
+  parametersSchema:
+    type: object
+    properties:
+      test:
+        type: string
 
-# [optional] default parameters and merge function
-# Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
-# Upon merge arrays will be concatenated.
-defaults:
-  # [required] default values
-  values:
-    test: yes
+  # [optional] default parameters and merge function
+  # Note: if no mergeFunction or modifiers is provided defaults with parameters will be deeply merged.
+  # Upon merge arrays will be concatenated.
+  defaults:
+    # [required] default values
+    values:
+      test: yes
 
-  # [optional] merge modification functions for given paths
-  # This is a recommended way of overriding merge behaviour.
-  # Use "mergeFunction" only when you need to do something really unique.
-  # "parameters" - represents field state by given path
-  # "defaults" - its default value if any
-  modifiers:
-    $.test: |-
-      return parameters + defaults
+    # [optional] merge modification functions for given paths
+    # This is a recommended way of overriding merge behaviour.
+    # Use "mergeFunction" only when you need to do something really unique.
+    # "parameters" - represents field state by given path
+    # "defaults" - its default value if any
+    modifiers:
+      $.test: |-
+        return parameters + defaults
 
-  # [optional] custom merge function
-  # Use it only when "modifiers" functionality isn't enough
-  # "parameters" - represents provided parameters
-  # "defaults" - defaults by itself
-  mergeFunction: |-
-    return parameters.test + defaults.test
+    # [optional] custom merge function
+    # Use it only when "modifiers" functionality isn't enough
+    # "parameters" - represents provided parameters
+    # "defaults" - defaults by itself
+    mergeFunction: |-
+      return parameters.test + defaults.test
 
-# [required] action to invoke
-# Note: upon execution all relative paths for given action will be calculated based on the folder
-# where virtual actually lives. If you need to use relative paths based on the place of invocation
-# use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %>
-action:
-  # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
-  ctx:
-    some_field:
-      # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
-      inline: <%- parameters.test %>
+  # [required] action to invoke
+  # Note: upon execution all relative paths for given action will be calculated based on the folder
+  # where virtual actually lives. If you need to use relative paths based on the place of invocation
+  # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %>
+  action:
+    # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
+    ctx:
+      some_field:
+        # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+        inline: <%- parameters.test %>
 ```
 
 Then you can reference your generated handler like any other:
@@ -576,6 +576,25 @@ Then you can reference your generated handler like any other:
 ```yaml
 handler.id:
   test: some_field_value
+```
+
+## Action Handler: Invoke
+
+Allows to execute action passed as parameter. Can be used in pair with `virtual` to pass flow actions as parameters and create reach execution flow patterns.
+
+**ID:** `com.fireblink.fbl.flow.invoke`
+
+**Aliases:**
+
+- `fbl.flow.invoke`
+- `flow.invoke`
+- `invoke`
+
+**Example:**
+
+```yaml
+# Invoke action described in parameters `action` field
+invoke: $ref:parameters.action
 ```
 
 ## Action Handler: Error

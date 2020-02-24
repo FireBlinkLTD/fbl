@@ -14,6 +14,7 @@ import { WhileActionHandler } from './WhileActionHandler';
 import { SleepFlowActionHandler } from './SleepFlowActionHandler';
 import { VoidFlowActionHandler } from './VoidFlowActionHandler';
 import { RetryActionHandler } from './RetryActionHandler';
+import { InvokeActionHandler } from './InvokeActionHandler';
 
 const version: string = require(process.env.FBL_ENV === 'test' ? '../../../package.json' : '../../../../package.json')
     .version;
@@ -31,6 +32,7 @@ module.exports = <IPlugin>{
         new EchoActionHandler(),
         new ErrorActionHandler(),
         new ForEachFlowActionHandler(),
+        new InvokeActionHandler(),
         new ParallelFlowActionHandler(),
         new SequenceFlowActionHandler(),
         new SleepFlowActionHandler(),

@@ -1,8 +1,8 @@
 import { suite, test } from 'mocha-typescript';
-import { ActionHandler, ActionSnapshot } from '../../../../src/models';
+import { ActionSnapshot } from '../../../../src/models';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ForEachFlowActionHandler } from '../../../../src/plugins/flow/ForEachFlowActionHandler';
-import { IActionHandlerMetadata, IIteration, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
+import { IIteration, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
