@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# [1.12.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.11.0) - 2020-02-04
+# [1.12.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.12.1) - 2020-02-24
+
+### Fixed
+
+- `switch` action handler didn't resolve value on subsequent execution and kept using the first resolved value.
+
+# [1.12.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.12.0) - 2020-02-04
 
 ### Added
 

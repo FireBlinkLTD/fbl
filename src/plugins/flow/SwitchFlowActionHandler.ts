@@ -27,7 +27,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    async validate(): Promise<void> {
+    async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
         // register masked options in the snapshot
@@ -39,13 +39,13 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
             this.parameters,
             true,
         );
+
         this.snapshot.setOptions({
             value: masked,
             is: this.options.is,
         });
 
-        // resolve value, as it is mostly likely a template and we're not processing options as a template
-        this.options.value = await flowService.resolveOptionsWithNoHandlerCheck(
+        const value = await flowService.resolveOptionsWithNoHandlerCheck(
             this.context.ejsTemplateDelimiters.local,
             this.options.value,
             this.context,
@@ -54,18 +54,9 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
             false,
         );
 
-        await super.validate();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let action;
         for (const is of Object.keys(this.options.is)) {
-            if (is.toString() === this.options.value.toString()) {
+            if (is.toString() === value.toString()) {
                 action = this.options.is[is];
                 break;
             }
@@ -78,7 +69,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
         }
 
         if (action) {
-            this.snapshot.log(`Based on value: ${this.options.value} invoking handler.`);
+            this.snapshot.log(`Based on value: ${value} invoking handler.`);
             const childSnapshot = await flowService.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
@@ -89,7 +80,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
             );
             this.snapshot.registerChildActionSnapshot(childSnapshot);
         } else {
-            this.snapshot.log(`Unable to find handler for value: ${this.options.value}`, true);
+            this.snapshot.log(`Unable to find handler for value: ${value}`, true);
         }
     }
 }
