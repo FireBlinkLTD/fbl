@@ -70,6 +70,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
             .without('mergeFunction', 'modifiers')
             .without('modifiers', 'mergeFunction'),
         parametersSchema: createJsonSchema(),
+        dynamicWorkDir: Joi.boolean(),
         action: FBL_ACTION_SCHEMA,
     }).required();
 
@@ -175,6 +176,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
         }
 
         const dynamicFlowHandler = new DynamicFlowActionHandler(
+            this.options.dynamicWorkDir ? null : this.snapshot.wd,
             this.snapshot.wd,
             this.options.id,
             this.options.aliases || [],
@@ -220,7 +222,8 @@ class DynamicFlowActionProcessor extends ActionProcessor {
         context: IContext,
         snapshot: ActionSnapshot,
         parameters: IDelegatedParameters,
-        private wd: string,
+        private wd: string | null,
+        private pwd: string,
         private validationSchema: any | null,
         private action: { [key: string]: any },
         private virtualDefaults?: IVirtualDefaults,
@@ -282,9 +285,13 @@ class DynamicFlowActionProcessor extends ActionProcessor {
     async execute(): Promise<void> {
         const flowService = Container.get(FlowService);
 
-        this.snapshot.wd = this.wd;
+        if (this.wd) {
+            this.snapshot.wd = this.wd;
+        }
+
         this.parameters.parameters = this.getMergedOptions(this.options);
-        this.parameters.wd = this.snapshot.wd;
+        this.parameters.parameters.wd = this.snapshot.wd;
+        this.parameters.parameters.pwd = this.pwd;
 
         const childSnapshot = await flowService.executeAction(
             this.snapshot.source,
@@ -303,7 +310,8 @@ class DynamicFlowActionProcessor extends ActionProcessor {
  */
 class DynamicFlowActionHandler extends ActionHandler {
     constructor(
-        private wd: string,
+        private wd: string | null,
+        private pwd: string,
         private id: string,
         private aliases: string[],
         private validationSchema: any | null,
@@ -346,6 +354,7 @@ class DynamicFlowActionHandler extends ActionHandler {
             parameters,
 
             this.wd,
+            this.pwd,
             this.validationSchema,
             this.action,
             this.virtualDefaults,

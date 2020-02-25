@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.13.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.1) - 2020-02-25
+
+### Added
+
+- New option `dynamicWorkDir` for `virtual` action handler that can override default behavior to resolve work dir based on the place of invocation, but not declaration.
+
 # [1.13.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.0) - 2020-02-24
 
 ### Added

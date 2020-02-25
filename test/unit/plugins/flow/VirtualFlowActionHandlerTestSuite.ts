@@ -459,4 +459,55 @@ class VirtualFlowActionHandlerTestSuite {
         assert(snapshot.successful);
         assert.strictEqual(opts, '/tmp1/index.txt');
     }
+
+    @test()
+    async dynamicWorkingDirectory(): Promise<void> {
+        const flowService = Container.get(FlowService);
+
+        const virtual = new VirtualFlowActionHandler();
+        flowService.actionHandlersRegistry.register(virtual, plugin);
+        flowService.templateUtilityRegistry.register(new FSTemplateUtility());
+
+        let opts;
+        const dummyActionHandler = new DummyActionHandler();
+        dummyActionHandler.executeFn = async (options: any) => {
+            opts = options;
+        };
+        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+
+        const context = ContextUtil.generateEmptyContext();
+
+        await flowService.executeAction(
+            'index.yml',
+            '/tmp1',
+            {
+                [virtual.getMetadata().id]: {
+                    id: 'virtual.test',
+                    dynamicWorkDir: true,
+                    action: {
+                        [dummyActionHandler.id]: '<%- parameters.tst.t %>',
+                    },
+                },
+            },
+            context,
+            {},
+        );
+
+        const snapshot = await flowService.executeAction(
+            'index.yml',
+            '/tmp2',
+            {
+                'virtual.test': {
+                    tst: {
+                        t: '<%- $.fs.getAbsolutePath("index.txt") %>',
+                    },
+                },
+            },
+            context,
+            {},
+        );
+
+        assert(snapshot.successful);
+        assert.strictEqual(opts, '/tmp2/index.txt');
+    }
 }
