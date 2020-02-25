@@ -4,7 +4,7 @@ import { Container } from 'typedi';
 import { FlowService } from '../../../../src/services';
 import { VirtualFlowActionHandler } from '../../../../src/plugins/flow/VirtualFlowActionHandler';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
-import { IPlugin } from '../../../../src/interfaces';
+import { IPlugin, IContext } from '../../../../src/interfaces';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
@@ -419,9 +419,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.templateUtilityRegistry.register(new FSTemplateUtility());
 
         let opts;
+        let wd;
         const dummyActionHandler = new DummyActionHandler();
-        dummyActionHandler.executeFn = async (options: any) => {
+        dummyActionHandler.executeFn = async (options: any, ctx: IContext, s: ActionSnapshot) => {
             opts = options;
+            wd = s.wd;
         };
         flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
@@ -434,7 +436,7 @@ class VirtualFlowActionHandlerTestSuite {
                 [virtual.getMetadata().id]: {
                     id: 'virtual.test',
                     action: {
-                        [dummyActionHandler.id]: '<%- parameters.tst.t %>',
+                        [dummyActionHandler.id]: '<%- $.fs.getAbsolutePath(parameters.tst.t) %>',
                     },
                 },
             },
@@ -448,7 +450,7 @@ class VirtualFlowActionHandlerTestSuite {
             {
                 'virtual.test': {
                     tst: {
-                        t: '<%- $.fs.getAbsolutePath("index.txt") %>',
+                        t: 'index.txt',
                     },
                 },
             },
@@ -458,6 +460,7 @@ class VirtualFlowActionHandlerTestSuite {
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '/tmp1/index.txt');
+        assert.strictEqual(wd, '/tmp1');
     }
 
     @test()
@@ -469,9 +472,11 @@ class VirtualFlowActionHandlerTestSuite {
         flowService.templateUtilityRegistry.register(new FSTemplateUtility());
 
         let opts;
+        let wd;
         const dummyActionHandler = new DummyActionHandler();
-        dummyActionHandler.executeFn = async (options: any) => {
+        dummyActionHandler.executeFn = async (options: any, ctx: IContext, s: ActionSnapshot) => {
             opts = options;
+            wd = s.wd;
         };
         flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
 
@@ -485,7 +490,7 @@ class VirtualFlowActionHandlerTestSuite {
                     id: 'virtual.test',
                     dynamicWorkDir: true,
                     action: {
-                        [dummyActionHandler.id]: '<%- parameters.tst.t %>',
+                        [dummyActionHandler.id]: '<%- $.fs.getAbsolutePath(parameters.tst.t) %>',
                     },
                 },
             },
@@ -499,7 +504,7 @@ class VirtualFlowActionHandlerTestSuite {
             {
                 'virtual.test': {
                     tst: {
-                        t: '<%- $.fs.getAbsolutePath("index.txt") %>',
+                        t: 'index.txt',
                     },
                 },
             },
@@ -509,5 +514,6 @@ class VirtualFlowActionHandlerTestSuite {
 
         assert(snapshot.successful);
         assert.strictEqual(opts, '/tmp2/index.txt');
+        assert.strictEqual(wd, '/tmp2');
     }
 }

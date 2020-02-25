@@ -235,7 +235,6 @@ class DynamicFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async validate(): Promise<void> {
-        this.snapshot.wd = this.wd;
         if (this.validationSchema) {
             const mergedOptions = this.getMergedOptions(this.options);
 
@@ -295,7 +294,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
 
         const childSnapshot = await flowService.executeAction(
             this.snapshot.source,
-            this.wd,
+            this.snapshot.wd,
             this.action,
             this.context,
             this.parameters,

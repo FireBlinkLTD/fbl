@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+# [1.13.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.2) - 2020-02-25
+
+### Fixed
+
+- When enabled`dynamicWorkDir` option, `virtual` was incorrectly passing working directory to the child action. Unit tests were updated to cover this case.
+
 # [1.13.1](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.1) - 2020-02-25
 
 ### Added
