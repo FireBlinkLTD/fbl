@@ -559,15 +559,25 @@ virtual:
     mergeFunction: |-
       return parameters.test + defaults.test
 
+  # [optional] Change working directory location based on the place of virtual execution
+  #  instead of declaration.
+  #
+  # By default all relative paths are resolved based on the place where virtual action is declared.
+  # If you need to change the behavior - set this property to "true".
+  #
+  # Parameters:
+  #   $.parameters.wd  - will be dynamically set to either working directory where virtual
+  #                      is declared or place where it will be invoked.
+  #
+  #   $.parameters.pwd - always points to the working directory where virtual was declared.
+  dynamicWorkDir: true
+
   # [required] action to invoke
-  # Note: upon execution all relative paths for given action will be calculated based on the folder
-  # where virtual actually lives. If you need to use relative paths based on the place of invocation
-  # use "wd" property inside the template, e.g: <%- $.fs.getAbsolutePath('some_file.txt', wd); %>
   action:
-    # Note: path resolution inside "metadata" fields is using invocation working directory, but not virtual's one
     ctx:
       some_field:
-        # Note: you may use "parameters" to reference passed options that pre-validated first with provided validationSchema (if any)
+        # Note: you may use "parameters" to reference passed options to the virtual handler
+        # These options are first pre-validated with provided validationSchema (if any)
         inline: <%- parameters.test %>
 ```
 
