@@ -18,7 +18,7 @@ export class ActionHandlersRegistry {
     }
 
     /**
-     * Register new entity
+     * Register new action handler
      * @param {ActionHandler} handler
      * @param {IPlugin} plugin
      * @param {ActionSnapshot} [snapshot]
