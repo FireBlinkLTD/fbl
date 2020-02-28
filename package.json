@@ -54,7 +54,7 @@
     "tar": "6.0.1",
     "tmp-promise": "2.0.2",
     "typedi": "0.8.0",
-    "uuid": "7.0.0"
+    "uuid": "7.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
@@ -63,7 +63,7 @@
     "@types/ejs": "3.0.1",
     "@types/joi": "14.3.4",
     "@types/js-yaml": "3.12.2",
-    "@types/node": "13.7.4",
+    "@types/node": "13.7.6",
     "@types/semver": "7.1.0",
     "@types/table": "4.0.7",
     "@types/tar": "4.0.3",
@@ -76,10 +76,10 @@
     "cz-conventional-changelog": "3.1.0",
     "husky": "4.2.3",
     "jsonlint": "1.6.3",
-    "lint-staged": "10.0.7",
-    "mocha": "7.0.1",
+    "lint-staged": "10.0.8",
+    "mocha": "7.1.0",
     "mocha-typescript": "1.1.17",
-    "mochawesome": "4.1.0",
+    "mochawesome": "5.0.0",
     "nyc": "15.0.0",
     "prettier": "1.19.1",
     "rimraf": "3.0.2",
