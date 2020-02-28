@@ -56,9 +56,22 @@ export class CLIService {
     }
 
     async run(): Promise<void> {
-        this.globalConfig = {};
+        this.globalConfig = <IFBLGlobalConfig>{
+            plugins: [],
+            context: {
+                ctx: {},
+                secrets: {},
+                parameters: {},
+            },
+            report: {
+                options: {},
+            },
+            http: {
+                headers: {},
+            },
+            other: {},
+        };
 
-        await this.readGlobalConfig();
         this.globalConfig.plugins.push(...CLIService.CORE_PLUGINS);
 
         await this.parseParameters();
@@ -202,36 +215,6 @@ export class CLIService {
                 }),
             ]),
         );
-    }
-
-    /**
-     * Read global config (if exists)
-     * @return {Promise<void>}
-     */
-    private async readGlobalConfig(): Promise<void> {
-        const globalConfigPath = resolve(FlowService.getHomeDir(), 'config');
-        const globalConfigExists = await promisify(exists)(globalConfigPath);
-
-        this.globalConfig = <IFBLGlobalConfig>{
-            plugins: [],
-            context: {
-                ctx: {},
-                secrets: {},
-                parameters: {},
-            },
-            report: {
-                options: {},
-            },
-            http: {
-                headers: {},
-            },
-            other: {},
-        };
-
-        if (globalConfigExists) {
-            const config: IFBLGlobalConfig = await FSUtil.readYamlFromFile(globalConfigPath);
-            collideUnsafe(this.globalConfig, config);
-        }
     }
 
     /**
@@ -504,12 +487,14 @@ export class CLIService {
         const chunks = kv.split('=');
         if (chunks.length !== 2) {
             const secret = chunks[0].startsWith('$.secrets.');
-            chunks[1] = (await prompts({
-                type: 'text',
-                name: 'value',
-                style: secret ? 'password' : 'default',
-                message: `${chunks[0]}: `,
-            })).value;
+            chunks[1] = (
+                await prompts({
+                    type: 'text',
+                    name: 'value',
+                    style: secret ? 'password' : 'default',
+                    message: `${chunks[0]}: `,
+                })
+            ).value;
         }
 
         let value;

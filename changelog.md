@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file. The format 
 
 # 1.13.3 - Under Development
 
-### Changed
+### Removed
 
 - `entities` and related action handlers were removed, as functionality was never used seriously and can be replaced with other technics that are more obvious for script writer.
+- dropped support of previously optional global configuration file stored in `$HOME/$FBL_HOME/config`. This functionality was never provided a real value.
 
 # [1.13.2](https://github.com/FireBlinkLTD/fbl/releases/tag/1.13.2) - 2020-02-25
 

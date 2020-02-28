@@ -398,91 +398,6 @@ class CliTestSuite {
     }
 
     @test()
-    async globalConfiguration(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-
-        const flow: any = {
-            version: '1.0.0',
-            pipeline: {
-                ctx: {
-                    '$.test': {
-                        inline: {
-                            ct: '<%- ctx.ct %>',
-                            st: '<%- secrets.st %>',
-                        },
-                    },
-                },
-            },
-        };
-
-        const customContextValues = {
-            custom_ct: 'file1',
-        };
-
-        const customSecretValues = {
-            custom_st: 'file2',
-        };
-
-        const flowFile = await tempPathsRegistry.createTempFile();
-        const reportFile = await tempPathsRegistry.createTempFile();
-        const contextFile = await tempPathsRegistry.createTempFile();
-        const secretsFile = await tempPathsRegistry.createTempFile();
-
-        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
-        await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
-        await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
-
-        const globalConfig = <IFBLGlobalConfig>{
-            plugins: [`${__dirname}/../../dist/src/plugins/flow`],
-            context: {
-                ctx: {
-                    ct: 'yes',
-                },
-                secrets: {
-                    st: 'yes',
-                },
-            },
-            other: {
-                noColors: true,
-                globalTemplateDelimiter: '$',
-                localTemplateDelimiter: '%',
-            },
-        };
-
-        await promisify(writeFile)(CliTestSuite.getGlobalConfigPath(), dump(globalConfig), 'utf8');
-
-        // prettier-ignore
-        const result = await CliTestSuite.exec([
-            '-o', reportFile,
-            '-r', 'json',
-            flowFile
-        ]);
-
-        if (result.code !== 0) {
-            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
-        }
-
-        const reportJson = await promisify(readFile)(reportFile, 'utf8');
-        assert(reportJson.length > 0);
-
-        const report = JSON.parse(reportJson);
-        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
-
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
-            added: {
-                ctx: {
-                    test: {
-                        ct: 'yes',
-                        st: 'yes',
-                    },
-                },
-            },
-            deleted: {},
-            updated: {},
-        });
-    }
-
-    @test()
     async failedExecution(): Promise<void> {
         const tempPathsRegistry = Container.get(TempPathsRegistry);
 
@@ -1498,7 +1413,7 @@ class CliTestSuite {
 
         assert.strictEqual(server.lastRequest.headers.test1, 'y1');
         assert.strictEqual(server.lastRequest.headers.test2, 'y2');
-        assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
+        assert.strictEqual(server.lastRequest.headers.test3, 'y3');
 
         // run one more time to check cache match
         result = await CliTestSuite.exec(args);
