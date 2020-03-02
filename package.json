@@ -59,7 +59,7 @@
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
-    "@types/chai": "4.2.9",
+    "@types/chai": "4.2.10",
     "@types/ejs": "3.0.1",
     "@types/joi": "14.3.4",
     "@types/js-yaml": "3.12.2",
