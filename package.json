@@ -38,7 +38,7 @@
     "command-exists": "1.2.8",
     "commander": "4.1.1",
     "deep-object-diff": "1.1.0",
-    "ejs": "3.0.1",
+    "ejs": "3.0.2",
     "ejs-lint": "1.0.1",
     "glob-promise": "3.4.0",
     "got": "10.7.0",
