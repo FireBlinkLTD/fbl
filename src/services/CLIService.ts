@@ -3,9 +3,6 @@ import * as commander from 'commander';
 import { collideUnsafe, isObject, collide } from 'object-collider';
 import * as colors from 'colors';
 import { FlowService, FBLService, LogService } from './index';
-import { exists } from 'fs';
-import { promisify } from 'util';
-import { resolve } from 'path';
 import {
     IContext,
     IFlowLocationOptions,
