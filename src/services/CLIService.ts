@@ -56,9 +56,22 @@ export class CLIService {
     }
 
     async run(): Promise<void> {
-        this.globalConfig = {};
+        this.globalConfig = <IFBLGlobalConfig>{
+            plugins: [],
+            context: {
+                ctx: {},
+                secrets: {},
+                parameters: {},
+            },
+            report: {
+                options: {},
+            },
+            http: {
+                headers: {},
+            },
+            other: {},
+        };
 
-        await this.readGlobalConfig();
         this.globalConfig.plugins.push(...CLIService.CORE_PLUGINS);
 
         await this.parseParameters();
@@ -165,7 +178,7 @@ export class CLIService {
      * @param {ISummaryRecord[]} records
      */
     private static printSummary(records: ISummaryRecord[]): void {
-        const includeDuration = records.find(r => !!r.duration);
+        const includeDuration = records.find((r) => !!r.duration);
 
         const head = ['Title'.bold, 'Status'.bold];
         /* istanbul ignore else */
@@ -177,7 +190,7 @@ export class CLIService {
         console.log(
             table([
                 head,
-                ...records.map(r => {
+                ...records.map((r) => {
                     let status = r.status.trim();
 
                     if (['created', 'updated', 'passed', 'success', 'ok', 'yes'].indexOf(status.toLowerCase()) >= 0) {
@@ -205,42 +218,12 @@ export class CLIService {
     }
 
     /**
-     * Read global config (if exists)
-     * @return {Promise<void>}
-     */
-    private async readGlobalConfig(): Promise<void> {
-        const globalConfigPath = resolve(FlowService.getHomeDir(), 'config');
-        const globalConfigExists = await promisify(exists)(globalConfigPath);
-
-        this.globalConfig = <IFBLGlobalConfig>{
-            plugins: [],
-            context: {
-                ctx: {},
-                secrets: {},
-                parameters: {},
-            },
-            report: {
-                options: {},
-            },
-            http: {
-                headers: {},
-            },
-            other: {},
-        };
-
-        if (globalConfigExists) {
-            const config: IFBLGlobalConfig = await FSUtil.readYamlFromFile(globalConfigPath);
-            collideUnsafe(this.globalConfig, config);
-        }
-    }
-
-    /**
      * Parse parameters passed via CLI
      */
     private async parseParameters(): Promise<void> {
         const assign: string[] = [];
         const reportOptions: string[] = [];
-        const options: { flags: string; description: string[]; fn?: Function }[] = [
+        const options: { flags: string; description: string[]; fn?: (value: string) => void }[] = [
             {
                 flags: '-p --plugin <file>',
                 description: ['Plugin file.'],
@@ -360,13 +343,14 @@ export class CLIService {
         // prepare commander
         commander
             .version(require('../../../package.json').version)
-            .arguments('<file>')
-            .action((file, opts) => {
-                opts.file = file;
+            .usage('[options] <path>')
+            .arguments('<path>')
+            .action((path, opts) => {
+                opts.path = path;
             });
 
         // register options
-        options.forEach(option => {
+        options.forEach((option) => {
             commander.option(option.flags, option.description.join(' '), option.fn);
         });
 
@@ -374,8 +358,14 @@ export class CLIService {
             this.printHelp(options);
         });
 
+        commander.exitOverride((err) => {
+            console.log('');
+            commander.outputHelp();
+            process.exit(1);
+        });
+
         // parse environment variables
-        commander.parse(process.argv);
+        await commander.parseAsync(process.argv);
 
         for (const v of assign) {
             await this.convertKVPair(v, this.globalConfig.context);
@@ -383,12 +373,6 @@ export class CLIService {
 
         for (const v of reportOptions) {
             await this.convertKVPair(v, this.globalConfig.report.options);
-        }
-
-        if (!commander.file) {
-            console.error('Error: flow descriptor file was not provided.');
-            commander.outputHelp();
-            process.exit(1);
         }
 
         this.globalConfig.report.output = commander.output || this.globalConfig.report.output;
@@ -400,7 +384,7 @@ export class CLIService {
             process.exit(1);
         }
 
-        this.flowFilePath = commander.file;
+        this.flowFilePath = commander.path;
         this.globalConfig.other.noColors = !commander.colors;
         this.globalConfig.other.useCache = commander.useCache;
         this.globalConfig.other.allowUnsafePlugins = commander.unsafePlugins;
@@ -436,7 +420,7 @@ export class CLIService {
         let maxFlagsLength = 0;
         let maxDescriptionLength = 0;
 
-        allOptions.forEach(option => {
+        allOptions.forEach((option) => {
             maxFlagsLength = Math.max(maxFlagsLength, option.flags.length);
             for (const line of option.description) {
                 maxDescriptionLength = Math.max(maxDescriptionLength, line.length);
@@ -451,7 +435,7 @@ export class CLIService {
             padding: [1, 0, 1, 0],
         });
 
-        allOptions.forEach(option => {
+        allOptions.forEach((option) => {
             ui.div(
                 {
                     text: option.flags,
@@ -504,12 +488,14 @@ export class CLIService {
         const chunks = kv.split('=');
         if (chunks.length !== 2) {
             const secret = chunks[0].startsWith('$.secrets.');
-            chunks[1] = (await prompts({
-                type: 'text',
-                name: 'value',
-                style: secret ? 'password' : 'default',
-                message: `${chunks[0]}: `,
-            })).value;
+            chunks[1] = (
+                await prompts({
+                    type: 'text',
+                    name: 'value',
+                    style: secret ? 'password' : 'default',
+                    message: `${chunks[0]}: `,
+                })
+            ).value;
         }
 
         let value;

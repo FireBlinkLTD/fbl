@@ -50,12 +50,10 @@ class JsonReporterTestSuite {
                 initial: {
                     ctx: context.ctx,
                     summary: context.summary,
-                    entities: context.entities,
                 },
                 final: {
                     ctx: context.ctx,
                     summary: context.summary,
-                    entities: context.entities,
                 },
             },
             snapshot: {

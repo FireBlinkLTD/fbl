@@ -7,44 +7,15 @@ import { isMissing } from 'object-collider';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export class FunctionActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required()
-        .options({ abortEarly: true });
-
-    private static entityValidationSchema = Joi.object()
-        .keys({
-            type: Joi.string()
-                .required()
-                .min(1),
-            id: Joi.alternatives(Joi.string().min(1), Joi.number()).required(),
-            payload: Joi.any(),
-        })
-        .options({
-            abortEarly: true,
-            allowUnknown: false,
-        });
+    private static validationSchema = Joi.string().min(1).required().options({ abortEarly: true });
 
     private static functionResultValidationSchema = Joi.object().keys({
         cwd: Joi.string().min(1),
         ctx: Joi.object(),
         secrets: Joi.object(),
-        entities: Joi.object()
-            .keys({
-                registered: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
-                unregistered: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
-                created: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
-                updated: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
-                deleted: Joi.array().items(FunctionActionProcessor.entityValidationSchema),
-            })
-            .options({
-                allowUnknown: false,
-            }),
         parameters: Joi.any(),
         iteration: Joi.object().keys({
-            index: Joi.number()
-                .min(0)
-                .required(),
+            index: Joi.number().min(0).required(),
             value: Joi.any(),
             key: Joi.string(),
         }),
@@ -62,7 +33,7 @@ export class FunctionActionProcessor extends ActionProcessor {
      */
     async execute(): Promise<void> {
         const script = [
-            'return async function($, env, require, cwd, ctx, secrets, entities, parameters, iteration) {',
+            'return async function($, env, require, cwd, ctx, secrets, parameters, iteration) {',
             this.options,
             '}',
         ].join('\n');
@@ -81,7 +52,6 @@ export class FunctionActionProcessor extends ActionProcessor {
             this.context.cwd,
             this.context.ctx,
             this.context.secrets,
-            this.context.entities,
             this.parameters.parameters,
             this.parameters.iteration,
         );
@@ -90,12 +60,12 @@ export class FunctionActionProcessor extends ActionProcessor {
             const validationResult = Joi.validate(result, FunctionActionProcessor.functionResultValidationSchema);
             if (validationResult.error) {
                 throw new ActionError(
-                    validationResult.error.details.map(d => d.message).join('\n'),
+                    validationResult.error.details.map((d) => d.message).join('\n'),
                     INVALID_CONFIGURATION,
                 );
             }
 
-            ['cwd', 'ctx', 'secrets', 'entities'].forEach((field: 'cwd' | 'ctx' | 'secrets' | 'entities') => {
+            ['cwd', 'ctx', 'secrets'].forEach((field: 'cwd' | 'ctx' | 'secrets') => {
                 /* istanbul ignore else */
                 if (!isMissing(result[field])) {
                     this.context[field] = result[field];

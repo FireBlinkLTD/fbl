@@ -101,19 +101,19 @@ class CliTestSuite {
                 nodeArgs,
                 wd || join(__dirname, '../../'),
                 {
-                    stdout: data => {
+                    stdout: (data) => {
                         // console.log('stdout:', data.toString().trim());
                         stdout.push(data.toString().trim());
                     },
 
-                    stderr: data => {
+                    stderr: (data) => {
                         // console.log('stderr:', data.toString().trim());
                         stderr.push(data.toString().trim());
                     },
 
-                    process: process => {
+                    process: (process) => {
                         if (answer) {
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 process.stdin.write(answer);
                                 process.stdin.end();
                             }, 100);
@@ -227,7 +227,6 @@ class CliTestSuite {
                 },
             },
             summary: <ISummaryRecord[]>[],
-            entities: ContextUtil.generateEmptyContext().entities,
         });
 
         assert.deepStrictEqual(report.context.final, <IContextBase>{
@@ -248,7 +247,6 @@ class CliTestSuite {
                 },
             },
             summary: <ISummaryRecord[]>[],
-            entities: ContextUtil.generateEmptyContext().entities,
         });
 
         const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
@@ -299,7 +297,7 @@ class CliTestSuite {
         // prettier-ignore
         result = await CliTestSuite.exec([
             '-o', '/tmp/report.json',
-            '-r', 'unknown', 
+            '-r', 'unknown',
             flowFile
         ]);
         assert.strictEqual(result.code, 1);
@@ -356,7 +354,7 @@ class CliTestSuite {
         // prettier-ignore
         result = await CliTestSuite.exec([
             '-a', '$.ctx.ct.yes=yes',
-            '-a', '$.secrets.st', 
+            '-a', '$.secrets.st',
             flowFile
         ], 'prompt_value');
 
@@ -390,98 +388,13 @@ class CliTestSuite {
         // prettier-ignore
         const result = await CliTestSuite.exec([
             '-a', '$.ctx.ct=yes',
-            '-a', '$.secrets.st=yes', 
+            '-a', '$.secrets.st=yes',
             flowFile
         ]);
 
         if (result.code !== 0) {
             throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
         }
-    }
-
-    @test()
-    async globalConfiguration(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-
-        const flow: any = {
-            version: '1.0.0',
-            pipeline: {
-                ctx: {
-                    '$.test': {
-                        inline: {
-                            ct: '<%- ctx.ct %>',
-                            st: '<%- secrets.st %>',
-                        },
-                    },
-                },
-            },
-        };
-
-        const customContextValues = {
-            custom_ct: 'file1',
-        };
-
-        const customSecretValues = {
-            custom_st: 'file2',
-        };
-
-        const flowFile = await tempPathsRegistry.createTempFile();
-        const reportFile = await tempPathsRegistry.createTempFile();
-        const contextFile = await tempPathsRegistry.createTempFile();
-        const secretsFile = await tempPathsRegistry.createTempFile();
-
-        await promisify(writeFile)(flowFile, dump(flow), 'utf8');
-        await promisify(writeFile)(contextFile, dump(customContextValues), 'utf8');
-        await promisify(writeFile)(secretsFile, dump(customSecretValues), 'utf8');
-
-        const globalConfig = <IFBLGlobalConfig>{
-            plugins: [`${__dirname}/../../dist/src/plugins/flow`],
-            context: {
-                ctx: {
-                    ct: 'yes',
-                },
-                secrets: {
-                    st: 'yes',
-                },
-            },
-            other: {
-                noColors: true,
-                globalTemplateDelimiter: '$',
-                localTemplateDelimiter: '%',
-            },
-        };
-
-        await promisify(writeFile)(CliTestSuite.getGlobalConfigPath(), dump(globalConfig), 'utf8');
-
-        // prettier-ignore
-        const result = await CliTestSuite.exec([
-            '-o', reportFile,
-            '-r', 'json',  
-            flowFile
-        ]);
-
-        if (result.code !== 0) {
-            throw new Error(`code: ${result.code};\nstdout: ${result.stdout};\nstderr: ${result.stderr}`);
-        }
-
-        const reportJson = await promisify(readFile)(reportFile, 'utf8');
-        assert(reportJson.length > 0);
-
-        const report = JSON.parse(reportJson);
-        const contextSteps = report.snapshot.steps.filter((s: IActionStep) => s.type === 'context');
-
-        assert.deepStrictEqual(contextSteps[contextSteps.length - 1].payload, {
-            added: {
-                ctx: {
-                    test: {
-                        ct: 'yes',
-                        st: 'yes',
-                    },
-                },
-            },
-            deleted: {},
-            updated: {},
-        });
     }
 
     @test()
@@ -549,9 +462,9 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         // prettier-ignore
-        let result = await CliTestSuite.exec([            
+        let result = await CliTestSuite.exec([
             '-a', '$=test',
-            '--no-colors', 
+            '--no-colors',
             flowFile
         ]);
         assert.strictEqual(result.code, 1);
@@ -585,7 +498,7 @@ class CliTestSuite {
         // prettier-ignore
         result = await CliTestSuite.exec([
             '-a', `$=@${contextFile}`,
-            '--no-colors', 
+            '--no-colors',
             flowFile
         ]);
 
@@ -616,7 +529,7 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             [
                 '-p', 'dist/test/assets/fakePlugins/incompatibleWithFBL',
-                '--no-colors', 
+                '--no-colors',
                 flowFile
             ],
             null,
@@ -632,8 +545,8 @@ class CliTestSuite {
         result = await CliTestSuite.exec(
             [
                 '-p', 'dist/test/assets/fakePlugins/incompatibleWithFBL.js',
-                '--no-colors', 
-                '--unsafe-plugins', 
+                '--no-colors',
+                '--unsafe-plugins',
                 flowFile
             ],
             null,
@@ -882,7 +795,7 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             [
                 '-p', 'dist/test/assets/fakePlugins/incompatibleWithOtherPlugin',
-                '--no-colors', 
+                '--no-colors',
                 flowFile
             ],
             null,
@@ -940,7 +853,7 @@ class CliTestSuite {
         let result = await CliTestSuite.exec(
             [
                 '-p', 'dist/test/assets/fakePlugins/missingPluginDependency',
-                '--no-colors', 
+                '--no-colors',
                 flowFile
             ],
             null,
@@ -1028,7 +941,7 @@ class CliTestSuite {
         const result = await CliTestSuite.exec(
             [
                 '-p', 'dist/test/assets/fakePlugins/broken',
-                '--no-colors', 
+                '--no-colors',
                 flowFile
             ],
             null,
@@ -1156,8 +1069,8 @@ class CliTestSuite {
         // prettier-ignore
         const flow: string = [
             'version: 1.0.0',
-            'pipeline:', 
-            '  "--":', 
+            'pipeline:',
+            '  "--":',
             '    - void'
         ].join('\n');
 
@@ -1179,8 +1092,8 @@ class CliTestSuite {
         // prettier-ignore
         const flow = [
             'pipeline:',
-            '  ctx:', 
-            '    "$.test_[]":', 
+            '  ctx:',
+            '    "$.test_[]":',
             '      inline: $ref:ctx.array'
         ].join('\n');
 
@@ -1236,7 +1149,7 @@ class CliTestSuite {
         // prettier-ignore
         let result = await CliTestSuite.exec([
             '-o', reportFile,
-            '-r', 'json', 
+            '-r', 'json',
             flowFile
         ]);
 
@@ -1258,8 +1171,8 @@ class CliTestSuite {
         // prettier-ignore
         flow = [
             'pipeline:',
-            '  ctx:', 
-            '    "$.test_failure":', 
+            '  ctx:',
+            '    "$.test_failure":',
             '      inline: <%= new Promise(() => {}); %>'
         ].join('\n');
 
@@ -1311,7 +1224,7 @@ class CliTestSuite {
         // prettier-ignore
         const result = await CliTestSuite.exec([
             '-o', reportFile,
-            '-r', 'json', 
+            '-r', 'json',
             rootDir
         ]);
 
@@ -1500,7 +1413,7 @@ class CliTestSuite {
 
         assert.strictEqual(server.lastRequest.headers.test1, 'y1');
         assert.strictEqual(server.lastRequest.headers.test2, 'y2');
-        assert.strictEqual(server.lastRequest.headers.test3, 'y3 ');
+        assert.strictEqual(server.lastRequest.headers.test3, 'y3');
 
         // run one more time to check cache match
         result = await CliTestSuite.exec(args);
@@ -1536,7 +1449,7 @@ class CliTestSuite {
         const result = await CliTestSuite.exec([
             '--no-colors',
             '-r', 'yaml',
-            '-o', reportPath, 
+            '-o', reportPath,
             flowPath
         ]);
 
@@ -1658,8 +1571,8 @@ class CliTestSuite {
         // prettier-ignore
         const result = await CliTestSuite.exec([
             '--no-colors',
-            '-r', 'yaml', 
-            '-o', reportPath, 
+            '-r', 'yaml',
+            '-o', reportPath,
             mainFlowPath
         ]);
 

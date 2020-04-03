@@ -66,7 +66,6 @@ class FunctionActionHandlerTestSuite {
             '  ctx: {test: parameters.t1 + iteration.value},',
             '  secrets: {a: true},',
             '  cwd: "/test",',
-            '  entities: {registered: [{type: "Test", id: 0}]},',
             '  parameters: {p: 123},',
             '  iteration: {index: 0},',
             '}',
@@ -87,7 +86,6 @@ class FunctionActionHandlerTestSuite {
         assert.deepStrictEqual(context.cwd, '/test');
         assert.deepStrictEqual(context.ctx, { test: 3 });
         assert.deepStrictEqual(context.secrets, { a: true });
-        assert.deepStrictEqual(context.entities, { registered: [{ type: 'Test', id: 0 }] });
         assert.deepStrictEqual(parameters.parameters, { p: 123 });
         assert.deepStrictEqual(parameters.iteration, { index: 0 });
     }

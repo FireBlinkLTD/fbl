@@ -18,7 +18,7 @@ export class ActionHandlersRegistry {
     }
 
     /**
-     * Register new entity
+     * Register new action handler
      * @param {ActionHandler} handler
      * @param {IPlugin} plugin
      * @param {ActionSnapshot} [snapshot]
@@ -64,7 +64,7 @@ export class ActionHandlersRegistry {
 
         this.registry[metadata.id] = handler;
         if (metadata.aliases) {
-            metadata.aliases.forEach(alias => {
+            metadata.aliases.forEach((alias) => {
                 if (this.aliases[alias]) {
                     /* istanbul ignore else */
                     if (snapshot) {
@@ -96,7 +96,7 @@ export class ActionHandlersRegistry {
      */
     public unregister(id: string): ActionHandlersRegistry {
         delete this.registry[id];
-        Object.keys(this.aliases).forEach(key => {
+        Object.keys(this.aliases).forEach((key) => {
             if (this.aliases[key] === id) {
                 delete this.aliases[key];
             }

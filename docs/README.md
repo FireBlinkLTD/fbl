@@ -77,7 +77,9 @@ To get list of available CLI arguments run:
 fbl --help
 ```
 
-You can also provide global [default configuration](global-config.md) if you need to assign same options for all your flow's executions.
+## Environment Variables
+
+- FBL_HOME - defines alternative `home` directory where `fbl` can store cached packages (downloaded tarballs), etc. Default value is `.fbl` inside user home directory, e.g. on unix systems: `~/.fbl`.
 
 ## Next steps
 

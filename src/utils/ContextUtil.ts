@@ -6,7 +6,7 @@ import { isObject, isBasicType, isMissing } from 'object-collider';
 export class ContextUtil {
     private static OBJECT_PATH_REGEX = /^\$(\.[^.]+)*$/;
     private static FIELD_PATH_REGEX = /^\$\.[^.]+(\.[^.]+)*$/;
-    private static REFERENCE_REGEX = /^\s*\$ref:(env|cwd|ctx|secrets|entities|parameters|iteration)((\.[^.]+)+)?\s*$/;
+    private static REFERENCE_REGEX = /^\s*\$ref:(env|cwd|ctx|secrets|parameters|iteration)((\.[^.]+)+)?\s*$/;
 
     /**
      * Assign value based on paths
@@ -341,7 +341,6 @@ export class ContextUtil {
         return {
             ctx: context.ctx,
             summary: context.summary,
-            entities: context.entities,
         };
     }
 
@@ -354,13 +353,6 @@ export class ContextUtil {
             cwd: process.cwd(),
             ctx: {},
             secrets: {},
-            entities: {
-                registered: [],
-                unregistered: [],
-                created: [],
-                updated: [],
-                deleted: [],
-            },
             summary: [],
             dynamicActionHandlers: new ActionHandlersRegistry(),
             ejsTemplateDelimiters: {
@@ -397,8 +389,6 @@ export class ContextUtil {
                         target = process.env;
                     } else if (match[1] === 'secrets') {
                         target = context.secrets;
-                    } else if (match[1] === 'entities') {
-                        target = context.entities;
                     } else if (match[1] === 'parameters') {
                         target = parameters.parameters;
                     } else if (match[1] === 'iteration') {
@@ -435,7 +425,7 @@ export class ContextUtil {
         }
 
         if (Array.isArray(options)) {
-            return options.map(item => {
+            return options.map((item) => {
                 return ContextUtil.resolveReferences(item, context, parameters);
             });
         }
