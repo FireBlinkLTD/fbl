@@ -17,7 +17,7 @@ pipeline:
     secretValue: <%- secrets.password %>
 ```
 
-Available steps:
+Available actions:
 
 - [ctx](context.md#action-handler-context-values-assignment) - assign values to "ctx"
 - [secret](context.md#action-handler-secret-values-assignment) - assign values to "secret"

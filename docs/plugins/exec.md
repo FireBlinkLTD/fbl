@@ -2,7 +2,7 @@
 
 Plugin allows to invoke any shell command.
 
-Available steps:
+Available actions:
 
 - [exec](exec.md#action-handler-shell-command) - execute single command
 - [shell](exec.md#action-handler-shell-script) - execute shell script

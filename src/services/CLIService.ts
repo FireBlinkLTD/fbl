@@ -178,7 +178,7 @@ export class CLIService {
      * @param {ISummaryRecord[]} records
      */
     private static printSummary(records: ISummaryRecord[]): void {
-        const includeDuration = records.find(r => !!r.duration);
+        const includeDuration = records.find((r) => !!r.duration);
 
         const head = ['Title'.bold, 'Status'.bold];
         /* istanbul ignore else */
@@ -190,7 +190,7 @@ export class CLIService {
         console.log(
             table([
                 head,
-                ...records.map(r => {
+                ...records.map((r) => {
                     let status = r.status.trim();
 
                     if (['created', 'updated', 'passed', 'success', 'ok', 'yes'].indexOf(status.toLowerCase()) >= 0) {
@@ -343,25 +343,19 @@ export class CLIService {
         // prepare commander
         commander
             .version(require('../../../package.json').version)
-            .usage('[options] <path>')
-            .arguments('<path>')
+            .usage('[options] [path]')
+            .arguments('[path]')
             .action((path, opts) => {
                 opts.path = path;
             });
 
         // register options
-        options.forEach(option => {
+        options.forEach((option) => {
             commander.option(option.flags, option.description.join(' '), option.fn);
         });
 
         commander.on('--help', () => {
             this.printHelp(options);
-        });
-
-        commander.exitOverride(err => {
-            console.log('');
-            commander.outputHelp();
-            process.exit(1);
         });
 
         // parse environment variables
@@ -373,6 +367,12 @@ export class CLIService {
 
         for (const v of reportOptions) {
             await this.convertKVPair(v, this.globalConfig.report.options);
+        }
+
+        if (!commander.path) {
+            console.error('Error: flow descriptor file/url was not provided.\n');
+            commander.outputHelp();
+            process.exit(1);
         }
 
         this.globalConfig.report.output = commander.output || this.globalConfig.report.output;
@@ -420,7 +420,7 @@ export class CLIService {
         let maxFlagsLength = 0;
         let maxDescriptionLength = 0;
 
-        allOptions.forEach(option => {
+        allOptions.forEach((option) => {
             maxFlagsLength = Math.max(maxFlagsLength, option.flags.length);
             for (const line of option.description) {
                 maxDescriptionLength = Math.max(maxDescriptionLength, line.length);
@@ -435,7 +435,7 @@ export class CLIService {
             padding: [1, 0, 1, 0],
         });
 
-        allOptions.forEach(option => {
+        allOptions.forEach((option) => {
             ui.div(
                 {
                     text: option.flags,

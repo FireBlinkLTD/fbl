@@ -2,7 +2,7 @@
 
 Prompt user over CLI.
 
-Available steps:
+Available actions:
 
 - [confirm](prompts.md#action-handler-confirm) - request confirmation
 - [prompt](prompts.md#action-handler-prompt) - prompt to type the value
