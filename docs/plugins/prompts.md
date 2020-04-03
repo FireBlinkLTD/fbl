@@ -2,6 +2,13 @@
 
 Prompt user over CLI.
 
+Available steps:
+
+- [confirm](prompts.md#action-handler-confirm) - request confirmation
+- [prompt](prompts.md#action-handler-prompt) - prompt to type the value
+- [select](prompts.md#action-handler-select) - prompt to select one options from the list
+- [multiselect](prompts.md#action-handler-multiselect) - prompt to select multiple options from the list
+
 ## Action Handler: Confirm
 
 Ask user to confirm something.
@@ -34,7 +41,7 @@ confirm:
 
 ## Action Handler: Prompt
 
-Ask user to type the response.
+Ask user to type the value.
 
 **ID:** `com.fireblink.fbl.cli.prompts.prompt`
 

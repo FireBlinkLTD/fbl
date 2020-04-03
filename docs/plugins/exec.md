@@ -2,6 +2,12 @@
 
 Plugin allows to invoke any shell command.
 
+Available steps:
+
+- [exec](exec.md#action-handler-shell-command) - execute single command
+- [shell](exec.md#action-handler-shell-script) - execute shell script
+- [fn](exec.md#action-handler-function) - execute JS function
+
 ## Action Handler: Shell Command
 
 Invoice single shell command.

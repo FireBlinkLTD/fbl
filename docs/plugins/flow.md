@@ -4,21 +4,21 @@ Flow order control.
 
 Available steps:
 
-- [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution)
-- [parallel \(async\)](flow.md#action-handler-parallel-steps-execution)
-- [attachment](flow.md#action-handler-attached-flow)
-- [repeat](flow.md#action-handler-repeat-flow)
-- [retry](flow.md#action-handler-retry-flow)
-- [for each of](flow.md#action-handler-for-each)
-- [while](flow.md#action-handler-while)
-- [switch \(conditional\)](flow.md#action-handler-switch-flow)
-- [try-catch-finally](flow.md#action-handler-try---catch---finally-flow)
-- [sleep](flow.md#action-handler-sleep)
-- [template](flow.md#action-handler-template)
-- [virtual](flow.md#action-handler-virtual)
-- [error](flow.md#action-handler-error)
-- [echo](flow.md#action-handler-echo)
-- [void](flow.md#action-handler-void)
+- [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution) - execute sub-flows in a sequence
+- [parallel \(async\)](flow.md#action-handler-parallel-steps-execution) - execute sub-flows in parallel
+- [attachment](flow.md#action-handler-attached-flow) - execute flow described in different file / url
+- [repeat](flow.md#action-handler-repeat-flow) - repeat action multiple times
+- [retry](flow.md#action-handler-retry-flow) - repeat action till it succeeds or fails maximum number of times
+- [for each of](flow.md#action-handler-for-each) - execute action for each item in the array
+- [while](flow.md#action-handler-while) - execute action while condition satisfies
+- [switch \(conditional\)](flow.md#action-handler-switch-flow) - execute different actions based on the value
+- [try-catch-finally](flow.md#action-handler-try---catch---finally-flow) - "try / catch / finally"
+- [sleep](flow.md#action-handler-sleep) - sleep for given amount of second
+- [template](flow.md#action-handler-template) - execute action described in template string
+- [virtual](flow.md#action-handler-virtual) - create virtual action handler
+- [error](flow.md#action-handler-error) - rise error
+- [echo](flow.md#action-handler-echo) - print message to stdout
+- [void](flow.md#action-handler-void) - does nothing
 
 ## Action Handler: Sequential steps execution
 

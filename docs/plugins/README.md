@@ -6,12 +6,12 @@ Plugins is a key concept of fbl to extend its capabilities. FBL by itself distri
 
 FBL distributed with few handful plugins:
 
-- [Flow Execution Control](flow.md)
-- [Context Manipulation](context.md)
-- [Commands and Scripts Execution](exec.md)
-- [File System Operations](fs.md)
-- [Interactive User Prompts](prompts.md)
-- [Execution Reporters](reporters.md)
+- [Flow Execution Control](./flow.md)
+- [Context Manipulation](./context.md)
+- [Commands and Scripts Execution](./exec.md)
+- [File System Operations](./fs.md)
+- [Interactive User Prompts](./prompts.md)
+- [Execution Reporters](./reporters.md)
 
 ## Official FBL Plugins
 
@@ -21,6 +21,6 @@ Additionally FireBlink is open to provide services to create specific closed sou
 
 ## Plugin Development
 
-Start with creating new plugin with [project generator](https://github.com/FireBlinkLTD/fbl-plugin-template). 
+Start with creating new plugin with [project generator](https://github.com/FireBlinkLTD/fbl-plugin-template).
 
 You can also review the [source code](https://github.com/FireBlinkLTD/fbl/tree/develop/src/plugins) of the default plugins as a starting point.

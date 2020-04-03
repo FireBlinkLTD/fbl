@@ -17,6 +17,12 @@ pipeline:
     secretValue: <%- secrets.password %>
 ```
 
+Available steps:
+
+- [ctx](context.md#action-handler-context-values-assignment) - assign values to "ctx"
+- [secret](context.md#action-handler-secret-values-assignment) - assign values to "secret"
+- [summary](context.md#action-handler-summary) - report in the end of fbl execution
+
 ## Action Handler: Context Values Assignment
 
 Assign non-secret values to context `ctx` field or its child properties by [path](../GLOSSARY.md#path). General use case: register shared non-sensitive options that later will be used by actions.

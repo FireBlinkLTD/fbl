@@ -2,6 +2,15 @@
 
 File System plugin.
 
+Available steps:
+
+- [->](fs.md#action-handler-write-to-file) - write to file.
+- [mkdir](fs.md#action-handler-create-directories) - create directory
+- [rm](fs.md#action-handler-remove-file-or-directory) - remove file or directory
+- [mv](fs.md#action-handler-move-file-or-directory) - move file or directory
+- [cp](fs.md#action-handler-copy-file-or-directory) - copy file or directory
+- [find](fs.md#action-handler-find-files) - find files
+
 ## Action Handler: Write to file
 
 **ID:** `com.fireblink.fbl.fs.file.write`
@@ -77,9 +86,9 @@ Create directory \(and all parent ones if missing\).
 mkdir: /tmp/parent/child
 ```
 
-## Action Handler: Remove File or Folder
+## Action Handler: Remove File or Directory
 
-Removes file or folder for given path.
+Removes file or directory for given path.
 
 **ID:** `com.fireblink.fbl.fs.remove`
 
@@ -98,9 +107,9 @@ Removes file or folder for given path.
 rm: /tmp/parent/child
 ```
 
-## Action Handler: Move File or Folder
+## Action Handler: Move File or Directory
 
-Allows to move/rename file or entire folder.
+Allows to move/rename file or entire directory.
 
 **ID:** `com.fireblink.fbl.fs.move`
 
@@ -148,9 +157,9 @@ mv:
   to: /tmp/target
 ```
 
-## Action Handler: Copy File or Folder
+## Action Handler: Copy File or Directory
 
-Allows to copy file or entire folder.
+Allows to copy file or entire directory.
 
 **ID:** `com.fireblink.fbl.fs.copy`
 
@@ -198,7 +207,7 @@ cp:
   to: /tmp/target
 ```
 
-## Action Handler: Find files
+## Action Handler: Find Files
 
 Find files by mask.
 
