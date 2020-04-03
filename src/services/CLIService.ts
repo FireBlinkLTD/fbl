@@ -343,8 +343,8 @@ export class CLIService {
         // prepare commander
         commander
             .version(require('../../../package.json').version)
-            .usage('[options] <path>')
-            .arguments('<path>')
+            .usage('[options] [path]')
+            .arguments('[path]')
             .action((path, opts) => {
                 opts.path = path;
             });
@@ -358,12 +358,6 @@ export class CLIService {
             this.printHelp(options);
         });
 
-        commander.exitOverride((err) => {
-            console.log('');
-            commander.outputHelp();
-            process.exit(1);
-        });
-
         // parse environment variables
         await commander.parseAsync(process.argv);
 
@@ -373,6 +367,12 @@ export class CLIService {
 
         for (const v of reportOptions) {
             await this.convertKVPair(v, this.globalConfig.report.options);
+        }
+
+        if (!commander.path) {
+            console.error('Error: flow descriptor file/url was not provided.\n');
+            commander.outputHelp();
+            process.exit(1);
         }
 
         this.globalConfig.report.output = commander.output || this.globalConfig.report.output;

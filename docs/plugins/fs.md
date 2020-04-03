@@ -2,7 +2,7 @@
 
 File System plugin.
 
-Available steps:
+Available actions:
 
 - [->](fs.md#action-handler-write-to-file) - write to file.
 - [mkdir](fs.md#action-handler-create-directories) - create directory

@@ -2,7 +2,7 @@
 
 Flow order control.
 
-Available steps:
+Available actions:
 
 - [sequence \(sync\)](flow.md#action-handler-sequential-steps-execution) - execute sub-flows in a sequence
 - [parallel \(async\)](flow.md#action-handler-parallel-steps-execution) - execute sub-flows in parallel
