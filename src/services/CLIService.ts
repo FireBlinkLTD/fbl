@@ -223,7 +223,7 @@ export class CLIService {
     private async parseParameters(): Promise<void> {
         const assign: string[] = [];
         const reportOptions: string[] = [];
-        const options: { flags: string; description: string[]; fn?: Function }[] = [
+        const options: { flags: string; description: string[]; fn?: (value: string) => void }[] = [
             {
                 flags: '-p --plugin <file>',
                 description: ['Plugin file.'],
@@ -343,9 +343,10 @@ export class CLIService {
         // prepare commander
         commander
             .version(require('../../../package.json').version)
-            .arguments('<file>')
-            .action((file, opts) => {
-                opts.file = file;
+            .usage('[options] <path>')
+            .arguments('<path>')
+            .action((path, opts) => {
+                opts.path = path;
             });
 
         // register options
@@ -357,8 +358,14 @@ export class CLIService {
             this.printHelp(options);
         });
 
+        commander.exitOverride(err => {
+            console.log('');
+            commander.outputHelp();
+            process.exit(1);
+        });
+
         // parse environment variables
-        commander.parse(process.argv);
+        await commander.parseAsync(process.argv);
 
         for (const v of assign) {
             await this.convertKVPair(v, this.globalConfig.context);
@@ -366,12 +373,6 @@ export class CLIService {
 
         for (const v of reportOptions) {
             await this.convertKVPair(v, this.globalConfig.report.options);
-        }
-
-        if (!commander.file) {
-            console.error('Error: flow descriptor file was not provided.');
-            commander.outputHelp();
-            process.exit(1);
         }
 
         this.globalConfig.report.output = commander.output || this.globalConfig.report.output;
@@ -383,7 +384,7 @@ export class CLIService {
             process.exit(1);
         }
 
-        this.flowFilePath = commander.file;
+        this.flowFilePath = commander.path;
         this.globalConfig.other.noColors = !commander.colors;
         this.globalConfig.other.useCache = commander.useCache;
         this.globalConfig.other.allowUnsafePlugins = commander.unsafePlugins;
