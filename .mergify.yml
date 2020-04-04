@@ -7,3 +7,14 @@ pull_request_rules:
     actions:
       merge:
         method: merge
+
+  - name: automatic merge of dependabot PRs to develop branch
+    conditions:
+      - 'status-success=ci/circleci: build'
+      - 'base=develop'
+      - 'author=snyk-bot'
+    actions:
+      merge:
+        method: merge
+
+
