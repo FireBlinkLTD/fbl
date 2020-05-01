@@ -25,7 +25,9 @@
     "build": "rimraf ./dist/ && tsc",
     "lint": "tslint -c tslint.json src/**/*.ts test/**/*.ts index.ts",
     "prettify": "prettier src/**/*.{md,ts,json} test/**/*.{md,ts,json} index.{md,ts,json} --write --config .prettierrc.yml && tslint 'src/**/*.ts' 'test/**/*.ts' 'index.ts' --fix",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
   },
   "bin": {
     "fbl": "dist/src/cli.js"
@@ -54,7 +56,8 @@
     "tar": "6.0.1",
     "tmp-promise": "2.0.2",
     "typedi": "0.8.0",
-    "uuid": "7.0.3"
+    "uuid": "7.0.3",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
@@ -121,5 +124,6 @@
     "type": "git",
     "url": "git+https://github.com/FireBlinkLTD/fbl.git"
   },
-  "homepage": "https://fbl.fireblink.com"
+  "homepage": "https://fbl.fireblink.com",
+  "snyk": true
 }
