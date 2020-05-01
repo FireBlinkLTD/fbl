@@ -1,26 +1,23 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { Container } from 'typedi';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
 export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
-    private static actionsValidationSchema = Joi.array()
-        .items(FBL_ACTION_SCHEMA.optional())
-        .options({
-            abortEarly: true,
-        });
+    private static actionsValidationSchema = Joi.array().items(FBL_ACTION_SCHEMA.optional()).options({
+        abortEarly: true,
+    });
 
     private static validationSchema = Joi.alternatives(
         ParallelFlowActionProcessor.actionsValidationSchema,
         Joi.object()
             .keys({
-                actions: ParallelFlowActionProcessor.actionsValidationSchema,
+                actions: ParallelFlowActionProcessor.actionsValidationSchema.required(),
                 shareParameters: Joi.boolean(),
             })
-            .requiredKeys('actions')
             .required()
             .options({
                 allowUnknown: false,
@@ -69,7 +66,7 @@ export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
         await Promise.all(promises);
 
         // register snapshots in the order of their presence
-        snapshots.forEach(childSnapshot => {
+        snapshots.forEach((childSnapshot) => {
             this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
     }

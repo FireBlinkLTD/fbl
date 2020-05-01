@@ -1,26 +1,15 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FSUtil, ContextUtil } from '../../utils';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 import { ActionError } from '../../errors';
 
 export class FindActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        include: Joi.array()
-            .items(
-                Joi.string()
-                    .min(1)
-                    .required(),
-            )
-            .min(1)
-            .required(),
+        include: Joi.array().items(Joi.string().min(1).required()).min(1).required(),
 
-        exclude: Joi.array().items(
-            Joi.string()
-                .min(1)
-                .required(),
-        ),
+        exclude: Joi.array().items(Joi.string().min(1).required()),
 
         result: Joi.object({
             baseDir: Joi.string().min(1),
@@ -51,7 +40,7 @@ export class FindActionProcessor extends ActionProcessor {
         if (this.options.result.baseDir) {
             const baseDir = FSUtil.getAbsolutePath(this.options.result.baseDir, this.snapshot.wd);
 
-            result = result.map(p => {
+            result = result.map((p) => {
                 if (!p.startsWith(baseDir)) {
                     throw new ActionError(
                         `Unable to find baseDir "${this.options.result.baseDir}" in path "${p}"`,

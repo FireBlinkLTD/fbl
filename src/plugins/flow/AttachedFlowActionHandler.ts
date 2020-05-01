@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { Container } from 'typedi';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FBLService, FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IFlowLocationOptions } from '../../interfaces';
 import { FSUtil } from '../../utils';
@@ -9,9 +9,7 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.alternatives(
         Joi.string().min(1),
         Joi.object({
-            path: Joi.string()
-                .min(1)
-                .required(),
+            path: Joi.string().min(1).required(),
             http: Joi.object({
                 headers: Joi.object().min(1),
             }),

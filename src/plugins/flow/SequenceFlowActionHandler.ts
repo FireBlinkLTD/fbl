@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { Container } from 'typedi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -16,10 +16,9 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
         SequenceFlowActionProcessor.actionsValidationSchema,
         Joi.object()
             .keys({
-                actions: SequenceFlowActionProcessor.actionsValidationSchema,
+                actions: SequenceFlowActionProcessor.actionsValidationSchema.required(),
                 shareParameters: Joi.boolean(),
             })
-            .requiredKeys('actions')
             .required()
             .options({
                 allowUnknown: false,

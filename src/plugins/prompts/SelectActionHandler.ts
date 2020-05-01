@@ -1,24 +1,21 @@
 import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { ContextUtil } from '../../utils';
 import { BasePromptActionProcessor } from './BasePromptActionProcessor';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
 export class SelectActionProcessor extends BasePromptActionProcessor {
     private static validationSchema = Joi.object({
-        message: Joi.string()
-            .required()
-            .min(1),
+        message: Joi.string().required().min(1),
 
         options: Joi.array()
-            .items(Joi.alternatives(
-                Joi.string(), 
-                Joi.number()),
+            .items(
+                Joi.alternatives(Joi.string(), Joi.number()),
                 Joi.object({
                     title: Joi.string().required().min(1),
-                    value: Joi.any().required()
-                })
+                    value: Joi.any().required(),
+                }),
             )
             .min(1)
             .required(),
@@ -42,7 +39,7 @@ export class SelectActionProcessor extends BasePromptActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const choices = this.options.options.map((o: string | number | {title: string, value: any}) => {
+        const choices = this.options.options.map((o: string | number | { title: string; value: any }) => {
             if (typeof o === 'string' || typeof o === 'number') {
                 return {
                     title: o.toString(),
@@ -50,17 +47,17 @@ export class SelectActionProcessor extends BasePromptActionProcessor {
                 };
             }
 
-            const obj = <{title: string, value: any}> o;
+            const obj = <{ title: string; value: any }>o;
 
             return {
                 title: obj.title,
                 value: obj.value,
-            };                                
+            };
         });
 
         let initial: number | undefined;
         if (this.options.default !== undefined) {
-            const match = choices.find((c: {title: string, value: any}) => c.value === this.options.default);
+            const match = choices.find((c: { title: string; value: any }) => c.value === this.options.default);
             initial = choices.indexOf(match);
         }
 

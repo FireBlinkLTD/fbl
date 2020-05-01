@@ -1,14 +1,12 @@
 import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { BaseExecutableActionProcessor } from './BaseExecutableActionProcessor';
 import { FBL_ASSIGN_TO_SCHEMA } from '../../schemas';
 
 export class ExecActionProcessor extends BaseExecutableActionProcessor {
     private static validationSchema = Joi.object({
-        command: Joi.string()
-            .min(1)
-            .required(),
+        command: Joi.string().min(1).required(),
         args: Joi.array().items(Joi.alternatives(Joi.string().min(1), Joi.number())),
         options: Joi.object({
             stdout: Joi.boolean(),

@@ -8,7 +8,7 @@ import {
     IActionHandlerMetadata,
 } from '../../../src';
 import { deepStrictEqual } from 'assert';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

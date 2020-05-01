@@ -1,12 +1,10 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FSUtil } from '../../utils';
 
 export class RemovePathActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required();
+    private static validationSchema = Joi.string().min(1).required();
 
     /**
      * @inheritdoc

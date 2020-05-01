@@ -1,10 +1,10 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FlowService } from '../../services';
 import { Container } from 'typedi';
 import { Validator } from 'jsonschema';
-import { AnySchema } from 'joi';
+import { AnySchema } from '@hapi/joi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { collide, ICollideModifiers } from 'object-collider';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
@@ -24,29 +24,26 @@ const createJsonSchema = (): AnySchema => {
         maxLength: Joi.number(),
         minLength: Joi.number(),
         pattern: Joi.string(),
-        additionalItems: Joi.alternatives(Joi.boolean(), Joi.lazy(createJsonSchema)),
-        items: Joi.alternatives(Joi.lazy(createJsonSchema), Joi.array().items(Joi.lazy(createJsonSchema))),
+        additionalItems: Joi.alternatives(Joi.boolean(), createJsonSchema),
+        items: Joi.alternatives(createJsonSchema, Joi.array().items(createJsonSchema)),
         maxItems: Joi.number(),
         minItems: Joi.number(),
         uniqueItems: Joi.boolean(),
         maxProperties: Joi.number(),
         minProperties: Joi.number(),
         required: Joi.array().items(Joi.string()),
-        additionalProperties: Joi.alternatives(Joi.boolean(), Joi.lazy(createJsonSchema)),
-        definitions: Joi.object().pattern(/^/, Joi.lazy(createJsonSchema)),
-        properties: Joi.object().pattern(/^/, Joi.lazy(createJsonSchema)),
-        patternProperties: Joi.object().pattern(/^/, Joi.lazy(createJsonSchema)),
-        dependencies: Joi.object().pattern(
-            /^/,
-            Joi.alternatives(Joi.lazy(createJsonSchema), Joi.array().items(Joi.string())),
-        ),
+        additionalProperties: Joi.alternatives(Joi.boolean(), createJsonSchema),
+        definitions: Joi.object().pattern(/^/, createJsonSchema),
+        properties: Joi.object().pattern(/^/, createJsonSchema),
+        patternProperties: Joi.object().pattern(/^/, createJsonSchema),
+        dependencies: Joi.object().pattern(/^/, Joi.alternatives(createJsonSchema, Joi.array().items(Joi.string()))),
         enum: Joi.array().items(Joi.any()),
         type: Joi.alternatives(Joi.string(), Joi.array().items(Joi.string())),
         format: Joi.string(),
-        allOf: Joi.array().items(Joi.lazy(createJsonSchema)),
-        anyOf: Joi.array().items(Joi.lazy(createJsonSchema)),
-        oneOf: Joi.array().items(Joi.lazy(createJsonSchema)),
-        not: Joi.lazy(createJsonSchema),
+        allOf: Joi.array().items(createJsonSchema),
+        anyOf: Joi.array().items(createJsonSchema),
+        oneOf: Joi.array().items(createJsonSchema),
+        not: createJsonSchema,
     });
 };
 
@@ -58,9 +55,7 @@ interface IVirtualDefaults {
 
 export class VirtualFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        id: Joi.string()
-            .min(1)
-            .required(),
+        id: Joi.string().min(1).required(),
         aliases: Joi.array().items(Joi.string().min(1)),
         defaults: Joi.object({
             values: Joi.any().required(),
@@ -242,7 +237,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
             if (!result.valid) {
                 throw new ActionError(
                     result.errors
-                        .map(e => {
+                        .map((e) => {
                             let key = 'value';
 
                             /* istanbul ignore else */

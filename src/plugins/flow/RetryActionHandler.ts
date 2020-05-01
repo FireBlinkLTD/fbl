@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { Container } from 'typedi';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA, FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
@@ -10,9 +10,7 @@ import { UNEXPECTED } from '../../errors';
 export class RetryActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
         action: FBL_ACTION_SCHEMA,
-        attempts: Joi.number()
-            .required()
-            .min(1),
+        attempts: Joi.number().required().min(1),
         errorCode: Joi.object({
             assignTo: FBL_ASSIGN_TO_SCHEMA,
             pushTo: FBL_PUSH_TO_SCHEMA,

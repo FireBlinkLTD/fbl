@@ -1,15 +1,11 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, ISummaryRecord } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 
 export class SummaryRecordActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        title: Joi.string()
-            .min(1)
-            .required(),
-        status: Joi.string()
-            .min(1)
-            .required(),
+        title: Joi.string().min(1).required(),
+        status: Joi.string().min(1).required(),
         duration: Joi.string().min(1),
         payload: Joi.any(),
     })

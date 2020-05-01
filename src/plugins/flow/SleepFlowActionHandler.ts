@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 
 export class SleepFlowActionProcessor extends ActionProcessor {
@@ -19,7 +19,7 @@ export class SleepFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        await new Promise<void>(resolve => setTimeout(resolve, Number(this.options) * 1000));
+        await new Promise<void>((resolve) => setTimeout(resolve, Number(this.options) * 1000));
     }
 }
 

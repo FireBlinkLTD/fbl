@@ -1,11 +1,9 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 
 export class EchoActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.any()
-        .required()
-        .options({ abortEarly: true });
+    private static validationSchema = Joi.any().required().options({ abortEarly: true });
 
     /**
      * @inheritdoc

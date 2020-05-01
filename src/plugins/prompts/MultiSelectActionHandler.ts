@@ -1,23 +1,19 @@
 import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { ContextUtil } from '../../utils';
 import { BasePromptActionProcessor } from './BasePromptActionProcessor';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
 export class MultiSelectActionProcessor extends BasePromptActionProcessor {
     private static validationSchema = Joi.object({
-        message: Joi.string()
-            .required()
-            .min(1),
+        message: Joi.string().required().min(1),
 
         options: Joi.array()
             .items(
                 Joi.alternatives(Joi.string(), Joi.number()),
                 Joi.object({
-                    title: Joi.string()
-                        .required()
-                        .min(1),
+                    title: Joi.string().required().min(1),
                     value: Joi.any().required(),
                 }),
             )

@@ -1,4 +1,4 @@
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { Container } from 'typedi';
 
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';

@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { writeFile } from 'fs';
 import { promisify } from 'util';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';

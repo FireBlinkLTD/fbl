@@ -1,4 +1,4 @@
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { IContext } from '../interfaces';
 import { ActionSnapshot } from './ActionSnapshot';
 import { IDelegatedParameters } from '../interfaces/IDelegatedParameters';
@@ -18,9 +18,10 @@ export abstract class ActionProcessor {
     async validate(): Promise<void> {
         const schema = this.getValidationSchema();
         if (schema) {
-            const result = Joi.validate(this.options, schema);
-            if (result.error) {
-                throw new Error(result.error.details.map(d => d.message).join('\n'));
+            try {
+                Joi.assert(this.options, schema);
+            } catch (e) {
+                throw new Error((<Joi.ValidationError>e).details.map((d) => d.message).join('\n'));
             }
         }
     }

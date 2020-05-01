@@ -1,16 +1,13 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import Container from 'typedi';
 import { TemplateUtilitiesRegistry } from '../../services';
 import { isMissing } from 'object-collider';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export class FunctionActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required()
-        .options({ abortEarly: true });
+    private static validationSchema = Joi.string().min(1).required().options({ abortEarly: true });
 
     private static functionResultValidationSchema = Joi.object().keys({
         cwd: Joi.string().min(1),
@@ -18,9 +15,7 @@ export class FunctionActionProcessor extends ActionProcessor {
         secrets: Joi.object(),
         parameters: Joi.any(),
         iteration: Joi.object().keys({
-            index: Joi.number()
-                .min(0)
-                .required(),
+            index: Joi.number().min(0).required(),
             value: Joi.any(),
             key: Joi.string(),
         }),
@@ -62,10 +57,11 @@ export class FunctionActionProcessor extends ActionProcessor {
         );
 
         if (result) {
-            const validationResult = Joi.validate(result, FunctionActionProcessor.functionResultValidationSchema);
-            if (validationResult.error) {
+            try {
+                Joi.assert(result, FunctionActionProcessor.functionResultValidationSchema);
+            } catch (e) {
                 throw new ActionError(
-                    validationResult.error.details.map(d => d.message).join('\n'),
+                    (<Joi.ValidationError>e).details.map((d) => d.message).join('\n'),
                     INVALID_CONFIGURATION,
                 );
             }

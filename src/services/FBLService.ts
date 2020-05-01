@@ -1,6 +1,6 @@
 import Container, { Service } from 'typedi';
 import { IContext, IDelegatedParameters, IFlow, IPlugin, IReporter } from '../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FlowService } from './index';
 import { ActionSnapshot } from '../models';
 import { ActionHandlersRegistry } from './ActionHandlersRegistry';
@@ -108,13 +108,13 @@ export class FBLService {
         this.processedPlugins[plugin.name] = plugin.version;
 
         if (plugin.actionHandlers) {
-            plugin.actionHandlers.forEach(actionHandler => {
+            plugin.actionHandlers.forEach((actionHandler) => {
                 this.actionHandlersRegistry.register(actionHandler, plugin);
             });
         }
 
         if (plugin.reporters) {
-            plugin.reporters.forEach(reporter => {
+            plugin.reporters.forEach((reporter) => {
                 this.reporters[reporter.getName()] = reporter;
             });
         }
@@ -129,7 +129,7 @@ export class FBLService {
      * @param {IPlugin[]} plugins
      */
     registerPlugins(plugins: IPlugin[]): void {
-        plugins.forEach(plugin => {
+        plugins.forEach((plugin) => {
             this.registerPlugin(plugin);
         });
     }
@@ -291,7 +291,7 @@ export class FBLService {
 
         if (errors.length) {
             if (this.allowUnsafePlugins) {
-                errors.forEach(err => console.error(err));
+                errors.forEach((err) => console.error(err));
             } else {
                 throw new Error(errors.join('\n'));
             }
@@ -353,7 +353,7 @@ export class FBLService {
 
         if (errors.length) {
             if (this.allowUnsafeFlows) {
-                errors.forEach(err => console.error(err));
+                errors.forEach((err) => console.error(err));
             } else {
                 throw new Error(errors.join('\n'));
             }
@@ -375,9 +375,10 @@ export class FBLService {
         context: IContext,
         parameters: IDelegatedParameters,
     ): Promise<ActionSnapshot> {
-        const result = Joi.validate(flow, FBL_FLOW_SCHEMA);
-        if (result.error) {
-            throw new Error(result.error.details.map(d => d.message).join('\n'));
+        try {
+            Joi.assert(flow, FBL_FLOW_SCHEMA);
+        } catch (e) {
+            throw new Error((<Joi.ValidationError>e).details.map((d) => d.message).join('\n'));
         }
 
         await this.validateFlowRequirements(flow, wd);

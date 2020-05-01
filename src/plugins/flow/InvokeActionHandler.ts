@@ -1,7 +1,7 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import Container from 'typedi';
 import { FlowService } from '../../services';
 

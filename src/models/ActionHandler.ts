@@ -1,9 +1,10 @@
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 
 import { IContext, IActionHandlerMetadata, IDelegatedParameters } from '../interfaces';
 import { ActionSnapshot } from './ActionSnapshot';
 import { ActionProcessor } from './ActionProcessor';
 import { CompatibilityActionProcessor } from './CompatibilityActionProcessor';
+import { INVALID_CONFIGURATION, ActionError } from '../errors';
 
 /**
  * Context variables resolver
@@ -61,9 +62,13 @@ export abstract class ActionHandler {
         const schema = this.getValidationSchema();
         /* istanbul ignore next */
         if (schema) {
-            const result = Joi.validate(options, schema);
-            if (result.error) {
-                throw new Error(result.error.details.map(d => d.message).join('\n'));
+            try {
+                Joi.assert(options, schema);
+            } catch (e) {
+                throw new ActionError(
+                    (<Joi.ValidationError>e).details.map((d) => d.message).join('\n'),
+                    INVALID_CONFIGURATION,
+                );
             }
         }
     }

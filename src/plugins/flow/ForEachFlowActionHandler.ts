@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { FlowService } from '../../services';
 import { Container } from 'typedi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
@@ -109,7 +109,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
         await Promise.all(promises);
 
         // register snapshots in the order of their presence
-        snapshots.forEach(childSnapshot => {
+        snapshots.forEach((childSnapshot) => {
             this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
     }
