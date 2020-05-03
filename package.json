@@ -42,7 +42,7 @@
     "commander": "5.0.0",
     "deep-object-diff": "1.1.0",
     "ejs": "3.0.2",
-    "ejs-lint": "1.0.1",
+    "ejs-lint": "1.1.0",
     "glob-promise": "3.4.0",
     "got": "10.7.0",
     "humanize-duration": "3.22.0",
