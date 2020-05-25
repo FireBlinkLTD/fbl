@@ -57,7 +57,7 @@
     "tmp-promise": "2.0.2",
     "typedi": "0.8.0",
     "uuid": "7.0.3",
-    "snyk": "^1.316.1"
+    "snyk": "^1.317.0"
   },
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
