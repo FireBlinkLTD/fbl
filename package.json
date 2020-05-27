@@ -54,7 +54,7 @@
     "semver": "7.3.2",
     "table": "5.4.6",
     "tar": "6.0.2",
-    "tmp-promise": "2.0.2",
+    "tmp-promise": "2.1.1",
     "typedi": "0.8.0",
     "uuid": "7.0.3",
     "snyk": "^1.317.0"
