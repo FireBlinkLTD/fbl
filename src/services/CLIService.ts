@@ -138,7 +138,6 @@ export class CLIService {
         }
 
         const snapshot = await this.fbl.execute(source, flow.wd, flow.flow, context, parameters);
-
         if (this.globalConfig.report.output) {
             finalContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
         }

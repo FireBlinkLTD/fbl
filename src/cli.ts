@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { CLIService } from './services';
 import { Container } from 'typedi';
 

@@ -101,19 +101,19 @@ class CliTestSuite {
                 nodeArgs,
                 wd || join(__dirname, '../../'),
                 {
-                    stdout: data => {
+                    stdout: (data) => {
                         // console.log('stdout:', data.toString().trim());
                         stdout.push(data.toString().trim());
                     },
 
-                    stderr: data => {
+                    stderr: (data) => {
                         // console.log('stderr:', data.toString().trim());
                         stderr.push(data.toString().trim());
                     },
 
-                    process: process => {
+                    process: (process) => {
                         if (answer) {
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 process.stdin.write(answer);
                                 process.stdin.end();
                             }, 100);
@@ -416,6 +416,7 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(['--no-colors', flowFile]);
+        console.log(result);
         assert.strictEqual(result.code, 1);
     }
 

@@ -17,6 +17,7 @@ yarn-error.log
 
 dist/test/
 
+docs/
 _book/
 book.json
 .gitbook/
