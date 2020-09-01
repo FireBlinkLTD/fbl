@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, ISummaryRecord } from '../../interfaces';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 
 export class SummaryRecordActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
@@ -15,7 +15,7 @@ export class SummaryRecordActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SummaryRecordActionProcessor.validationSchema;
     }
 

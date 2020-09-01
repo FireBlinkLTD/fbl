@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 
 export class SleepFlowActionProcessor extends ActionProcessor {
@@ -11,7 +11,7 @@ export class SleepFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SleepFlowActionProcessor.validationSchema;
     }
 

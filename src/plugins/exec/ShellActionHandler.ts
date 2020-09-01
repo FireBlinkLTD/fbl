@@ -1,6 +1,6 @@
 import { ActionSnapshot, ActionProcessor, ActionHandler } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
 import { BaseExecutableActionProcessor } from './BaseExecutableActionProcessor';
@@ -27,7 +27,7 @@ export class SheelActionProcessor extends BaseExecutableActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SheelActionProcessor.validationSchema;
     }
 

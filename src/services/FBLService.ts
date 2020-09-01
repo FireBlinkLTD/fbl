@@ -1,6 +1,6 @@
 import Container, { Service } from 'typedi';
 import { IContext, IDelegatedParameters, IFlow, IPlugin, IReporter } from '../interfaces';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { FlowService } from './index';
 import { ActionSnapshot } from '../models';
 import { ActionHandlersRegistry } from './ActionHandlersRegistry';

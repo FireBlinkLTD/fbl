@@ -1,7 +1,7 @@
 import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { Validator } from 'jsonschema';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { ContextUtil } from '../../utils';
 import { BasePromptActionProcessor } from './BasePromptActionProcessor';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
@@ -38,7 +38,7 @@ export class PromptActionProcessor extends BasePromptActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return PromptActionProcessor.validationSchema;
     }
 

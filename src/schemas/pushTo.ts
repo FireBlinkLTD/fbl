@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { FBL_ASSIGN_TO_OBJECT_SCHEMA, FBL_ASSIGN_TO_STRING_SCHEMA } from './assignTo';
 
 const FBL_PUSH_TO_OBJECT_SCHEMA = FBL_ASSIGN_TO_OBJECT_SCHEMA.keys({

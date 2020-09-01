@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { IContext } from '../interfaces';
 import { ActionSnapshot } from './ActionSnapshot';
 import { IDelegatedParameters } from '../interfaces/IDelegatedParameters';
@@ -30,7 +30,7 @@ export abstract class ActionProcessor {
      * Get Joi schema to validate options with
      * Return null if no validation should be applied, though it is not recommended.
      */
-    protected getValidationSchema(): Joi.SchemaLike | null {
+    protected getValidationSchema(): Joi.Schema | null {
         return null;
     }
 

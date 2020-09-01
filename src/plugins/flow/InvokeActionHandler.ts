@@ -1,7 +1,7 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import Container from 'typedi';
 import { FlowService } from '../../services';
 
@@ -11,7 +11,7 @@ export class InvokeActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return InvokeActionProcessor.validationSchema;
     }
 

@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { FlowService } from '../../services';
 import { Container } from 'typedi';
@@ -19,7 +19,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return RepeatFlowActionProcessor.validationSchema;
     }
 

@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { Container } from 'typedi';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { FBLService, FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IFlowLocationOptions } from '../../interfaces';
 import { FSUtil } from '../../utils';
@@ -23,7 +23,7 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return AttachedFlowActionProcessor.validationSchema;
     }
 

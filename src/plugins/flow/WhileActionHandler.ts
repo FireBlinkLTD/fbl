@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { Container } from 'typedi';
 
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
@@ -22,7 +22,7 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return WhileActionProcessor.validationSchema;
     }
 

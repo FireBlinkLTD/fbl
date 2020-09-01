@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { FBL_ACTION_SCHEMA } from './action';
 
 const FBL_FLOW_SCHEMA = Joi.object({

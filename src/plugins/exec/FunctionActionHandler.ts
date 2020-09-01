@@ -1,6 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import Container from 'typedi';
 import { TemplateUtilitiesRegistry } from '../../services';
 import { isMissing } from 'object-collider';
@@ -24,7 +24,7 @@ export class FunctionActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return FunctionActionProcessor.validationSchema;
     }
 

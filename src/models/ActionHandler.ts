@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 
 import { IContext, IActionHandlerMetadata, IDelegatedParameters } from '../interfaces';
 import { ActionSnapshot } from './ActionSnapshot';
@@ -77,7 +77,7 @@ export abstract class ActionHandler {
      * Get Joi schema to validate options with
      * @deprecated
      */
-    public getValidationSchema(): Joi.SchemaLike | null /** istanbul ignore next  */ {
+    public getValidationSchema(): Joi.Schema | null /** istanbul ignore next  */ {
         return null;
     }
 

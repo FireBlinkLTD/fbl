@@ -1,5 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { writeFile } from 'fs';
 import { promisify } from 'util';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -27,7 +27,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return WriteToFileActionProcessor.validationSchema;
     }
 

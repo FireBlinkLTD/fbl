@@ -416,7 +416,6 @@ class CliTestSuite {
         await promisify(writeFile)(flowFile, dump(flow), 'utf8');
 
         const result = await CliTestSuite.exec(['--no-colors', flowFile]);
-        console.log(result);
         assert.strictEqual(result.code, 1);
     }
 

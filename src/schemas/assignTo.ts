@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 
 const FBL_ASSIGN_TO_OBJECT_SCHEMA = Joi.object({
     ctx: Joi.string()

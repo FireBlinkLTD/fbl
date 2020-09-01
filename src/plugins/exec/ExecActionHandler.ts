@@ -1,6 +1,6 @@
 import { ActionSnapshot, ActionHandler, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { BaseExecutableActionProcessor } from './BaseExecutableActionProcessor';
 import { FBL_ASSIGN_TO_SCHEMA } from '../../schemas';
 
@@ -23,7 +23,7 @@ export class ExecActionProcessor extends BaseExecutableActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return ExecActionProcessor.validationSchema;
     }
 

@@ -8,7 +8,7 @@ import {
     IActionHandlerMetadata,
 } from '../../../src';
 import { deepStrictEqual } from 'assert';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -57,7 +57,7 @@ class CompatibilityActionHandler extends ActionHandler {
         await super.validate(options, context, snapshot, parameters);
     }
 
-    public getValidationSchema(): Joi.SchemaLike | null {
+    public getValidationSchema(): Joi.Schema | null {
         this.getValidationSchemaCalled = true;
 
         return null;

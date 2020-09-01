@@ -1,4 +1,4 @@
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { Container } from 'typedi';
 import { safeLoad } from 'js-yaml';
 
@@ -30,7 +30,7 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return BaseValuesAssignmentActionProcessor.validationSchema;
     }
 
