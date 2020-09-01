@@ -16,9 +16,9 @@ import { homedir } from 'os';
 import { LogService } from './LogService';
 import { isMissing } from 'object-collider';
 import { FBLService } from './FBLService';
+import { v5 as uuidv5 } from 'uuid';
 
 const ejsLint = require('ejs-lint');
-const uuidv5 = require('uuid/v5');
 
 @Service()
 export class FlowService {
@@ -288,9 +288,9 @@ export class FlowService {
         let contents = await promisify(readdir)(path);
 
         // filter all files and folders that start with "."
-        contents = contents.filter(fileOrDir => !fileOrDir.startsWith('.'));
+        contents = contents.filter((fileOrDir) => !fileOrDir.startsWith('.'));
 
-        const match = contents.find(dirOrFile => {
+        const match = contents.find((dirOrFile) => {
             return dirOrFile === 'index.yml' || dirOrFile === 'index.yaml';
         });
 
@@ -524,10 +524,10 @@ export class FlowService {
         const lines: string[] = [];
         const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
         const doubleQuotesRegEx = /''/g;
-        tpl.split('\n').forEach(line => {
+        tpl.split('\n').forEach((line) => {
             if (line.indexOf("''") !== -1) {
                 // we only want to replace '' to ' inside the EJS template
-                line = line.replace(ejsTemplateRegEx, function(match, g1): string {
+                line = line.replace(ejsTemplateRegEx, function (match, g1): string {
                     return `<${delimiter}${g1.replace(doubleQuotesRegEx, "'")}${delimiter}>`;
                 });
             }
