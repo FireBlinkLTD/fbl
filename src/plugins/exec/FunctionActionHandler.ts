@@ -24,7 +24,7 @@ export class FunctionActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return FunctionActionProcessor.validationSchema;
     }
 
@@ -57,10 +57,11 @@ export class FunctionActionProcessor extends ActionProcessor {
         );
 
         if (result) {
-            const validationResult = Joi.validate(result, FunctionActionProcessor.functionResultValidationSchema);
-            if (validationResult.error) {
+            try {
+                Joi.assert(result, FunctionActionProcessor.functionResultValidationSchema);
+            } catch (e) {
                 throw new ActionError(
-                    validationResult.error.details.map((d) => d.message).join('\n'),
+                    (<Joi.ValidationError>e).details.map((d) => d.message).join('\n'),
                     INVALID_CONFIGURATION,
                 );
             }

@@ -10,12 +10,8 @@ import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
 export class SheelActionProcessor extends BaseExecutableActionProcessor {
     private static validationSchema = Joi.object({
-        executable: Joi.string()
-            .min(1)
-            .required(),
-        script: Joi.string()
-            .min(1)
-            .required(),
+        executable: Joi.string().min(1).required(),
+        script: Joi.string().min(1).required(),
         options: Joi.object({
             stdout: Joi.boolean(),
             stderr: Joi.boolean(),
@@ -31,7 +27,7 @@ export class SheelActionProcessor extends BaseExecutableActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SheelActionProcessor.validationSchema;
     }
 

@@ -11,7 +11,7 @@ export class InvokeActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return InvokeActionProcessor.validationSchema;
     }
 

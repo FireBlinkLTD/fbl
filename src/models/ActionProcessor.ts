@@ -18,9 +18,10 @@ export abstract class ActionProcessor {
     async validate(): Promise<void> {
         const schema = this.getValidationSchema();
         if (schema) {
-            const result = Joi.validate(this.options, schema);
-            if (result.error) {
-                throw new Error(result.error.details.map(d => d.message).join('\n'));
+            try {
+                Joi.assert(this.options, schema);
+            } catch (e) {
+                throw new Error((<Joi.ValidationError>e).details.map((d) => d.message).join('\n'));
             }
         }
     }
@@ -29,7 +30,7 @@ export abstract class ActionProcessor {
      * Get Joi schema to validate options with
      * Return null if no validation should be applied, though it is not recommended.
      */
-    protected getValidationSchema(): Joi.SchemaLike | null {
+    protected getValidationSchema(): Joi.Schema | null {
         return null;
     }
 

@@ -22,7 +22,7 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return WhileActionProcessor.validationSchema;
     }
 

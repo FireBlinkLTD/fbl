@@ -16,10 +16,9 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
         SequenceFlowActionProcessor.actionsValidationSchema,
         Joi.object()
             .keys({
-                actions: SequenceFlowActionProcessor.actionsValidationSchema,
+                actions: SequenceFlowActionProcessor.actionsValidationSchema.required(),
                 shareParameters: Joi.boolean(),
             })
-            .requiredKeys('actions')
             .required()
             .options({
                 allowUnknown: false,
@@ -30,7 +29,7 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SequenceFlowActionProcessor.validationSchema;
     }
 

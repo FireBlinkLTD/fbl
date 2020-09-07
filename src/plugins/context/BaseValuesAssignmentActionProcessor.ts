@@ -13,10 +13,8 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
             /^\$(\.[^.]+)*$/,
             Joi.object({
                 inline: Joi.any(),
-                files: Joi.array()
-                    .items(Joi.string())
-                    .min(1),
-                priority: Joi.string().valid(['inline', 'files']),
+                files: Joi.array().items(Joi.string()).min(1),
+                priority: Joi.string().valid('inline', 'files'),
                 override: Joi.boolean(),
                 push: Joi.boolean(),
                 children: Joi.boolean(),
@@ -32,7 +30,7 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return BaseValuesAssignmentActionProcessor.validationSchema;
     }
 
@@ -59,10 +57,11 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
         await super.validate();
 
         if (this.options.$ && this.options.$.inline) {
-            const validationResult = Joi.validate(this.options.$.inline, Joi.object().required());
-            if (validationResult.error) {
+            try {
+                Joi.assert(this.options.$.inline, Joi.object().required());
+            } catch (e) {
                 throw new ActionError(
-                    validationResult.error.details.map(d => d.message).join('\n'),
+                    (<Joi.ValidationError>e).details.map((d) => d.message).join('\n'),
                     INVALID_CONFIGURATION,
                 );
             }

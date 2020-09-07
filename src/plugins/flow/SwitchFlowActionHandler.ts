@@ -8,10 +8,7 @@ import { FBL_ACTION_SCHEMA } from '../../schemas';
 export class SwitchFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
         value: Joi.alternatives(Joi.string(), Joi.number(), Joi.boolean()).required(),
-        is: Joi.object()
-            .pattern(/^/, FBL_ACTION_SCHEMA)
-            .min(1)
-            .required(),
+        is: Joi.object().pattern(/^/, FBL_ACTION_SCHEMA).min(1).required(),
         else: FBL_ACTION_SCHEMA.optional(),
     })
         .required()
@@ -20,7 +17,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SwitchFlowActionProcessor.validationSchema;
     }
 

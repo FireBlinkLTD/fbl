@@ -26,7 +26,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return TryCatchFinallyFlowActionProcessor.validationSchema;
     }
 

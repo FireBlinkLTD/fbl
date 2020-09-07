@@ -27,7 +27,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return WriteToFileActionProcessor.validationSchema;
     }
 

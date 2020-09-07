@@ -4,14 +4,12 @@ import * as Joi from 'joi';
 import { FSUtil } from '../../utils';
 
 export class RemovePathActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required();
+    private static validationSchema = Joi.string().min(1).required();
 
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return RemovePathActionProcessor.validationSchema;
     }
 

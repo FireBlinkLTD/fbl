@@ -8,17 +8,13 @@ import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
 export class PromptActionProcessor extends BasePromptActionProcessor {
     private static validationSchema = Joi.object({
-        message: Joi.string()
-            .required()
-            .min(1),
+        message: Joi.string().required().min(1),
         password: Joi.boolean(),
 
         default: Joi.alternatives(Joi.string(), Joi.number()),
 
         schema: Joi.object({
-            type: Joi.string()
-                .valid(['string', 'integer', 'number'])
-                .required(),
+            type: Joi.string().valid('string', 'integer', 'number').required(),
 
             // when type is "string"
             pattern: Joi.string().min(1),
@@ -42,7 +38,7 @@ export class PromptActionProcessor extends BasePromptActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return PromptActionProcessor.validationSchema;
     }
 

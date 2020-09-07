@@ -7,7 +7,7 @@ import {
 } from '../../../src';
 import { DummyActionProcessor } from './DummyActionProcessor';
 
-const uuidv4 = require('uuid/v4');
+import { v4 as uuidv4 } from 'uuid';
 
 export class DummyActionHandler extends ActionHandler {
     public shouldSkipExecution = false;

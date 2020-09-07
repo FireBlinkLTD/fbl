@@ -57,7 +57,7 @@ class CompatibilityActionHandler extends ActionHandler {
         await super.validate(options, context, snapshot, parameters);
     }
 
-    public getValidationSchema(): Joi.SchemaLike | null {
+    public getValidationSchema(): Joi.Schema | null {
         this.getValidationSchemaCalled = true;
 
         return null;

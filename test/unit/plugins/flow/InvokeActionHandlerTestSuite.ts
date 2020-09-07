@@ -5,7 +5,6 @@ import { InvokeActionHandler } from '../../../../src/plugins/flow/InvokeActionHa
 import Container from 'typedi';
 import { ActionHandlersRegistry, IPlugin } from '../../../../src';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
-import { assert } from 'joi';
 import { strictEqual } from 'assert';
 
 const chai = require('chai');

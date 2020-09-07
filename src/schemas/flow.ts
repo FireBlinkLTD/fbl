@@ -6,12 +6,8 @@ const FBL_FLOW_SCHEMA = Joi.object({
 
     requires: Joi.object({
         fbl: Joi.string().min(1),
-        plugins: Joi.object()
-            .min(1)
-            .pattern(/^.*$/, Joi.string().min(1)),
-        applications: Joi.array()
-            .items(Joi.string().min(1))
-            .min(1),
+        plugins: Joi.object().min(1).pattern(/^.*$/, Joi.string().min(1)),
+        applications: Joi.array().items(Joi.string().min(1)).min(1),
     }),
 
     description: Joi.string(),

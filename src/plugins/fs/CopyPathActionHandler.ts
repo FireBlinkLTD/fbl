@@ -6,12 +6,8 @@ import { sep } from 'path';
 
 export class CopyPathActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        from: Joi.string()
-            .min(1)
-            .required(),
-        to: Joi.string()
-            .min(1)
-            .required(),
+        from: Joi.string().min(1).required(),
+        to: Joi.string().min(1).required(),
     })
         .required()
         .options({
@@ -21,7 +17,7 @@ export class CopyPathActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return CopyPathActionProcessor.validationSchema;
     }
 

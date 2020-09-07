@@ -6,18 +6,14 @@ import { sep } from 'path';
 
 export class MovePathActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        from: Joi.string()
-            .min(1)
-            .required(),
-        to: Joi.string()
-            .min(1)
-            .required(),
+        from: Joi.string().min(1).required(),
+        to: Joi.string().min(1).required(),
     }).required();
 
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return MovePathActionProcessor.validationSchema;
     }
 

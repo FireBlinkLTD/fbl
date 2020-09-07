@@ -9,9 +9,7 @@ import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
     private static validationSchema = Joi.object({
         shareParameters: Joi.boolean(),
-        times: Joi.number()
-            .min(0)
-            .required(),
+        times: Joi.number().min(0).required(),
         action: FBL_ACTION_SCHEMA,
         async: Joi.boolean(),
     })
@@ -21,7 +19,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return RepeatFlowActionProcessor.validationSchema;
     }
 
@@ -65,7 +63,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
         await Promise.all(promises);
 
         // register snapshots in the order of their presence
-        snapshots.forEach(childSnapshot => {
+        snapshots.forEach((childSnapshot) => {
             this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
     }

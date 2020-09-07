@@ -6,9 +6,7 @@ import { FBL_ASSIGN_TO_SCHEMA } from '../../schemas';
 
 export class ExecActionProcessor extends BaseExecutableActionProcessor {
     private static validationSchema = Joi.object({
-        command: Joi.string()
-            .min(1)
-            .required(),
+        command: Joi.string().min(1).required(),
         args: Joi.array().items(Joi.alternatives(Joi.string().min(1), Joi.number())),
         options: Joi.object({
             stdout: Joi.boolean(),
@@ -25,7 +23,7 @@ export class ExecActionProcessor extends BaseExecutableActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return ExecActionProcessor.validationSchema;
     }
 

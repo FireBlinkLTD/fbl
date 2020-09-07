@@ -8,15 +8,12 @@ import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
 export class TemplateFlowActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required()
-        .options({ abortEarly: true });
+    private static validationSchema = Joi.string().min(1).required().options({ abortEarly: true });
 
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return TemplateFlowActionProcessor.validationSchema;
     }
 
@@ -27,10 +24,13 @@ export class TemplateFlowActionProcessor extends ActionProcessor {
         await super.validate();
 
         const action = safeLoad(this.options);
-        const result = Joi.validate(action, FBL_ACTION_SCHEMA);
-
-        if (result.error) {
-            throw new ActionError(result.error.details.map(d => d.message).join('\n'), INVALID_CONFIGURATION);
+        try {
+            Joi.assert(action, FBL_ACTION_SCHEMA);
+        } catch (e) {
+            throw new ActionError(
+                (<Joi.ValidationError>e).details.map((d) => d.message).join('\n'),
+                INVALID_CONFIGURATION,
+            );
         }
     }
 

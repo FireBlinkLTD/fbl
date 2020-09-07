@@ -11,7 +11,7 @@ export class SleepFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SleepFlowActionProcessor.validationSchema;
     }
 
@@ -19,7 +19,7 @@ export class SleepFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        await new Promise<void>(resolve => setTimeout(resolve, Number(this.options) * 1000));
+        await new Promise<void>((resolve) => setTimeout(resolve, Number(this.options) * 1000));
     }
 }
 

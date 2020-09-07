@@ -4,12 +4,8 @@ import * as Joi from 'joi';
 
 export class SummaryRecordActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
-        title: Joi.string()
-            .min(1)
-            .required(),
-        status: Joi.string()
-            .min(1)
-            .required(),
+        title: Joi.string().min(1).required(),
+        status: Joi.string().min(1).required(),
         duration: Joi.string().min(1),
         payload: Joi.any(),
     })
@@ -19,7 +15,7 @@ export class SummaryRecordActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return SummaryRecordActionProcessor.validationSchema;
     }
 

@@ -3,15 +3,12 @@ import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../in
 import * as Joi from 'joi';
 
 export class ErrorActionProcessor extends ActionProcessor {
-    private static validationSchema = Joi.string()
-        .min(1)
-        .required()
-        .options({ abortEarly: true });
+    private static validationSchema = Joi.string().min(1).required().options({ abortEarly: true });
 
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return ErrorActionProcessor.validationSchema;
     }
 

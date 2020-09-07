@@ -41,7 +41,7 @@ class YamlReporterTestSuite {
         await reporter.generate(file, {}, reportSrc);
         const strReport = await promisify(readFile)(file, 'utf8');
 
-        const report = safeLoad(strReport);
+        const report: any = safeLoad(strReport);
 
         // check if created time is valid and was reported less than a second ago
         assert(new Date(report.snapshot.createdAt).getTime() + 1000 > Date.now());

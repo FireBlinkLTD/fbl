@@ -8,7 +8,7 @@ export class VoidFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return VoidFlowActionProcessor.validationSchema;
     }
 

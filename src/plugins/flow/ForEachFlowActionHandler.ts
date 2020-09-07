@@ -19,7 +19,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return ForEachFlowActionProcessor.validationSchema;
     }
 
@@ -109,7 +109,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
         await Promise.all(promises);
 
         // register snapshots in the order of their presence
-        snapshots.forEach(childSnapshot => {
+        snapshots.forEach((childSnapshot) => {
             this.snapshot.registerChildActionSnapshot(childSnapshot);
         });
     }

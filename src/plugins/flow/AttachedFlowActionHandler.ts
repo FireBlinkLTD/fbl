@@ -9,9 +9,7 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.alternatives(
         Joi.string().min(1),
         Joi.object({
-            path: Joi.string()
-                .min(1)
-                .required(),
+            path: Joi.string().min(1).required(),
             http: Joi.object({
                 headers: Joi.object().min(1),
             }),
@@ -25,7 +23,7 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return AttachedFlowActionProcessor.validationSchema;
     }
 

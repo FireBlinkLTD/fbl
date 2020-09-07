@@ -1,34 +1,36 @@
-import {ITemplateUtility, IContext, IDelegatedParameters} from '../../interfaces';
+import { ITemplateUtility, IContext, IDelegatedParameters } from '../../interfaces';
 import { ActionSnapshot } from '../../models';
-
-const uuidv4 = require('uuid/v4');
-const uuidv5 = require('uuid/v5');
+import { v4, v5 } from 'uuid';
 
 export class UUIDTemplateUtility implements ITemplateUtility {
     /**
      * @inheritdoc
      */
-    getUtilities(context: IContext, snapshot: ActionSnapshot, parameters: IDelegatedParameters): {[key: string]: any} {
+    getUtilities(
+        context: IContext,
+        snapshot: ActionSnapshot,
+        parameters: IDelegatedParameters,
+    ): { [key: string]: any } {
         return {
             UUID: {
                 v4: (): string => {
-                    return uuidv4();
+                    return v4();
                 },
 
                 v5: {
                     DNS: (dns: string): string => {
-                        return uuidv5(dns, uuidv5.DNS);
+                        return v5(dns, v5.DNS);
                     },
 
                     URL: (url: string): string => {
-                        return uuidv5(url, uuidv5.URL);
+                        return v5(url, v5.URL);
                     },
 
                     custom: (name: string, uuid: string): string => {
-                        return uuidv5(name, uuid);
-                    }
-                }
-            }
+                        return v5(name, uuid);
+                    },
+                },
+            },
         };
     }
 }

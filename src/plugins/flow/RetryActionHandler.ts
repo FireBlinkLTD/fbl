@@ -10,9 +10,7 @@ import { UNEXPECTED } from '../../errors';
 export class RetryActionProcessor extends ActionProcessor {
     private static validationSchema = Joi.object({
         action: FBL_ACTION_SCHEMA,
-        attempts: Joi.number()
-            .required()
-            .min(1),
+        attempts: Joi.number().required().min(1),
         errorCode: Joi.object({
             assignTo: FBL_ASSIGN_TO_SCHEMA,
             pushTo: FBL_PUSH_TO_SCHEMA,
@@ -27,7 +25,7 @@ export class RetryActionProcessor extends ActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return RetryActionProcessor.validationSchema;
     }
 

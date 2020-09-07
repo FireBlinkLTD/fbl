@@ -7,9 +7,7 @@ import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
 export class ConfirmActionProcessor extends BasePromptActionProcessor {
     private static validationSchema = Joi.object({
-        message: Joi.string()
-            .required()
-            .min(1),
+        message: Joi.string().required().min(1),
 
         default: Joi.boolean(),
 
@@ -22,7 +20,7 @@ export class ConfirmActionProcessor extends BasePromptActionProcessor {
     /**
      * @inheritdoc
      */
-    getValidationSchema(): Joi.SchemaLike | null {
+    getValidationSchema(): Joi.Schema | null {
         return ConfirmActionProcessor.validationSchema;
     }
 
