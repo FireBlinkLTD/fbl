@@ -95,7 +95,7 @@ class ContextUtilTestSuite {
                 1,
                 false,
             );
-        }).to.throw('Unable to assign path "$.l1.l2". Sub-path "$.l1" leads to non-object value.');
+        }).to.throw('Unable to process path "$.l1.l2". Sub-path "$.l1" leads to non-object value.');
 
         chai.expect(() => {
             ContextUtil.push(

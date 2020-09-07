@@ -1,6 +1,6 @@
 {
   "name": "fbl",
-  "version": "1.14.0-beta.3",
+  "version": "1.14.0",
   "description": "CLI tool to manage routine automation tasks.",
   "keywords": [
     "fireblink",
@@ -15,7 +15,7 @@
     "routine"
   ],
   "engines": {
-    "node": ">=8.12.0"
+    "node": ">=12.18.0"
   },
   "main": "dist/index.js",
   "scripts": {

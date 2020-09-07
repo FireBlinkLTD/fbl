@@ -178,22 +178,20 @@ export class ContextUtil {
             key = chunks[i];
             subPath += '.' + key;
 
-            const candidate = target[chunks[i]];
+            let candidate = target[chunks[i]];
             const isLast = i === chunks.length - 1;
             if (isMissing(candidate)) {
-                target[chunks[i]] = isLast ? leaf : {};
-                target = target[chunks[i]];
+                candidate = target[chunks[i]] = isLast ? leaf : {};
             } else {
                 if (!isLast) {
                     if (!isObject(candidate)) {
                         throw new Error(
-                            `Unable to assign path "${path}". Sub-path "${subPath}" leads to non-object value.`,
+                            `Unable to process path "${path}". Sub-path "${subPath}" leads to non-object value.`,
                         );
                     }
                 }
-
-                target = candidate;
             }
+            target = candidate;
         }
 
         return {
@@ -425,7 +423,7 @@ export class ContextUtil {
         }
 
         if (Array.isArray(options)) {
-            return options.map(item => {
+            return options.map((item) => {
                 return ContextUtil.resolveReferences(item, context, parameters);
             });
         }
