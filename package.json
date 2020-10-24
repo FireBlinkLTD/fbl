@@ -47,7 +47,7 @@
     "humanize-duration": "3.24.0",
     "joi": "^17.2.1",
     "js-yaml": "3.14.0",
-    "jsonschema": "1.2.7",
+    "jsonschema": "1.2.8",
     "object-collider": "1.0.3",
     "prompts": "2.3.2",
     "requireg": "0.2.2",
