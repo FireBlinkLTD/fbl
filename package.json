@@ -45,7 +45,7 @@
     "glob-promise": "3.4.0",
     "got": "11.6.0",
     "humanize-duration": "3.24.0",
-    "joi": "^17.2.1",
+    "joi": "^17.3.0",
     "js-yaml": "3.14.0",
     "jsonschema": "1.2.8",
     "object-collider": "1.0.3",
