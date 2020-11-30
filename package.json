@@ -35,7 +35,7 @@
   "author": "FireBlink LTD",
   "license": "MIT",
   "dependencies": {
-    "cliui": "7.0.3",
+    "cliui": "7.0.4",
     "colors": "1.4.0",
     "command-exists": "1.2.9",
     "commander": "6.2.0",
