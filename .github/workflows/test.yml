@@ -3,7 +3,7 @@ name: Tests
 on:
   push:
     branches:
-      - '*'
+      - develop
 
 jobs:
   build_and_test:
@@ -16,6 +16,10 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn test
+
+      # run snyk protect test
+      - run: yarn snyk-protect
+
       # generate coverage report
       - run: ./node_modules/.bin/nyc report --reporter=text-lcov > ./coverage.lcov
       # send test coverage
