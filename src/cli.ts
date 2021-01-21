@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import 'reflect-metadata';
 import { CLIService } from './services';
 
 CLIService.instance.run().catch((e: Error) => {
