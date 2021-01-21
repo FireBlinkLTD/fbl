@@ -19,6 +19,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
+    "circleci": "circleci local execute --job build",
     "commit": "npx git-cz",
     "start": "node dist/src/cli.js",
     "test": "rimraf ./coverage/ && nyc --reporter=html --reporter=text cross-env FBL_ENV=test mocha",

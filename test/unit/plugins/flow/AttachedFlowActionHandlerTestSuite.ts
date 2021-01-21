@@ -127,11 +127,8 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async processAttachedFlow(): Promise<void> {
-        console.log('==========');
         const tempPathsRegistry = TempPathsRegistry.instance;
-        console.log('==========');
         const actionHandlersRegistry = ActionHandlersRegistry.instance;
-        console.log('==========');
 
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
