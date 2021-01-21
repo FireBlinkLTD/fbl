@@ -26,7 +26,7 @@ class DummyActionHandler extends ActionHandler {
 export class ActionHandlersRegistryTestSuite {
     @test()
     async lifecycle() {
-        const registry = new ActionHandlersRegistry();
+        const registry = ActionHandlersRegistry.instance;
         const id1 = 'test1';
         const id2 = 'test2';
         const actionHandler1 = new DummyActionHandler(id1);
@@ -72,7 +72,7 @@ export class ActionHandlersRegistryTestSuite {
         const snapshot = new EnabledActionSnapshot('.', 'id', {}, '.', 0, {});
         registry.register(actionHandler2, plugin, snapshot);
 
-        const logs = snapshot.getSteps().filter(step => step.type === 'log');
+        const logs = snapshot.getSteps().filter((step) => step.type === 'log');
         assert.strictEqual(
             logs[0].payload,
             `Action handler with id ${actionHandler2.getMetadata().id} was overridden by plugin ${plugin.name}@${

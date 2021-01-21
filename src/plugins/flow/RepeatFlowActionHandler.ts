@@ -1,7 +1,6 @@
 import * as Joi from 'joi';
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { FlowService } from '../../services';
-import { Container } from 'typedi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
@@ -27,8 +26,6 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
@@ -38,7 +35,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
             if (this.options.async) {
                 promises.push(
                     (async (p): Promise<void> => {
-                        snapshots[p.iteration.index] = await flowService.executeAction(
+                        snapshots[p.iteration.index] = await FlowService.instance.executeAction(
                             this.snapshot.source,
                             this.snapshot.wd,
                             this.options.action,
@@ -49,7 +46,7 @@ export class RepeatFlowActionProcessor extends BaseFlowActionProcessor {
                     })(iterationParams),
                 );
             } else {
-                snapshots[i] = await flowService.executeAction(
+                snapshots[i] = await FlowService.instance.executeAction(
                     this.snapshot.source,
                     this.snapshot.wd,
                     this.options.action,

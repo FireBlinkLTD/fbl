@@ -2,7 +2,6 @@ import { suite, test } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { IPlugin } from '../../../../src/interfaces';
-import { Container } from 'typedi';
 import * as assert from 'assert';
 import { TemplateFlowActionHandler } from '../../../../src/plugins/flow/TemplateFlowActionHandler';
 import { ContextUtil } from '../../../../src/utils';
@@ -46,8 +45,8 @@ class TemplateFlowActionHandlerTestSuite {
 
     @test()
     async execute(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new TemplateFlowActionHandler();
 
         actionHandlersRegistry.register(actionHandler, plugin);

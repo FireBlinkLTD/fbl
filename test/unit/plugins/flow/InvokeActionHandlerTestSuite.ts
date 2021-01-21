@@ -2,7 +2,6 @@ import { test, suite } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
 import { ContextUtil } from '../../../../src/utils';
 import { InvokeActionHandler } from '../../../../src/plugins/flow/InvokeActionHandler';
-import Container from 'typedi';
 import { ActionHandlersRegistry, IPlugin } from '../../../../src';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 import { strictEqual } from 'assert';
@@ -45,7 +44,7 @@ class InvokeActionHandlerTestSuite {
 
     @test()
     async execution(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         let result = false;

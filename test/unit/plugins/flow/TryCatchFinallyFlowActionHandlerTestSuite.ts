@@ -3,7 +3,6 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ActionSnapshot } from '../../../../src/models';
 import { TryCatchFinallyFlowActionHandler } from '../../../../src/plugins/flow/TryCatchFinallyFlowActionHandler';
 import { IPlugin } from '../../../../src/interfaces';
-import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
@@ -183,8 +182,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithoutCatchAndFinallyBlocks(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -218,8 +217,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithCatchAndFinallyBlocks(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -281,8 +280,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithCatchAndFinallyBlocksAndRegularError(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -344,8 +343,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithSuccessfulActionAndFinallyBlocks(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         actionHandlersRegistry.register(dummyActionHandler, plugin);
@@ -396,8 +395,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithFailedCatchAndSuccessfulFinallyBlocks(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -451,8 +450,8 @@ class TryCatchFinallyFlowActionHandlerTestSuite {
 
     @test()
     async executeWithSuccessfulCatchAndFailedFinallyBlocks(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {

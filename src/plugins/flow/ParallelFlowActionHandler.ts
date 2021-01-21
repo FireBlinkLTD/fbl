@@ -1,5 +1,4 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -36,8 +35,6 @@ export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let actions;
         let shareParameters = false;
         if (Array.isArray(this.options)) {
@@ -52,7 +49,7 @@ export class ParallelFlowActionProcessor extends BaseFlowActionProcessor {
             async (action: any, index: number): Promise<void> => {
                 const iterationParams = this.getParameters(shareParameters, { index });
 
-                snapshots[index] = await flowService.executeAction(
+                snapshots[index] = await FlowService.instance.executeAction(
                     this.snapshot.source,
                     this.snapshot.wd,
                     action,

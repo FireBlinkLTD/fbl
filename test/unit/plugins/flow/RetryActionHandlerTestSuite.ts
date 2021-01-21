@@ -3,7 +3,6 @@ import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ActionSnapshot } from '../../../../src/models';
 import { RetryActionHandler } from '../../../../src/plugins/flow/RetryActionHandler';
 import { IPlugin } from '../../../../src/interfaces';
-import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
@@ -80,8 +79,8 @@ class RetryActionHandlerTestSuite {
 
     @test()
     async executeWithSuccessfulOnASecondRetry(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         let count = 0;
@@ -124,8 +123,8 @@ class RetryActionHandlerTestSuite {
 
     @test()
     async executeWithFailureOnASecondRetry(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         let count = 0;
@@ -169,8 +168,8 @@ class RetryActionHandlerTestSuite {
 
     @test()
     async executeWithFailureOnAThirdRetry(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         let count = 0;

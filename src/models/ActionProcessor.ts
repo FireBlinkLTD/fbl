@@ -44,5 +44,5 @@ export abstract class ActionProcessor {
     /**
      * Execute action
      */
-    abstract async execute(): Promise<void>;
+    abstract execute(): Promise<void>;
 }

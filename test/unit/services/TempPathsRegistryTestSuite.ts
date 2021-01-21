@@ -8,16 +8,15 @@ import * as assert from 'assert';
 class TempPathsRegistryTestSuite {
     @test()
     async testCleanup(): Promise<void> {
-        const tempPathsRegistry = new TempPathsRegistry();
         const existsAsync = promisify(exists);
         const unlinkAsync = promisify(unlink);
         const rmdirAsync = promisify(rmdir);
 
         // create temp dirs and files with keep option turned on and off
-        const keepFalseDir = await tempPathsRegistry.createTempDir(false);
-        const keepTrueDir = await tempPathsRegistry.createTempDir(true);
-        const keepFalseFile = await tempPathsRegistry.createTempFile(false);
-        const keepTrueFile = await tempPathsRegistry.createTempFile(true);
+        const keepFalseDir = await TempPathsRegistry.instance.createTempDir(false);
+        const keepTrueDir = await TempPathsRegistry.instance.createTempDir(true);
+        const keepFalseFile = await TempPathsRegistry.instance.createTempFile(false);
+        const keepTrueFile = await TempPathsRegistry.instance.createTempFile(true);
 
         // check existence of temp paths
         let keepFalseDirExists = await existsAsync(keepFalseDir);
@@ -31,7 +30,7 @@ class TempPathsRegistryTestSuite {
         assert(keepTrueFileExists);
 
         // cleanup
-        await tempPathsRegistry.cleanup();
+        await TempPathsRegistry.instance.cleanup();
 
         // check existence of temp paths after cleanup
         keepFalseDirExists = await existsAsync(keepFalseDir);

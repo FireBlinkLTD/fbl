@@ -1,10 +1,10 @@
 import { test, suite } from 'mocha-typescript';
+import * as assert from 'assert';
+
 import { ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 import { WhileActionHandler } from '../../../../src/plugins/flow/WhileActionHandler';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
-import * as assert from 'assert';
 import { IContext, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
@@ -107,8 +107,8 @@ class WhileActionHandlerTestSuite {
 
     @test()
     async checkPositiveCondition(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let count = 0;
         const dummyActionHandler = new DummyActionHandler();
@@ -145,8 +145,8 @@ class WhileActionHandlerTestSuite {
 
     @test()
     async checkNegativeCondition(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let count = 0;
         const dummyActionHandler = new DummyActionHandler();
@@ -183,8 +183,8 @@ class WhileActionHandlerTestSuite {
 
     @test()
     async skipExecution(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let count = 0;
         const dummyActionHandler = new DummyActionHandler();
@@ -221,8 +221,8 @@ class WhileActionHandlerTestSuite {
 
     @test()
     async failedExecution(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -257,8 +257,8 @@ class WhileActionHandlerTestSuite {
 
     @test()
     async shareParameters(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new WhileActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 

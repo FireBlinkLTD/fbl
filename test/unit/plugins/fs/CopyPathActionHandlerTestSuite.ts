@@ -7,7 +7,6 @@ import { promisify } from 'util';
 import { FSUtil, ContextUtil } from '../../../../src/utils';
 import { homedir } from 'os';
 import { CopyPathActionHandler } from '../../../../src/plugins/fs/CopyPathActionHandler';
-import { Container } from 'typedi';
 import { TempPathsRegistry } from '../../../../src/services';
 
 const chai = require('chai');
@@ -79,7 +78,7 @@ class CopyPathActionHandlerTestSuite {
     }
 
     private static async prepareTmpDir(dirs: string[], files: string[]): Promise<string> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const tmpdir = await tempPathsRegistry.createTempDir();
         for (const dir of dirs) {

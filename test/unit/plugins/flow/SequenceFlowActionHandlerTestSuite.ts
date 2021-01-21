@@ -1,7 +1,6 @@
 import { suite, test } from 'mocha-typescript';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 import { ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import * as assert from 'assert';
 import { IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
@@ -85,8 +84,8 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async voidAction(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandler = new SequenceFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
@@ -108,8 +107,8 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async emptyList(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandler = new SequenceFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
@@ -130,20 +129,20 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async validateExecutionOrder(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
@@ -168,8 +167,8 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async shouldStopAfterFirstError(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
@@ -180,7 +179,7 @@ export class SequenceFlowActionHandlerTestSuite {
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
@@ -206,22 +205,22 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async tree(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new SequenceFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
@@ -248,8 +247,8 @@ export class SequenceFlowActionHandlerTestSuite {
 
     @test()
     async shareParameters(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new SequenceFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 

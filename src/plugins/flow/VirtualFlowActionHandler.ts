@@ -2,7 +2,6 @@ import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FlowService } from '../../services';
-import { Container } from 'typedi';
 import { Validator } from 'jsonschema';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { collide, ICollideModifiers } from 'object-collider';
@@ -78,11 +77,9 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async validate(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let unmaskedParametersSchema;
         if (this.options.hasOwnProperty('parametersSchema')) {
-            const masked = await flowService.resolveOptionsWithNoHandlerCheck(
+            const masked = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.parametersSchema,
                 this.context,
@@ -91,7 +88,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
                 true,
             );
 
-            unmaskedParametersSchema = await flowService.resolveOptionsWithNoHandlerCheck(
+            unmaskedParametersSchema = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.parametersSchema,
                 this.context,
@@ -105,7 +102,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
 
         let unmaskedDefaults;
         if (this.options.hasOwnProperty('defaults')) {
-            const masked = await flowService.resolveOptionsWithNoHandlerCheck(
+            const masked = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.defaults,
                 this.context,
@@ -114,7 +111,7 @@ export class VirtualFlowActionProcessor extends ActionProcessor {
                 true,
             );
 
-            unmaskedDefaults = await flowService.resolveOptionsWithNoHandlerCheck(
+            unmaskedDefaults = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.defaults,
                 this.context,
@@ -275,8 +272,6 @@ class DynamicFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         if (this.wd) {
             this.snapshot.wd = this.wd;
         }
@@ -285,7 +280,7 @@ class DynamicFlowActionProcessor extends ActionProcessor {
         this.parameters.parameters.wd = this.snapshot.wd;
         this.parameters.parameters.pwd = this.pwd;
 
-        const childSnapshot = await flowService.executeAction(
+        const childSnapshot = await FlowService.instance.executeAction(
             this.snapshot.source,
             this.snapshot.wd,
             this.action,

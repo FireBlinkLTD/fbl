@@ -1,4 +1,3 @@
-import Container, { Service } from 'typedi';
 import { IContext, IDelegatedParameters, IFlow, IPlugin, IReporter } from '../interfaces';
 import * as Joi from 'joi';
 import { FlowService } from './index';
@@ -18,7 +17,6 @@ const requireg = require('requireg');
 const fblVersion: string = require(process.env.FBL_ENV === 'test' ? '../../package.json' : '../../../package.json')
     .version;
 
-@Service()
 export class FBLService {
     private plugins: { [name: string]: IPlugin } = {};
     private processedPlugins: { [name: string]: string } = {};
@@ -33,16 +31,19 @@ export class FBLService {
     // if flow requirements are not satisfied instead of throwing error log statements will be printed only
     public allowUnsafeFlows = false;
 
-    get flowService(): FlowService {
-        return Container.get(FlowService);
+    private constructor() {}
+
+    private static pInstance: FBLService;
+    public static get instance(): FBLService {
+        if (!this.pInstance) {
+            this.pInstance = new FBLService();
+        }
+
+        return this.pInstance;
     }
 
-    get actionHandlersRegistry(): ActionHandlersRegistry {
-        return Container.get(ActionHandlersRegistry);
-    }
-
-    get templateUtilityRegistry(): TemplateUtilitiesRegistry {
-        return Container.get(TemplateUtilitiesRegistry);
+    public static reset() {
+        this.pInstance = null;
     }
 
     /**
@@ -109,7 +110,7 @@ export class FBLService {
 
         if (plugin.actionHandlers) {
             plugin.actionHandlers.forEach((actionHandler) => {
-                this.actionHandlersRegistry.register(actionHandler, plugin);
+                ActionHandlersRegistry.instance.register(actionHandler, plugin);
             });
         }
 
@@ -120,7 +121,7 @@ export class FBLService {
         }
 
         if (plugin.templateUtils) {
-            this.templateUtilityRegistry.register(...plugin.templateUtils);
+            TemplateUtilitiesRegistry.instance.register(...plugin.templateUtils);
         }
     }
 
@@ -383,6 +384,6 @@ export class FBLService {
 
         await this.validateFlowRequirements(flow, wd);
 
-        return await this.flowService.executeAction(source, wd, flow.pipeline, context, parameters);
+        return await FlowService.instance.executeAction(source, wd, flow.pipeline, context, parameters);
     }
 }

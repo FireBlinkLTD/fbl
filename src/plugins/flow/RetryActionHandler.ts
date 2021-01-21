@@ -1,5 +1,4 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -33,14 +32,12 @@ export class RetryActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let retriesLeft = this.options.attempts;
 
         let childSnapshot;
         while (retriesLeft > 0) {
             // run try
-            childSnapshot = await flowService.executeAction(
+            childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 this.options.action,

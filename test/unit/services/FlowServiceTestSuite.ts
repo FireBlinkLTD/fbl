@@ -1,7 +1,6 @@
 import { suite, test } from 'mocha-typescript';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
-import { Container } from 'typedi';
 import { FlowService, TempPathsRegistry } from '../../../src/services';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../src/utils';
@@ -16,7 +15,7 @@ chai.use(chaiAsPromised);
 class FlowServiceTestSuite {
     @test()
     async failOnResolvingFlowWithJustRelativePath(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
 
         await chai
             .expect(
@@ -29,7 +28,7 @@ class FlowServiceTestSuite {
 
     @test()
     async resolveTemplate(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const tpl = [
             'version: 1.0.0',
@@ -43,6 +42,8 @@ class FlowServiceTestSuite {
             '    - ctx:',
             '       l_1:',
             '         inline: <%- ctx.test %>',
+            '       l_2:',
+            "         inline: <%- ctx['test'] %>",
         ].join('\n');
 
         // create temp file
@@ -56,7 +57,7 @@ class FlowServiceTestSuite {
 
         const snapshot = new ActionSnapshot('.', '', {}, '.', 0, {});
 
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         let resolved = await flowService.resolveTemplate(
             context.ejsTemplateDelimiters.global,
             tpl,
@@ -87,6 +88,8 @@ class FlowServiceTestSuite {
                 '    - ctx:',
                 '       l_1:',
                 '         inline: <%- ctx.test %>',
+                '       l_2:',
+                "         inline: <%- ctx['test'] %>",
             ].join('\n'),
         );
 
@@ -121,6 +124,8 @@ class FlowServiceTestSuite {
                 '    ',
                 '    - ctx:',
                 '       l_1:',
+                '         inline: new',
+                '       l_2:',
                 '         inline: new',
             ].join('\n'),
         );

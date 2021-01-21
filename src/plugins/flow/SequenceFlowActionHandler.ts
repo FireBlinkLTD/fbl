@@ -1,6 +1,5 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import * as Joi from 'joi';
-import { Container } from 'typedi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
@@ -37,8 +36,6 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let actions;
         let shareParameters = false;
         if (Array.isArray(this.options)) {
@@ -52,7 +49,7 @@ export class SequenceFlowActionProcessor extends BaseFlowActionProcessor {
         for (const action of actions) {
             const actionParameters = this.getParameters(shareParameters, { index });
 
-            const childSnapshot = await flowService.executeAction(
+            const childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 action,

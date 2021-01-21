@@ -7,7 +7,6 @@ import { RemovePathActionHandler } from '../../../../src/plugins/fs/RemovePathAc
 import { promisify } from 'util';
 import { ContextUtil } from '../../../../src/utils';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -41,7 +40,7 @@ class MakeDirActionHandlerTestSuite {
 
     @test()
     async removePath(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();
@@ -70,7 +69,7 @@ class MakeDirActionHandlerTestSuite {
 
     @test()
     async removeNonExistingPath(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new RemovePathActionHandler();
         const context = ContextUtil.generateEmptyContext();

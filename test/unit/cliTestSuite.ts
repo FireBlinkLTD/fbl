@@ -5,12 +5,11 @@ import { exists, readFile, unlink, writeFile } from 'fs';
 import * as assert from 'assert';
 import { ChildProcessService, FlowService, TempPathsRegistry } from '../../src/services';
 import { basename, dirname, join, resolve, sep } from 'path';
-import { Container } from 'typedi';
 import { IActionStep } from '../../src/models';
 import { ContextUtil, FSUtil } from '../../src/utils';
 import { DummyServerWrapper, IDummyServerWrapperConfig } from '../assets/dummy.http.server.wrapper';
 import { c } from 'tar';
-import { IContextBase, IReport, ISummaryRecord, IFBLGlobalConfig } from '../../src/interfaces';
+import { IContextBase, IReport, ISummaryRecord } from '../../src/interfaces';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -96,31 +95,26 @@ class CliTestSuite {
 
         delete process.env.FBL_ENV;
         try {
-            const code = await Container.get(ChildProcessService).exec(
-                'node',
-                nodeArgs,
-                wd || join(__dirname, '../../'),
-                {
-                    stdout: (data) => {
-                        // console.log('stdout:', data.toString().trim());
-                        stdout.push(data.toString().trim());
-                    },
-
-                    stderr: (data) => {
-                        // console.log('stderr:', data.toString().trim());
-                        stderr.push(data.toString().trim());
-                    },
-
-                    process: (process) => {
-                        if (answer) {
-                            setTimeout(function () {
-                                process.stdin.write(answer);
-                                process.stdin.end();
-                            }, 100);
-                        }
-                    },
+            const code = await ChildProcessService.instance.exec('node', nodeArgs, wd || join(__dirname, '../../'), {
+                stdout: (data) => {
+                    // console.log('stdout:', data.toString().trim());
+                    stdout.push(data.toString().trim());
                 },
-            );
+
+                stderr: (data) => {
+                    // console.log('stderr:', data.toString().trim());
+                    stderr.push(data.toString().trim());
+                },
+
+                process: (process) => {
+                    if (answer) {
+                        setTimeout(function () {
+                            process.stdin.write(answer);
+                            process.stdin.end();
+                        }, 100);
+                    }
+                },
+            });
             const end = Date.now();
             console.log(`Test -> Execution of command took: ${end - start}ms`);
 
@@ -136,7 +130,7 @@ class CliTestSuite {
 
     @test()
     async successfulExecution(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -268,7 +262,7 @@ class CliTestSuite {
 
     @test()
     async invalidReportParameters(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -319,7 +313,7 @@ class CliTestSuite {
 
     @test()
     async readContextParametersFromPrompt(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -365,7 +359,7 @@ class CliTestSuite {
 
     @test()
     async readSecretsParametersFromPrompt(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -399,7 +393,7 @@ class CliTestSuite {
 
     @test()
     async failedExecution(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -421,7 +415,7 @@ class CliTestSuite {
 
     @test()
     async failedExecutionAtNoOptionsAndMetadata(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -443,7 +437,7 @@ class CliTestSuite {
 
     @test()
     async nonObjectContextRootAssignment(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -507,7 +501,7 @@ class CliTestSuite {
 
     @test()
     async incompatiblePluginWithFBL(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -565,7 +559,7 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithFBL(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -604,7 +598,7 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithPluginByVersion(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const plugin = require('../../src/plugins/flow');
 
@@ -650,7 +644,7 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithMissingPlugin(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -694,7 +688,7 @@ class CliTestSuite {
 
     @test()
     async incompatibleFlowWithMissingApplication(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -736,7 +730,7 @@ class CliTestSuite {
 
     @test()
     async compatibleFlow(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const plugin = require('../../src/plugins/flow');
 
@@ -773,7 +767,7 @@ class CliTestSuite {
 
     @test()
     async incompatiblePluginWithOtherPlugin(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -831,7 +825,7 @@ class CliTestSuite {
 
     @test()
     async missingPluginDependency(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -883,7 +877,7 @@ class CliTestSuite {
 
     @test()
     async satisfiedPluginDependencies(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -919,7 +913,7 @@ class CliTestSuite {
 
     @test()
     async brokenPlugin(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -955,7 +949,7 @@ class CliTestSuite {
 
     @test()
     async testCustomTemplateDelimiters(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: string = [
             'version: 1.0.0',
@@ -1039,7 +1033,7 @@ class CliTestSuite {
 
     @test()
     async testBrokenFlowFile(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         // prettier-ignore
         const flow: string = [
@@ -1064,7 +1058,7 @@ class CliTestSuite {
 
     @test()
     async testActionWithoutOption(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         // prettier-ignore
         const flow: string = [
@@ -1087,7 +1081,7 @@ class CliTestSuite {
 
     @test()
     async testLocalTemplatePassingValueByReference(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         // prettier-ignore
         const flow = [
@@ -1128,7 +1122,7 @@ class CliTestSuite {
 
     @test()
     async testLocalTemplateEscape(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         // prettier-ignore
         let flow = [
@@ -1199,7 +1193,7 @@ class CliTestSuite {
     }
 
     static async indexFileLookupInsideDirectoryTree(ext: 'yml' | 'yaml'): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -1261,7 +1255,7 @@ class CliTestSuite {
 
     @test()
     async indexFileLookupFailure(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -1289,7 +1283,7 @@ class CliTestSuite {
 
     @test()
     async indexFileLookupFailureDueToMultipleParentDirs(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -1318,7 +1312,7 @@ class CliTestSuite {
 
     @test()
     async testSummary(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const flow: any = {
             version: '1.0.0',
@@ -1360,7 +1354,7 @@ class CliTestSuite {
 
     @test()
     async testHttpHeaders(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const flow: any = {
             pipeline: {
                 ctx: {
@@ -1427,7 +1421,7 @@ class CliTestSuite {
 
     @test()
     async metadataParameters(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const flowPath = await tempPathsRegistry.createTempFile();
         const reportPath = await tempPathsRegistry.createTempFile();
 
@@ -1465,7 +1459,7 @@ class CliTestSuite {
 
     @test()
     async propagatedProperties(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const attachmentFlowPath = await tempPathsRegistry.createTempFile();
         const mainFlowPath = await tempPathsRegistry.createTempFile();

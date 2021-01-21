@@ -1,6 +1,5 @@
 import * as Joi from 'joi';
-import { Container } from 'typedi';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { ActionProcessor } from '../../models';
 import { ContextUtil, FSUtil } from '../../utils';
@@ -74,8 +73,6 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
     async execute(): Promise<void> {
         const target = this.getAssignmentTarget();
 
-        const flowService = Container.get(FlowService);
-
         const names = Object.keys(this.options);
         const promises = names.map(
             async (name: string): Promise<void> => {
@@ -101,7 +98,7 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
                         let fileContent: string = await FSUtil.readTextFile(path);
 
                         // resolve global template
-                        fileContent = await flowService.resolveTemplate(
+                        fileContent = await FlowService.instance.resolveTemplate(
                             this.context.ejsTemplateDelimiters.global,
                             fileContent,
                             this.context,
@@ -109,10 +106,10 @@ export abstract class BaseValuesAssignmentActionProcessor extends ActionProcesso
                             this.parameters,
                         );
 
-                        let fileContentObject = safeLoad(fileContent);
+                        let fileContentObject = load(fileContent);
 
                         // resolve local template
-                        fileContentObject = await flowService.resolveOptionsWithNoHandlerCheck(
+                        fileContentObject = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                             this.context.ejsTemplateDelimiters.local,
                             fileContentObject,
                             this.context,

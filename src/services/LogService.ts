@@ -1,8 +1,20 @@
-import { Service } from 'typedi';
-
-@Service()
 export class LogService {
     private infoEnabled = false;
+
+    private constructor() {}
+
+    private static pInstance: LogService;
+    public static get instance(): LogService {
+        if (!this.pInstance) {
+            this.pInstance = new LogService();
+        }
+
+        return this.pInstance;
+    }
+
+    public static reset() {
+        this.pInstance = null;
+    }
 
     /**
      * Enable info logs

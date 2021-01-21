@@ -5,7 +5,6 @@ import { ActionSnapshot } from '../../models';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 import { FSUtil } from '../../utils';
 import { readFileSync } from 'fs';
-import Container from 'typedi';
 import { FlowService } from '../../services';
 import { dirname } from 'path';
 
@@ -31,11 +30,9 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                 const abolutePath = FSUtil.getAbsolutePath(path, wd);
 
                 let template = readFileSync(abolutePath, 'utf8');
-                const flowService = Container.get(FlowService);
-
                 const templateWD = dirname(abolutePath);
 
-                template = await flowService.resolveTemplate(
+                template = await FlowService.instance.resolveTemplate(
                     context.ejsTemplateDelimiters.global,
                     template,
                     context,
@@ -45,7 +42,7 @@ export class IncludeTemplateUtility implements ITemplateUtility {
                     templateWD,
                 );
 
-                return await flowService.resolveTemplate(
+                return await FlowService.instance.resolveTemplate(
                     context.ejsTemplateDelimiters.local,
                     template,
                     context,

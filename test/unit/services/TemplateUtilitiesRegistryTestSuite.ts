@@ -9,14 +9,13 @@ import { ContextUtil, ActionSnapshot } from '../../../src';
 class TemplateUtilitiesRegistryTestSuite {
     @test()
     async flow(): Promise<void> {
-        const registry = new TemplateUtilitiesRegistry();
         const hashTemplateUtility = new HashTemplateUtility();
         const fsTemplateUtility = new FSTemplateUtility();
 
-        registry.register(hashTemplateUtility, fsTemplateUtility);
-        registry.unregister(fsTemplateUtility);
+        TemplateUtilitiesRegistry.instance.register(hashTemplateUtility, fsTemplateUtility);
+        TemplateUtilitiesRegistry.instance.unregister(fsTemplateUtility);
 
-        const utils = registry.generateUtilities(
+        const utils = TemplateUtilitiesRegistry.instance.generateUtilities(
             ContextUtil.generateEmptyContext(),
             new ActionSnapshot('.', '', {}, '.', 0, {}),
             {},

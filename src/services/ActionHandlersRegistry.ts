@@ -1,21 +1,28 @@
 import { ActionHandler, ActionSnapshot } from '../models';
-import Container, { Service } from 'typedi';
 import { FBLService } from './FBLService';
 import { IPlugin } from '../interfaces';
 import { LogService } from './LogService';
 
-@Service()
 export class ActionHandlersRegistry {
-    private registry: { [name: string]: ActionHandler };
-    private aliases: { [alias: string]: string };
-
     constructor() {
         this.cleanup();
     }
 
-    get logService(): LogService {
-        return Container.get(LogService);
+    private static pInstance: ActionHandlersRegistry;
+    public static get instance(): ActionHandlersRegistry {
+        if (!this.pInstance) {
+            this.pInstance = new ActionHandlersRegistry();
+        }
+
+        return this.pInstance;
     }
+
+    public static reset() {
+        this.pInstance = null;
+    }
+
+    private registry: { [name: string]: ActionHandler };
+    private aliases: { [alias: string]: string };
 
     /**
      * Register new action handler
@@ -52,7 +59,7 @@ export class ActionHandlersRegistry {
                     true,
                 );
             } else {
-                this.logService.error(
+                LogService.instance.error(
                     ' -> Warning'.red +
                         ' action handler with id: ' +
                         metadata.id.red +
@@ -73,7 +80,7 @@ export class ActionHandlersRegistry {
                             true,
                         );
                     } else {
-                        this.logService.error(
+                        LogService.instance.error(
                             ' -> Warning'.red +
                                 ' action handler with alias: ' +
                                 alias.red +

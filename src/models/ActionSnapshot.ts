@@ -1,4 +1,3 @@
-import { Container } from 'typedi';
 import { LogService } from '../services';
 import { IContext } from '../interfaces';
 import { IMetadata } from '../interfaces/IMetadata';
@@ -50,8 +49,9 @@ export class ActionSnapshot {
      * @param {boolean} [silent] if provided LogService will not be invoked
      */
     log(message: string, error = false, silent = false) {
-        let prefix = ` -> [${this.idx}] [${this.source}] [${(this.metadata && this.metadata.$title) ||
-            this.idOrAlias}]`;
+        let prefix = ` -> [${this.idx}] [${this.source}] [${
+            (this.metadata && this.metadata.$title) || this.idOrAlias
+        }]`;
 
         if (error) {
             prefix = prefix.red;
@@ -63,9 +63,9 @@ export class ActionSnapshot {
 
         if (!silent) {
             if (error) {
-                Container.get(LogService).error(logMessage);
+                LogService.instance.error(logMessage);
             } else {
-                Container.get(LogService).info(logMessage);
+                LogService.instance.info(logMessage);
             }
         }
 

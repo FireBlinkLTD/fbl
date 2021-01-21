@@ -2,8 +2,7 @@ import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
-import { Container } from 'typedi';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
 
@@ -23,7 +22,7 @@ export class TemplateFlowActionProcessor extends ActionProcessor {
     async validate(): Promise<void> {
         await super.validate();
 
-        const action = safeLoad(this.options);
+        const action = load(this.options);
         try {
             Joi.assert(action, FBL_ACTION_SCHEMA);
         } catch (e) {
@@ -38,14 +37,12 @@ export class TemplateFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const action = load(this.options);
 
-        const action = safeLoad(this.options);
-
-        const childSnapshot = await flowService.executeAction(
+        const childSnapshot = await FlowService.instance.executeAction(
             this.snapshot.source,
             this.snapshot.wd,
-            action,
+            action as any,
             this.context,
             this.parameters,
         );

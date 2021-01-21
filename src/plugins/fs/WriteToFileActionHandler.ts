@@ -5,7 +5,6 @@ import { promisify } from 'util';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { ContextUtil, FSUtil } from '../../utils';
 import { dirname } from 'path';
-import { Container } from 'typedi';
 import { FlowService, TempPathsRegistry } from '../../services';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
@@ -39,7 +38,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
         if (this.options.path) {
             file = FSUtil.getAbsolutePath(this.options.path, this.snapshot.wd);
         } else {
-            file = await Container.get(TempPathsRegistry).createTempFile(true);
+            file = await TempPathsRegistry.instance.createTempFile(true);
         }
 
         // create folders structure if needed
@@ -47,15 +46,13 @@ export class WriteToFileActionProcessor extends ActionProcessor {
 
         let content = this.options.content;
         if (this.options.contentFromFile) {
-            const flowService = Container.get(FlowService);
-
             const absolutePath = FSUtil.getAbsolutePath(this.options.contentFromFile, this.snapshot.wd);
             content = await FSUtil.readTextFile(absolutePath);
 
             const wd = dirname(absolutePath);
 
             // resolve with global template delimiter first
-            content = await flowService.resolveTemplate(
+            content = await FlowService.instance.resolveTemplate(
                 this.context.ejsTemplateDelimiters.global,
                 content,
                 this.context,
@@ -66,7 +63,7 @@ export class WriteToFileActionProcessor extends ActionProcessor {
             );
 
             // resolve local template delimiter
-            content = await flowService.resolveTemplate(
+            content = await FlowService.instance.resolveTemplate(
                 this.context.ejsTemplateDelimiters.local,
                 content,
                 this.context,

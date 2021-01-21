@@ -1,13 +1,8 @@
 import { ActionProcessor } from '../../models';
 import { ContextUtil, FSUtil } from '../../utils';
-import { Container } from 'typedi';
 import { ChildProcessService } from '../../services';
 
 export abstract class BaseExecutableActionProcessor extends ActionProcessor {
-    get childProcessService(): ChildProcessService {
-        return Container.get(ChildProcessService);
-    }
-
     /**
      * Execute shell command
      * @param executable
@@ -69,7 +64,7 @@ export abstract class BaseExecutableActionProcessor extends ActionProcessor {
             }
 
             wd = wd ? FSUtil.getAbsolutePath(wd, this.snapshot.wd) : this.snapshot.wd;
-            result.code = await this.childProcessService.exec(executable, args, wd, on);
+            result.code = await ChildProcessService.instance.exec(executable, args, wd, on);
 
             if (result.code !== 0) {
                 result.error = new Error(`Command ${executable} exited with non-zero code.`);
