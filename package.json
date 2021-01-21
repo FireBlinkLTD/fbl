@@ -27,8 +27,7 @@
     "lint": "tslint -c tslint.json src/**/*.ts test/**/*.ts index.ts",
     "prettify": "prettier src/**/*.{md,ts,json} test/**/*.{md,ts,json} index.{md,ts,json} --write --config .prettierrc.yml && tslint 'src/**/*.ts' 'test/**/*.ts' 'index.ts' --fix",
     "prepublishOnly": "npm run build",
-    "snyk-protect": "snyk protect",
-    "prepare": "yarn run snyk-protect"
+    "snyk-protect": "snyk protect"
   },
   "bin": {
     "fbl": "dist/src/cli.js"
