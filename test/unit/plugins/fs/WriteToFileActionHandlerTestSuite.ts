@@ -6,9 +6,7 @@ import * as assert from 'assert';
 import { ActionSnapshot } from '../../../../src/models';
 import { resolve, join } from 'path';
 import { ContextUtil, FSUtil } from '../../../../src/utils';
-import { TempPathsRegistry, FlowService, FBLService } from '../../../../src/services';
-import { Container } from 'typedi';
-import { FSTemplateUtility } from '../../../../src/plugins/templateUtilities/FSTemplateUtility';
+import { TempPathsRegistry, FBLService, TemplateUtilitiesRegistry } from '../../../../src/services';
 import { IncludeTemplateUtility } from '../../../../src/plugins/templateUtilities/IncludeTemplateUtility';
 
 const chai = require('chai');
@@ -152,7 +150,7 @@ class WriteToFileActionHandlerTestSuite {
 
     @test()
     async saveToFile(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new WriteToFileActionHandler();
 
@@ -187,11 +185,10 @@ class WriteToFileActionHandlerTestSuite {
 
     @test()
     async saveToFileBasedOnTemplate(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const utils = new IncludeTemplateUtility();
 
-        const fblService = Container.get(FBLService);
-        fblService.templateUtilityRegistry.register(utils);
+        TemplateUtilitiesRegistry.instance.register(utils);
 
         const actionHandler = new WriteToFileActionHandler();
 
@@ -273,7 +270,7 @@ class WriteToFileActionHandlerTestSuite {
 
     @test()
     async mkdirp(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();
@@ -303,7 +300,7 @@ class WriteToFileActionHandlerTestSuite {
 
     @test()
     async fileInsteadOfFolderInParentPath(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new WriteToFileActionHandler();
         const context = ContextUtil.generateEmptyContext();

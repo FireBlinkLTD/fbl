@@ -1,5 +1,4 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -34,10 +33,8 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         // run try
-        let childSnapshot = await flowService.executeAction(
+        let childSnapshot = await FlowService.instance.executeAction(
             this.snapshot.source,
             this.snapshot.wd,
             this.options.action,
@@ -56,7 +53,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
 
         // run catch
         if (this.snapshot.childFailure && this.options.catch) {
-            childSnapshot = await flowService.executeAction(
+            childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 this.options.catch,
@@ -70,7 +67,7 @@ export class TryCatchFinallyFlowActionProcessor extends ActionProcessor {
 
         // run finally
         if (this.options.finally) {
-            childSnapshot = await flowService.executeAction(
+            childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 this.options.finally,

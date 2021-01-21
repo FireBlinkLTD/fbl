@@ -5,7 +5,6 @@ import { writeFile } from 'fs';
 import * as assert from 'assert';
 import { promisify } from 'util';
 import { FSUtil, ContextUtil } from '../../../../src/utils';
-import { Container } from 'typedi';
 import { TempPathsRegistry } from '../../../../src/services';
 import { FindActionHandler } from '../../../../src/plugins/fs/FindActionHandler';
 import { IDelegatedParameters } from '../../../../src';
@@ -95,7 +94,7 @@ class CopyPathActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
         const snapshot = new ActionSnapshot('.', '.', {}, '', 0, {});
 
-        const tmpDir = await Container.get(TempPathsRegistry).createTempDir();
+        const tmpDir = await TempPathsRegistry.instance.createTempDir();
         await FSUtil.mkdirp(join(tmpDir, 'a/b/c'));
         const writeFileAsync = promisify(writeFile);
 
@@ -127,8 +126,11 @@ class CopyPathActionHandlerTestSuite {
         await processor.validate();
         await processor.execute();
 
-        assert.deepStrictEqual(parameters.parameters.test1A, files.map(f => join(tmpDir, f)));
-        assert.deepStrictEqual(parameters.parameters.test1B, [files.map(f => join(tmpDir, f))]);
+        assert.deepStrictEqual(
+            parameters.parameters.test1A,
+            files.map((f) => join(tmpDir, f)),
+        );
+        assert.deepStrictEqual(parameters.parameters.test1B, [files.map((f) => join(tmpDir, f))]);
 
         processor = actionHandler.getProcessor(
             {
@@ -148,8 +150,11 @@ class CopyPathActionHandlerTestSuite {
         await processor.validate();
         await processor.execute();
 
-        assert.deepStrictEqual(parameters.parameters.test2A, files.filter(f => f.endsWith('.txt')));
-        assert.deepStrictEqual(parameters.parameters.test2B, [files.filter(f => f.endsWith('.txt'))]);
+        assert.deepStrictEqual(
+            parameters.parameters.test2A,
+            files.filter((f) => f.endsWith('.txt')),
+        );
+        assert.deepStrictEqual(parameters.parameters.test2B, [files.filter((f) => f.endsWith('.txt'))]);
     }
 
     @test()
@@ -157,7 +162,7 @@ class CopyPathActionHandlerTestSuite {
         const actionHandler = new FindActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
-        const tmpFile = await Container.get(TempPathsRegistry).createTempFile();
+        const tmpFile = await TempPathsRegistry.instance.createTempFile();
         const writeFileAsync = promisify(writeFile);
         const snapshot = new ActionSnapshot('.', '.', {}, dirname(tmpFile), 0, {});
 

@@ -6,7 +6,6 @@ import { dump } from 'js-yaml';
 import * as assert from 'assert';
 import { basename, dirname } from 'path';
 import { ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
 import { ContextUtil } from '../../../../src/utils';
 import { IPlugin } from '../../../../src/interfaces';
@@ -141,9 +140,9 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new SecretValuesAssignmentActionHandler();
 
         flowService.debug = true;
@@ -192,7 +191,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.existing.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
         options['$.fromFile'].files = [basename(tmpFile)];
@@ -209,14 +208,14 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.secrets.existing.value, 'value');
         assert.strictEqual(context.secrets.existing.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file_content, fileContent.file_content);
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, FlowService.MASKED);
     }
 
     @test()
     async assignRootValues(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const flowService = Container.get(FlowService);
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const flowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new SecretValuesAssignmentActionHandler();
 
         flowService.debug = true;
@@ -265,7 +264,7 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.secrets.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file1_content, file1Content.file1_content);
         assert.strictEqual(context.secrets.fromFile.file2_content, file2Content.file2_content);
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, FlowService.MASKED);
 
         // do the same with relative path
         options['$.fromFile'].files = [basename(tmpFile1), tmpFile2];
@@ -282,6 +281,6 @@ export class SecretValuesAssignmentActionHandlerTestSuite {
         assert.strictEqual(context.secrets.other, 'other');
         assert.strictEqual(context.secrets.fromFile.file1_content, file1Content.file1_content);
         assert.strictEqual(context.secrets.fromFile.file2_content, file2Content.file2_content);
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, FlowService.MASKED);
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, FlowService.MASKED);
     }
 }

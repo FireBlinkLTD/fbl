@@ -1,11 +1,9 @@
 import * as colors from 'colors';
-import Container from 'typedi';
 
-import { TempPathsRegistry } from '../../src';
+import { resetState } from '../utils/TestUtils';
 
 afterEach(async () => {
-    await Container.get(TempPathsRegistry).cleanup();
-    Container.reset();
+    await resetState();
 });
 
 before(() => {

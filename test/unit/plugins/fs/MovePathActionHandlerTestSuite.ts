@@ -8,7 +8,6 @@ import { promisify } from 'util';
 import { FSUtil, ContextUtil } from '../../../../src/utils';
 import { homedir } from 'os';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -77,7 +76,7 @@ class MovePathActionHandlerTestSuite {
     }
 
     private static async prepareTmpDir(dirs: string[], files: string[]): Promise<string> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const tmpdir = await tempPathsRegistry.createTempDir();
         for (const dir of dirs) {

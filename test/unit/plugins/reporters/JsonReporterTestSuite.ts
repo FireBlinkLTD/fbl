@@ -5,7 +5,6 @@ import { promisify } from 'util';
 import { readFile } from 'fs';
 import * as assert from 'assert';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 import { IReport } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
 
@@ -13,7 +12,7 @@ import { ContextUtil } from '../../../../src/utils';
 class JsonReporterTestSuite {
     @test()
     async generate(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const reporter = new JsonReporter();
         const file = await tempPathsRegistry.createTempFile();

@@ -3,7 +3,6 @@ import { TempPathsRegistry } from '../../../../src/services';
 import { ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
 import { ShellActionHandler } from '../../../../src/plugins/exec/ShellActionHandler';
 import * as assert from 'assert';
-import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
@@ -142,7 +141,7 @@ class ShellActionHandlerTestSuite {
         assert.strictEqual(context.secrets.tst2.stdout, 'hello!\n');
         assert.strictEqual(context.secrets.tst2.stderr, '');
 
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log').payload, 'stdout: hello!\n');
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'log').payload, 'stdout: hello!\n');
     }
 
     @test()
@@ -175,7 +174,7 @@ class ShellActionHandlerTestSuite {
         assert.strictEqual(context.ctx.tst1.stdout, 'hello!\n');
         assert.strictEqual(context.ctx.tst1.stderr, '');
 
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log').payload, 'stdout: hello!\n');
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'log').payload, 'stdout: hello!\n');
     }
 
     @test()
@@ -208,7 +207,7 @@ class ShellActionHandlerTestSuite {
         assert.strictEqual(context.secrets.tst2.stdout, 'hello!\n');
         assert.strictEqual(context.secrets.tst2.stderr, '');
 
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log').payload, 'stdout: hello!\n');
+        assert.strictEqual(snapshot.getSteps().find((s) => s.type === 'log').payload, 'stdout: hello!\n');
     }
 
     @test()
@@ -246,7 +245,10 @@ class ShellActionHandlerTestSuite {
         assert.strictEqual(context.secrets.tst2.stdout, 'hello!\n');
         assert.strictEqual(context.secrets.tst2.stderr, '');
 
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log'), undefined);
+        assert.strictEqual(
+            snapshot.getSteps().find((s) => s.type === 'log'),
+            undefined,
+        );
     }
 
     @test()
@@ -284,7 +286,10 @@ class ShellActionHandlerTestSuite {
         assert.strictEqual(context.secrets.tst2.stdout, '');
         assert.strictEqual(context.secrets.tst2.stderr, 'hello!\n');
 
-        assert.strictEqual(snapshot.getSteps().find(s => s.type === 'log'), undefined);
+        assert.strictEqual(
+            snapshot.getSteps().find((s) => s.type === 'log'),
+            undefined,
+        );
     }
 
     @test()
@@ -412,7 +417,7 @@ class ShellActionHandlerTestSuite {
 
     @test()
     async workingDirectory(): Promise<void> {
-        const tempPathRegistry = Container.get(TempPathsRegistry);
+        const tempPathRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new ShellActionHandler();
         const context = ContextUtil.generateEmptyContext();

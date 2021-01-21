@@ -1,10 +1,9 @@
 import { suite, test } from 'mocha-typescript';
 import { SwitchFlowActionHandler } from '../../../../src/plugins/flow/SwitchFlowActionHandler';
-import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
-import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
+import { ActionSnapshot, EnabledActionSnapshot } from '../../../../src/models';
+import { ActionHandlersRegistry } from '../../../../src/services';
 import * as assert from 'assert';
-import { IActionHandlerMetadata, IPlugin } from '../../../../src/interfaces';
+import { IPlugin } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
 
@@ -22,10 +21,6 @@ const plugin: IPlugin = {
 
 @suite()
 export class SwitchFlowActionHandlerTestSuite {
-    after() {
-        Container.reset();
-    }
-
     @test()
     async failValidation(): Promise<void> {
         const actionHandler = new SwitchFlowActionHandler();
@@ -251,7 +246,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithString(): Promise<void> {
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler();
@@ -283,7 +278,7 @@ export class SwitchFlowActionHandlerTestSuite {
         await processor.execute();
 
         assert.strictEqual(actionHandlerOptions, true);
-        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+        assert.deepStrictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, {
             value: '{MASKED}st',
             is: options.is,
         });
@@ -291,7 +286,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithTemplateCondition(): Promise<void> {
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler();
@@ -326,7 +321,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithNumber(): Promise<void> {
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions: any;
         const dummyActionHandler = new DummyActionHandler();
@@ -361,7 +356,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async triggerActionHandlerDueToMatchWithBoolean(): Promise<void> {
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions: any;
         const dummyActionHandler = new DummyActionHandler();
@@ -396,7 +391,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async doNotTriggerActionHandlerDueToMismatch(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions = false;
         const dummyActionHandler = new DummyActionHandler();
@@ -427,7 +422,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
         assert.strictEqual(actionHandlerOptions, false);
 
-        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+        assert.deepStrictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, {
             value: '{MASKED}st',
             is: options.is,
         });
@@ -435,7 +430,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async elseFlowActionHandler(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandlerOptions: number[] = [];
         const dummyActionHandler = new DummyActionHandler();
@@ -469,7 +464,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
         assert.deepStrictEqual(actionHandlerOptions, [2]);
 
-        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+        assert.deepStrictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, {
             value: '{MASKED}st',
             is: options.is,
         });
@@ -477,7 +472,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
     @test()
     async repeatTwice(): Promise<void> {
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandlerOptions: number[] = [];
         const dummyActionHandler = new DummyActionHandler();
@@ -511,7 +506,7 @@ export class SwitchFlowActionHandlerTestSuite {
 
         assert.deepStrictEqual(actionHandlerOptions, [2]);
 
-        assert.deepStrictEqual(snapshot.getSteps().find(s => s.type === 'options').payload, {
+        assert.deepStrictEqual(snapshot.getSteps().find((s) => s.type === 'options').payload, {
             value: '{MASKED}st',
             is: options.is,
         });

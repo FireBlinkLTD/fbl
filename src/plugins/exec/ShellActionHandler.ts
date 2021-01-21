@@ -4,7 +4,6 @@ import * as Joi from 'joi';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
 import { BaseExecutableActionProcessor } from './BaseExecutableActionProcessor';
-import { Container } from 'typedi';
 import { TempPathsRegistry } from '../../services';
 import { FBL_ASSIGN_TO_SCHEMA, FBL_PUSH_TO_SCHEMA } from '../../schemas';
 
@@ -35,7 +34,7 @@ export class SheelActionProcessor extends BaseExecutableActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const file = await Container.get(TempPathsRegistry).createTempFile();
+        const file = await TempPathsRegistry.instance.createTempFile();
         await promisify(writeFile)(file, this.options.script, 'utf8');
 
         const result: any = await this.exec(this.options.executable, [file], this.options.wd, this.options.options);

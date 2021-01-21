@@ -1,9 +1,8 @@
 import { ActionHandlersRegistry } from './ActionHandlersRegistry';
 import { IContext, IDelegatedParameters, IFlow, IFlowLocationOptions } from '../interfaces';
-import { safeLoad, dump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
 import * as ejs from 'ejs';
 import { ActionHandler, ActionSnapshot, EnabledActionSnapshot } from '../models';
-import Container, { Service } from 'typedi';
 import { ContextUtil, FSUtil } from '../utils';
 import { TemplateUtilitiesRegistry } from './TemplateUtilitiesRegistry';
 import { dirname, join, resolve } from 'path';
@@ -20,18 +19,26 @@ import { v5 as uuidv5 } from 'uuid';
 
 const ejsLint = require('ejs-lint');
 
-@Service()
 export class FlowService {
-    private index = 0;
-
     public static MASKED = '{MASKED}';
 
-    private flowPathCache: { [key: string]: string };
-    private flowResolvers: { [key: string]: Promise<string> };
+    private index = 0;
+    private flowPathCache: { [key: string]: string } = {};
+    private flowResolvers: { [key: string]: Promise<string> } = {};
 
-    constructor() {
-        this.flowPathCache = {};
-        this.flowResolvers = {};
+    private constructor() {}
+
+    private static pInstance: FlowService;
+    public static get instance(): FlowService {
+        if (!this.pInstance) {
+            this.pInstance = new FlowService();
+        }
+
+        return this.pInstance;
+    }
+
+    public static reset() {
+        this.pInstance = null;
     }
 
     /**
@@ -46,22 +53,6 @@ export class FlowService {
      * @type {boolean}
      */
     public debug = false;
-
-    get actionHandlersRegistry(): ActionHandlersRegistry {
-        return Container.get(ActionHandlersRegistry);
-    }
-
-    get templateUtilityRegistry(): TemplateUtilitiesRegistry {
-        return Container.get(TemplateUtilitiesRegistry);
-    }
-
-    get tempPathsRegistry(): TempPathsRegistry {
-        return Container.get(TempPathsRegistry);
-    }
-
-    get logService(): LogService {
-        return Container.get(LogService);
-    }
 
     /**
      * Execute action
@@ -111,7 +102,7 @@ export class FlowService {
         }
 
         const idx = ++this.index;
-        this.logService.info(
+        LogService.instance.info(
             ` -> [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.green + ' Processing.',
         );
 
@@ -123,7 +114,7 @@ export class FlowService {
         }
 
         try {
-            let handler = this.actionHandlersRegistry.find(idOrAlias);
+            let handler = ActionHandlersRegistry.instance.find(idOrAlias);
             if (!handler) {
                 handler = context.dynamicActionHandlers.find(idOrAlias);
             }
@@ -173,26 +164,26 @@ export class FlowService {
                 snapshot.success();
 
                 if (snapshot.successful) {
-                    this.logService.info(
+                    LogService.instance.info(
                         ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.blue +
                             ' Completed successfully withing ' +
                             snapshot.getHumanReadableDuration().blue,
                     );
                 } else {
-                    this.logService.info(
+                    LogService.instance.info(
                         ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow +
                             ' Marked as failed. Took ' +
                             snapshot.getHumanReadableDuration().yellow,
                     );
                 }
             } else {
-                this.logService.info(
+                LogService.instance.info(
                     ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.yellow + ' Skipped',
                 );
                 snapshot.skipped();
             }
         } catch (e) {
-            this.logService.error(
+            LogService.instance.error(
                 ` <- [${idx}] [${source}] [${(metadata && metadata.$title) || idOrAlias}]`.red +
                     ` Failed with: ${e.toString().red}`,
             );
@@ -226,15 +217,17 @@ export class FlowService {
 
             const exists = await FSUtil.exists(tarballFile);
             if (exists) {
-                this.logService.info(' -> Found cached tarball for remote URL: '.green + location.path);
+                LogService.instance.info(' -> Found cached tarball for remote URL: '.green + location.path);
 
                 return tarballFile;
             }
         } else {
-            tarballFile = await this.tempPathsRegistry.createTempFile(false, '.tar.gz');
+            tarballFile = await TempPathsRegistry.instance.createTempFile(false, '.tar.gz');
         }
 
-        this.logService.info(' -> Downloading tarball from remote URL: '.green + location.path + ' to ' + tarballFile);
+        LogService.instance.info(
+            ' -> Downloading tarball from remote URL: '.green + location.path + ' to ' + tarballFile,
+        );
         const ws = createWriteStream(tarballFile);
         try {
             await new Promise((res, rej) => {
@@ -267,9 +260,9 @@ export class FlowService {
      * @return {Promise<string>} path to temp dir
      */
     private async extractTarball(path: string): Promise<string> {
-        this.logService.info(' -> Extracting tarball at path: '.green + path);
+        LogService.instance.info(' -> Extracting tarball at path: '.green + path);
         const tarball = path;
-        const result = await this.tempPathsRegistry.createTempDir();
+        const result = await TempPathsRegistry.instance.createTempDir();
 
         await x({
             file: tarball,
@@ -401,7 +394,7 @@ export class FlowService {
     ): Promise<{ flow: IFlow; wd: string }> {
         const absolutePath = await this.resolveFlow(location);
 
-        this.logService.info(` -> Reading flow file: `.green + absolutePath);
+        LogService.instance.info(` -> Reading flow file: `.green + absolutePath);
         let content = await FSUtil.readTextFile(absolutePath);
 
         content = await this.resolveTemplate(
@@ -414,12 +407,12 @@ export class FlowService {
 
         let flow;
         try {
-            flow = safeLoad(content) as IFlow;
+            flow = load(content) as IFlow;
         } catch (e) {
-            this.logService.error(
+            LogService.instance.error(
                 ` -> Reading flow failed from file: `.red + absolutePath + ' Error: ' + e.message.red,
             );
-            this.logService.error(content.gray);
+            LogService.instance.error(content.gray);
             throw e;
         }
 
@@ -449,7 +442,7 @@ export class FlowService {
         ejsLint(tpl, { delimiter });
 
         const data: any = {
-            $: this.templateUtilityRegistry.generateUtilities(context, snapshot, parameters, wd || snapshot.wd),
+            $: TemplateUtilitiesRegistry.instance.generateUtilities(context, snapshot, parameters, wd || snapshot.wd),
             env: process.env,
             ...parameters,
             ...context,
@@ -516,28 +509,9 @@ export class FlowService {
             options = JSON.parse(json);
         }
 
-        let tpl = dump(options);
-
-        // fix template after dump
-        // while in yaml following string is fully valid '<%- ctx[''name''] %>'
-        // for EJS it is broken due to quotes escape
-        const lines: string[] = [];
-        const ejsTemplateRegEx = new RegExp(`<${delimiter}([^${delimiter}>]*)${delimiter}>`, 'g');
-        const doubleQuotesRegEx = /''/g;
-        tpl.split('\n').forEach((line) => {
-            if (line.indexOf("''") !== -1) {
-                // we only want to replace '' to ' inside the EJS template
-                line = line.replace(ejsTemplateRegEx, function (match, g1): string {
-                    return `<${delimiter}${g1.replace(doubleQuotesRegEx, "'")}${delimiter}>`;
-                });
-            }
-
-            lines.push(line);
-        });
-
-        tpl = lines.join('\n');
+        const tpl = dump(options);
         const yaml = await this.resolveTemplate(delimiter, tpl, context, snapshot, parameters);
-        options = safeLoad(yaml);
+        options = load(yaml);
 
         // resolve references
         options = ContextUtil.resolveReferences(options, context, parameters);

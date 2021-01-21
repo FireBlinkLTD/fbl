@@ -1,7 +1,6 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import * as Joi from 'joi';
-import Container from 'typedi';
 import { TemplateUtilitiesRegistry } from '../../services';
 import { isMissing } from 'object-collider';
 import { ActionError, INVALID_CONFIGURATION } from '../../errors';
@@ -41,7 +40,7 @@ export class FunctionActionProcessor extends ActionProcessor {
         const fn = new Function(script)();
 
         const result = await fn(
-            Container.get(TemplateUtilitiesRegistry).generateUtilities(
+            TemplateUtilitiesRegistry.instance.generateUtilities(
                 this.context,
                 this.snapshot,
                 this.parameters,

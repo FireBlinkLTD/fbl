@@ -2,7 +2,6 @@ import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import * as Joi from 'joi';
-import Container from 'typedi';
 import { FlowService } from '../../services';
 
 export class InvokeActionProcessor extends ActionProcessor {
@@ -19,9 +18,7 @@ export class InvokeActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
-        const childSnapshot = await flowService.executeAction(
+        const childSnapshot = await FlowService.instance.executeAction(
             this.snapshot.source,
             this.snapshot.wd,
             this.options,

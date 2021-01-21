@@ -3,7 +3,6 @@ import { ActionSnapshot } from '../../../../src/models';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { RepeatFlowActionHandler } from '../../../../src/plugins/flow/RepeatFlowActionHandler';
 import { IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
-import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
@@ -118,8 +117,8 @@ class RepeatFlowActionHandlerTestSuite {
 
     @test()
     async executeZeroTimesSync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
         const dummyActionHandler = new DummyActionHandler();
@@ -151,8 +150,8 @@ class RepeatFlowActionHandlerTestSuite {
 
     @test()
     async executeZeroTimesAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
         const dummyActionHandler = new DummyActionHandler();
@@ -185,8 +184,8 @@ class RepeatFlowActionHandlerTestSuite {
 
     @test()
     async executeSync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -194,7 +193,7 @@ class RepeatFlowActionHandlerTestSuite {
         const results: number[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, delays[opts.index]));
+            await new Promise((resolve) => setTimeout(resolve, delays[opts.index]));
             results.push(opts.index);
         };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
@@ -225,8 +224,8 @@ class RepeatFlowActionHandlerTestSuite {
 
     @test()
     async executeAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -234,7 +233,7 @@ class RepeatFlowActionHandlerTestSuite {
         const results: number[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, delays[opts.index]));
+            await new Promise((resolve) => setTimeout(resolve, delays[opts.index]));
             results.push(opts.index);
         };
         actionHandlersRegistry.register(dummyActionHandler, plugin);
@@ -266,8 +265,8 @@ class RepeatFlowActionHandlerTestSuite {
 
     @test()
     async shareParameters(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new RepeatFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 

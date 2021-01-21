@@ -7,7 +7,6 @@ import * as assert from 'assert';
 import { basename, dirname } from 'path';
 import { ActionSnapshot } from '../../../../src/models';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 import { ContextUtil } from '../../../../src/utils';
 
 const chai = require('chai');
@@ -132,7 +131,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async priorityCheck(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
 
@@ -183,7 +182,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignValues(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
@@ -285,7 +284,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async assignRootValues(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const actionHandler = new ContextValuesAssignmentActionHandler();
 
         const context = ContextUtil.generateEmptyContext();
@@ -384,7 +383,7 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
 
     @test()
     async pushToArray(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
         const actionHandler = new ContextValuesAssignmentActionHandler();
         const context = ContextUtil.generateEmptyContext();
         context.ctx.existing1 = [1, 2];
@@ -471,7 +470,10 @@ export class ContextValuesAssignmentActionHandlerTestSuite {
         assert.deepStrictEqual(context.ctx.new, [123]);
         assert.deepStrictEqual(context.ctx.fromFile1, [[5, 6]]);
         assert.deepStrictEqual(context.ctx.fromFile2, [5, 6]);
-        assert.deepStrictEqual(context.ctx.combined1, [[5, 6], [1, 2]]);
+        assert.deepStrictEqual(context.ctx.combined1, [
+            [5, 6],
+            [1, 2],
+        ]);
         assert.deepStrictEqual(context.ctx.combined2, [1, 2, 5, 6]);
         assert.deepStrictEqual(context.ctx.combined3, [5, 6, 1, 2]);
     }

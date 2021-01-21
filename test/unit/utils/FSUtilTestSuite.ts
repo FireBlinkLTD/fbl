@@ -6,7 +6,6 @@ import { join } from 'path';
 import { writeFile } from 'fs';
 import { promisify } from 'util';
 import { TempPathsRegistry } from '../../../src/services';
-import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -14,14 +13,9 @@ chai.use(chaiAsPromised);
 
 @suite()
 class FSUtilTestSuite {
-    async after(): Promise<void> {
-        await Container.get(TempPathsRegistry).cleanup();
-        Container.reset();
-    }
-
     @test()
     async corruptedYamlRead(): Promise<void> {
-        const tmpFile = await Container.get(TempPathsRegistry).createTempFile();
+        const tmpFile = await TempPathsRegistry.instance.createTempFile();
         await promisify(writeFile)(tmpFile, '12414: @>');
 
         await chai.expect(FSUtil.readYamlFromFile(tmpFile)).to.be.rejectedWith('Unable to parse YAML');
@@ -29,7 +23,7 @@ class FSUtilTestSuite {
 
     @test()
     async missingFileRead(): Promise<void> {
-        const tmpDir = await Container.get(TempPathsRegistry).createTempDir();
+        const tmpDir = await TempPathsRegistry.instance.createTempDir();
         const path = join(tmpDir, 'test.txt');
 
         await chai
@@ -47,7 +41,7 @@ class FSUtilTestSuite {
 
     @test()
     async findFilesByMask(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const tmpDir = await tempPathsRegistry.createTempDir();
         const writeFileAsync = promisify(writeFile);

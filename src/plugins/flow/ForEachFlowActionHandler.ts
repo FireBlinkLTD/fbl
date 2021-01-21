@@ -2,7 +2,6 @@ import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IIteration } from '../../interfaces';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
-import { Container } from 'typedi';
 import { FBL_ACTION_SCHEMA } from '../../schemas';
 import { BaseFlowActionProcessor } from './BaseFlowActionProcessor';
 
@@ -27,8 +26,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async validate(): Promise<void> {
-        const flowService = Container.get(FlowService);
-        this.options.of = await flowService.resolveOptionsWithNoHandlerCheck(
+        this.options.of = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
             this.context.ejsTemplateDelimiters.local,
             this.options.of,
             this.context,
@@ -38,7 +36,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
         );
 
         if (this.options.async) {
-            this.options.async = await flowService.resolveOptionsWithNoHandlerCheck(
+            this.options.async = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.async,
                 this.context,
@@ -55,8 +53,6 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         const promises: Promise<void>[] = [];
         const snapshots: ActionSnapshot[] = [];
 
@@ -80,7 +76,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
             if (this.options.async) {
                 promises.push(
                     (async (p): Promise<void> => {
-                        snapshots[p.iteration.index] = await flowService.executeAction(
+                        snapshots[p.iteration.index] = await FlowService.instance.executeAction(
                             this.snapshot.source,
                             this.snapshot.wd,
                             this.options.action,
@@ -91,7 +87,7 @@ export class ForEachFlowActionProcessor extends BaseFlowActionProcessor {
                     })(actionParameters),
                 );
             } else {
-                const result = (snapshots[i] = await flowService.executeAction(
+                const result = (snapshots[i] = await FlowService.instance.executeAction(
                     this.snapshot.source,
                     this.snapshot.wd,
                     this.options.action,

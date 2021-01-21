@@ -1,5 +1,4 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FBLService, FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters, IFlowLocationOptions } from '../../interfaces';
@@ -40,13 +39,21 @@ export class AttachedFlowActionProcessor extends ActionProcessor {
         // get absolute path
         this.options.path = FSUtil.getAbsolutePath(this.options.path, this.snapshot.wd);
 
-        const flowService = Container.get(FlowService);
-        const fbl = Container.get(FBLService);
-
         this.snapshot.log(`Attaching flow at path ${this.options.path}.`);
-        const flow = await flowService.readFlowFromFile(this.options, this.context, this.snapshot, this.parameters);
+        const flow = await FlowService.instance.readFlowFromFile(
+            this.options,
+            this.context,
+            this.snapshot,
+            this.parameters,
+        );
 
-        const childSnapshot = await fbl.execute(this.options.path, flow.wd, flow.flow, this.context, this.parameters);
+        const childSnapshot = await FBLService.instance.execute(
+            this.options.path,
+            flow.wd,
+            flow.flow,
+            this.context,
+            this.parameters,
+        );
         this.snapshot.registerChildActionSnapshot(childSnapshot);
     }
 }

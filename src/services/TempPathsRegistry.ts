@@ -1,14 +1,23 @@
-import { Service } from 'typedi';
 import { FSUtil } from '../utils';
 
 const tmp = require('tmp-promise');
 
-@Service()
 export class TempPathsRegistry {
-    private tempPaths: string[];
+    private tempPaths: string[] = [];
 
-    constructor() {
-        this.tempPaths = [];
+    private constructor() {}
+
+    private static pInstance: TempPathsRegistry;
+    public static get instance(): TempPathsRegistry {
+        if (!this.pInstance) {
+            this.pInstance = new TempPathsRegistry();
+        }
+
+        return this.pInstance;
+    }
+
+    public static reset() {
+        this.pInstance = null;
     }
 
     async createTempDir(keep = false): Promise<string> {
@@ -37,6 +46,6 @@ export class TempPathsRegistry {
     }
 
     async cleanup(): Promise<void> {
-        await Promise.all(this.tempPaths.map(path => FSUtil.remove(path, true)));
+        await Promise.all(this.tempPaths.map((path) => FSUtil.remove(path, true)));
     }
 }

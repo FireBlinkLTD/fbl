@@ -1,7 +1,6 @@
 import { suite, test } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
 import * as assert from 'assert';
-import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ParallelFlowActionHandler } from '../../../../src/plugins/flow/ParallelFlowActionHandler';
 import { IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
@@ -83,8 +82,8 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async emptyList(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
@@ -105,8 +104,8 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async voidAction(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
@@ -128,20 +127,20 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async validateExecutionOrder(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
@@ -167,8 +166,8 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async failureOnFirstShouldNotStopOthers(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const results: number[] = [];
         const dummyActionHandler0 = new DummyActionHandler();
@@ -179,14 +178,14 @@ export class ParallelFlowActionHandlerTestSuite {
 
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
@@ -219,29 +218,29 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async tree(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
         const results: number[] = [];
         const dummyActionHandler1 = new DummyActionHandler();
         dummyActionHandler1.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise((resolve) => setTimeout(resolve, 50));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler1, plugin);
 
         const dummyActionHandler2 = new DummyActionHandler();
         dummyActionHandler2.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 5));
+            await new Promise((resolve) => setTimeout(resolve, 5));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler2, plugin);
 
         const dummyActionHandler3 = new DummyActionHandler();
         dummyActionHandler3.executeFn = async (opts: any) => {
-            await new Promise(resolve => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 20));
             results.push(opts);
         };
         actionHandlersRegistry.register(dummyActionHandler3, plugin);
@@ -270,8 +269,8 @@ export class ParallelFlowActionHandlerTestSuite {
 
     @test()
     async shareParameters(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ParallelFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 

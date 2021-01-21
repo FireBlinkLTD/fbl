@@ -1,5 +1,4 @@
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
-import { Container } from 'typedi';
 import * as Joi from 'joi';
 import { FlowService } from '../../services';
 import { IActionHandlerMetadata, IContext, IDelegatedParameters } from '../../interfaces';
@@ -25,10 +24,8 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         // register masked options in the snapshot
-        const masked = await flowService.resolveOptionsWithNoHandlerCheck(
+        const masked = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
             this.context.ejsTemplateDelimiters.local,
             this.options.value,
             this.context,
@@ -42,7 +39,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
             is: this.options.is,
         });
 
-        const value = await flowService.resolveOptionsWithNoHandlerCheck(
+        const value = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
             this.context.ejsTemplateDelimiters.local,
             this.options.value,
             this.context,
@@ -67,7 +64,7 @@ export class SwitchFlowActionProcessor extends ActionProcessor {
 
         if (action) {
             this.snapshot.log(`Based on value: ${value} invoking handler.`);
-            const childSnapshot = await flowService.executeAction(
+            const childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 action,

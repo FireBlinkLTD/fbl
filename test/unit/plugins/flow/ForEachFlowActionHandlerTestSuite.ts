@@ -3,7 +3,6 @@ import { ActionSnapshot } from '../../../../src/models';
 import { ActionHandlersRegistry, FlowService } from '../../../../src/services';
 import { ForEachFlowActionHandler } from '../../../../src/plugins/flow/ForEachFlowActionHandler';
 import { IIteration, IPlugin, IDelegatedParameters } from '../../../../src/interfaces';
-import { Container } from 'typedi';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { VoidFlowActionHandler } from '../../../../src/plugins/flow/VoidFlowActionHandler';
@@ -158,8 +157,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async voidAction(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
@@ -184,8 +183,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeArraySync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -193,7 +192,7 @@ class ForEachFlowActionHandlerTestSuite {
         const results: IIteration[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
                 setTimeout(resolve, delays[opts.index]);
             });
 
@@ -228,8 +227,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeEmptyArrayAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -264,8 +263,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeEmptyArraySync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -300,8 +299,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeArrayAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -309,7 +308,7 @@ class ForEachFlowActionHandlerTestSuite {
         const results: IIteration[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
                 setTimeout(resolve, delays[opts.index]);
             });
 
@@ -345,8 +344,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeEmptyObjectSync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -381,8 +380,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeEmptyObjectAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -418,8 +417,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeObjectSync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -427,7 +426,7 @@ class ForEachFlowActionHandlerTestSuite {
         const results: IIteration[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
                 setTimeout(resolve, delays[opts.index]);
             });
 
@@ -467,8 +466,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async executeObjectAsync(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -476,7 +475,7 @@ class ForEachFlowActionHandlerTestSuite {
         const results: IIteration[] = [];
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (opts: any) => {
-            await new Promise(resolve => {
+            await new Promise((resolve) => {
                 setTimeout(resolve, delays[opts.index]);
             });
 
@@ -517,8 +516,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async shareParameters(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const actionHandler = new ForEachFlowActionHandler();
         actionHandlersRegistry.register(actionHandler, plugin);
 
@@ -565,8 +564,8 @@ class ForEachFlowActionHandlerTestSuite {
 
     @test()
     async shouldStopAfterFirstError(): Promise<void> {
-        const flowService: FlowService = Container.get<FlowService>(FlowService);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const flowService: FlowService = FlowService.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const results: number[] = [];
         const dummyActionHandler = new DummyActionHandler();

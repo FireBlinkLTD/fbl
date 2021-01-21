@@ -1,7 +1,6 @@
 import { test, suite } from 'mocha-typescript';
 import { ActionSnapshot } from '../../../../src/models';
-import { Container } from 'typedi';
-import { FlowService } from '../../../../src/services';
+import { ActionHandlersRegistry, FlowService, TemplateUtilitiesRegistry } from '../../../../src/services';
 import { VirtualFlowActionHandler } from '../../../../src/plugins/flow/VirtualFlowActionHandler';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 import { IPlugin, IContext } from '../../../../src/interfaces';
@@ -113,17 +112,17 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async successfulExecution(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -158,17 +157,17 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async testDefaults(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -208,17 +207,17 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async testDefaultsWithMergeModifiers(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -261,17 +260,17 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async testDefaultsWithMergeFunction(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -312,19 +311,19 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async failVirtualValidation(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
         flowService.debug = true;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -363,27 +362,27 @@ class VirtualFlowActionHandlerTestSuite {
         assert(!snapshot.successful);
         const virtualChildSnapshot: ActionSnapshot = snapshot
             .getSteps()
-            .find(s => s.type === 'child' && s.payload.idOrAlias === 'virtual.test').payload;
+            .find((s) => s.type === 'child' && s.payload.idOrAlias === 'virtual.test').payload;
         assert.strictEqual(
-            virtualChildSnapshot.getSteps().find(s => s.type === 'failure').payload.message,
+            virtualChildSnapshot.getSteps().find((s) => s.type === 'failure').payload.message,
             'tst.t is not of a type(s) string',
         );
     }
 
     @test()
     async noSchemaValidation(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.actionHandlersRegistry.register(new SequenceFlowActionHandler(), plugin);
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        ActionHandlersRegistry.instance.register(new SequenceFlowActionHandler(), plugin);
 
         let opts;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async (options: any) => {
             opts = options;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const actionOptions = [
             {
@@ -412,11 +411,11 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async workingDirectory(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.templateUtilityRegistry.register(new FSTemplateUtility());
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        TemplateUtilitiesRegistry.instance.register(new FSTemplateUtility());
 
         let opts;
         let wd;
@@ -425,7 +424,7 @@ class VirtualFlowActionHandlerTestSuite {
             opts = options;
             wd = s.wd;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const context = ContextUtil.generateEmptyContext();
 
@@ -465,11 +464,11 @@ class VirtualFlowActionHandlerTestSuite {
 
     @test()
     async dynamicWorkingDirectory(): Promise<void> {
-        const flowService = Container.get(FlowService);
+        const flowService = FlowService.instance;
 
         const virtual = new VirtualFlowActionHandler();
-        flowService.actionHandlersRegistry.register(virtual, plugin);
-        flowService.templateUtilityRegistry.register(new FSTemplateUtility());
+        ActionHandlersRegistry.instance.register(virtual, plugin);
+        TemplateUtilitiesRegistry.instance.register(new FSTemplateUtility());
 
         let opts;
         let wd;
@@ -478,7 +477,7 @@ class VirtualFlowActionHandlerTestSuite {
             opts = options;
             wd = s.wd;
         };
-        flowService.actionHandlersRegistry.register(dummyActionHandler, plugin);
+        ActionHandlersRegistry.instance.register(dummyActionHandler, plugin);
 
         const context = ContextUtil.generateEmptyContext();
 

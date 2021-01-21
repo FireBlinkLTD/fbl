@@ -1,7 +1,6 @@
 import { suite, test } from 'mocha-typescript';
 import * as assert from 'assert';
 import { VirtualFlowActionHandler } from '../../../../src/plugins/flow/VirtualFlowActionHandler';
-import Container from 'typedi';
 import { ActionHandlersRegistry, IPlugin, TemplateUtilitiesRegistry, ContextUtil, FlowService } from '../../../../src';
 import { ContextTemplateUtility } from '../../../../src/plugins/templateUtilities/ContextTemplateUtility';
 import { FunctionActionHandler } from '../../../../src/plugins/exec/FunctionActionHandler';
@@ -26,8 +25,8 @@ class ContextTemplateUtilityTestSuite {
             action: {
                 fn: `
                     $.assignTo(parameters.assignTo, 'assignToValue');
-                    $.pushTo(parameters.pushTo, 'pushToValue');      
-                    
+                    $.pushTo(parameters.pushTo, 'pushToValue');
+
                     // should not cause errors, but just have no effect:
                     $.pushTo(undefined, 'pv');
                     $.assignTo(null, 'av');
@@ -35,9 +34,9 @@ class ContextTemplateUtilityTestSuite {
             },
         };
 
-        const flowService = Container.get(FlowService);
-        const templateUtilitiesRegistry = Container.get(TemplateUtilitiesRegistry);
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
+        const flowService = FlowService.instance;
+        const templateUtilitiesRegistry = TemplateUtilitiesRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         actionHandlersRegistry.register(new VirtualFlowActionHandler(), <IPlugin>{
             name: 'test-plugin',

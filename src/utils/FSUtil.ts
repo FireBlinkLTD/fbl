@@ -1,7 +1,7 @@
 import * as glob from 'glob-promise';
 import { homedir } from 'os';
 import { basename, dirname, isAbsolute, normalize, resolve, sep } from 'path';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { promisify } from 'util';
 import { copyFile, exists, mkdir, readdir, readFile, rename, rmdir, stat, unlink } from 'fs';
 import { ActionError, CORRUPTED_FILE, PATH_ALREADY_EXISTS, NOT_FOUND } from '../errors';
@@ -55,7 +55,7 @@ export class FSUtil {
         for (const mask of masks) {
             const absolutePathMask = FSUtil.getAbsolutePath(mask, wd);
             const matches = await glob(absolutePathMask, {
-                ignore: (ignore || []).map(i => FSUtil.getAbsolutePath(i, wd)),
+                ignore: (ignore || []).map((i) => FSUtil.getAbsolutePath(i, wd)),
                 nodir: true,
                 absolute: true,
                 dot: true,
@@ -303,7 +303,7 @@ export class FSUtil {
         const source = await FSUtil.readTextFile(file);
 
         try {
-            return safeLoad(source);
+            return load(source);
         } catch (e) {
             throw new ActionError(`Unable to parse YAML: ${e.message}`, CORRUPTED_FILE);
         }

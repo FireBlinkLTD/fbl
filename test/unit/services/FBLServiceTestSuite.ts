@@ -1,19 +1,11 @@
 import { suite, test } from 'mocha-typescript';
-import { Container } from 'typedi';
-import {
-    IActionHandlerMetadata,
-    IFlow,
-    IPlugin,
-    ITemplateUtility,
-    IDelegatedParameters,
-} from '../../../src/interfaces';
+import { IActionHandlerMetadata, IFlow, IPlugin } from '../../../src/interfaces';
 import { ActionHandler, ActionSnapshot } from '../../../src/models';
 import * as assert from 'assert';
-import { FBLService } from '../../../src/services';
+import { ActionHandlersRegistry, FBLService, FlowService } from '../../../src/services';
 import { ContextUtil } from '../../../src/utils';
 import { join } from 'path';
 import { DummyActionHandler } from '../../assets/fakePlugins/DummyActionHandler';
-import { IContext } from 'mocha';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -52,7 +44,7 @@ class InvalidAliasActionHandler extends ActionHandler {
 export class FBLServiceTestSuite {
     @test()
     async pluginAutoInclude(): Promise<void> {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
         await fbl.validateFlowRequirements(
             <IFlow>{
                 version: '1.0.0',
@@ -74,7 +66,7 @@ export class FBLServiceTestSuite {
 
     @test()
     async pluginAutoIncludeWithWD(): Promise<void> {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
         await fbl.validateFlowRequirements(
             <IFlow>{
                 version: '1.0.0',
@@ -110,9 +102,7 @@ export class FBLServiceTestSuite {
 
     @test()
     async pipeline(): Promise<void> {
-        const fbl = Container.get<FBLService>(FBLService);
-
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         let result = null;
         const actionHandler = new DummyActionHandler();
@@ -120,7 +110,7 @@ export class FBLServiceTestSuite {
             result = opt;
         };
 
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -132,7 +122,7 @@ export class FBLServiceTestSuite {
         context.ctx.var = 'test';
         context.secrets.var = '123';
 
-        const snapshot = await fbl.execute(
+        const snapshot = await FBLService.instance.execute(
             'index.yml',
             '.',
             <IFlow>{
@@ -146,12 +136,12 @@ export class FBLServiceTestSuite {
             {},
         );
 
-        const snapshotOptionsSteps = snapshot.getSteps().filter(s => s.type === 'options');
+        const snapshotOptionsSteps = snapshot.getSteps().filter((s) => s.type === 'options');
         assert.strictEqual(snapshotOptionsSteps[snapshotOptionsSteps.length - 1].payload, 'test{MASKED}');
         assert.strictEqual(result, 'test123');
 
         await chai.expect(
-            fbl.execute(
+            FBLService.instance.execute(
                 'index.yml',
                 '.',
                 <IFlow>{
@@ -166,9 +156,9 @@ export class FBLServiceTestSuite {
 
     @test()
     async skippedExecution(): Promise<void> {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         const actionHandler = new DummyActionHandler();
         actionHandler.executeFn = async (opt: any) => {
@@ -177,7 +167,7 @@ export class FBLServiceTestSuite {
         actionHandler.shouldSkipExecution = true;
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -203,16 +193,16 @@ export class FBLServiceTestSuite {
 
     @test
     async failedExecution() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         const actionHandler = new DummyActionHandler();
         actionHandler.executeFn = async (opt: any) => {
             throw new Error('test');
         };
 
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -238,9 +228,9 @@ export class FBLServiceTestSuite {
 
     @test()
     async ejsTemplateValidation() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         const actionHandler = new DummyActionHandler();
         actionHandler.executeFn = async (opt: any) => {
@@ -248,7 +238,7 @@ export class FBLServiceTestSuite {
         };
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -271,7 +261,7 @@ export class FBLServiceTestSuite {
 
         assert.strictEqual(snapshot.successful, false);
         assert.strictEqual(
-            snapshot.getSteps().find(s => s.type === 'failure').payload.message,
+            snapshot.getSteps().find((s) => s.type === 'failure').payload.message,
             'Could not find matching close tag for "<%-".',
         );
         assert.strictEqual(result, null);
@@ -279,9 +269,9 @@ export class FBLServiceTestSuite {
 
     @test()
     async failActionIdAndAliasValidation() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         let error;
         try {
@@ -332,9 +322,9 @@ export class FBLServiceTestSuite {
 
     @test()
     async escapingOfUtilityResult() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         const actionHandler = new DummyActionHandler();
         actionHandler.executeFn = async (opt: any) => {
@@ -342,7 +332,7 @@ export class FBLServiceTestSuite {
         };
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -378,9 +368,9 @@ export class FBLServiceTestSuite {
 
     @test()
     async templateProcessingStringEscape() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
-        fbl.flowService.debug = true;
+        FlowService.instance.debug = true;
 
         const actionHandler = new DummyActionHandler();
         actionHandler.executeFn = async (opt: any) => {
@@ -388,7 +378,7 @@ export class FBLServiceTestSuite {
         };
 
         let result = null;
-        fbl.flowService.actionHandlersRegistry.register(actionHandler, {
+        ActionHandlersRegistry.instance.register(actionHandler, {
             name: 'test',
             version: '1.0.0',
             requires: {
@@ -409,7 +399,7 @@ export class FBLServiceTestSuite {
             <IFlow>{
                 version: '1.0.0',
                 pipeline: {
-                    [actionHandler.id]: `<%- ctx['t1']["t2"].value %>`,
+                    [actionHandler.id]: `<%= ctx['t1']["t2"].value %>`,
                 },
             },
             context,
@@ -438,7 +428,7 @@ export class FBLServiceTestSuite {
 
     @test()
     async missingApplicationRequirement() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
         await chai
             .expect(
@@ -461,7 +451,7 @@ export class FBLServiceTestSuite {
 
     @test()
     async satisfiesApplicationRequirement() {
-        const fbl = Container.get<FBLService>(FBLService);
+        const fbl = FBLService.instance;
 
         await fbl.validatePlugin(
             <IPlugin>{

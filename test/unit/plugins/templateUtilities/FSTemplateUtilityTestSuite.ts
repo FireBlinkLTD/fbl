@@ -4,7 +4,6 @@ import * as assert from 'assert';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 import { ContextUtil, ActionSnapshot } from '../../../../src';
 
 @suite()
@@ -29,7 +28,7 @@ class FSTemplateUtilityTestSuite {
 
     @test()
     async readText(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const file = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(file, 'test', 'utf8');
@@ -46,7 +45,7 @@ class FSTemplateUtilityTestSuite {
 
     @test()
     async readBase64(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const file = await tempPathsRegistry.createTempFile();
         await promisify(writeFile)(file, 'test', 'utf8');

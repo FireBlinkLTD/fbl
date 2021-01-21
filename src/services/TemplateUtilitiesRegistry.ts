@@ -1,13 +1,24 @@
-import { Service } from 'typedi';
 import { ITemplateUtility, IContext, IDelegatedParameters } from '../interfaces';
 import { ActionSnapshot } from '../models';
 
-@Service()
 export class TemplateUtilitiesRegistry {
     private registry: ITemplateUtility[];
 
-    constructor() {
+    private constructor() {
         this.cleanup();
+    }
+
+    private static pInstance: TemplateUtilitiesRegistry;
+    public static get instance(): TemplateUtilitiesRegistry {
+        if (!this.pInstance) {
+            this.pInstance = new TemplateUtilitiesRegistry();
+        }
+
+        return this.pInstance;
+    }
+
+    public static reset() {
+        this.pInstance = null;
     }
 
     /**

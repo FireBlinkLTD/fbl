@@ -1,4 +1,3 @@
-import Container, { Service } from 'typedi';
 import * as commander from 'commander';
 import { collideUnsafe, isObject, collide } from 'object-collider';
 import * as colors from 'colors';
@@ -20,11 +19,26 @@ import { ActionSnapshot } from '../models';
 const prompts = require('prompts');
 const cliui = require('cliui');
 
-@Service()
 export class CLIService {
     private globalConfig: IFBLGlobalConfig;
     private flowFilePath: string;
     private flowTarget: string;
+
+    private constructor() {}
+
+    private static pInstance: CLIService;
+    public static get instance(): CLIService {
+        /* istanbul ignore else */
+        if (!this.pInstance) {
+            this.pInstance = new CLIService();
+        }
+
+        return this.pInstance;
+    }
+
+    public static reset() {
+        this.pInstance = null;
+    }
 
     private static CORE_PLUGINS = [
         __dirname + '/../plugins/context',
@@ -35,22 +49,6 @@ export class CLIService {
         __dirname + '/../plugins/reporters',
         __dirname + '/../plugins/templateUtilities',
     ];
-
-    get fbl(): FBLService {
-        return Container.get(FBLService);
-    }
-
-    get flowService(): FlowService {
-        return Container.get(FlowService);
-    }
-
-    get tempPathsRegistry(): TempPathsRegistry {
-        return Container.get(TempPathsRegistry);
-    }
-
-    get logService(): LogService {
-        return Container.get(LogService);
-    }
 
     async run(): Promise<void> {
         this.globalConfig = <IFBLGlobalConfig>{
@@ -79,23 +77,25 @@ export class CLIService {
             colors.enable();
         }
 
-        if (commander.unsafePlugins) {
-            this.fbl.allowUnsafePlugins = true;
+        const options = commander.opts();
+
+        if (options.unsafePlugins) {
+            FBLService.instance.allowUnsafePlugins = true;
         }
 
-        if (commander.unsafeFlows) {
-            this.fbl.allowUnsafeFlows = true;
+        if (options.unsafeFlows) {
+            FBLService.instance.allowUnsafeFlows = true;
         }
 
         if (this.globalConfig.report.output) {
             // enable debug mode when report generation is requested
-            this.flowService.debug = true;
+            FlowService.instance.debug = true;
         }
 
         await this.registerPlugins();
 
         if (this.globalConfig.report.output) {
-            if (!this.fbl.getReporter(this.globalConfig.report.type)) {
+            if (!FBLService.instance.getReporter(this.globalConfig.report.type)) {
                 console.error(`Error: Unable to find reporter: ${this.globalConfig.report.type}`);
                 commander.outputHelp();
                 process.exit(1);
@@ -116,7 +116,7 @@ export class CLIService {
         }
 
         const source = FSUtil.getAbsolutePath(this.flowFilePath, process.cwd());
-        const flow = await this.flowService.readFlowFromFile(
+        const flow = await FlowService.instance.readFlowFromFile(
             <IFlowLocationOptions>{
                 path: source,
                 http: {
@@ -137,7 +137,7 @@ export class CLIService {
             initialContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
         }
 
-        const snapshot = await this.fbl.execute(source, flow.wd, flow.flow, context, parameters);
+        const snapshot = await FBLService.instance.execute(source, flow.wd, flow.flow, context, parameters);
         if (this.globalConfig.report.output) {
             finalContextState = JSON.parse(JSON.stringify(ContextUtil.toBase(context)));
         }
@@ -152,13 +152,13 @@ export class CLIService {
             };
 
             // generate report
-            await this.fbl
+            await FBLService.instance
                 .getReporter(this.globalConfig.report.type)
                 .generate(this.globalConfig.report.output, this.globalConfig.report.options, report);
         }
 
         // remove all temp files and folders
-        await this.tempPathsRegistry.cleanup();
+        await TempPathsRegistry.instance.cleanup();
 
         if (!snapshot.successful) {
             throw new Error('Execution failed.');
@@ -365,14 +365,16 @@ export class CLIService {
             await this.convertKVPair(v, this.globalConfig.report.options);
         }
 
-        if (!commander.path) {
+        const commanderOptions = commander.opts();
+
+        if (!commanderOptions.path) {
             console.error('Error: flow descriptor file/url was not provided.\n');
             commander.outputHelp();
             process.exit(1);
         }
 
-        this.globalConfig.report.output = commander.output || this.globalConfig.report.output;
-        this.globalConfig.report.type = commander.report || this.globalConfig.report.type;
+        this.globalConfig.report.output = commanderOptions.output || this.globalConfig.report.output;
+        this.globalConfig.report.type = commanderOptions.report || this.globalConfig.report.type;
 
         if (this.globalConfig.report.output && !this.globalConfig.report.type) {
             console.error('Error: --report parameter is missing.');
@@ -380,23 +382,23 @@ export class CLIService {
             process.exit(1);
         }
 
-        this.flowFilePath = commander.path;
-        this.globalConfig.other.noColors = !commander.colors;
-        this.globalConfig.other.useCache = commander.useCache;
-        this.globalConfig.other.allowUnsafePlugins = commander.unsafePlugins;
-        this.globalConfig.other.allowUnsafeFlows = commander.unsafeFlows;
-        this.flowTarget = commander.target;
+        this.flowFilePath = commanderOptions.path;
+        this.globalConfig.other.noColors = !commanderOptions.colors;
+        this.globalConfig.other.useCache = commanderOptions.useCache;
+        this.globalConfig.other.allowUnsafePlugins = commanderOptions.unsafePlugins;
+        this.globalConfig.other.allowUnsafeFlows = commanderOptions.unsafeFlows;
+        this.flowTarget = commanderOptions.target;
 
-        if (commander.globalTemplateDelimiter) {
-            this.globalConfig.other.globalTemplateDelimiter = commander.globalTemplateDelimiter;
+        if (commanderOptions.globalTemplateDelimiter) {
+            this.globalConfig.other.globalTemplateDelimiter = commanderOptions.globalTemplateDelimiter;
         }
 
-        if (commander.localTemplateDelimiter) {
-            this.globalConfig.other.localTemplateDelimiter = commander.localTemplateDelimiter;
+        if (commanderOptions.localTemplateDelimiter) {
+            this.globalConfig.other.localTemplateDelimiter = commanderOptions.localTemplateDelimiter;
         }
 
-        if (commander.verbose) {
-            this.logService.enableInfoLogs();
+        if (commanderOptions.verbose) {
+            LogService.instance.enableInfoLogs();
         }
     }
 
@@ -458,8 +460,8 @@ export class CLIService {
             plugins.push(plugin);
         }
 
-        this.fbl.registerPlugins(plugins);
-        await this.fbl.validatePlugins(process.cwd());
+        FBLService.instance.registerPlugins(plugins);
+        await FBLService.instance.validatePlugins(process.cwd());
     }
 
     /**

@@ -1,6 +1,5 @@
 import { suite, test } from 'mocha-typescript';
 import { AttachedFlowActionHandler } from '../../../../src/plugins/flow/AttachedFlowActionHandler';
-import { Container } from 'typedi';
 import { ActionHandlersRegistry, FlowService, TempPathsRegistry } from '../../../../src/services';
 import { ActionSnapshot } from '../../../../src/models';
 import { unlink, writeFile } from 'fs';
@@ -14,6 +13,7 @@ import { c } from 'tar';
 import { DummyServerWrapper } from '../../../assets/dummy.http.server.wrapper';
 import { SequenceFlowActionHandler } from '../../../../src/plugins/flow/SequenceFlowActionHandler';
 import { DummyActionHandler } from '../../../assets/fakePlugins/DummyActionHandler';
+import { resetState } from '../../../utils/TestUtils';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -127,8 +127,11 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async processAttachedFlow(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        console.log('==========');
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        console.log('==========');
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
+        console.log('==========');
 
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
@@ -167,8 +170,8 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async corruptedYAML(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -195,8 +198,8 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async failOnAttachedFileWithTarget(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.executeFn = async () => {
@@ -236,8 +239,8 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async directoryAsPath(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         let actionHandlerOptions: any = null;
         let actionHandlerContext: any = null;
@@ -385,7 +388,7 @@ class AttachedFlowActionHandlerTestSuite {
         const context = ContextUtil.generateEmptyContext();
 
         setTimeout(() => {
-            server.stop().catch(err => {
+            server.stop().catch((err) => {
                 throw err;
             });
         }, 100);
@@ -551,7 +554,7 @@ class AttachedFlowActionHandlerTestSuite {
         assert.strictEqual(server.lastRequest.headers.test, options.http.headers.test);
 
         // run one more time
-        Container.reset();
+        await resetState();
 
         await server.stop();
         await server.start();
@@ -560,7 +563,7 @@ class AttachedFlowActionHandlerTestSuite {
         context.ctx.tst = 124;
         options.http.headers.test = 'second';
 
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.id = 'test';
         dummyActionHandler.executeFn = async (opts: any, ctx: any) => {
@@ -652,9 +655,9 @@ class AttachedFlowActionHandlerTestSuite {
 
     @test()
     async correctCacheMatch(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get(ActionHandlersRegistry);
-        const flowService = Container.get(FlowService);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
+        const flowService = FlowService.instance;
 
         const tracked: any[] = [];
         const dummyActionHandler = new DummyActionHandler();
@@ -725,8 +728,8 @@ class AttachedFlowActionHandlerTestSuite {
         fileName = 'index.yml',
         id = 'test',
     ): Promise<string> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
-        const actionHandlersRegistry = Container.get<ActionHandlersRegistry>(ActionHandlersRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
+        const actionHandlersRegistry = ActionHandlersRegistry.instance;
 
         const dummyActionHandler = new DummyActionHandler();
         dummyActionHandler.id = id;

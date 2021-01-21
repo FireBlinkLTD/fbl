@@ -6,7 +6,6 @@ import { existsSync, statSync } from 'fs';
 import * as assert from 'assert';
 import { ContextUtil } from '../../../../src/utils';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -40,7 +39,7 @@ class MakeDirActionHandlerTestSuite {
 
     @test()
     async mkdir(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const actionHandler = new MakeDirActionHandler();
         const context = ContextUtil.generateEmptyContext();

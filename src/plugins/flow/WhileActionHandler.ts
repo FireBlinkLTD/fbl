@@ -1,5 +1,4 @@
 import * as Joi from 'joi';
-import { Container } from 'typedi';
 
 import { ActionHandler, ActionSnapshot, ActionProcessor } from '../../models';
 import { FlowService } from '../../services';
@@ -30,13 +29,11 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async isShouldExecuteWithParameters(parameters: IDelegatedParameters): Promise<boolean> {
-        const flowService = Container.get(FlowService);
-
         if (this.snapshot.childFailure) {
             return false;
         }
 
-        const value = await flowService.resolveOptionsWithNoHandlerCheck(
+        const value = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
             this.context.ejsTemplateDelimiters.local,
             this.options.value,
             this.context,
@@ -45,7 +42,7 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
             false,
         );
         if (this.options.is !== undefined) {
-            const is = await flowService.resolveOptionsWithNoHandlerCheck(
+            const is = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.is,
                 this.context,
@@ -56,7 +53,7 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
 
             return value.toString() === is.toString();
         } else {
-            const not = await flowService.resolveOptionsWithNoHandlerCheck(
+            const not = await FlowService.instance.resolveOptionsWithNoHandlerCheck(
                 this.context.ejsTemplateDelimiters.local,
                 this.options.not,
                 this.context,
@@ -80,14 +77,12 @@ export class WhileActionProcessor extends BaseFlowActionProcessor {
      * @inheritdoc
      */
     async execute(): Promise<void> {
-        const flowService = Container.get(FlowService);
-
         let index = 0;
         let actionParameters: any = this.getParameters(this.options.shareParameters, { index });
 
         let execute = await this.isShouldExecuteWithParameters(actionParameters);
         while (execute) {
-            const childSnapshot = await flowService.executeAction(
+            const childSnapshot = await FlowService.instance.executeAction(
                 this.snapshot.source,
                 this.snapshot.wd,
                 this.options.action,

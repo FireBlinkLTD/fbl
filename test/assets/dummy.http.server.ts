@@ -29,42 +29,44 @@ createServer(async (request, response) => {
         headers: request.headers,
     });
 
-    if (commander.delay) {
-        await new Promise(resolve => setTimeout(resolve, commander.delay));
+    const options = commander.opts();
+
+    if (options.delay) {
+        await new Promise((resolve) => setTimeout(resolve, options.delay));
     }
 
     let headers: OutgoingHttpHeaders = {};
 
-    if (commander.headers) {
-        headers = JSON.parse(commander.headers);
+    if (options.headers) {
+        headers = JSON.parse(options.headers);
     }
 
-    response.writeHead(commander.status, headers);
-    response.setTimeout(commander.timeout * 1000, () => {
+    response.writeHead(options.status, headers);
+    response.setTimeout(options.timeout * 1000, () => {
         response.end();
     });
 
-    if (commander.ignoreRequest) {
+    if (options.ignoreRequest) {
         return;
     }
 
-    if (Number(commander.status) === 200) {
-        const fileStream = createReadStream(commander.file);
+    if (Number(options.status) === 200) {
+        const fileStream = createReadStream(options.file);
         fileStream.pipe(response);
 
-        fileStream.on('end', function() {
+        fileStream.on('end', function () {
             response.end();
         });
     } else {
         response.end();
     }
 })
-    .on('error', err => {
+    .on('error', (err) => {
         processSend('failed');
         console.error(err);
         process.exit(1);
     })
-    .listen(commander.port, () => {
-        console.log('Server is running on port: ' + commander.port);
+    .listen(commander.opts().port, () => {
+        console.log('Server is running on port: ' + commander.opts().port);
         processSend('started');
     });

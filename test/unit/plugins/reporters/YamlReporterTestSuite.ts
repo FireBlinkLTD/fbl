@@ -4,9 +4,8 @@ import { ActionSnapshot } from '../../../../src/models';
 import { promisify } from 'util';
 import { readFile } from 'fs';
 import * as assert from 'assert';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import { TempPathsRegistry } from '../../../../src/services';
-import { Container } from 'typedi';
 import { IReport } from '../../../../src/interfaces';
 import { ContextUtil } from '../../../../src/utils';
 
@@ -14,7 +13,7 @@ import { ContextUtil } from '../../../../src/utils';
 class YamlReporterTestSuite {
     @test()
     async generate(): Promise<void> {
-        const tempPathsRegistry = Container.get(TempPathsRegistry);
+        const tempPathsRegistry = TempPathsRegistry.instance;
 
         const reporter = new YamlReporter();
         const file = await tempPathsRegistry.createTempFile();
@@ -41,7 +40,7 @@ class YamlReporterTestSuite {
         await reporter.generate(file, {}, reportSrc);
         const strReport = await promisify(readFile)(file, 'utf8');
 
-        const report: any = safeLoad(strReport);
+        const report: any = load(strReport);
 
         // check if created time is valid and was reported less than a second ago
         assert(new Date(report.snapshot.createdAt).getTime() + 1000 > Date.now());
