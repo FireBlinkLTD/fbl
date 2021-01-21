@@ -1,6 +1,6 @@
 # FBL \(FireBlink Logistics\)
 
-![Tests](https://github.com/FireBlinkLTD/fbl/workflows/Test%20/badge.svg)
+![Tests](https://github.com/FireBlinkLTD/fbl/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/FireBlinkLTD/fbl/branch/master/graph/badge.svg)](https://codecov.io/gh/FireBlinkLTD/fbl)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/FireBlinkLTD/fbl.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/FireBlinkLTD/fbl/context:javascript)
 [![Known Vulnerabilities](https://snyk.io/test/github/FireBlinkLTD/fbl/badge.svg)](https://snyk.io/test/github/FireBlinkLTD/fbl)
