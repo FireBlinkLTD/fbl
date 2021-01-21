@@ -1,0 +1,36 @@
+name: Test Project
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - run: yarn install
+      - run: yarn build
+      - run: yarn test
+      # generate coverage report
+      - run: ./node_modules/.bin/nyc report --reporter=text-lcov > ./coverage.lcov
+      # send test coverage
+      - run: bash <(curl -s https://codecov.io/bash) -f ./coverage.lcov
+
+      # test if app can run with prod dependencies
+      - run: yarn install --prod
+      - run: node dist/src/cli.js -V
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: ./coverage/
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mochawesome-report
+          path: ./mochawesome-report/
