@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-# 1.13.3 - Under Development
+# [1.15.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.15.0) - 2021-01-21
+
+### Changed
+
+- `typedi` DI was completely removed from the project. All the services are now plain old singletons.
+
+# [1.14.0](https://github.com/FireBlinkLTD/fbl/releases/tag/1.14.0) - 2020-09-07
 
 ### Removed
 
