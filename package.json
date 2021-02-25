@@ -47,7 +47,7 @@
     "joi": "^17.3.0",
     "js-yaml": "4.0.0",
     "jsonschema": "1.4.0",
-    "object-collider": "1.0.3",
+    "object-collider": "1.0.4",
     "prompts": "2.4.0",
     "requireg": "0.2.2",
     "semver": "7.3.4",

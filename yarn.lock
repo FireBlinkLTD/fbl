@@ -4633,10 +4633,10 @@ object-assign@^4.0.1, object-assign@^4.1.1:
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
 
-object-collider@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/object-collider/-/object-collider-1.0.3.tgz#9a1de8b46f6ad187007c83d4658beb4d2d88baee"
-  integrity sha512-em48voKDt0DCE+cal/o18RGf7c/14q1bcrvuHjvk713y0Kzw5KXmNq9F9qiAla0j1HpMKAPBJvmsh9CTbGXn1A==
+object-collider@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/object-collider/-/object-collider-1.0.4.tgz#8be69d1103daa4565301aac1adb82b79914605ae"
+  integrity sha512-OW2kox1waznBo7oUkst2uxWH1SXl1KJcLXu/DWjNva+Kqd/rFuQ6ZbaAg60z3/U1JsKXRKFCVbzfhmvb/eNIeg==
 
 object-copy@^0.1.0:
   version "0.1.0"
