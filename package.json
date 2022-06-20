@@ -41,7 +41,7 @@
     "ejs": "3.1.6",
     "ejs-lint": "1.2.0",
     "glob-promise": "4.2.0",
-    "got": "11.8.2",
+    "got": "11.8.5",
     "humanize-duration": "3.27.0",
     "joi": "17.4.0",
     "js-yaml": "4.1.0",
