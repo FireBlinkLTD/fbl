@@ -44,7 +44,7 @@
     "got": "11.8.2",
     "humanize-duration": "3.27.0",
     "joi": "17.4.0",
-    "js-yaml": "4.1.0",
+    "js-yaml": "4.1.1",
     "jsonschema": "1.4.0",
     "object-collider": "1.0.4",
     "prompts": "2.4.1",
